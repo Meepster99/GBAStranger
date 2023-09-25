@@ -1,0 +1,469 @@
+{
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor_INS\", obj_glassfloor)   instance_destroy()   }": [
+        null
+    ],
+    "return;": [
+        null
+    ],
+    "special_message = 2": [
+        null
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_bombfloor)   instance_destroy()   }": [
+        null
+    ],
+    "if (global.loop == 0)   instance_destroy()   b_form = 1": [
+        "destroy"
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floorswitch)   instance_destroy()   }": [
+        null
+    ],
+    "b_form = 4": [
+        "b_form = 4"
+    ],
+    "contents = 1   if (global.loop == 1)   {   instance_create_layer(x, y, \"Instances\", obj_boulder)   instance_destroy()   }": [
+        null
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
+        null
+    ],
+    "if (global.loop == 0)   instance_destroy()": [
+        "destroy"
+    ],
+    "b_form = 3   if (global.loop == 0)   instance_destroy()": [
+         "destroy"
+    ],
+    "contents = 1": [
+        null
+    ],
+    "if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "if (global.loop == 1)   b_form = 3": [
+        null
+    ],
+    "b_form = 1   if (global.loop == 0)   instance_destroy()": [
+        "destroy"
+    ],
+    "if (global.loop == 1)   b_form = 1": [
+        null
+    ],
+    "if (global.loop == 0)   b_form = 4   if (global.loop == 1)   b_form = 1": [
+        "b_form = 4"
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor_INS\", obj_exit)   instance_destroy()   }": [
+        null
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_create_layer(x, y, \"Floor_INS\", obj_chest_small)   instance_destroy()   }": [
+        null
+    ],
+    "contents = 1   if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "special_message = 9   if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_exit)   instance_destroy()   }": [
+        null
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Pit\", obj_pit)   instance_destroy()   }": [
+        null
+    ],
+    "special_message = 10   if (global.loop == 1)   b_form = 1": [
+        null
+    ],
+    "special_message = 11   if (global.loop == 1)   b_form = 2": [
+        null
+    ],
+    "b_form = 2": [
+        "b_form = 2"
+    ],
+    "special_message = 12   if (global.loop == 1)   b_form = 2": [
+        null
+    ],
+    "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_copyfloor)   instance_destroy()   }": [
+        null
+    ],
+    "special_message = 13   if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "contents = 1   if (global.loop == 1)   contents = 5": [
+        null
+    ],
+    "if (global.loop == 0)   special_message = 3   else if (global.loop == 1)   b_form = 4": [
+        null
+    ],
+    "b_form = 4   if (global.loop == 0)   instance_destroy()": [
+		"destroy"
+    ],
+    "with (obj_music_controller)   {   if audio_is_playing(current_song)   alarm[3] = 4   }": [
+        null
+    ],
+    "b_form = 2   if (global.stranger == 0 && ds_grid_get(obj_inventory.ds_player_info, 13, 0) == 2)   {   instance_create_layer(x, y, \"Instances\", obj_npc_bee)   instance_destroy()   }": [
+        "b_form = 2"
+    ],
+    "if (global.loop == 0)   instance_destroy()   b_form = 3": [
+        "destroy"
+    ],
+    "special_message = 14   if (global.loop == 1)   b_form = 1": [
+        null
+    ],
+    "special_message = 15   if (global.loop == 1)   b_form = 2": [
+        null
+    ],
+    "special_message = 16   if (global.loop == 1)   b_form = 2": [
+        null
+    ],
+    "special_message = 18   if (global.loop == 1)   b_form = 1": [
+        null
+    ],
+    "if (global.loop == 0)   contents = 5": [
+        null
+    ],
+    "contents = 5": [
+        null
+    ],
+    "b_form = 2   if (global.loop == 0)   instance_destroy()": [
+        "destroy"
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor_INS\", obj_glassfloor)   instance_destroy()   }": [
+        "obj_glassfloor"
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
+        "obj_floor"
+    ],
+    "if (global.loop == 0)   instance_destroy()   b_form = 4": [
+        "destroy"
+    ],
+    "if (global.loop == 1)   instance_destroy()   special_message = 22": [
+        null
+    ],
+    "contents = 5   secret_inspection = 1": [
+        null
+    ],
+    "if (global.loop == 1)   {   }": [
+        null
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Pit\", obj_pit)   instance_destroy()   }": [
+        "obj_pit"
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }   if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
+        "obj_floor"
+    ],
+    "b_form = 3": [
+        "b_form = 3"
+    ],
+    "special_message = 27   if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "b_form = 2   if (global.loop == 1)   instance_destroy()": [
+        "b_form = 2"
+    ],
+    "b_form = 3   if (global.loop == 1)   instance_destroy()": [
+        "b_form = 3"
+    ],
+    "if (global.loop == 0)   b_form = 4": [
+        "b_form = 4"
+    ],
+    "if (global.loop == 1)   special_message = 29": [
+        null
+    ],
+    "if (global.loop == 0)   b_form = 4   else if (global.loop == 1)   b_form = 1": [
+        "b_form = 4"
+    ],
+    "b_form = 3   if (global.loop == 1)   b_form = 4": [
+        "b_form = 3"
+    ],
+    "special_message = 30": [
+        null
+    ],
+    "b_form = 3   if (global.loop == 1)   b_form = 1": [
+        "b_form = 3"
+    ],
+    "b_form = 3   if (global.loop == 1)   b_form = 0": [
+        "b_form = 3"
+    ],
+    "b_form = 4   if (global.loop == 1)   instance_destroy()": [
+        "b_form = 4"
+    ],
+    "if (global.loop == 0)   {   }": [
+        null
+    ],
+    "b_form = 1   if (global.loop == 1)   b_form = 0": [
+        "b_form = 1"
+    ],
+    "b_form = 1": [
+        "b_form = 1"
+    ],
+    "b_form = 1   if (global.loop == 1)   b_form = 4": [
+        "b_form = 1"
+    ],
+    "contents = 0": [
+        null
+    ],
+    "special_message = 45": [
+        null
+    ],
+    "b_form = 6": [
+        "b_form = 6"
+    ],
+    "b_form = 7": [
+        "b_form = 7"
+    ],
+    "special_message = 48": [
+        null
+    ],
+    "special_message = 56": [
+        null
+    ],
+    "b_form = 8": [
+        "b_form = 8"
+    ],
+    "b_form = 5": [
+        "b_form = 5"
+    ],
+	"contents = 1   special = 1": [
+		null
+	],
+	"contents = 5   if (global.loop == 1)   contents = 1": [
+		null
+	],
+	"contents = 5   if (global.loop == 0)   instance_destroy()": [
+		"destroy"
+	],
+	"contents = 1   if (global.loop == 0)   instance_destroy()": [
+		"destroy"
+	],
+	"contents = 5   if (global.loop == 1)   instance_destroy()": [
+		null
+	],
+	"if (global.loop == 0)   contents = 1   else   contents = 5": [
+		null
+	],
+	"contents = 4   chest_secret = 1": [
+		null
+	],
+	"if (ds_grid_get(obj_inventory.ds_equipment, 0, 1) != 2 && global.collect_wings != 0)   {   instance_create_layer(x, y, \"Floor_INS\", obj_glassfloor)   instance_destroy()   }": [
+		null
+	],
+	"contents = 3": [
+		null
+	],
+	"if (ds_grid_get(obj_inventory.ds_player_info, 17, 3) == 0 && ds_grid_get(obj_inventory.ds_player_info, 11, 0) != 0 && global.stranger < 2)   special_message = 61   else   special_message = 31": [
+		null
+	],
+	"b_form = 2   if (global.loop == 1)   b_form = 1": [
+		"b_form = 2"
+	],
+	"special_message = 33   if (global.loop == 1)   b_form = 1": [
+		null
+	],
+	"special_mimic = 1   if (global.stranger >= 2)   instance_destroy()": [
+		null
+	],
+	"if (!instance_exists(obj_puzzlepieces))   instance_create_depth(0, 0, 795, obj_puzzlepieces)   if (!instance_exists(obj_graysmemories))   instance_create_depth(0, 0, 775, obj_graysmemories)": [
+		null
+	],
+	"special_message = 19   if (global.loop == 1)   b_form = 2": [
+		null
+	], 
+	"special_message = 20   if (global.loop == 1)   b_form = 4": [
+		null
+	],
+	"special_message = 21   if (global.loop == 1)   b_form = 2": [
+		null
+	],
+	"if (global.loop == 0)   special_message = 23": [
+		null
+	],
+	"contents = 1   if (global.loop == 1)   {   }": [
+		null
+	],
+	
+	
+	
+	"special_message = 24   if (global.loop == 1)   b_form = 3": [
+        null
+    ],
+    "special_message = 25   if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }   if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_bombfloor)   instance_destroy()   }": [
+        "obj_floor"
+    ],
+    "special_message = 28   if (global.loop == 1)   {   }": [
+        null
+    ],
+    "special_message = 32": [
+        null
+    ],
+    "if (global.loop == 1)   b_form = 2   else if (global.loop == 1)   b_form = 1": [
+        null
+    ],
+    "b_form = 3   if (global.loop == 1)   b_form = 2": [
+        "b_form = 3"
+    ],
+    "b_form = 1   if (global.loop == 1)   instance_destroy()": [
+        "b_form = 1"
+    ],
+    "special_message = 38": [
+        null
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor\", obj_copyfloor)   instance_destroy()   }": [
+        "obj_copyfloor"
+    ],
+    "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floorswitch)   instance_destroy()   }": [
+        "obj_floorswitch"
+    ],
+    "b_form = 4   if (global.loop == 1)   b_form = 4": [
+        "b_form = 4"
+    ],
+    "b_form = 4   if (global.loop == 1)   b_form = 1": [
+        "b_form = 4"
+    ],
+    "contents = 1   if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_exit)   instance_destroy()   }": [
+        null
+    ],
+    "b_form = 4   if (global.loop == 1)   {   }": [
+        "b_form = 4"
+    ],
+    "b_form = 4   if (global.loop == 1)   b_form = 3": [
+        "b_form = 4"
+    ],
+    "special_message = 52": [
+        null
+    ],
+	"special_message = 62": [
+		null
+	],
+	"special_message = 35   if (global.loop == 1)   instance_destroy()": [
+		null
+	],
+	
+	
+	
+	"special_message = 36": [
+        null
+    ],
+    "if (global.loop == 0)   special_message = 37": [
+        null
+    ],
+    "b_form = 3   if (global.loop == 0 || ds_grid_get(obj_inventory.ds_player_info, 16, 3) >= 999 || ds_grid_get(obj_inventory.ds_player_info, 16, 3) == 0)   instance_destroy()": [
+        "destroy"
+    ],
+    "special_message = 57": [
+        null
+    ],
+	
+	
+	
+	"b_form = 2   if (global.loop == 1)   b_form = 0": [
+		"b_form = 2"
+	],
+	"if (global.loop == 1)   b_form = 4   if (global.loop == 0)   instance_destroy()": [
+		"destroy"
+	],
+	"b_form = 0   if (global.loop == 0)   instance_destroy()": [
+		"destroy"
+	],
+	"special_message = 41": [
+		null
+	],
+	"b_form = 4   if (global.stranger == 2)   {   if (global.cc_state == 0)   instance_destroy()   }": [
+		"b_form = 4"
+	],
+	
+	
+	
+	
+	"special_message = 8   if (global.loop == 1)   b_form = 2": [
+        null
+    ],
+    "special_message = 6": [
+        null
+    ],
+    "if (global.loop == 1)   b_form = 2": [
+        null
+    ],
+    "if (global.loop == 1)   special_message = 17": [
+        null
+    ],
+    "if (global.loop == 0)   b_form = 2   else if (global.loop == 1)   b_form = 1": [
+        "b_form = 2"
+    ],
+    "if (global.loop == 0)   instance_destroy()   if (ds_grid_get(obj_inventory.ds_player_info, 16, 1) == 2)   instance_destroy()   b_form = 3": [
+        "destroy"
+    ],
+    "if (global.loop == 1)   b_form = 1   if (global.loop == 0)   instance_destroy()": [
+        null
+    ],
+    "special_message = 26   if (global.loop == 1)   instance_destroy()": [
+        null
+    ],
+    "if (global.loop == 1)   instance_destroy()   b_form = 4": [
+        null
+    ],
+    "special_message = 60": [
+        null
+    ],
+    "b_form = 4   if (global.loop == 0)   instance_destroy()   if (ds_grid_get(obj_inventory.ds_player_info, 16, 3) == 1)   instance_destroy()": [
+        "destroy"
+    ],
+    "special_message = 58": [
+        null
+    ],
+    "special_message = 44": [
+        null
+    ],
+    "var iboulderlist = ds_list_create()   for (var i2 = 0; i2 < 8; i2++)   ds_list_set(iboulderlist, i2, (i2 + 1))   ds_list_shuffle(iboulderlist)   for (var i = 0; i < 8; i++)   {   var ibform = ds_list_find_value(iboulderlist, i)   var iboulder = instance_create_layer((56 + (i * 16)), 24, \"Instances\", obj_boulder)   with (iboulder)   b_form = ibform   }   if ds_exists(iboulderlist, 2)   ds_list_destroy(iboulderlist)": [
+        null
+    ],
+    "special_message = 47": [
+        null
+    ],
+    "special_message = 49": [
+        null
+    ],
+    "special_message = 50": [
+        null
+    ],
+    "special_message = 51": [
+        null
+    ],
+    "special_message = 53": [
+        null
+    ],
+    "special_message = 54": [
+        null
+    ],
+    "special_message = 55": [
+        null
+    ],
+    "special_message = 46": [
+        null
+    ],
+    "special_message = 42": [
+        null
+    ],
+    "special_message = 43": [
+        null
+    ],
+    "special_message = 65": [
+        null
+    ],
+    "special_message = 1": [
+        null
+    ],
+    "special_message = 5": [
+        null
+    ],
+    "special_message = 59": [
+        null
+    ],
+    "contents = 8": [
+        null
+    ],
+	"b_form = 8   if (global.cc_state != 0)   b_form = 4   if (ds_grid_get(obj_inventory.ds_player_info, 13, 0) >= 2)   instance_destroy()": [
+		"b_form = 8"
+	]
+	
+}

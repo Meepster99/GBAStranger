@@ -15,8 +15,6 @@ WHITE = Fore.WHITE
 
 RESET = Style.RESET_ALL
 
-formattedOutputPath = "D:/programming/voidstranger/misc/textureFormatter/formattedOutput"
-
 
 # there might be a way to,,,, do this via a datamine?
 # but for now like,,, things are still much to difficult 

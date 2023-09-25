@@ -7,3 +7,4 @@
 *.gml
 code.elf
 code.gba
+!creationCodeData.json
