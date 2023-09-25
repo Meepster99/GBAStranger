@@ -1,0 +1,9 @@
+*.bmp
+*.json
+*.win
+/code/graphics/
+/code/build/
+*.png
+*.gml
+code.elf
+code.gba
