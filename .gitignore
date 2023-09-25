@@ -9,3 +9,4 @@ code.elf
 code.gba
 !creationCodeData.json
 target
+*.sav
