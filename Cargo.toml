@@ -3,9 +3,14 @@ name = "voidstranger_gba"
 version = "0.1.0"
 authors = [""]
 edition = "2021"
+build = "src/build.rs"
 
 [dependencies]
 agb = "0.16.0"
+
+[build-dependencies]
+serde = "1"
+serde_json = "1"
 
 [profile.dev]
 opt-level = 3
