@@ -8,6 +8,12 @@
 // this is the only way i could get this to work. why is this syntax like this??
 Palette* Sprite::spritePalette = &defaultPalette;
 
+// default initilization, gets overwritten in game.h
+EntityManager* Entity::entityManager = NULL;
+EffectsManager* Entity::effectsManager = NULL;
+TileManager* Entity::tileManager = NULL;
+Game* Entity::game = NULL;
+
 // Player
 
 bn::pair<bool, bn::optional<Direction>> Player::doInput() {
@@ -35,7 +41,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		// do the tile swap.
 		
-		FloorTile* tile = game->floorMap[tilePos.x][tilePos.y];
+		FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
 		
 		if(tile == NULL && rod == NULL) { 
 			return {false, bn::optional<Direction>()};
@@ -43,12 +49,12 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			return {false, bn::optional<Direction>()};
 		} else if(tile == NULL && rod != NULL) {
 			// put tile down 
-			game->floorMap[tilePos.x][tilePos.y] = rod;
+			tileManager->floorMap[tilePos.x][tilePos.y] = rod;
 			rod = NULL;
 		} else if(tile != NULL && rod == NULL) {
 			// pick tile up
-			rod = game->floorMap[tilePos.x][tilePos.y];
-			game->floorMap[tilePos.x][tilePos.y] = NULL;
+			rod = tileManager->floorMap[tilePos.x][tilePos.y];
+			tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
 		}
 
 		nextMove = bn::optional<Direction>();
@@ -164,7 +170,6 @@ bn::optional<Direction> Diamond::getNextMove() {
 
 // Obstacle
 
-
 bn::optional<Direction> Obstacle::getNextMove() {
 	
 	if(bumpDirections.size() == 0) {
@@ -213,4 +218,34 @@ bn::optional<Direction> Obstacle::getNextMove() {
 	return bn::optional<Direction>(res);
 }
 
+void Obstacle::startFall() {
+	
+	// copy over the actual sprite time zone into the falldata,
+	// just so i dont have to go bs a bunch of code
+	// but tbh, i rlly should.
+				
+	fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[0], 9));
+	
+}
+
+void EusStatue::startFall() {
+
+	BN_ASSERT(tileManager->floorMap[p.x][p.y] == NULL, "with a eus statue, you tried pushing it onto an area that i hadnt nulled yet(a glass that just broke, or something). im to lazy rn to fix this, but if you see it msg me");
+
+	tileManager->floorMap[p.x][p.y] = new FloorTile();
+
+	Obstacle::startFall();
+}
+
+bn::optional<Direction> GorStatue::getNextMove() {
+	
+	if(startPos == p) {
+		return Obstacle::getNextMove();
+	}
+	
+	tileIndex = 1;
+	
+	bumpDirections.clear();
+	return bn::optional<Direction>();
+}
 

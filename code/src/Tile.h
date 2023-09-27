@@ -103,6 +103,37 @@ public:
 	
 };
 
+class Switch : public FloorTile { // switch
+public:
+
+	static int pressedCount;
+	static int totalCount;
+	
+	Switch() : FloorTile(1+2+7+4+4+1+5, 3) {
+		totalCount+=1;
+	}
+	
+	// should this be an override?
+	~Switch() {
+		totalCount--;
+		if(isSteppedOn) {
+			pressedCount--;
+		}
+	}
+	
+	void stepOn() override {
+		pressedCount++;
+		isSteppedOn = true;
+	}
+	
+	virtual void stepOff() {
+		pressedCount--;
+		isSteppedOn = false;
+	}
+	
+	TileType tileType() override { return TileType::Switch; }
+};
+
 class Exit : public FloorTile { // exit, INCLUDE LOCKED AND UNLOCKED VERSIONS
 public:
 
@@ -118,21 +149,14 @@ public:
 	TileType tileType() override { return TileType::Exit; }
 
 	int getTileValue() override {
-		if(locked) {
+		if(Switch::pressedCount != Switch::totalCount) {
 			return startIndex + 4; 
 		}
 		return startIndex + 0; 	
 	}
 	
-	bool shouldExit() { return true; }
+	bool shouldExit() { return Switch::pressedCount == Switch::totalCount; }
 	
 };
 
-class Switch : public FloorTile { // switch
-public:
-
-	Switch() : FloorTile(1+2+7+4+4+1+5, 3) {}
-	
-	TileType tileType() override { return TileType::Switch; }
-};
 

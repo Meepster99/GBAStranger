@@ -3,7 +3,8 @@
 #include "EntityManager.h"
 
 #include "Game.h"
-
+#include "TileManager.h"
+#include "EffectsManager.h"
 
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 	
@@ -11,7 +12,6 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	// conspiricy time, NULL EVERYTHING.
 	
 	shadowQueue.clear();
-	floorSteps.clear();
 	
 	if(player != NULL) {
 		delete player->rod;
@@ -140,6 +140,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 		// set the entityManager pointer, could be done in constructor, but the constr is already complex enough
 		(*it)->entityManager = this;
+		(*it)->effectsManager = effectsManager;
 		(*it)->game = game;
 		
 		SaneSet<Entity*, 4>& mapRef = getMap(temp->p);
@@ -282,7 +283,7 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 	
 	bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(e->entityType(), bn::pair<Pos, Pos>(e->p, testPos));
 	
-	floorSteps.push_back(tempFloorStep);
+	tileManager->floorSteps.push_back(tempFloorStep);
 	
 	e->currentDir = move;
 	e->p = testPos;
@@ -347,11 +348,16 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	// do player move.
 	Pos playerStart = player->p;
 	moveEntity(player);
-	res = updateMap();
+	/*res = updateMap();
 	if(res) {
 		return res;
 	}
-	player->doUpdate();
+	player->doUpdate();*/
+	
+	// IF WE ARE ONE TILE AWAY FROM EXIT, AND SHADOWS ARE ON BUTTONS, WE DO NOT LEAVE THE LEVE
+	// still tho, calling doFloorSteps will update the shadows, which is needed 
+	
+	tileManager->doFloorSteps();
 	
 	// slightly hacky, but works.
 	bn::optional<Direction> shadowMove = playerRes.second;
@@ -533,7 +539,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 		futureEntityMap[currentPos.x][currentPos.y].erase(shadowList[i]);
 		
 		bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(shadowList[i]->entityType(), bn::pair<Pos, Pos>(currentPos, shadowList[i]->p));
-		floorSteps.push_back(tempFloorStep);
+		tileManager->floorSteps.push_back(tempFloorStep);
 
 		futureEntityMap[shadowList[i]->p.x][shadowList[i]->p.y].insert(shadowList[i]);
 		
@@ -572,128 +578,6 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	
 }
 
-bn::optional<Entity*> EntityManager::doFloorSteps() {
-	
-	// rlly should of made a tilemanager
-	
-	// STEP UPDATES OCCUR AFTER DOING EXIT CHECKING, 
-	// SINCE IF EVERY BUTTON IS PRESSED, YOU HAVE ONE TICK TO EXIT
-	// but,, what about shadows,, this is weird
-	// THIS DELAYED PRESS THING ONLY WORKS IF IT WAS A NONPLAYER ENTITY PRESSING IT!!
-	
-	// CURRENTLY SINCE I WANTED TO STORE THE ENTITYTYPE, POSES ARE
-	// NO LONGER UNIQUE
-	
-	bn::optional<Entity*> res;
-	
-	// horrid memory usage
-	static SaneSet<Pos, MAXENTITYSPRITES> stepOns;
-	static SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
-	stepOns.clear();
-	stepOffs.clear();
-	
-	for(auto it = floorSteps.begin(); it != floorSteps.end(); ++it) {
-		
-		BN_ASSERT((*it).second.first != (*it).second.second, "in doFloorSteps, calculating steps. why is a move here with the same start and end??");
-		
-		stepOffs.insert((*it).second.first);
-		stepOns.insert((*it).second.second);
-	}
-	
-	// stepoffs occur before stepons bc of shadows, and switches
-	for(auto it = stepOffs.begin(); it != stepOffs.end(); ++it) {
-		Pos tempPos = *it;
-		if(hasFloor(tempPos)) {
-			game->floorMap[tempPos.x][tempPos.y]->stepOff();
-		}
-	}
-	
-	for(auto it = stepOns.begin(); it != stepOns.end(); ++it) {
-		Pos tempPos = *it;
-		if(hasFloor(tempPos)) {
-			game->floorMap[tempPos.x][tempPos.y]->stepOn();
-		}
-	}
-
-	
-	// check if a player has stepped on a copy tileType
-	// literally spent had to redo so much code just for this omfg 
-	// ive said it twice before, should of had a tilemanager class.
-	
-	for(auto it = floorSteps.begin(); it != floorSteps.end(); ++it) {
-		if((*it).first == EntityType::Player) {
-			
-			Pos start = (*it).second.first;
-
-			if(hasFloor(start) && game->floorMap[start.x][start.y]->tileType() == TileType::Copy) {
-				shadowQueue.push_back(start);
-			}
-		}
-	}
-	
-	
-	stepOns.clear();
-	stepOffs.clear();
-	floorSteps.clear();
-	
-	//i really should have made a tilemanager class
-	// i also got no sleep and my eyes hurt, my codes going to be trash
-	
-	Exit* exitTile = NULL;
-	Pos exitPos(0, 0);
-	
-	int totalSwitches = 0;
-	int pressedSwitches = 0;
-	
-	// this code is not efficient
-	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			if(!hasFloor(Pos(x, y))) {
-				continue;
-			}
-			
-			switch(game->floorMap[x][y]->tileType()) {
-				case TileType::Death:
-					for(auto it = getMap(Pos(x, y)).begin(); it != getMap(Pos(x, y)).end(); ) {
-						if((*it)->isPlayer()) {
-							res = player;
-							++it;
-						} else {
-							it = killEntity(*it);
-						}
-					}
-					break;
-				case TileType::Exit:
-					exitTile = static_cast<Exit*>(game->floorMap[x][y]);
-					exitPos = Pos(x, y);
-					break;
-				case TileType::Switch:
-					totalSwitches++;
-					if(game->floorMap[x][y]->isSteppedOn) {
-						pressedSwitches++;
-					}
-				default:
-					break;
-			}
-		}
-	}
-	
-	if(player->rod != NULL && player->rod->tileType() == TileType::Switch) {
-		totalSwitches++;
-	}
-
-	if(exitTile != NULL) {
-	
-		exitTile->locked = totalSwitches != pressedSwitches;
-		
-		if(player->p == exitPos && !exitTile->locked) {
-			return NULL;			
-		}
-	}
-	
-	return res;
-}
-
 bn::optional<Entity*> EntityManager::updateMap() {
 
 	// return an entity if we died an need a reset
@@ -722,7 +606,7 @@ bn::optional<Entity*> EntityManager::updateMap() {
 	
 	// do floor updates.
 	
-	res = doFloorSteps();
+	res = tileManager->doFloorSteps();
 	if(res) {
 		return res;
 	}
@@ -902,15 +786,8 @@ bool EntityManager::hasCollision(Pos p) {
 	return true;
 }
 
-bool EntityManager::hasFloor(Pos p) {
-	
-	FloorTile* temp = game->floorMap[p.x][p.y];
-	
-	if(temp == NULL || !temp->isAlive) {
-		return false;
-	}
-	
-	return true;
+bn::optional<TileType> EntityManager::hasFloor(Pos p) {
+	return tileManager->hasFloor(p);
 }
 
 bn::optional<Direction> EntityManager::canSeePlayer(Pos p) {

@@ -9,10 +9,10 @@ void Game::resetRoom(Entity* reason, bool debug) {
 	
 	if(!debug) {
 		
-		//fullDraw();
-		floor.draw(collisionMap, floorMap);
+		tileManager.fullDraw();
 		
 		if(reason == NULL) {
+			entityManager.player->doUpdate();
 			debugText.updateText();
 			bn::core::update();
 			roomManager.nextRoom();
@@ -42,9 +42,7 @@ void Game::resetRoom(Entity* reason, bool debug) {
 void Game::loadLevel() {
 
 	Room idek = roomManager.loadRoom();
-	
-	TileType* floorPointer = (TileType*)idek.floor;
-	
+
 	for(int x=0; x<14; x++) { 
 		for(int y=0; y<9; y++) {
 			
@@ -61,48 +59,26 @@ void Game::loadLevel() {
 			/*if(detailsMap[x][y] == 0) {
 				detailsMap[x][y] = 1;
 			} */
-			
-			
-			if(floorMap[x][y] != NULL) {
-				delete floorMap[x][y];
-			}
-			
-			floorMap[x][y] = NULL;
-
-			switch(floorPointer[x + 14 * y]) {
-				case TileType::Pit:
-					break;
-				case TileType::Floor:
-					floorMap[x][y] = new FloorTile();
-					break;
-				case TileType::Glass:
-					floorMap[x][y] = new Glass();
-					break;
-				case TileType::Bomb:
-					floorMap[x][y] = new Bomb();
-					break;
-				case TileType::Death:
-					floorMap[x][y] = new Death();
-					break;
-				case TileType::Copy:
-					floorMap[x][y] = new Copy();
-					break;
-				case TileType::Exit:
-					floorMap[x][y] = new Exit();
-					break;
-				case TileType::Switch:
-					floorMap[x][y] = new Switch();
-					break;
-				default:
-					BN_ERROR("unknown tile tried to get loaded in, wtf");
-					break;
-			}
 		}
 	}
+	
+	TileType* floorPointer = (TileType*)idek.floor;
+	
+	tileManager.entityManager = &entityManager;
+	tileManager.effectsManager = &effectsManager;
+	
+	tileManager.loadTiles(floorPointer);
 
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
+	
+	Entity::entityManager = &entityManager;
+	Entity::effectsManager = &effectsManager;
+	Entity::tileManager = &tileManager;
 
+	entityManager.effectsManager = &effectsManager;
+	entityManager.tileManager = &tileManager;
+	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
 }
@@ -110,7 +86,9 @@ void Game::loadLevel() {
 void Game::fullDraw() {
 	collision.draw(collisionMap);
 	details.draw(detailsMap);
-	floor.draw(collisionMap, floorMap);
+
+	tileManager.fullDraw();
+	
 	entityManager.fullUpdate();
 }
 
@@ -129,7 +107,7 @@ void Game::changePalette(int offset) {
 	
 	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	floor.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
@@ -162,10 +140,7 @@ void Game::run() {
 			frame = (frame + 1) % 60000;
 
 			miscDebug = frame;
-			
-			BN_LOG(miscTimer.elapsed_ticks());
-			
-			miscTimer.restart();
+
 		}
 		
 		
@@ -213,7 +188,7 @@ void Game::run() {
 			
 			// inefficient, i rlly should of had a floormanager class.
 			
-			floor.draw(collisionMap, floorMap);
+			tileManager.fullDraw();
 			
 		}
 		

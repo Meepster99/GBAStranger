@@ -5,6 +5,8 @@
 
 class Game;
 class EntityManager;
+class EffectsManager;
+class TileManager;
 
 class Sprite {
 public:
@@ -52,8 +54,11 @@ public:
 	bn::vector<bn::sprite_tiles_item , 8> spriteTilesArray;
 	Sprite sprite;
 	
-	EntityManager* entityManager = NULL;
-	Game* game = NULL;
+	// making these static should save memory.
+	static EntityManager* entityManager;
+	static EffectsManager* effectsManager;
+	static TileManager* tileManager;
+	static Game* game;
 	
 	bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> fallData;
 	
@@ -127,9 +132,17 @@ public:
 	void updatePosition() {
 		sprite.updatePosition(p);
 	}
+	
+	
+	virtual void startFall() { return; }
 	 
 	bool fallDeath() {
 		// return true once the animation is over, and kill the sprite.
+		
+		if(!isFalling) {
+			isFalling = true;
+			startFall();
+		}
 		
 		if(fallData.size() == 0) {
 			sprite.setVisible(false);
@@ -137,6 +150,7 @@ public:
 		}
 		
 		// all this just to avoid a isFalling variable. really?
+		// funnything is i added in the variable above for startof fall behaviour
 		sprite.spritePointer.set_tiles(
 			fallData[0].first,
 			abs(fallData[0].first.graphics_count() - fallData[0].second) % fallData[0].first.graphics_count()
@@ -150,6 +164,9 @@ public:
 		
 		return false;
 	}
+	
+private:
+	bool isFalling = false;
 
 };
 
@@ -229,10 +246,9 @@ public:
 		tileIndex = 0;
 	}
 	
-	void doTick() override {
-		
-	}
+	void doTick() override {}
 	
+	void startFall() override;
 
 	
 };
@@ -640,6 +656,8 @@ public:
 	EusStatue* clone() const override { return new EusStatue(*this); }
 
 	EntityType entityType() const override { return EntityType::EusStatue; }
+	
+	void startFall() override;
 
 };
 
@@ -691,16 +709,23 @@ public:
 class GorStatue : public Obstacle {
 public:
 
-	GorStatue(Pos p_) : Obstacle(p_) {
+	const Pos startPos;
+
+	GorStatue(Pos p_) : Obstacle(p_), startPos(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower_stop);
 		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_slower_shaken, 8));
 	}
 
 	GorStatue* clone() const override { return new GorStatue(*this); }
 
 	EntityType entityType() const override { return EntityType::GorStatue; }
-
+	
+	bn::optional<Direction> getNextMove() override;
+	
+	void updateTileIndex() override { }
+	
 };
 
 class LevStatue : public Obstacle {

@@ -3,9 +3,12 @@
 #include "SharedTypes.h"
 #include "Tile.h"
 #include "Entity.h"
+#include "EffectsManager.h"
+#include "TileManager.h"
 
 class Game;
-
+class EffectsManager;
+class TileManager;
 
 class EntityManager {
 public:
@@ -16,17 +19,14 @@ public:
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> entityList;
 	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
-	SaneSet<Obstacle*, MAXENTITYSPRITES> obstacleList;
+	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
 	
 	bn::vector<Shadow*, MAXENTITYSPRITES> shadowList;
 	// i rlly should impliment dynamic resizing for these vecs.
 	bn::vector<Pos, 64> shadowQueue;
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
-	
-	// goofy, but will work
-	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
-	
+
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
 	
 	// i could include a unordered map here for each entity type, but 
@@ -34,7 +34,9 @@ public:
 	
 	Player* player = NULL; // player will be a member of entityList, and included everywhere else
 	
-	Game* game;
+	Game* game = NULL;
+	EffectsManager* effectsManager = NULL;
+	TileManager* tileManager = NULL;
 
 	EntityManager(Game* game_) : game(game_) {}
 	
@@ -51,9 +53,7 @@ public:
 	bn::optional<Entity*> doMoves();
 
 	void manageShadows(bn::optional<Direction> playerDir);	
-	
-	bn::optional<Entity*> doFloorSteps();
-	
+
 	bn::optional<Entity*> updateMap();
 
 	void updateScreen();
@@ -75,7 +75,7 @@ public:
 	bool hasEnemy(Pos p);
 	bool hasObstacle(Pos p);
 	bool hasCollision(Pos p);
-	bool hasFloor(Pos p);
+	bn::optional<TileType> hasFloor(Pos p);
 	
 	bn::optional<Direction> canSeePlayer(Pos p);
 	bn::optional<Direction> canPathToPlayer(Pos p);
