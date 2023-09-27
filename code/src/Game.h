@@ -210,6 +210,8 @@ public:
 	
 	EntityManager entityManager;
 	
+	EffectsManager effectsManager;
+	
 	DebugText debugText;
 	
 	int miscDebug = 0; // just here for when i want to disp something on the screen

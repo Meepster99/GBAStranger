@@ -43,7 +43,7 @@ void DebugText::updateText() {
 	stringStream.append(game->roomManager.roomIndex);
 	
 	
-	debugText.generate(bn::fixed(-120), bn::fixed(76-4), 
+	debugText.generate(bn::fixed(-120), bn::fixed(80-4), 
 		bn::string_view(debugString.data()),
 	text_sprites);
 	

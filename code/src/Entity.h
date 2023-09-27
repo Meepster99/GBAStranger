@@ -14,7 +14,6 @@ public:
 	bn::fixed screenx = 0;
 	bn::fixed screeny = 0;
 	
-	// this could, and 
 	static Palette* spritePalette;
 
 	Sprite(bn::sprite_tiles_item startTilesItem) : 
@@ -41,8 +40,6 @@ public:
 	}
 	
 };
-
-
 
 // -----
 

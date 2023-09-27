@@ -344,13 +344,19 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	// (maybe) insert shadows move into its func? (MORE NEEDS TO BE DONE ON THIS)
 	
 	// do player move.
+	Pos playerStart = player->p;
 	moveEntity(player);
 	res = updateMap();
 	if(res) {
 		return res;
 	}
 	
-	manageShadows(playerRes.second);
+	// slightly hacky, but works.
+	bn::optional<Direction> shadowMove = playerRes.second;
+	if(player->p == playerStart) {
+		shadowMove.reset();
+	}
+	manageShadows(shadowMove);
 	res = updateMap(); // this call may not be needed, but im not rishing it
 	if(res) {
 		return res;
@@ -443,6 +449,8 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	
 	return res;
 }
+
+// -----
 
 bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	
