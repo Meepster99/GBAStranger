@@ -3,6 +3,7 @@
 #include "SharedTypes.h"
 #include "Tile.h"
 
+class Game;
 class EntityManager;
 
 class Sprite {
@@ -12,19 +13,25 @@ public:
 		
 	bn::fixed screenx = 0;
 	bn::fixed screeny = 0;
+	
+	// this could, and 
+	static Palette* spritePalette;
 
 	Sprite(bn::sprite_tiles_item startTilesItem) : 
 		spritePointer(
 			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
 			bn::sprite_shape_size(16, 16),
 			startTilesItem.create_tiles(),
-			defaultPalette.getSpritePalette().create_palette())
+			//defaultPalette.getSpritePalette().create_palette())
+			spritePalette->getSpritePalette().create_palette())
 			)
 		{ }
 		
-	void updatePosition(int x, int y) {
-		screenx = x * 16 - 8 - (6 * 16);
-		screeny = y * 16 - (4 * 16);
+	
+		
+	void updatePosition(const Pos& p) {
+		screenx = p.x * 16 - 8 - (6 * 16);
+		screeny = p.y * 16 - (4 * 16);
 		spritePointer.set_x(screenx);
 		spritePointer.set_y(screeny);
 	}
@@ -35,6 +42,8 @@ public:
 	
 };
 
+
+
 // -----
 
 class Entity {
@@ -43,15 +52,25 @@ public:
 	Pos p;
 	Direction currentDir = Direction::Down;
 	
-	EntityManager* entityManager;
-	
 	bn::vector<bn::sprite_tiles_item , 8> spriteTilesArray;
 	Sprite sprite;
+	
+	EntityManager* entityManager = NULL;
+	Game* game = NULL;
+	
+	bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> fallData;
+	
+	int animationIndex = 0;
+	int tileIndex = 0;
 	
 	Entity(Pos p_) : p(p_), 
 		spriteTilesArray(1, bn::sprite_tiles_items::dw_spr_gray_w_d),
 		sprite(spriteTilesArray[0])
-		{ }
+		{ 
+		
+		BN_ASSERT(p.sanity(), "point sanity failed in entity constructor?");
+		
+		}
 
 	virtual ~Entity() = default;
 	
@@ -59,9 +78,74 @@ public:
 	virtual bool isObstacle() const = 0;
 	virtual bool isPlayer() const = 0;
 	virtual bool canFall() const = 0;
+	virtual bool canPush() const = 0;
 	
 	virtual Entity* clone() const = 0;
 	virtual EntityType entityType() const = 0;
+	
+	virtual bn::optional<Direction> getNextMove() = 0;
+	virtual void moveFailed() = 0;
+
+	virtual void updateTileIndex() {
+		
+		tileIndex = static_cast<int>(currentDir);
+		
+		BN_ASSERT(tileIndex < spriteTilesArray.size(), "tried loading a tileIndex out of the sprite array bounds! ", __PRETTY_FUNCTION__);
+		
+	}
+	
+	virtual void doTick() {
+		
+		updateTileIndex();
+
+		animationIndex = animationIndex + 1;
+		animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
+	
+
+		doUpdate();
+	}
+
+	virtual void doUpdate() {
+
+		updateTileIndex();
+		
+		// just incase
+		animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
+		
+		sprite.spritePointer.set_tiles(
+			spriteTilesArray[tileIndex],
+			animationIndex
+		);
+		
+		sprite.updatePosition(p);
+	}
+	
+	void updatePosition() {
+		sprite.updatePosition(p);
+	}
+	 
+	bool fallDeath() {
+		// return true once the animation is over, and kill the sprite.
+		
+		if(fallData.size() == 0) {
+			sprite.setVisible(false);
+			return true;
+		}
+		
+		// all this just to avoid a isFalling variable. really?
+		sprite.spritePointer.set_tiles(
+			fallData[0].first,
+			abs(fallData[0].first.graphics_count() - fallData[0].second) % fallData[0].first.graphics_count()
+		);
+		
+		fallData[0].second--;
+		
+		if(fallData[0].second == 0) {
+			fallData.erase(fallData.begin());
+		}
+		
+		return false;
+	}
 
 };
 
@@ -71,18 +155,34 @@ class Player : public Entity {
 public:
 	
 	Player(Pos p_) : Entity(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_up);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_down);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_left);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_right);
 		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_fall, 6));
 	}
 	
 	bool isEnemy() const override { return false; }
 	bool isObstacle() const override { return false; }
 	bool isPlayer() const override { return true; }
 	bool canFall() const override { return true; }
+	bool canPush() const override { return true; }
 	
 	Player* clone() const override { return new Player(*this); }
 	EntityType entityType() const override { return EntityType::Player; }
 	
 	FloorTile* rod = NULL;
+	
+	bn::optional<Direction> nextMove;
+	
+	bn::optional<Direction> getNextMove() override;
+	
+	void moveFailed() override { return; }
+	
+	bn::pair<bool, bn::optional<Direction>> doInput();
+	
 };
 
 // -----
@@ -95,7 +195,11 @@ public:
 	bool isEnemy() const override { return true; }
 	bool isObstacle() const override { return false; }
 	bool isPlayer() const override { return false; }
+	bool canPush() const override { return false; }
 	
+	bn::optional<Direction> getNextMove() override;
+	
+	void moveFailed() override { return; }
 	
 };
 
@@ -111,6 +215,21 @@ public:
 	bool isObstacle() const override { return true; }
 	bool isPlayer() const override { return false; }
 	bool canFall() const override { return true; }
+	bool canPush() const override { return false; }
+	
+	bn::optional<Direction> getNextMove() override;
+	
+	void moveFailed() override { return; }
+	
+	void updateTileIndex() override {
+		tileIndex = 0;
+	}
+	
+	void doTick() override {
+		
+	}
+	
+
 	
 };
 
@@ -119,20 +238,53 @@ public:
 class Leech : public Enemy {
 public:
 
-	Leech(Pos p_) : Enemy(p_) {}
+	Leech(Pos p_) : Enemy(p_) {
+
+		currentDir = Direction::Right;
+	
+		spriteTilesArray.clear(); 
+        // insert two blanks so that i can use the default dotick and direction methods
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cl_left);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cl_right);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cl_falling, 6));
+		
+	}
 
 	Leech* clone() const override { return new Leech(*this); }
 
 	EntityType entityType() const override { return EntityType::Leech; }
 	
 	bool canFall() const override { return false; }
+	
+	void moveFailed() override {
+		if(currentDir == Direction::Right) {
+			currentDir = Direction::Left;
+		} else {
+			currentDir = Direction::Right;
+		}
+		return;
+	}
 
 };
 
 class Maggot : public Enemy {
 public:
 
-	Maggot(Pos p_) : Enemy(p_) {}
+	Maggot(Pos p_) : Enemy(p_) {
+		currentDir = Direction::Down;
+		
+		spriteTilesArray.clear(); 
+
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cc_up);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cc_down);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cc_falling, 6));
+	}
 
 	Maggot* clone() const override { return new Maggot(*this); }
 
@@ -140,25 +292,63 @@ public:
 	
 	bool canFall() const override { return false; }
 
+	void moveFailed() override {
+		if(currentDir == Direction::Up) {
+			currentDir = Direction::Down;
+		} else {
+			currentDir = Direction::Up;
+		}
+		return;
+	}
+	
 };
 
 class Eye : public Enemy {
 public:
 
-	Eye(Pos p_) : Enemy(p_) {}
+	Eye(Pos p_) : Enemy(p_) {
+		
+		spriteTilesArray.clear(); 
+
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_ch);	
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_ch_falling, 6));
+	}
 
 	Eye* clone() const override { return new Eye(*this); }
 
 	EntityType entityType() const override { return EntityType::Eye; }
 	
 	bool canFall() const override { return false; }
+	
+	bn::optional<Direction> getNextMove() override { return bn::optional<Direction>(); }
 
 };
 
 class Bull : public Enemy {
 public:
 
-	Bull(Pos p_) : Enemy(p_) {}
+	Bull(Pos p_) : Enemy(p_) {
+		
+		spriteTilesArray.clear(); 
+
+		// movement
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cg_up);	
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cg_down);	
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cg_left);	
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cg_right);	
+
+		// idle 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cg_idle);	
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cg_falling, 6));
+
+	}
+	
+	bool idle = true;
 
 	Bull* clone() const override { return new Bull(*this); }
 
@@ -166,18 +356,54 @@ public:
 	
 	bool canFall() const override { return false; }
 
+	bn::optional<Direction> getNextMove() override;
+	
+	void moveFailed() override;
+	
+	void updateTileIndex() override {
+		if(idle) {
+			tileIndex = 4;
+		} else {
+			Entity::updateTileIndex();
+		}
+	}
+	
 };
 
 class Chester : public Enemy {
 public:
 
-	Chester(Pos p_) : Enemy(p_) {}
+	Chester(Pos p_) : Enemy(p_) {
+
+		currentDir = Direction::Right;
+	
+		spriteTilesArray.clear(); 
+
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cs_left);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cs_right);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_fall, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_falling, 6));
+		
+	}
 
 	Chester* clone() const override { return new Chester(*this); }
 
 	EntityType entityType() const override { return EntityType::Chester; }
 	
 	bool canFall() const override { return true; }
+	
+	bn::optional<Direction> getNextMove() override;
+	
+	void updateTileIndex() override {
+		if(currentDir == Direction::Right) {
+			tileIndex = 3;
+		} else if(currentDir == Direction::Left) {
+			tileIndex = 2;
+		}
+	}
 
 };
 
@@ -186,6 +412,8 @@ public:
 	const bool invertHorizontal = false;
 	const bool invertVertical = false;
 	
+	bn::optional<Direction> nextMove;
+	
 	Mimic(Pos p_, bool invertHorizontal_, bool invertVertical_) : Enemy(p_),
 		invertHorizontal(invertHorizontal_),
 		invertVertical(invertVertical_)
@@ -193,12 +421,27 @@ public:
 		
 	}
 	
+	bool canPush() const override { return true; }
+	
+	bn::optional<Direction> getNextMove() override;
+	
 };
 
 class WhiteMimic : public Mimic {
 public:
 
-	WhiteMimic(Pos p_) : Mimic(p_, true, false) {}
+	WhiteMimic(Pos p_) : Mimic(p_, true, false) {
+		
+		currentDir = Direction::Down;
+		
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_up);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_down);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_left);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_right);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling, 6));	
+	}
 
 	WhiteMimic* clone() const override { return new WhiteMimic(*this); }
 
@@ -211,7 +454,19 @@ public:
 class GrayMimic : public Mimic {
 public:
 
-	GrayMimic(Pos p_) : Mimic(p_, false, true) {}
+	GrayMimic(Pos p_) : Mimic(p_, false, true) {
+		
+		currentDir = Direction::Up;
+		
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_up1);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_down1);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_left1);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_right1);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling1, 6));	
+		
+	}
 
 	GrayMimic* clone() const override { return new GrayMimic(*this); }
 
@@ -224,7 +479,19 @@ public:
 class BlackMimic : public Mimic {
 public:
 
-	BlackMimic(Pos p_) : Mimic(p_, true, true) {}
+	BlackMimic(Pos p_) : Mimic(p_, true, true) {
+		
+		currentDir = Direction::Up;
+		
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_up2);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_down2);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_left2);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_right2);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling2, 6));	
+		
+	}
 
 	BlackMimic* clone() const override { return new BlackMimic(*this); }
 
@@ -237,20 +504,59 @@ public:
 class Diamond : public Enemy {
 public:
 
-	Diamond(Pos p_) : Enemy(p_) {}
+	Diamond(Pos p_) : Enemy(p_) {
+		
+		spriteTilesArray.clear(); 
+		
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_co_move);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_co_move);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_co_move);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_co_move);
+
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_co_idle);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_fall, 2));		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_falling, 6));		
+	}
+	
+	bn::optional<Direction> nextMove;
 
 	Diamond* clone() const override { return new Diamond(*this); }
 
 	EntityType entityType() const override { return EntityType::Diamond; }
 	
 	bool canFall() const override { return false; }
+	
+	bool idle = true;
+	
+	bn::optional<Direction> getNextMove() override;
+	
+	void updateTileIndex() override {
+		if(idle) {
+			tileIndex = 4;
+		} else {
+			Entity::updateTileIndex();
+		}
+	}
 
 };
 
 class Shadow : public Enemy {
 public:
 
-	Shadow(Pos p_) : Enemy(p_) {}
+	Shadow(Pos p_) : Enemy(p_) {
+		
+		spriteTilesArray.clear(); 
+		
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cr_up);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cr_down);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cr_left);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cr_right);
+		
+		// here as a temporary measure
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_falling, 6));		
+		
+	}
 
 	Shadow* clone() const override { return new Shadow(*this); }
 
@@ -265,7 +571,12 @@ public:
 class Boulder : public Obstacle {
 public:
 
-	Boulder(Pos p_) : Obstacle(p_) {}
+	Boulder(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_boulder);
+		
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_boulder_shake, 8));
+	}
 
 	Boulder* clone() const override { return new Boulder(*this); }
 
@@ -276,18 +587,30 @@ public:
 class Chest : public Obstacle {
 public:
 
-	Chest(Pos p_) : Obstacle(p_) {}
+	Chest(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear();
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+	}
 
 	Chest* clone() const override { return new Chest(*this); }
 
 	EntityType entityType() const override { return EntityType::Chest; }
+	
+	bn::optional<Direction> getNextMove() { 
+		bumpDirections.clear();
+		return bn::optional<Direction>(); 
+	}
 
 };
 
 class AddStatue : public Obstacle {
 public:
 
-	AddStatue(Pos p_) : Obstacle(p_) {}
+	AddStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_voider);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_voider_shaken, 8));
+	}
 
 	AddStatue* clone() const override { return new AddStatue(*this); }
 
@@ -298,7 +621,11 @@ public:
 class EusStatue : public Obstacle {
 public:
 
-	EusStatue(Pos p_) : Obstacle(p_) {}
+	EusStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lover);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_lover_shaken, 8));
+	}
 
 	EusStatue* clone() const override { return new EusStatue(*this); }
 
@@ -309,7 +636,11 @@ public:
 class BeeStatue : public Obstacle {
 public:
 
-	BeeStatue(Pos p_) : Obstacle(p_) {}
+	BeeStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_smiler);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_smiler_shaken, 8));
+	}
 
 	BeeStatue* clone() const override { return new BeeStatue(*this); }
 
@@ -320,7 +651,11 @@ public:
 class MonStatue : public Obstacle {
 public:
 
-	MonStatue(Pos p_) : Obstacle(p_) {}
+	MonStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_greeder);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_greeder_shaken, 8));
+	}
 
 	MonStatue* clone() const override { return new MonStatue(*this); }
 
@@ -331,7 +666,11 @@ public:
 class TanStatue : public Obstacle {
 public:
 
-	TanStatue(Pos p_) : Obstacle(p_) {}
+	TanStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_killer);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_killer_shaken, 8));
+	}
 
 	TanStatue* clone() const override { return new TanStatue(*this); }
 
@@ -342,7 +681,11 @@ public:
 class GorStatue : public Obstacle {
 public:
 
-	GorStatue(Pos p_) : Obstacle(p_) {}
+	GorStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_slower_shaken, 8));
+	}
 
 	GorStatue* clone() const override { return new GorStatue(*this); }
 
@@ -353,7 +696,11 @@ public:
 class LevStatue : public Obstacle {
 public:
 
-	LevStatue(Pos p_) : Obstacle(p_) {}
+	LevStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_watcher);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_watcher_shaken, 8));
+	}
 
 	LevStatue* clone() const override { return new LevStatue(*this); }
 
@@ -364,7 +711,11 @@ public:
 class CifStatue : public Obstacle {
 public:
 
-	CifStatue(Pos p_) : Obstacle(p_) {}
+	CifStatue(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_atoner);
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_atoner_shaken, 8));
+	}
 
 	CifStatue* clone() const override { return new CifStatue(*this); }
 

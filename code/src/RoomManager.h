@@ -3,10 +3,13 @@
 class RoomManager {
 public:
 
-	int roomIndex = 164;
+	int roomIndex = 218;
 	
 	Room loadRoom();
 	
 	const char* currentRoomName();
 
+	void nextRoom();
+	void prevRoom();
+	
 };

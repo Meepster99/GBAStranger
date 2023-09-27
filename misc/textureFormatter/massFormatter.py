@@ -368,10 +368,10 @@ def convertAllSprite(outputPath):
 
 	os.makedirs(outputPath)
 	
-	convertSprites("./Sprites/.", outputPath)
-	
 	convertSprites("./Sprites_Padded/.", outputPath)
 	
+	convertSprites("./Sprites/.", outputPath)
+
 		
 	global spriteSuccess
 	global spriteTotal

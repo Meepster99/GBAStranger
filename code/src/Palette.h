@@ -7,7 +7,7 @@ public:
 
 	bn::color colorArray[16];
 	
-	Palette(bn::color a, bn::color b, bn::color c, bn::color d, bn::color e = bn::color(0, 0, 0)) :
+	constexpr Palette(bn::color a, bn::color b, bn::color c, bn::color d, bn::color e = bn::color(0, 0, 0)) :
 	colorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)}
 	{}
 
@@ -28,7 +28,21 @@ public:
 };
 
 extern Palette defaultPalette;
-extern Palette customTilesPalette;
+
+extern Palette GRAYPALETTE;   
+extern Palette REDPALETTE;
+extern Palette ORANGEPALETTE;
+extern Palette YELLOWPALETTE; 
+extern Palette GREENPALETTE;  
+extern Palette BLUEPALETTE;
+extern Palette INDIGOPALETTE;
+extern Palette VIOLETPALETTE;
+
+extern Palette BLUEBERRYJAMPALETTE;
+
+extern Palette ZERORANGERPALETTE;
+
+extern Palette* paletteList[10];
 
 extern Palette redText;
 extern Palette greenText;

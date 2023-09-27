@@ -6,17 +6,28 @@
 
 class Game;
 
-#define MAXSPRITES 128
-
 
 class EntityManager {
 public:
 
-	EntitySet<4> entityMap[14][9];
+	SaneSet<Entity*, 4> entityMap[14][9];
 	
-	EntitySet<MAXSPRITES> entityList;
-	EntitySet<MAXSPRITES> enemyList;
-	EntitySet<MAXSPRITES> obstacleList;
+	SaneSet<Entity*, 4> futureEntityMap[14][9];
+	
+	SaneSet<Entity*, MAXENTITYSPRITES> entityList;
+	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
+	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
+	
+	bn::vector<Shadow*, MAXENTITYSPRITES> shadowList;
+	// i rlly should impliment dynamic resizing for these vecs.
+	bn::vector<Pos, 64> shadowQueue;
+	
+	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
+	
+	// goofy, but will work
+	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
+	
+	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
 	
 	// i could include a unordered map here for each entity type, but 
 	// tbh, i dont want to.
@@ -29,12 +40,48 @@ public:
 	
 	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
 	
-	void doMove(Direction playerMove);
+	void updatePalette(Palette* pal);
 	
-	void updateMap();
+	bool moveEntity(Entity* e, bool dontSet = false);
+	void moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end);
+	void moveEnemies();
+	void moveObstacles();
+	
+	
+	bn::optional<Entity*> doMoves();
 
-	EntitySet<4>& getMap(Pos p) { return entityMap[p.x][p.y]; }
+	void manageShadows(bn::optional<Direction> playerDir);	
+	
+	bn::optional<Entity*> doFloorSteps();
+	
+	bn::optional<Entity*> updateMap();
 
+	void updateScreen();
+	
+	void doTicks();
+	
+	void fullUpdate();
+	
+	void doDeaths();
+	
+	bn::vector<Entity*, 4>::iterator killEntity(Entity* e);
+	
+	SaneSet<Entity*, 4>& getMap(Pos p) { 
+		BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
+		return entityMap[p.x][p.y]; 
+	}
+	
+	bool hasEntity(Pos p);
+	bool hasEnemy(Pos p);
+	bool hasObstacle(Pos p);
+	bool hasCollision(Pos p);
+	bool hasFloor(Pos p);
+	
+	bn::optional<Direction> canSeePlayer(Pos p);
+	bn::optional<Direction> canPathToPlayer(Pos p);
+	
+	void sanity();
+	
 };
 
 

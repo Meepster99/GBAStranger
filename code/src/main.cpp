@@ -7,9 +7,9 @@
 int main() {
 	
 	bn::core::init();
-	
-	Game game;
-	
-	game.run();
+
+	// this needs to be a pointer, or else i get scary stack errors.
+	Game* game = new Game();
+	game->run();
 
 }

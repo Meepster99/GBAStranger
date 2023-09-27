@@ -25,14 +25,25 @@ void DebugText::updateText() {
 	
 	stringStream.append("  ");
 	stringStream.append(game->entityManager.entityList.size());
-	
+
 	stringStream.append(" ");
+	stringStream.append(game->miscDebug);
+	
+	debugText.generate(bn::fixed(-120), bn::fixed(-80+4), 
+		bn::string_view(debugString.data()),
+	text_sprites);
+	
+	stringStream.append(game->roomManager.roomIndex);
+	
+	debugString.clear();
+	
 	stringStream.append(game->roomManager.currentRoomName());
 	
 	stringStream.append(" ");
 	stringStream.append(game->roomManager.roomIndex);
 	
-	debugText.generate(bn::fixed(-120), bn::fixed(-80+4), 
+	
+	debugText.generate(bn::fixed(-120), bn::fixed(76-4), 
 		bn::string_view(debugString.data()),
 	text_sprites);
 	

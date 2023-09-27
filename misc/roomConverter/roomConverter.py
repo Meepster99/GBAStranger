@@ -454,7 +454,7 @@ def convertEntities(layerData):
 	
 	for inst in tempInstanceData:
 	
-		if inst["object_definition"] == "obj_spawnpoint":
+		if inst["object_definition"] == "obj_spawnpoint" or inst["object_definition"] == "obj_enter_the_secret":
 			continue
 	
 		if inst["object_definition"] in skipObjects:

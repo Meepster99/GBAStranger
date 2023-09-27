@@ -22,7 +22,7 @@ public:
 		
 	}
 	
-	int getTileValue() { return startIndex + currentTile; }
+	virtual int getTileValue() { return startIndex + currentTile; }
 	
 	virtual ~FloorTile() = default;
 	
@@ -66,6 +66,23 @@ public:
 	
 	TileType tileType() override { return TileType::Bomb; }
 	
+	int charge = 0;
+	
+	int getTileValue() override {
+		if(charge == 0) {
+			return startIndex + 3; 
+		}
+		
+		return startIndex + 0; 	
+	}
+	
+	void stepOn() override {
+		charge++;
+		if(charge == 2) {
+			isAlive = false;
+		}
+	}
+	
 };
 
 class Death : public FloorTile { // the ones that just kill you if you touch them
@@ -95,13 +112,17 @@ public:
 	Exit(char* nextRoom_ = NULL, bool locked_ = false) : FloorTile(1+2+7+4+4+1, 5), 
 	nextRoom(nextRoom_), locked(locked_)
 	{ 
-		if(locked) {
-			currentTile =4;
-		}
+
 	}
 	
 	TileType tileType() override { return TileType::Exit; }
 
+	int getTileValue() override {
+		if(locked) {
+			return startIndex + 4; 
+		}
+		return startIndex + 0; 	
+	}
 	
 	bool shouldExit() { return true; }
 	
@@ -113,6 +134,5 @@ public:
 	Switch() : FloorTile(1+2+7+4+4+1+5, 3) {}
 	
 	TileType tileType() override { return TileType::Switch; }
-	
 };
 

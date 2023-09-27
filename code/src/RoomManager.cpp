@@ -20,3 +20,15 @@ const char* RoomManager::currentRoomName() {
 	
 	return roomNames[roomIndex]; 
 }
+
+void RoomManager::nextRoom() {
+	if(roomIndex + 1 < (int)(sizeof(rooms)/sizeof(rooms[0]))) {
+		roomIndex++;
+	}
+}
+
+void RoomManager::prevRoom() {
+	if(roomIndex - 1 >= 0 ) {
+		roomIndex--;
+	}
+}
