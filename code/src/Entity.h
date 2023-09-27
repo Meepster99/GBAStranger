@@ -98,8 +98,15 @@ public:
 		animationIndex = animationIndex + 1;
 		animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
 	
-
-		doUpdate();
+	
+		// should this be here?
+		sprite.spritePointer.set_tiles(
+			spriteTilesArray[tileIndex],
+			animationIndex
+		);
+	
+		// should this be called here?
+		//doUpdate();
 	}
 
 	virtual void doUpdate() {
@@ -555,6 +562,12 @@ public:
 		
 	}
 
+	// the following may be a very bad idea
+	// this allows shadows to properly die when an enemy TOUCHES, not collides with them, but,,, i dont like it.
+	// erodes trust in my funcs.
+	bool isEnemy() const override { return false; }
+	bool isPlayer() const override { return true; }
+	
 	Shadow* clone() const override { return new Shadow(*this); }
 
 	EntityType entityType() const override { return EntityType::Shadow; }

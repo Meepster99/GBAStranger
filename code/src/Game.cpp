@@ -8,9 +8,28 @@ Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 void Game::resetRoom(Entity* reason, bool debug) {
 	
 	if(!debug) {
+		
+		//fullDraw();
+		floor.draw(collisionMap, floorMap);
+		
 		if(reason == NULL) {
+			debugText.updateText();
+			bn::core::update();
 			roomManager.nextRoom();
+		} else if(reason->entityType() == EntityType::Player) {
+			reason->doUpdate();
 		}
+		
+		for(int i=0; i<10; i++) {
+			miscTimer.restart();
+			while(miscTimer.elapsed_ticks() < FRAMETICKS * 6) {
+				debugText.updateText();
+				bn::core::update();
+			}
+			if(reason != NULL) {
+				reason->doTick();
+			}
+		}		
 	}
 	
 	BN_LOG("resetroom called");
@@ -127,16 +146,12 @@ void Game::run() {
 	bn::core::set_vblank_callback(didVBlank);
 	
 	bn::timer inputTimer;
-	
-	bn::timer miscTimer;
-	
+
 	int frame = 0;
 	
 	resetRoom(NULL, true);
 
 	bn::optional<Entity*> test = NULL;
-	
-	BN_ASSERT(test.has_value(), "wtf");
 	
 	while(true) {
 		
@@ -147,6 +162,10 @@ void Game::run() {
 			frame = (frame + 1) % 60000;
 
 			miscDebug = frame;
+			
+			BN_LOG(miscTimer.elapsed_ticks());
+			
+			miscTimer.restart();
 		}
 		
 		

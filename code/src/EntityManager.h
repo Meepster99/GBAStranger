@@ -16,7 +16,7 @@ public:
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> entityList;
 	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
-	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
+	SaneSet<Obstacle*, MAXENTITYSPRITES> obstacleList;
 	
 	bn::vector<Shadow*, MAXENTITYSPRITES> shadowList;
 	// i rlly should impliment dynamic resizing for these vecs.

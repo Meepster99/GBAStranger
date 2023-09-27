@@ -1,6 +1,9 @@
 #pragma once
 
-#include "SharedTypes.h"
+//#include "SharedTypes.h"
+#include "bn_color.h"
+#include "bn_bg_palette_item.h"
+#include "bn_sprite_palette_item.h"
 
 class Palette {
 public:

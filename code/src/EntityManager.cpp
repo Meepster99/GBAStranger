@@ -257,6 +257,7 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 	
 	if(e->isEnemy() && (hasEnemy(testPos) || hasObstacle(testPos))) {
 		// enemies cannot move to squares which have an obstacle/enemy
+		// EXCEPT FOR SHADOWS?
 		e->moveFailed();
 		return false;
 	}
@@ -350,6 +351,7 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	if(res) {
 		return res;
 	}
+	player->doUpdate();
 	
 	// slightly hacky, but works.
 	bn::optional<Direction> shadowMove = playerRes.second;
@@ -465,7 +467,6 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	obstacleList.erase(e);
 	enemyList.erase(e);		
 
-	e->updatePosition();
 	deadList.insert(e);
 	
 	return res;
@@ -563,6 +564,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 		Shadow* temp = new Shadow(queuePos);
 		shadowList.push_back(temp); 
 		entityList.insert(temp);
+
 		getMap(queuePos).insert(temp);
 		// also insert this into futuremap
 		futureEntityMap[queuePos.x][queuePos.y].insert(temp);
@@ -802,6 +804,7 @@ void EntityManager::doDeaths() {
 	}
 	
 	for(auto it = deadList.begin(); it != deadList.end(); ) {
+		(*it)->updatePosition();
 		bool res = (*it)->fallDeath();
 		
 		if(res) {
