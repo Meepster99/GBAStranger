@@ -1,0 +1,2718 @@
+{
+  "name": "rm_0133",
+  "caption": null,
+  "width": 224,
+  "height": 144,
+  "speed": 0,
+  "persistent": false,
+  "background_color": 0,
+  "draw_background_color": false,
+  "creation_code_id": "gml_Room_rm_0133_Create",
+  "flags": 196609,
+  "world": false,
+  "top": 0,
+  "left": 0,
+  "right": 0,
+  "bottom": 0,
+  "gravity_x": 0,
+  "gravity_y": 10,
+  "meters_per_pixel": 0.1,
+  "backgrounds": [],
+  "views": [
+    {
+      "enabled": true,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 224,
+      "view_height": 144,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 224,
+      "port_height": 144,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    }
+  ],
+  "game_objects": [
+    {
+      "x": 200,
+      "y": 104,
+      "object_definition": "obj_spawnpoint",
+      "instance_id": 106988,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 104,
+      "object_definition": "obj_floor",
+      "instance_id": 106999,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 56,
+      "object_definition": "obj_exit",
+      "instance_id": 107000,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 56,
+      "object_definition": "obj_boulder",
+      "instance_id": 106989,
+      "creation_code": "gml_RoomCC_rm_0133_0_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 107033,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107001,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107002,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107003,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107004,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 107005,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107006,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107007,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107008,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107009,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107010,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 107011,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107012,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 107013,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107014,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107015,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 24,
+      "object_definition": "obj_floor",
+      "instance_id": 107016,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107017,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 107018,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 107019,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107020,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 24,
+      "object_definition": "obj_floor",
+      "instance_id": 107021,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107022,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 107034,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 107035,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 107036,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 107037,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 56,
+      "object_definition": "obj_boulder",
+      "instance_id": 106990,
+      "creation_code": "gml_RoomCC_rm_0133_1_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 56,
+      "object_definition": "obj_boulder",
+      "instance_id": 106991,
+      "creation_code": "gml_RoomCC_rm_0133_2_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 107023,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 24,
+      "object_definition": "obj_floor",
+      "instance_id": 107024,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107025,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107026,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 24,
+      "object_definition": "obj_floor",
+      "instance_id": 107027,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107028,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107029,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 107030,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 107038,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 107039,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 107040,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 107041,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 107042,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 40,
+      "object_definition": "obj_enemy_cc",
+      "instance_id": 106992,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 24,
+      "object_definition": "obj_enemy_cc",
+      "instance_id": 106993,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 40,
+      "object_definition": "obj_enemy_cl",
+      "instance_id": 106994,
+      "creation_code": "gml_RoomCC_rm_0133_3_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 88,
+      "object_definition": "obj_enemy_cl",
+      "instance_id": 106995,
+      "creation_code": "gml_RoomCC_rm_0133_4_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 107043,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 107031,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 40,
+      "object_definition": "obj_boulder",
+      "instance_id": 106996,
+      "creation_code": "gml_RoomCC_rm_0133_5_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 40,
+      "object_definition": "obj_pit",
+      "instance_id": 107044,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 104,
+      "object_definition": "obj_floor",
+      "instance_id": 107032,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 104,
+      "object_definition": "obj_enemy_cm",
+      "instance_id": 106997,
+      "creation_code": "gml_RoomCC_rm_0133_6_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 40,
+      "object_definition": "obj_enemy_cm",
+      "instance_id": 106998,
+      "creation_code": "gml_RoomCC_rm_0133_7_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    }
+  ],
+  "tiles": [],
+  "layers": [
+    {
+      "layer_name": "Text",
+      "layer_id": 1442,
+      "layer_type": 2,
+      "layer_depth": -200,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Effects2",
+      "layer_id": 1443,
+      "layer_type": 2,
+      "layer_depth": -100,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Effects",
+      "layer_id": 1444,
+      "layer_type": 2,
+      "layer_depth": 0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Player",
+      "layer_id": 1445,
+      "layer_type": 2,
+      "layer_depth": 100,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Instances",
+      "layer_id": 1446,
+      "layer_type": 2,
+      "layer_depth": 200,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 200,
+            "y": 104,
+            "object_definition": "obj_spawnpoint",
+            "instance_id": 106988,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 56,
+            "object_definition": "obj_boulder",
+            "instance_id": 106989,
+            "creation_code": "gml_RoomCC_rm_0133_0_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 56,
+            "object_definition": "obj_boulder",
+            "instance_id": 106990,
+            "creation_code": "gml_RoomCC_rm_0133_1_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 56,
+            "object_definition": "obj_boulder",
+            "instance_id": 106991,
+            "creation_code": "gml_RoomCC_rm_0133_2_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 40,
+            "object_definition": "obj_enemy_cc",
+            "instance_id": 106992,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 24,
+            "object_definition": "obj_enemy_cc",
+            "instance_id": 106993,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 40,
+            "object_definition": "obj_enemy_cl",
+            "instance_id": 106994,
+            "creation_code": "gml_RoomCC_rm_0133_3_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 88,
+            "object_definition": "obj_enemy_cl",
+            "instance_id": 106995,
+            "creation_code": "gml_RoomCC_rm_0133_4_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 40,
+            "object_definition": "obj_boulder",
+            "instance_id": 106996,
+            "creation_code": "gml_RoomCC_rm_0133_5_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 104,
+            "object_definition": "obj_enemy_cm",
+            "instance_id": 106997,
+            "creation_code": "gml_RoomCC_rm_0133_6_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 40,
+            "object_definition": "obj_enemy_cm",
+            "instance_id": 106998,
+            "creation_code": "gml_RoomCC_rm_0133_7_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Floor_INS",
+      "layer_id": 1447,
+      "layer_type": 2,
+      "layer_depth": 300,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Floor",
+      "layer_id": 1448,
+      "layer_type": 2,
+      "layer_depth": 400,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 200,
+            "y": 104,
+            "object_definition": "obj_floor",
+            "instance_id": 106999,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 56,
+            "object_definition": "obj_exit",
+            "instance_id": 107000,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107001,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107002,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107003,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107004,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 107005,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107006,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107007,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107008,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107009,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107010,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 107011,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107012,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 107013,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107014,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107015,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 24,
+            "object_definition": "obj_floor",
+            "instance_id": 107016,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107017,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 107018,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 107019,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107020,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 24,
+            "object_definition": "obj_floor",
+            "instance_id": 107021,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107022,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 107023,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 24,
+            "object_definition": "obj_floor",
+            "instance_id": 107024,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107025,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107026,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 24,
+            "object_definition": "obj_floor",
+            "instance_id": 107027,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107028,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107029,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 107030,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 107031,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 104,
+            "object_definition": "obj_floor",
+            "instance_id": 107032,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Pit",
+      "layer_id": 1449,
+      "layer_type": 2,
+      "layer_depth": 500,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 72,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 107033,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 107034,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 107035,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 107036,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 107037,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 107038,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 107039,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 107040,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 107041,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 107042,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 107043,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 40,
+            "object_definition": "obj_pit",
+            "instance_id": 107044,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Tiles_2",
+      "layer_id": 1450,
+      "layer_type": 4,
+      "layer_depth": 600,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "background": "tile_edges",
+        "tiles_x": 14,
+        "tiles_y": 9,
+        "tile_data": [
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 15
+            },
+            {
+              "id": 14
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 13
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "layer_name": "Tiles_1",
+      "layer_id": 1451,
+      "layer_type": 4,
+      "layer_depth": 700,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "background": "tile_bg_1",
+        "tiles_x": 14,
+        "tiles_y": 9,
+        "tile_data": [
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 3
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 3
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 5
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 16
+            },
+            {
+              "id": 4
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 8
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 16
+            },
+            {
+              "id": 17
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 8
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 12
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 8
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 8
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 8
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 13
+            },
+            {
+              "id": 14
+            },
+            {
+              "id": 13
+            },
+            {
+              "id": 14
+            },
+            {
+              "id": 13
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 14
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 8
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 9
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 11
+            },
+            {
+              "id": 6
+            },
+            {
+              "id": 16
+            },
+            {
+              "id": 17
+            },
+            {
+              "id": 8
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 9
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 11
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "layer_name": "Background",
+      "layer_id": 1452,
+      "layer_type": 1,
+      "layer_depth": 800,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "visible": true,
+        "foreground": false,
+        "sprite": null,
+        "tiled_horizontally": false,
+        "tiled_vertically": false,
+        "stretch": false,
+        "color": 4278190080,
+        "first_frame": 0,
+        "animation_speed": 15,
+        "animation_speed_type": 0
+      }
+    }
+  ]
+}

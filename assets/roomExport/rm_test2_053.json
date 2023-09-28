@@ -1,0 +1,4343 @@
+{
+  "name": "rm_test2_053",
+  "caption": null,
+  "width": 224,
+  "height": 144,
+  "speed": 0,
+  "persistent": false,
+  "background_color": 0,
+  "draw_background_color": false,
+  "creation_code_id": "gml_Room_rm_test2_053_Create",
+  "flags": 196609,
+  "world": false,
+  "top": 0,
+  "left": 0,
+  "right": 0,
+  "bottom": 0,
+  "gravity_x": 0,
+  "gravity_y": 10,
+  "meters_per_pixel": 0.1,
+  "backgrounds": [],
+  "views": [
+    {
+      "enabled": true,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 224,
+      "view_height": 144,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 224,
+      "port_height": 144,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    },
+    {
+      "enabled": false,
+      "view_x": 0,
+      "view_y": 0,
+      "view_width": 1024,
+      "view_height": 768,
+      "port_x": 0,
+      "port_y": 0,
+      "port_width": 1024,
+      "port_height": 768,
+      "border_x": 32,
+      "border_y": 32,
+      "speed_x": -1,
+      "speed_y": -1,
+      "object_id": null
+    }
+  ],
+  "game_objects": [
+    {
+      "x": 72,
+      "y": 72,
+      "object_definition": "obj_spawnpoint",
+      "instance_id": 137986,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 24,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138003,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 88,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138004,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 24,
+      "object_definition": "obj_boulder",
+      "instance_id": 137987,
+      "creation_code": "gml_RoomCC_rm_test2_053_0_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 88,
+      "object_definition": "obj_boulder",
+      "instance_id": 137988,
+      "creation_code": "gml_RoomCC_rm_test2_053_1_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 8,
+      "object_definition": "obj_floor",
+      "instance_id": 138022,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 8,
+      "object_definition": "obj_floor",
+      "instance_id": 138023,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138024,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138025,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138026,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138027,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138028,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138029,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138030,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138032,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138033,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 104,
+      "object_definition": "obj_floor",
+      "instance_id": 138034,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138035,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138036,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 56,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138005,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 56,
+      "object_definition": "obj_boulder",
+      "instance_id": 137989,
+      "creation_code": "gml_RoomCC_rm_test2_053_2_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 8,
+      "object_definition": "obj_floorswitch",
+      "instance_id": 138037,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "object_definition": "obj_floorswitch",
+      "instance_id": 138038,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 72,
+      "object_definition": "obj_floorswitch",
+      "instance_id": 138039,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 104,
+      "object_definition": "obj_floorswitch",
+      "instance_id": 138040,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 8,
+      "object_definition": "obj_enemy_cl",
+      "instance_id": 137990,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 40,
+      "object_definition": "obj_enemy_cl",
+      "instance_id": 137991,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 104,
+      "object_definition": "obj_enemy_cl",
+      "instance_id": 137992,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 72,
+      "object_definition": "obj_enemy_cl",
+      "instance_id": 137993,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 40,
+      "object_definition": "obj_floor",
+      "instance_id": 138041,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "object_definition": "obj_floor",
+      "instance_id": 138043,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 24,
+      "object_definition": "obj_floor",
+      "instance_id": 138044,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "object_definition": "obj_boulder",
+      "instance_id": 137994,
+      "creation_code": "gml_RoomCC_rm_test2_053_3_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 24,
+      "object_definition": "obj_boulder",
+      "instance_id": 137995,
+      "creation_code": "gml_RoomCC_rm_test2_053_4_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 40,
+      "object_definition": "obj_boulder",
+      "instance_id": 137996,
+      "creation_code": "gml_RoomCC_rm_test2_053_5_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138053,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138054,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138055,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138056,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138057,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138058,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138059,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138060,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138061,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138062,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138063,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138064,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138065,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138066,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138067,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138068,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138069,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138070,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138071,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138072,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138073,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138074,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138075,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 8,
+      "object_definition": "obj_pit",
+      "instance_id": 138076,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138077,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 40,
+      "object_definition": "obj_pit",
+      "instance_id": 138078,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 138079,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 138080,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138081,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138082,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 40,
+      "object_definition": "obj_pit",
+      "instance_id": 138083,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138084,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138085,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 24,
+      "object_definition": "obj_pit",
+      "instance_id": 138086,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 138087,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138088,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138089,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138090,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 104,
+      "object_definition": "obj_pit",
+      "instance_id": 138091,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 72,
+      "object_definition": "obj_boulder",
+      "instance_id": 137998,
+      "creation_code": "gml_RoomCC_rm_test2_053_6_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 216,
+      "y": 104,
+      "object_definition": "obj_exit",
+      "instance_id": 138045,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 8,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138006,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 40,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138007,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 72,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138008,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 104,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138009,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 104,
+      "object_definition": "obj_pit",
+      "instance_id": 138092,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 200,
+      "y": 104,
+      "object_definition": "obj_pit",
+      "instance_id": 138093,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 138042,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 56,
+      "object_definition": "obj_boulder",
+      "instance_id": 137997,
+      "creation_code": "gml_RoomCC_rm_test2_053_7_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 40,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138010,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 40,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138011,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 72,
+      "object_definition": "obj_boulder",
+      "instance_id": 137999,
+      "creation_code": "gml_RoomCC_rm_test2_053_8_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138046,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 72,
+      "object_definition": "obj_floor",
+      "instance_id": 138031,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 104,
+      "object_definition": "obj_floor",
+      "instance_id": 138047,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 104,
+      "object_definition": "obj_floor",
+      "instance_id": 138048,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 104,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138012,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 104,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138013,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 104,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138014,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 104,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138015,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 8,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138016,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 136,
+      "y": 8,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138017,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 152,
+      "y": 8,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138018,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 184,
+      "y": 8,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138019,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 168,
+      "y": 8,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138020,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 40,
+      "object_definition": "obj_glassfloor",
+      "instance_id": 138021,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 8,
+      "object_definition": "obj_enemy_cc",
+      "instance_id": 138000,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 120,
+      "y": 40,
+      "object_definition": "obj_enemy_cc",
+      "instance_id": 138001,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 72,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138094,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 138095,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 72,
+      "object_definition": "obj_pit",
+      "instance_id": 138096,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 104,
+      "object_definition": "obj_pit",
+      "instance_id": 138097,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 104,
+      "y": 56,
+      "object_definition": "obj_pit",
+      "instance_id": 138098,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 56,
+      "object_definition": "obj_floor",
+      "instance_id": 138049,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 88,
+      "y": 88,
+      "object_definition": "obj_pit",
+      "instance_id": 138099,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 56,
+      "y": 8,
+      "object_definition": "obj_floor",
+      "instance_id": 138050,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 40,
+      "y": 8,
+      "object_definition": "obj_floor",
+      "instance_id": 138051,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 24,
+      "y": 8,
+      "object_definition": "obj_pit",
+      "instance_id": 138100,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 88,
+      "object_definition": "obj_floor",
+      "instance_id": 138052,
+      "creation_code": null,
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    },
+    {
+      "x": 8,
+      "y": 88,
+      "object_definition": "obj_boulder",
+      "instance_id": 138002,
+      "creation_code": "gml_RoomCC_rm_test2_053_9_Create",
+      "scale_x": 1,
+      "scale_y": 1,
+      "color": 4294967295,
+      "rotation": 0,
+      "pre_create_code": null,
+      "image_speed": 1,
+      "image_index": 0
+    }
+  ],
+  "tiles": [],
+  "layers": [
+    {
+      "layer_name": "Text",
+      "layer_id": 6920,
+      "layer_type": 2,
+      "layer_depth": -200,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Effects2",
+      "layer_id": 6921,
+      "layer_type": 2,
+      "layer_depth": -100,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Effects",
+      "layer_id": 6922,
+      "layer_type": 2,
+      "layer_depth": 0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Player",
+      "layer_id": 6923,
+      "layer_type": 2,
+      "layer_depth": 100,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": []
+      }
+    },
+    {
+      "layer_name": "Instances",
+      "layer_id": 6924,
+      "layer_type": 2,
+      "layer_depth": 200,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 72,
+            "y": 72,
+            "object_definition": "obj_spawnpoint",
+            "instance_id": 137986,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 24,
+            "object_definition": "obj_boulder",
+            "instance_id": 137987,
+            "creation_code": "gml_RoomCC_rm_test2_053_0_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 88,
+            "object_definition": "obj_boulder",
+            "instance_id": 137988,
+            "creation_code": "gml_RoomCC_rm_test2_053_1_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 56,
+            "object_definition": "obj_boulder",
+            "instance_id": 137989,
+            "creation_code": "gml_RoomCC_rm_test2_053_2_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 8,
+            "object_definition": "obj_enemy_cl",
+            "instance_id": 137990,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 40,
+            "object_definition": "obj_enemy_cl",
+            "instance_id": 137991,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 104,
+            "object_definition": "obj_enemy_cl",
+            "instance_id": 137992,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 72,
+            "object_definition": "obj_enemy_cl",
+            "instance_id": 137993,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 8,
+            "object_definition": "obj_boulder",
+            "instance_id": 137994,
+            "creation_code": "gml_RoomCC_rm_test2_053_3_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 24,
+            "object_definition": "obj_boulder",
+            "instance_id": 137995,
+            "creation_code": "gml_RoomCC_rm_test2_053_4_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 40,
+            "object_definition": "obj_boulder",
+            "instance_id": 137996,
+            "creation_code": "gml_RoomCC_rm_test2_053_5_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 56,
+            "object_definition": "obj_boulder",
+            "instance_id": 137997,
+            "creation_code": "gml_RoomCC_rm_test2_053_7_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 72,
+            "object_definition": "obj_boulder",
+            "instance_id": 137998,
+            "creation_code": "gml_RoomCC_rm_test2_053_6_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 72,
+            "object_definition": "obj_boulder",
+            "instance_id": 137999,
+            "creation_code": "gml_RoomCC_rm_test2_053_8_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 8,
+            "object_definition": "obj_enemy_cc",
+            "instance_id": 138000,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 40,
+            "object_definition": "obj_enemy_cc",
+            "instance_id": 138001,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 88,
+            "object_definition": "obj_boulder",
+            "instance_id": 138002,
+            "creation_code": "gml_RoomCC_rm_test2_053_9_Create",
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Floor_INS",
+      "layer_id": 6925,
+      "layer_type": 2,
+      "layer_depth": 300,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 104,
+            "y": 24,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138003,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 88,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138004,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 56,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138005,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 8,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138006,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 40,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138007,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 72,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138008,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 104,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138009,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 40,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138010,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 40,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138011,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 104,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138012,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 104,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138013,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 104,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138014,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 104,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138015,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 8,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138016,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 8,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138017,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 8,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138018,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 8,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138019,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 8,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138020,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 40,
+            "object_definition": "obj_glassfloor",
+            "instance_id": 138021,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Floor",
+      "layer_id": 6926,
+      "layer_type": 2,
+      "layer_depth": 400,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 88,
+            "y": 8,
+            "object_definition": "obj_floor",
+            "instance_id": 138022,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 8,
+            "object_definition": "obj_floor",
+            "instance_id": 138023,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138024,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138025,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138026,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138027,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138028,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138029,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138030,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138031,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138032,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138033,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 104,
+            "object_definition": "obj_floor",
+            "instance_id": 138034,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138035,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138036,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 8,
+            "object_definition": "obj_floorswitch",
+            "instance_id": 138037,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 40,
+            "object_definition": "obj_floorswitch",
+            "instance_id": 138038,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 72,
+            "object_definition": "obj_floorswitch",
+            "instance_id": 138039,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 104,
+            "object_definition": "obj_floorswitch",
+            "instance_id": 138040,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 40,
+            "object_definition": "obj_floor",
+            "instance_id": 138041,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 138042,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 8,
+            "object_definition": "obj_floor",
+            "instance_id": 138043,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 24,
+            "object_definition": "obj_floor",
+            "instance_id": 138044,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 104,
+            "object_definition": "obj_exit",
+            "instance_id": 138045,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 72,
+            "object_definition": "obj_floor",
+            "instance_id": 138046,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 104,
+            "object_definition": "obj_floor",
+            "instance_id": 138047,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 104,
+            "object_definition": "obj_floor",
+            "instance_id": 138048,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 56,
+            "object_definition": "obj_floor",
+            "instance_id": 138049,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 8,
+            "object_definition": "obj_floor",
+            "instance_id": 138050,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 8,
+            "object_definition": "obj_floor",
+            "instance_id": 138051,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 88,
+            "object_definition": "obj_floor",
+            "instance_id": 138052,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Pit",
+      "layer_id": 6927,
+      "layer_type": 2,
+      "layer_depth": 500,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "instances": [
+          {
+            "x": 136,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138053,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138054,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138055,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138056,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138057,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138058,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138059,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138060,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138061,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138062,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138063,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 120,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138064,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138065,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 168,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138066,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138067,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138068,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138069,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 152,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138070,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138071,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138072,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138073,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138074,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138075,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 8,
+            "object_definition": "obj_pit",
+            "instance_id": 138076,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138077,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 40,
+            "object_definition": "obj_pit",
+            "instance_id": 138078,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 184,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 138079,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 138080,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138081,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138082,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 40,
+            "object_definition": "obj_pit",
+            "instance_id": 138083,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138084,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 216,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138085,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 24,
+            "object_definition": "obj_pit",
+            "instance_id": 138086,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 138087,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138088,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138089,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138090,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 136,
+            "y": 104,
+            "object_definition": "obj_pit",
+            "instance_id": 138091,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 8,
+            "y": 104,
+            "object_definition": "obj_pit",
+            "instance_id": 138092,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 200,
+            "y": 104,
+            "object_definition": "obj_pit",
+            "instance_id": 138093,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 72,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138094,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 56,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 138095,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 40,
+            "y": 72,
+            "object_definition": "obj_pit",
+            "instance_id": 138096,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 104,
+            "object_definition": "obj_pit",
+            "instance_id": 138097,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 104,
+            "y": 56,
+            "object_definition": "obj_pit",
+            "instance_id": 138098,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 88,
+            "y": 88,
+            "object_definition": "obj_pit",
+            "instance_id": 138099,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          },
+          {
+            "x": 24,
+            "y": 8,
+            "object_definition": "obj_pit",
+            "instance_id": 138100,
+            "creation_code": null,
+            "scale_x": 1,
+            "scale_y": 1,
+            "color": 4294967295,
+            "rotation": 0,
+            "pre_create_code": null,
+            "image_speed": 1,
+            "image_index": 0
+          }
+        ]
+      }
+    },
+    {
+      "layer_name": "Tiles_2",
+      "layer_id": 6928,
+      "layer_type": 4,
+      "layer_depth": 600,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "background": "tile_edges",
+        "tiles_x": 14,
+        "tiles_y": 9,
+        "tile_data": [
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "layer_name": "Tiles_1",
+      "layer_id": 6929,
+      "layer_type": 4,
+      "layer_depth": 700,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "background": "tile_bg_void",
+        "tiles_x": 14,
+        "tiles_y": 9,
+        "tile_data": [
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ],
+          [
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            },
+            {
+              "id": 10
+            }
+          ],
+          [
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            },
+            {
+              "id": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "layer_name": "Background",
+      "layer_id": 6930,
+      "layer_type": 1,
+      "layer_depth": 800,
+      "x_offset": 0,
+      "y_offset": 0,
+      "h_speed": 0,
+      "v_speed": 0,
+      "is_visible": true,
+      "layer_data": {
+        "visible": true,
+        "foreground": false,
+        "sprite": null,
+        "tiled_horizontally": false,
+        "tiled_vertically": false,
+        "stretch": false,
+        "color": 4278190080,
+        "first_frame": 0,
+        "animation_speed": 15,
+        "animation_speed_type": 0
+      }
+    }
+  ]
+}

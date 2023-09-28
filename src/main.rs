@@ -14,15 +14,19 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
+// Include code generated for all the rooms by the build script. 
+include!(concat!(env!("OUT_DIR"), "/rooms.rs"));
+
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack
 // and interrupt handlers correctly. It will also handle creating the `Gba` struct for you.
 #[agb::entry]
 fn main(mut gba: agb::Gba) -> ! {
-    let mut counter = 0;
     loop {
-        agb::println!("Test {counter}");
-        counter += 1;
+        // Print number of rooms loaded. 
+        agb::println!("Total rooms preloaded: {}", ALL_ROOMS.len());
+
+        // Busy wait
+        for _ in 0..100 {}
     }
-    // agb::no_game(gba);
 }
