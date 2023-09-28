@@ -23,13 +23,51 @@ typedef unsigned char u8;
 
 #define MAXENTITYSPRITES MAXSPRITES - MAXDEBUGSPRITES
 
+extern int frame;
+
+enum class GameState {
+	Normal, // normal gameplay
+	Exiting, // we either just completed a level, or just died
+	Entering, // we just exited the exiting state and are now reloading stuffs. 
+	Loading, // loading in new data, do nothing for now.
+};
+
+inline bn::ostringstream& operator<<(bn::ostringstream& stream, const GameState& e) {
+static const char *GameStateToString[] ={ 
+	"Normal",
+	"Exiting", 
+	"Entering",
+	"Loading",
+};
+
+	stream << GameStateToString[static_cast<int>(e)];
+	return stream;
+
+}
+
+
 enum class Direction {
     Up,
     Down,
     Left,
     Right
 };
-	
+
+// all these ostreams should of been added days ago omfg.
+// nothing i googled mentioned i could overload ostream for enums
+inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Direction& e) {
+static const char *DirectionToString[] ={ 
+  	"Up",
+	"Down",
+	"Left",
+	"Right",
+};
+
+	stream << DirectionToString[static_cast<int>(e)];
+	return stream;
+
+}
+
 enum class EntityType {
 	Entity,
 	
@@ -60,7 +98,8 @@ enum class EntityType {
 	LevStatue,
 	CifStatue,
 };
-/*
+
+inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {
 static const char *EntityTypeToString[] ={ 
   	"Entity",
 	"Player",
@@ -85,7 +124,12 @@ static const char *EntityTypeToString[] ={
 	"LevStatue",
 	"CifStatue",
 };
-*/
+
+	stream << EntityTypeToString[static_cast<int>(e)];
+	return stream;
+
+}
+
 enum class TileType {
 	Pit,
 	Floor,
@@ -96,6 +140,24 @@ enum class TileType {
 	Exit,
 	Switch,
 };
+
+inline bn::ostringstream& operator<<(bn::ostringstream& stream, const TileType& e) {
+static const char *TileTypeToString[] ={ 
+	"Pit",
+	"Floor",
+	"Glass",
+	"Bomb",
+	"Death",
+	"Copy",
+	"Exit",
+	"Switch",
+};
+
+	stream << TileTypeToString[static_cast<int>(e)];
+	return stream;
+
+}
+
 
 class BackgroundMap {
 public:
@@ -278,6 +340,17 @@ public:
 	
 };
 
+inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Pos& p) {
+	//stream << "(" << p.x << ", " << p.y << ")";
+	stream.append("(");
+	stream.append(p.x);
+	stream.append(", ");
+	stream.append(p.y);
+	stream.append(")");
+
+	return stream;
+}
+
 struct EntityHolder {
 	const EntityType t;
 	const u8 x;
@@ -432,8 +505,5 @@ public:
 	
 	
 };
-
-
-
 
 

@@ -10,6 +10,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	// delete old data 
 	// conspiricy time, NULL EVERYTHING.
+	killedPlayer.clear();
 	
 	shadowQueue.clear();
 	
@@ -49,11 +50,21 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	player = NULL;
 	
+	SaneSet<Pos, MAXENTITYSPRITES> posSet;
+	
 	for(int i=0; i<entitiesCount; i++) {
 		
 		EntityHolder temp = entitiesPointer[i];
 		Pos tempPos(temp.x, temp.y);
-
+		
+		// why doesnt this line work omfg
+		//BN_ASSERT(!posSet.contains(tempPos), "the entitymangager tried loading in 2 entities on the same position: ", tempPos);
+		BN_ASSERT(!posSet.contains(tempPos), "the entitymangager tried loading in 2 entities on the same position: ", tempPos.x, " ", tempPos.y);
+		posSet.insert(tempPos);
+		
+		tileManager->stepOn(tempPos);
+		
+		
 		switch(temp.t) {
 			case EntityType::Player:
 			
@@ -306,7 +317,7 @@ void EntityManager::moveObstacles() {
 	moveEntities(obstacleList.begin(), obstacleList.end());
 }
 
-bn::optional<Entity*> EntityManager::doMoves() {
+void EntityManager::doMoves() {
 	
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -316,7 +327,7 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	bn::pair<bool, bn::optional<Direction>> playerRes = player->doInput();
 	
 	if(!playerRes.first) {
-		return res;
+		return;
 	}
 	
 
@@ -347,12 +358,26 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	
 	// do player move.
 	Pos playerStart = player->p;
-	moveEntity(player);
+	bool playerMoved = moveEntity(player);
 	/*res = updateMap();
 	if(res) {
 		return res;
 	}
 	player->doUpdate();*/
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			entityMap[x][y] = futureEntityMap[x][y];
+		}
+	}
+	
+	// a small check is needed here tho for if we walked backward into a shadow
+	if(playerMoved && getMap(player->p).size() >= 2) {
+		SaneSet<Entity*, 4> tempMap = getMap(player->p);
+		tempMap.erase(player);
+		BN_ASSERT(tempMap.begin() != tempMap.end(), "something has gone horribly wrong with the backwards walk into shadow detection");
+		addKill(*tempMap.begin());
+		return;
+	}
 	
 	// IF WE ARE ONE TILE AWAY FROM EXIT, AND SHADOWS ARE ON BUTTONS, WE DO NOT LEAVE THE LEVE
 	// still tho, calling doFloorSteps will update the shadows, which is needed 
@@ -365,11 +390,11 @@ bn::optional<Entity*> EntityManager::doMoves() {
 		shadowMove.reset();
 	}
 	manageShadows(shadowMove);
-	res = updateMap(); // this call may not be needed, but im not rishing it
-	if(res) {
-		return res;
+	updateMap(); // this call may not be needed, but im not rishing it
+	if(hasKills()) {
+		return;
 	}
-	
+
 	// check if player has moved into enemy, if so, die.
 	// DO STATUE CHECKS
 	// TODO: ABOVE NEEDS IMPLIMENTATION
@@ -378,9 +403,9 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	// move obstacle
 	// if that obstacle kills something, remove it from all sublists.
 	moveObstacles();
-	res = updateMap();
-	if(res) {
-		return res;
+	updateMap();
+	if(hasKills()) {
+		return;
 	}
 	
 	
@@ -410,16 +435,16 @@ bn::optional<Entity*> EntityManager::doMoves() {
 			
 		}
 	}
-	res = updateMap();
-	if(res) {
-		return res;
+	updateMap();
+	if(hasKills()) {
+		return;
 	}
 	
 
 	moveObstacles();
-	res = updateMap();
-	if(res) {
-		return res;
+	updateMap();
+	if(hasKills()) {
+		return;
 	}
 	
 	// -----
@@ -438,9 +463,9 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	// also possibly kill the player.
 	
 	moveEnemies();
-	res = updateMap();
-	if(res) {
-		return res;
+	updateMap();
+	if(hasKills()) {
+		return;
 	}
 	
 	
@@ -454,8 +479,7 @@ bn::optional<Entity*> EntityManager::doMoves() {
 	sanity();
 	
 	updateScreen();
-	
-	return res;
+
 }
 
 // -----
@@ -493,14 +517,14 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	
 	Pos nextPos = player->p;
 	
-	BN_LOG("moving shadows (",nextPos.x,",",nextPos.y,")");
+	//BN_LOG("moving shadows (",nextPos.x,",",nextPos.y,")");
 	
 	// i rlly should have a func for this bynow, screw it, now it kinda does
 	// i should rlly impliment this in mimic
 
 	BN_ASSERT(nextPos.moveInvert(moveDir, true, true), "somehow, in shadowmanager when reversing a playermove, the move failed??");
 	
-	BN_LOG("moving shadows (",nextPos.x,",",nextPos.y,")");
+	//BN_LOG("moving shadows (",nextPos.x,",",nextPos.y,")");
 	
 	for(int i=0; i<shadowList.size(); i++) {
 		
@@ -570,6 +594,11 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 		Shadow* temp = new Shadow(queuePos);
 		shadowList.push_back(temp); 
 		entityList.insert(temp);
+		
+		// shadows should be able to be added to enemylist,, since their moves will be used earlier?
+		// nvm i dont like that.
+		// do i????
+		//enemyList.insert(temp);
 
 		getMap(queuePos).insert(temp);
 		// also insert this into futuremap
@@ -578,7 +607,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	
 }
 
-bn::optional<Entity*> EntityManager::updateMap() {
+void EntityManager::updateMap() {
 
 	// return an entity if we died an need a reset
 
@@ -594,8 +623,6 @@ bn::optional<Entity*> EntityManager::updateMap() {
 	// CHECK IF PLAYER IS ON EXIT, AND EXIT IS OPEN HERE.
 	
 	// TODO: THIS CODE SHOULD DO STATUE CHECKS!!!!!!!!!!!!!!!!!!
-	
-	bn::optional<Entity*> res;
 		
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -606,9 +633,9 @@ bn::optional<Entity*> EntityManager::updateMap() {
 	
 	// do floor updates.
 	
-	res = tileManager->doFloorSteps();
-	if(res) {
-		return res;
+	tileManager->doFloorSteps();
+	if(hasKills()) {
+		return;
 	}
 	
 	// do the rest.
@@ -628,7 +655,9 @@ bn::optional<Entity*> EntityManager::updateMap() {
 				
 				if(!hasFloor(Pos(x, y))) {
 					if(temp->isPlayer() || temp->entityType() == EntityType::Shadow) {
-						res = temp;
+						//res = temp;
+						BN_LOG("no floor kill");
+						addKill(temp);
 					} else {
 						killEntity(temp);
 					}
@@ -643,24 +672,31 @@ bn::optional<Entity*> EntityManager::updateMap() {
 				
 				Entity* temp = *it;
 				
-				if(temp->isPlayer()) {
+				if(temp->entityType() == EntityType::Player) {
 					
 					// grab another(any) one entity in this square to be the death reason
 					SaneSet<Entity*, 4> tempMap = entityMap[x][y];
 					
 					tempMap.erase(temp);
-					
-					res = *tempMap.begin();
+					BN_LOG("intersect kill with a ");
+					//res = *tempMap.begin();
+					addKill(*tempMap.begin());
 					++it;
+					// break, NOT ITERATE here so that we dont delete the thing that killed us
+					// for death animation reasons.
+					//break;
 				} else if(temp->entityType() == EntityType::Shadow) {
-					res = temp;
+					//res = temp;
+					addKill(temp);
 					++it;
 				} else if(temp->isObstacle()) {
 					++it;
 					continue;
 				} else if(temp->isEnemy()) {
 					// kill
-					killEntity(temp);
+					
+					// the it wasnt being set here but stuff was still running fine for a while. why??
+					it = killEntity(temp);
 					continue;
 				} else {
 					BN_ERROR("a entity was somehow not a player, obstacle, or enemy. wtf.");
@@ -675,7 +711,7 @@ bn::optional<Entity*> EntityManager::updateMap() {
 		}
 	}
 	
-	return res;
+	sanity();
 }
 
 
@@ -732,6 +768,57 @@ void EntityManager::fullUpdate() {
 	updateScreen();
 }
 
+bool EntityManager::exitRoom() {
+	
+	// return true when done
+	
+	if(!hasKills()) {
+		//player->doUpdate();
+		//game->debugText.updateText();
+		//bn::core::update();
+		game->roomManager.nextRoom();
+	} 
+	
+	//do on al entityies that dont intersect the player here
+	// wee woo wee woo horrid code.
+	bool updatePlayer = true;
+	for(auto it = entityList.begin(); it != entityList.end(); it++) {
+		if((*it)->entityType() == EntityType::Player) {
+			continue;
+		}
+		
+		BN_ASSERT((*it) != player, "if you see this, something is super fucked");
+		
+		if((*it)->p == player->p) {
+			updatePlayer = false;
+		} else {
+			(*it)->doUpdate();
+		}
+	}
+
+	if(updatePlayer) {
+		player->doUpdate();
+	}
+	
+	return true;
+}
+
+bool EntityManager::enterRoom() {
+	return true;
+}
+
+void EntityManager::doVBlank() {
+	
+	// is modulo expensive???
+	if(frame % 25 == 0) {
+		doTicks();
+	}
+
+	if(frame % 8 == 0) {
+		doDeaths();
+	}
+}
+
 // -----
 
 bool EntityManager::hasEntity(Pos p) {
@@ -739,7 +826,23 @@ bool EntityManager::hasEntity(Pos p) {
 		SaneSet<Entity*, 4>& temp = getMap(p);
 		
 		return temp.size() != 0;
+}
+	
+bool EntityManager::hasNonPlayerEntity(Pos p) {
+	// this function exists entirely because of the goofyness with shadows technically being players
+	if(!hasEntity(p)) {
+		return false;
 	}
+	BN_LOG("ugh");
+	
+	SaneSet<Entity*, 4>& tempMap = getMap(p);
+	
+	if(tempMap.size() == 1 && tempMap.contains(player)) {
+		return false;
+	} 
+	
+	return true;
+}
 	
 bool EntityManager::hasEnemy(Pos p) {
 	
@@ -794,6 +897,8 @@ bn::optional<Direction> EntityManager::canSeePlayer(Pos p) {
 	
 	Pos playerPos = player->p;
 	
+	BN_ASSERT(getMap(player->p).contains(player), "wtf");
+	
 	// first, do some inexpensive checks
 	if(!(playerPos.x == p.x || playerPos.y == p.y)) {
 		return bn::optional<Direction>();
@@ -806,11 +911,16 @@ bn::optional<Direction> EntityManager::canSeePlayer(Pos p) {
 	int startValue = checkY ? MIN(playerPos.y, p.y) + 1 : MIN(playerPos.x, p.x) + 1;
 	int stopValue = checkY ? MAX(playerPos.y, p.y) - 1 : MAX(playerPos.x, p.x) - 1;
 
-	for(int i=startValue; i<stopValue; i++) {
+	//BN_ASSERT(startValue != stopValue, "in player LOS checks, the start and stop values were the same!");
+	
+	for(int i=startValue; i<=stopValue; i++) {
 		
-		bool collision = checkY ? hasCollision(Pos(sharedValue, i)) : hasCollision(Pos(i, sharedValue));
-		
-		if(collision) {
+		Pos testPos = checkY ? Pos(sharedValue, i) : Pos(i, sharedValue);
+	
+		BN_LOG("Entity at ", p, " checking LOS at ", testPos.x, " ", testPos.y, hasNonPlayerEntity(testPos));
+	
+		if(hasCollision(testPos) || hasNonPlayerEntity(testPos)) {
+			BN_LOG("FOUND COLLISION");
 			return bn::optional<Direction>();
 		}
 	}
@@ -916,7 +1026,7 @@ void EntityManager::sanity() {
 	// check that all data structures are holding up
 	
 	// plus1 is for the player.
-	BN_ASSERT(entityList.size() == 1 + enemyList.size() + obstacleList.size() + shadowList.size(), 
+	BN_ASSERT(entityList.size() == 1 + enemyList.size() + obstacleList.size() + shadowList.size(),
 		"EntityManager list sizes didnt add up! ",
 		entityList.size(), " ", 1, " ", enemyList.size(), " ", obstacleList.size(), " ", shadowList.size());
 	
@@ -935,5 +1045,6 @@ void EntityManager::sanity() {
 	
 	
 }
+
 
 

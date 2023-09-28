@@ -249,3 +249,11 @@ bn::optional<Direction> GorStatue::getNextMove() {
 	return bn::optional<Direction>();
 }
 
+bn::optional<Direction> MonStatue::getNextMove() {
+	
+	if(entityManager->canSeePlayer(p)) {
+		animationIndex = 1;
+	}
+
+	return bn::optional<Direction>();
+}

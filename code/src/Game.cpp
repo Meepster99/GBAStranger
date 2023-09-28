@@ -5,38 +5,45 @@
 
 Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 
-void Game::resetRoom(Entity* reason, bool debug) {
+void Game::resetRoom(bool debug) {
+	
+	BN_LOG("entered reset room with debug=",debug);
 	
 	if(!debug) {
+		//tileManager.fullDraw();
+		state = GameState::Exiting;
 		
-		tileManager.fullDraw();
-		
-		if(reason == NULL) {
-			entityManager.player->doUpdate();
+		// wait for animations to finish 
+		// IS THERE A NON BUSYLOOP VER OF THIS?
+
+		while(state == GameState::Exiting) { // wait for gamestate to no longer be exiting
+			//BN_LOG("looping on ", state);
 			debugText.updateText();
-			bn::core::update();
-			roomManager.nextRoom();
-		} else if(reason->entityType() == EntityType::Player) {
-			reason->doUpdate();
-		}
-		
-		for(int i=0; i<10; i++) {
-			miscTimer.restart();
-			while(miscTimer.elapsed_ticks() < FRAMETICKS * 6) {
-				debugText.updateText();
-				bn::core::update();
-			}
-			if(reason != NULL) {
-				reason->doTick();
-			}
-		}		
+			bn::core::update(); 
+		} 
 	}
+
+	state = GameState::Loading;
 	
 	BN_LOG("resetroom called");
 	loadLevel();
 	BN_LOG("loadlevel finished");
 	fullDraw();
 	BN_LOG("fulldraw finished");
+	
+	state = GameState::Normal;
+	
+	if(!debug) {
+		state = GameState::Entering;
+		while(state == GameState::Entering) { // wait for gamestate to no longer be entering
+			//BN_LOG("looping on ", state);
+			debugText.updateText();
+			bn::core::update(); 
+		}
+	}
+	
+	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
+	
 }
 
 void Game::loadLevel() {
@@ -64,20 +71,12 @@ void Game::loadLevel() {
 	
 	TileType* floorPointer = (TileType*)idek.floor;
 	
-	tileManager.entityManager = &entityManager;
-	tileManager.effectsManager = &effectsManager;
+	
 	
 	tileManager.loadTiles(floorPointer);
 
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
-	
-	Entity::entityManager = &entityManager;
-	Entity::effectsManager = &effectsManager;
-	Entity::tileManager = &tileManager;
-
-	entityManager.effectsManager = &effectsManager;
-	entityManager.tileManager = &tileManager;
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
@@ -113,36 +112,77 @@ void Game::changePalette(int offset) {
 	
 }
 
-bool vblanked = false;
+Game* globalGame = NULL;
+
+int frame = 0;
 
 void didVBlank() {
-	vblanked = true;
+	
+	//BN_LOG("vblanked ", frame);
+	
+	frame = (frame + 1) % 60000;
+	
+	globalGame->doVBlank();
+	
+	//bn::core::update();
+}
+
+void Game::doVBlank() {
+	bool a, b, c;
+	
+	switch(state) {
+		default:
+		case GameState::Normal:
+			entityManager.doVBlank();
+			effectsManager.doVBlank();
+			tileManager.doVBlank();
+			break;
+		case GameState::Exiting:
+			a = entityManager.exitRoom();
+			b = effectsManager.exitRoom();
+			c = tileManager.exitRoom();
+			if(a && b && c) {
+				state = GameState::Entering;
+			}
+			break;
+		case GameState::Entering:
+			a = entityManager.enterRoom();
+			b = effectsManager.enterRoom();
+			c = tileManager.enterRoom();
+			if(a && b && c) {
+				state = GameState::Normal;
+			}
+			break;
+		case GameState::Loading:
+			break;
+	}
+	
+	
 }
 
 void Game::run() {
+	
+	BN_LOG("hello?");
+	
+	globalGame = this;
 
 	bn::core::set_vblank_callback(didVBlank);
 	
 	bn::timer inputTimer;
 
-	int frame = 0;
+	//resetRoom();
 	
-	resetRoom(NULL, true);
-
-	bn::optional<Entity*> test = NULL;
+	state = GameState::Loading;
+	
+	loadLevel();
+	fullDraw();
+	
+	state = GameState::Normal;
 	
 	while(true) {
 		
-		if(vblanked) {
-			
-			vblanked = false;
-		
-			frame = (frame + 1) % 60000;
-
-			miscDebug = frame;
-
-		}
-		
+		miscDebug = Switch::pressedCount;
+		miscDebug2 = Switch::totalCount;
 		
 		if(bn::keypad::l_held() || bn::keypad::r_held()) {
 			if(bn::keypad::l_held()) {
@@ -150,7 +190,7 @@ void Game::run() {
 			} else {
 				roomManager.nextRoom();
 			}
-			resetRoom(NULL, true);
+			resetRoom(true);
 			
 			miscTimer.restart();
 			
@@ -176,13 +216,10 @@ void Game::run() {
 				continue;
 			}
 			
-			
-			bn::optional<Entity*> res = entityManager.doMoves();
-			
-			BN_LOG("domoves returned ", res.has_value());
-			
-			if(res) {
-				resetRoom(res.value());
+			entityManager.doMoves();
+
+			if(entityManager.hasKills()) {
+				resetRoom(NULL);
 				continue;
 			}
 			
@@ -191,16 +228,6 @@ void Game::run() {
 			tileManager.fullDraw();
 			
 		}
-		
-		// is modulo expensive???
-		if(frame % 25 == 0) {
-			entityManager.doTicks();
-		}
-		
-		if(frame % 8 == 0) {
-			entityManager.doDeaths();
-		}
-
 
 		debugText.updateText();
 		bn::core::update();

@@ -56,7 +56,12 @@ public:
 	
 	bn::timer miscTimer;
 	
+	GameState state = GameState::Loading;
+	
 	int miscDebug = 0; // just here for when i want to disp something on the screen
+	int miscDebug2 = 0;
+	
+	
 	
 	Game() : collision(bn::regular_bg_tiles_items::dw_tile_bg_1, 3),
 	details(bn::regular_bg_tiles_items::dw_tile_edges, 2),
@@ -65,16 +70,25 @@ public:
 	tileManager(this),
 	debugText(this) {
 		
-		
+		// goofy
+		tileManager.entityManager = &entityManager;
+		tileManager.effectsManager = &effectsManager;
+		Entity::entityManager = &entityManager;
+		Entity::effectsManager = &effectsManager;
+		Entity::tileManager = &tileManager;
+		entityManager.effectsManager = &effectsManager;
+		entityManager.tileManager = &tileManager;
 		
 	}
 	
 	void run();
 	
 	void loadLevel();
-	void resetRoom(Entity* reason = NULL, bool debug = false);
+	void resetRoom(bool debug = false);
 	
 	void fullDraw();
+	
+	void doVBlank();
 	
 	int paletteIndex = 0;
 	void changePalette(int offset);

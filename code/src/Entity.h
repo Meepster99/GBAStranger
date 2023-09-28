@@ -165,6 +165,11 @@ public:
 		return false;
 	}
 	
+	
+	virtual void killedPlayer() { // this func will be called if this entity kills a player, and do all the animations and such
+		doTick();
+	}
+	
 private:
 	bool isFalling = false;
 
@@ -590,6 +595,8 @@ public:
 
 	bool canFall() const override { return false; }
 	
+	bn::optional<Direction> getNextMove() override { return bn::optional<Direction>(); }
+	
 };
 
 // -----
@@ -688,6 +695,8 @@ public:
 	MonStatue* clone() const override { return new MonStatue(*this); }
 
 	EntityType entityType() const override { return EntityType::MonStatue; }
+	
+	bn::optional<Direction> getNextMove() override;
 
 };
 

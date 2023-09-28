@@ -50,18 +50,18 @@ public:
 	void moveObstacles();
 	
 	
-	bn::optional<Entity*> doMoves();
+	void doMoves();
 
 	void manageShadows(bn::optional<Direction> playerDir);	
 
-	bn::optional<Entity*> updateMap();
+	void updateMap();
 
 	void updateScreen();
 	
 	void doTicks();
 	
 	void fullUpdate();
-	
+
 	void doDeaths();
 	
 	bn::vector<Entity*, 4>::iterator killEntity(Entity* e);
@@ -72,6 +72,7 @@ public:
 	}
 	
 	bool hasEntity(Pos p);
+	bool hasNonPlayerEntity(Pos p);
 	bool hasEnemy(Pos p);
 	bool hasObstacle(Pos p);
 	bool hasCollision(Pos p);
@@ -81,6 +82,27 @@ public:
 	bn::optional<Direction> canPathToPlayer(Pos p);
 	
 	void sanity();
+			
+	void addKill(bn::optional<Entity*> e) {
+		BN_ASSERT(killedPlayer.size() + 1 != killedPlayer.max_size(), "ran out of entitys for the killplayer vector?");
+		if(e.has_value()) {
+			killedPlayer.push_back(e.value());
+		}
+	}
+	
+	bool hasKills() { return killedPlayer.size() != 0; }
+	
+	bool exitRoom();
+	bool enterRoom();
+	void doVBlank();
+		
+		
+	
+private:
+	// make a class OBJECT, have entity and floortile extend it, have this be an array of that.
+	// or, illl,,,,, ill just have the floor be a special case tbh 
+	// 16 is excessive
+	bn::vector<Entity*, 16> killedPlayer; 
 	
 };
 
