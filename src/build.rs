@@ -1,7 +1,7 @@
 //! Build script to generate the rust code for the rooms. 
 
+use serde::Deserialize;
 use std::{io::{self, Write, BufWriter}, env, path::{Path, PathBuf}, ffi::OsString, fs::{self, File}};
-use serde_json::Value;
 use heck::ToShoutySnakeCase;
 
 /// Structs to represent rooms that are included in the top of the generated rooms.rs. 
@@ -17,6 +17,13 @@ struct Room {
 }
 
 "#;
+
+// Deserializable version of all structs put here for use with serde.
+#[derive(Deserialize)]
+struct Room {
+    name: String, 
+    creation_code_id: String,
+}
 
 fn main() -> io::Result<()> {
     // Re-run if any assets change
@@ -39,28 +46,19 @@ fn main() -> io::Result<()> {
         // Assume that the whole dir is .json room files. 
         // Get the path of the directory entry.
         let path: PathBuf = entry?.path();
-        // Open the file at that path and deserialize it to a json value. 
-        let value: Value  = serde_json::from_reader(File::open(&path)?)?;
-
-        // Get required values out of this json object. 
-        let name = value["name"]
-            .as_str()
-            .unwrap_or_else(|| panic!("Room in {} has no name.", path.display()));
-
-        let creation_code_id = value["creation_code_id"]
-            .as_str()
-            .unwrap_or_else(|| panic!("Room in {} has no creation_code_id", path.display()));
-
+        // Log that we're processing the current file.
+        eprintln!("Processing {}...", path.display());
+        // Open the file at that path and deserialize it from json. 
+        let room: Room = serde_json::from_reader(File::open(&path)?)?;
         // The name for the constant should be an all caps version of the room name. 
-        let const_name = name.to_shouty_snake_case();
-
+        let const_name = room.name.to_shouty_snake_case();
+        // Add reference to room name to list of all rooms.
+        all_rooms.push(format!("&{const_name}"));
         // Write a const to the end of the rooms file.
         // Use `#[allow(dead_code)]` to spress warnings. 
         writeln!(&mut out_file, "#[allow(dead_code)]")?;
-        writeln!(&mut out_file, r#"const {const_name}: Room = Room {{ name: "{name}", creation_code_id: "{creation_code_id}" }};"#)?;
+        writeln!(&mut out_file, r#"const {const_name}: Room = Room {{ name: "{}", creation_code_id: "{}" }};"#, room.name, room.creation_code_id)?;
         
-        // Add reference to room name to list of all rooms.
-        all_rooms.push(format!("&{const_name}"));
 
         // Log message visible to cargo build -vv
         eprintln!("translated {} to a rust constant.", path.display());
