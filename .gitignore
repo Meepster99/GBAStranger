@@ -1,5 +1,4 @@
 *.bmp
-*.json
 *.win
 /code/graphics/
 /code/build/
