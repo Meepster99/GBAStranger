@@ -268,9 +268,10 @@ bn::optional<Direction> MonStatue::getNextMove() {
 void LevStatue::startFall() {
 	totalLev--;
 	if(isActive) {
+		rodUses--;
 		entityManager->rodUse();
 	}
-	if(rodUses >= totalLev) {
+	if(rodUses != 0 && rodUses >= totalLev) {
 		entityManager->addKill(entityManager->player); // ADDING THIS TO A KILL RIGHT HERE MIGHT BE A horrid idea, putting player to be safe
 	}
 }

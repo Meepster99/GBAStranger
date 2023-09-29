@@ -1121,7 +1121,7 @@ void EntityManager::rodUse() {
 	}
 	
 	// THIS COULD BE VERY BAD IF SOMEONE PUSHES OFF A LEV STATUE WITH ONLY ONE ON SCREEN
-	if(LevStatue::rodUses >= LevStatue::totalLev && LevStatue::totalLev != 0) {
+	if(LevStatue::rodUses >= LevStatue::totalLev && LevStatue::rodUses != 0) {
 		addKill(player);
 	}
 	
