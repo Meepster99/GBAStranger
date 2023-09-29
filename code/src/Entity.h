@@ -615,7 +615,7 @@ public:
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_boulder);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_boulder_shake, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	Boulder* clone() const override { return new Boulder(*this); }
@@ -649,7 +649,7 @@ public:
 	AddStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_voider);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_voider_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	AddStatue* clone() const override { return new AddStatue(*this); }
@@ -664,7 +664,7 @@ public:
 	EusStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lover);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_lover_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	EusStatue* clone() const override { return new EusStatue(*this); }
@@ -681,7 +681,7 @@ public:
 	BeeStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_smiler);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_smiler_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	BeeStatue* clone() const override { return new BeeStatue(*this); }
@@ -696,7 +696,7 @@ public:
 	MonStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_greeder);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_greeder_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	MonStatue* clone() const override { return new MonStatue(*this); }
@@ -713,7 +713,7 @@ public:
 	TanStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_killer);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_killer_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	TanStatue* clone() const override { return new TanStatue(*this); }
@@ -731,7 +731,7 @@ public:
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower_stop);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_slower_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	GorStatue* clone() const override { return new GorStatue(*this); }
@@ -753,7 +753,7 @@ public:
 	LevStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_watcher);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_watcher_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 		
 		totalLev++;
 	}
@@ -780,7 +780,7 @@ public:
 	CifStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_atoner);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_atoner_shaken, 8));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	CifStatue* clone() const override { return new CifStatue(*this); }

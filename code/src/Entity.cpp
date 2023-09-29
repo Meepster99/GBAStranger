@@ -229,7 +229,7 @@ void Obstacle::startFall() {
 	// just so i dont have to go bs a bunch of code
 	// but tbh, i rlly should.
 				
-	fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[0], 9));
+	//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[0], 9));
 	
 }
 
