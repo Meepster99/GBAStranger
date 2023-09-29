@@ -258,6 +258,7 @@ bn::optional<Direction> MonStatue::getNextMove() {
 	
 	if(entityManager->canSeePlayer(p)) {
 		animationIndex = 1;
+		doUpdate();
 		entityManager->addKill(this);
 	}
 
