@@ -514,6 +514,11 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 
 	deadList.insert(e);
 	
+	// this line here is good for tan statues, but may cause issues with other entities?
+	if(tileManager->hasFloor(tempPos)) {
+		tileManager->stepOff(tempPos);
+	}
+	
 	return res;
 }
 
@@ -719,17 +724,12 @@ void EntityManager::updateMap() {
 			}
 		}
 	}
-
-	// check tan statues
-	// TODO, MAKE THIS ONLY RUN WHEN THERE ARE ACTUAL TAN STATUES
+	
+	// should this loop be here, or in domove
 	if(enemyList.size() == 0 && shadowList.size() == 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 			if((*it)->entityType() == EntityType::TanStatue) {
 				// goofy ahh button check
-				
-				if(hasFloor((*it)->p) == TileType::Switch) {
-					tileManager->stepOff((*it)->p);
-				}
 				
 				killEntity(*it);
 				it = obstacleList.begin(); // trash code
@@ -739,7 +739,6 @@ void EntityManager::updateMap() {
 			}
 		}
 	}
-	
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
