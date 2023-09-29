@@ -65,7 +65,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		BN_ASSERT(!posSet.contains(tempPos), "the entitymangager tried loading in 2 entities on the same position: ", tempPos.x, " ", tempPos.y);
 		posSet.insert(tempPos);
 		
-		tileManager->stepOn(tempPos);
+		//BN_ASSERT(hasFloor(tempPos), "tryed loading entity without floor under it????");
+		if(hasFloor(tempPos)) {
+			tileManager->stepOn(tempPos);
+		}
 		
 		
 		switch(temp.t) {
