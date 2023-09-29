@@ -207,7 +207,7 @@ void Game::run() {
 			
 			miscTimer.restart();
 			
-			while(miscTimer.elapsed_ticks() < 254843 / 12) { }
+			while(miscTimer.elapsed_ticks() < FRAMETICKS * 5) { }
 		
 			debugText.updateText();
 			bn::core::update();
@@ -215,7 +215,7 @@ void Game::run() {
 			continue;
 		}
 		
-		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > 254843 / 20) {
+		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
 			
 			inputTimer.restart();
 			

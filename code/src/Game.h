@@ -81,6 +81,8 @@ public:
 		effectsManager.tileManager = &tileManager;
 		effectsManager.entityManager = &entityManager;
 		
+		FloorTile::effectsManager = &effectsManager;
+		
 	}
 	
 	void run();

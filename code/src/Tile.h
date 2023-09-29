@@ -3,10 +3,15 @@
 
 #include "SharedTypes.h"
 
+class EffectsManager;
+
 class FloorTile { // default floor.
 public:	
 
+	static EffectsManager* effectsManager;
 
+	Pos tilePos; // im not sure how much i like this, but for tiles to call/create effects, this is needed
+	
 	// index of where this tiles backgroundmap is 
 	const int startIndex = 1;
 	
@@ -17,8 +22,9 @@ public:
 	
 	int currentTile = 0; // current tile index.
 	
-	FloorTile() {}
-	FloorTile(int startIndex_, int tileCount_) : startIndex(startIndex_), tileCount(tileCount_) {
+	
+	FloorTile(Pos p_) : tilePos(p_) {}
+	FloorTile(Pos p_, int startIndex_, int tileCount_) : tilePos(p_), startIndex(startIndex_), tileCount(tileCount_) {
 		
 	}
 	
@@ -49,20 +55,19 @@ public:
 class Glass : public FloorTile { // glass
 public:
 
-	Glass() : FloorTile(1+2, 7) {}
+	Glass(Pos p) : FloorTile(p, 1+2, 7) {}
 	
 	TileType tileType() override { return TileType::Glass; }
 	
-	void stepOff() override {
-		isAlive = false;
-	}
+	void stepOff() override;
+		
 	
 };
 
 class Bomb : public FloorTile { // ones with a charge before break
 public:
 
-	Bomb() : FloorTile(1+2+7, 4) {}
+	Bomb(Pos p) : FloorTile(p, 1+2+7, 4) {}
 	
 	TileType tileType() override { return TileType::Bomb; }
 	
@@ -88,7 +93,7 @@ public:
 class Death : public FloorTile { // the ones that just kill you if you touch them
 public:
 
-	Death() : FloorTile(1+2+7+4, 4) {}
+	Death(Pos p) : FloorTile(p, 1+2+7+4, 4) {}
 	
 	TileType tileType() override { return TileType::Death; }
 	
@@ -97,7 +102,7 @@ public:
 class Copy : public FloorTile { // create shadow clones
 public:
 	
-	Copy() : FloorTile(1+2+7+4+4, 1) {}
+	Copy(Pos p) : FloorTile(p, 1+2+7+4+4, 1) {}
 	
 	TileType tileType() override { return TileType::Copy; }
 	
@@ -109,7 +114,7 @@ public:
 	static int pressedCount;
 	static int totalCount;
 	
-	Switch() : FloorTile(1+2+7+4+4+1+5, 3) {
+	Switch(Pos p) : FloorTile(p, 1+2+7+4+4+1+5, 3) {
 		totalCount+=1;
 	}
 	
@@ -141,8 +146,8 @@ public:
 	const char* nextRoom;
 	bool locked = false;
 
-	Exit(char* nextRoom_ = NULL, bool locked_ = false) : FloorTile(1+2+7+4+4+1, 5), 
-	nextRoom(nextRoom_), locked(locked_)
+	Exit(Pos p, char* nextRoom_ = NULL) : FloorTile(p, 1+2+7+4+4+1, 5), 
+	nextRoom(nextRoom_)
 	{ 
 
 	}

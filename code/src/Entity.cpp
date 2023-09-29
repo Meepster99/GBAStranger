@@ -237,7 +237,7 @@ void EusStatue::startFall() {
 
 	BN_ASSERT(tileManager->floorMap[p.x][p.y] == NULL, "with a eus statue, you tried pushing it onto an area that i hadnt nulled yet(a glass that just broke, or something). im to lazy rn to fix this, but if you see it msg me");
 
-	tileManager->floorMap[p.x][p.y] = new FloorTile();
+	tileManager->floorMap[p.x][p.y] = new FloorTile(p);
 
 	Obstacle::startFall();
 }
