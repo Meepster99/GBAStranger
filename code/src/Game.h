@@ -48,6 +48,7 @@ public:
 	
 	EntityManager entityManager;
 	
+	// why is this one plural while the rest aint? i should rlly change that
 	EffectsManager effectsManager;
 	
 	TileManager tileManager;

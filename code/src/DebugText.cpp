@@ -25,6 +25,12 @@ void DebugText::updateText() {
 	
 	stringStream.append("  ");
 	stringStream.append(game->entityManager.entityList.size());
+	
+	stringStream.append("  ");
+	stringStream.append(game->entityManager.deadList.size());
+	
+	stringStream.append("  ");
+	stringStream.append(game->effectsManager.effectList.size());
 
 	stringStream.append(" ");
 	stringStream.append(frame);

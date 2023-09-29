@@ -52,6 +52,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			return {false, bn::optional<Direction>()};
 		} else if(tile == NULL && rod != NULL) {
 			// put tile down 
+			rod->tilePos = tilePos;
 			tileManager->floorMap[tilePos.x][tilePos.y] = rod;
 			rod = NULL;
 			entityManager->rodUse();

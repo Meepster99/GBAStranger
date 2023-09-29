@@ -698,9 +698,12 @@ void EntityManager::updateMap() {
 					SaneSet<Entity*, 4> tempMap = entityMap[x][y];
 					
 					tempMap.erase(temp);
-					BN_LOG("intersect kill with a ");
+					
+					Entity* tempKiller = *tempMap.begin();
+					
+					BN_LOG("intersect kill with a ", tempKiller->entityType());
 					//res = *tempMap.begin();
-					addKill(*tempMap.begin());
+					addKill(tempKiller);
 					++it;
 					// break, NOT ITERATE here so that we dont delete the thing that killed us
 					// for death animation reasons.
@@ -970,7 +973,7 @@ bn::optional<Direction> EntityManager::canSeePlayer(Pos p) {
 		
 		Pos testPos = checkY ? Pos(sharedValue, i) : Pos(i, sharedValue);
 	
-		BN_LOG("Entity at ", p, " checking LOS at ", testPos.x, " ", testPos.y, hasNonPlayerEntity(testPos));
+		BN_LOG("Entity at ", p, " checking LOS at ", testPos.x, " ", testPos.y, " ", hasNonPlayerEntity(testPos));
 	
 		if(hasCollision(testPos) || hasNonPlayerEntity(testPos)) {
 			BN_LOG("FOUND COLLISION");

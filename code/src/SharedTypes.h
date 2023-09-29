@@ -190,6 +190,52 @@ public:
 			
 			//bgPointer.set_z_order(zIndex);
 			bgPointer.set_priority(zIndex);
+			
+			//setTile(0,21,4);
+			//setTile(31,31,4);
+
+			setTile(1,21,4);
+			setTile(1,22,4);
+			setTile(1,23,4);
+			
+			setTile(4,21,4);
+			setTile(4,22,4);
+			setTile(4,23,4);
+			
+			setTile(2,24,4);
+			setTile(3,24,4);
+			
+			// -----
+			
+			setTile(7,21,4);
+			setTile(7,22,4);
+			setTile(7,23,4);
+			
+			setTile(9,21,4);
+			setTile(9,22,4);
+			setTile(9,23,4);
+			
+			setTile(11,21,4);
+			setTile(11,22,4);
+			setTile(11,23,4);
+			
+			setTile(8,24,4);
+			setTile(10,24,4);
+			
+			// -----
+			
+			setTile(14,21,4);
+			setTile(14,22,4);
+			setTile(14,23,4);
+			
+			setTile(17,21,4);
+			setTile(17,22,4);
+			setTile(17,23,4);
+			
+			setTile(15,24,4);
+			setTile(16,24,4);
+			
+			
 		}
 	
 	void setTile(int x, int y, int tileIndex) {
