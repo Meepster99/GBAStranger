@@ -82,6 +82,7 @@ public:
 	bn::optional<Direction> canPathToPlayer(Pos p);
 	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStart);
 	
+	void rodUse();
 	
 	void sanity();
 			

@@ -747,13 +747,26 @@ public:
 class LevStatue : public Obstacle {
 public:
 
+	static int rodUses;
+	static int totalLev;
+
 	LevStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_watcher);
 		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_watcher_shaken, 8));
+		
+		totalLev++;
 	}
 	
-	static int rodUses = 0;
+	void startFall() override;
+	
+	bool isActive = false;
+	void activate() {
+		animationIndex = 1;
+		isActive = true;
+		rodUses++;
+		doUpdate();
+	}
 
 	LevStatue* clone() const override { return new LevStatue(*this); }
 

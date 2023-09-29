@@ -186,8 +186,8 @@ void Game::run() {
 	
 	while(true) {
 		
-		miscDebug = Switch::pressedCount;
-		miscDebug2 = Switch::totalCount;
+		miscDebug = LevStatue::rodUses;
+		miscDebug2 = LevStatue::totalLev;
 		
 		if(bn::keypad::l_held() || bn::keypad::r_held()) {
 			if(bn::keypad::l_held()) {

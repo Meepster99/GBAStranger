@@ -7,10 +7,10 @@
 #include "EffectsManager.h"
 
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
-	
-	
+
 	LevStatue::rodUses = 0;
-	
+	LevStatue::totalLev = 0;
+
 	// delete old data 
 	// conspiricy time, NULL EVERYTHING.
 	killedPlayer.clear();
@@ -142,6 +142,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		}
 		
 	}
+
+
 	
 	BN_ASSERT(entityList.size() == entitiesCount, "why does the entitylist size not equal entity count?? size=",entityList.size(), " count=",entitiesCount);
 	
@@ -715,6 +717,27 @@ void EntityManager::updateMap() {
 		}
 	}
 
+	// check tan statues
+	// TODO, MAKE THIS ONLY RUN WHEN THERE ARE ACTUAL TAN STATUES
+	if(enemyList.size() == 0 && shadowList.size() == 0) {
+		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
+			if((*it)->entityType() == EntityType::TanStatue) {
+				// goofy ahh button check
+				
+				if(hasFloor((*it)->p) == TileType::Switch) {
+					tileManager->stepOff((*it)->p);
+				}
+				
+				killEntity(*it);
+				it = obstacleList.begin(); // trash code
+				
+			} else {
+				++it;
+			}
+		}
+	}
+	
+	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			futureEntityMap[x][y] = entityMap[x][y];
@@ -777,6 +800,8 @@ void EntityManager::fullUpdate() {
 	doTicks();
 	updateScreen();
 }
+
+// -----
 
 bool EntityManager::exitRoom() {
 	
@@ -1068,6 +1093,36 @@ bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerSta
 	}
 	
 	return canPathToPlayer(e->p);
+}
+
+void EntityManager::rodUse() {
+	
+	bool foundLevStatue = false;
+	
+	LevStatue* temp = NULL;
+	
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+		if((*it)->entityType() == EntityType::LevStatue) {
+			
+			temp = static_cast<LevStatue*>(*it);
+			
+			if(!temp->isActive) {
+				temp->activate();
+				foundLevStatue = true;
+				break;
+			}
+		}
+	}
+	
+	if(!foundLevStatue && temp != NULL) {
+		addKill(temp);
+	}
+	
+	// THIS COULD BE VERY BAD IF SOMEONE PUSHES OFF A LEV STATUE WITH ONLY ONE ON SCREEN
+	if(LevStatue::rodUses >= LevStatue::totalLev && LevStatue::totalLev != 0) {
+		addKill(player);
+	}
+	
 }
 
 // -----

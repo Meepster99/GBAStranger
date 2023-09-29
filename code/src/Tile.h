@@ -114,6 +114,7 @@ public:
 	}
 	
 	// should this be an override?
+	// this was overkill tbh, but im not touching it rn
 	~Switch() {
 		totalCount--;
 		if(isSteppedOn) {

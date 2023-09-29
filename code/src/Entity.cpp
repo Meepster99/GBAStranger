@@ -14,6 +14,9 @@ EffectsManager* Entity::effectsManager = NULL;
 TileManager* Entity::tileManager = NULL;
 Game* Entity::game = NULL;
 
+int LevStatue::rodUses = 0;
+int LevStatue::totalLev = 0;
+
 // Player
 
 bn::pair<bool, bn::optional<Direction>> Player::doInput() {
@@ -51,10 +54,12 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			// put tile down 
 			tileManager->floorMap[tilePos.x][tilePos.y] = rod;
 			rod = NULL;
+			entityManager->rodUse();
 		} else if(tile != NULL && rod == NULL) {
 			// pick tile up
 			rod = tileManager->floorMap[tilePos.x][tilePos.y];
 			tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
+			entityManager->rodUse();
 		}
 
 		nextMove = bn::optional<Direction>();
@@ -253,7 +258,21 @@ bn::optional<Direction> MonStatue::getNextMove() {
 	
 	if(entityManager->canSeePlayer(p)) {
 		animationIndex = 1;
+		entityManager->addKill(this);
 	}
 
 	return bn::optional<Direction>();
 }
+
+void LevStatue::startFall() {
+	totalLev--;
+	if(isActive) {
+		entityManager->rodUse();
+	}
+	if(rodUses >= totalLev) {
+		entityManager->addKill(entityManager->player); // ADDING THIS TO A KILL RIGHT HERE MIGHT BE A horrid idea, putting player to be safe
+	}
+}
+
+
+
