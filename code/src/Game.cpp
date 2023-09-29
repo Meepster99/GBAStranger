@@ -10,7 +10,8 @@ void Game::resetRoom(bool debug) {
 	BN_LOG("entered reset room with debug=",debug);
 	
 	if(!debug) {
-		//tileManager.fullDraw();
+		
+		tileManager.fullDraw();
 		state = GameState::Exiting;
 		
 		// wait for animations to finish 
@@ -190,18 +191,23 @@ void Game::run() {
 		miscDebug2 = LevStatue::totalLev;
 		
 		if(bn::keypad::l_held() || bn::keypad::r_held()) {
+			
+			int debugIncrement = bn::keypad::select_held() ? 5 : 1;
+			
 			if(bn::keypad::l_held()) {
-				roomManager.prevRoom();
+				for(int i=0; i<debugIncrement; i++) {
+					roomManager.prevRoom();
+				}
 			} else {
-				roomManager.nextRoom();
+				for(int i=0; i<debugIncrement; i++) {
+					roomManager.nextRoom();
+				}
 			}
 			resetRoom(true);
 			
 			miscTimer.restart();
 			
-			while(miscTimer.elapsed_ticks() < 254843 / 12) {
-			
-			}
+			while(miscTimer.elapsed_ticks() < 254843 / 12) { }
 		
 			debugText.updateText();
 			bn::core::update();
@@ -215,9 +221,6 @@ void Game::run() {
 			
 			if(bn::keypad::start_pressed()) {
 				changePalette(1);
-				continue;
-			} else if(bn::keypad::select_pressed()) {
-				changePalette(-1);
 				continue;
 			}
 			
