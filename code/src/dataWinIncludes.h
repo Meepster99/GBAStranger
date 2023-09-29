@@ -1185,3 +1185,4 @@
 #include "bn_regular_bg_tiles_items_dw_tile_house_1.h"
 #include "bn_regular_bg_tiles_items_dw_tile_mini.h"
 #include "bn_regular_bg_tiles_items_dw_customfloortiles.h"
+#include "bn_regular_bg_tiles_items_dw_customeffecttiles.h"

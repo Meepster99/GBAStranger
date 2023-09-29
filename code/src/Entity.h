@@ -201,6 +201,11 @@ public:
 	
 	FloorTile* rod = NULL;
 	
+	void startFall() override { // have the player do the cyote time thingy
+		tileIndex = static_cast<int>(currentDir);
+		fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
+	}
+	
 	bn::optional<Direction> nextMove;
 	
 	bn::optional<Direction> getNextMove() override;

@@ -609,6 +609,40 @@ def generateCustomFloorBackground(outputPath):
 	print("done generating custom floor tiles")
 	
 	pass
+
+def generateEffectsTiles(outputPath):
+
+	print("generating custom effects tiles")
+
+	# for saftey, im always having the first tile be a transparent one
+	# additionally, these tiles no longer need to be 16x16, and tbh i should make them,,,
+	# fuck it ill 8x8 
+	
+	tiles = np.full((64+8, 8, 3), (0, 255, 255), dtype=np.uint8)
+	
+	for i in range(0, 64+8, 8):
+		
+		temp = tiles[i:i+8, 0:8]
+
+		for j in range(0, (64-i)//8):
+			temp[j, 0:8] = (0, 0, 0)
+		
+
+		
+	tiles = np.vstack((np.full((8, 8, 3), (0, 255, 255), dtype=np.uint8), tiles))
+		
+	writeBitmap(Image.fromarray(tiles), os.path.join(outputPath, "customeffecttiles.bmp"))
+
+	outputJson = {
+		"type": "regular_bg_tiles",
+		"bpp_mode": "bpp_4"
+	}
+
+	with open(os.path.join(outputPath, "dw_" + "customeffecttiles" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	print("done generating custom effects tiles")
+	
+	pass
 	
 def generateIncludes(folders):
 
@@ -693,9 +727,9 @@ if __name__ == "__main__":
 	createFolder("./formattedOutput/fonts/")
 	createFolder("./formattedOutput/tiles/")
 	createFolder("./formattedOutput/customFloor/")
+	createFolder("./formattedOutput/customEffects/")
 	
-	#convertSprites("./formattedOutput/sprites/")
-	
+
 	convertAllSprite("./formattedOutput/sprites/")
 	
 	convertTiles("./formattedOutput/tiles/")
@@ -704,7 +738,9 @@ if __name__ == "__main__":
 	
 	generateCustomFloorBackground("./formattedOutput/customFloor/")
 	
-	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/"])
+	generateEffectsTiles("./formattedOutput/customEffects/")
+
+	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/"])
 	
 	
 	

@@ -772,15 +772,20 @@ bool EntityManager::exitRoom() {
 	
 	// return true when done
 	
-	if(!hasKills()) {
+	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
+	
+	if(killedPlayer.contains(NULL)) {
 		//player->doUpdate();
 		//game->debugText.updateText();
 		//bn::core::update();
 		game->roomManager.nextRoom();
+		return true;
 	} 
 	
-	//do on al entityies that dont intersect the player here
+	
+	//update the pos of entities that DONT collide with the player.
 	// wee woo wee woo horrid code.
+	// also, its now even worse since this will be getting called every frame?
 	bool updatePlayer = true;
 	for(auto it = entityList.begin(); it != entityList.end(); it++) {
 		if((*it)->entityType() == EntityType::Player) {
@@ -792,15 +797,26 @@ bool EntityManager::exitRoom() {
 		if((*it)->p == player->p) {
 			updatePlayer = false;
 		} else {
-			(*it)->doUpdate();
+			(*it)->updatePosition();
 		}
 	}
 
 	if(updatePlayer) {
-		player->doUpdate();
+		player->updatePosition();
 	}
 	
-	return true;
+	if(killedPlayer.contains(player) && frame % 8 == 0) {
+		return player->fallDeath();
+	} else {
+		if(frame % 8 == 0) {
+			for(auto it = killedPlayer.begin(); it != killedPlayer.end(); ++it) {
+				(*it)->doTick();
+			}
+			return player->fallDeath();
+		}
+	}
+	
+	return false;
 }
 
 bool EntityManager::enterRoom() {

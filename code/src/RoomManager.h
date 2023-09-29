@@ -3,7 +3,7 @@
 class RoomManager {
 public:
 
-	int roomIndex = 150;
+	int roomIndex = 139;
 	
 	Room loadRoom();
 	
