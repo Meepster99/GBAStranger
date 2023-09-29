@@ -24,11 +24,13 @@ const char* RoomManager::currentRoomName() {
 void RoomManager::nextRoom() {
 	if(roomIndex + 1 < (int)(sizeof(rooms)/sizeof(rooms[0]))) {
 		roomIndex++;
+		BN_LOG("roomIndex incremented");
 	}
 }
 
 void RoomManager::prevRoom() {
 	if(roomIndex - 1 >= 0 ) {
 		roomIndex--;
+		BN_LOG("roomIndex decremented");
 	}
 }

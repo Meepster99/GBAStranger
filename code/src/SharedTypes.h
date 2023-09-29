@@ -23,7 +23,7 @@ typedef unsigned char u8;
 
 #define MAXENTITYSPRITES MAXSPRITES - MAXDEBUGSPRITES
 
-extern int frame;
+extern unsigned int frame;
 
 enum class GameState {
 	Normal, // normal gameplay
@@ -44,7 +44,6 @@ static const char *GameStateToString[] ={
 	return stream;
 
 }
-
 
 enum class Direction {
     Up,
@@ -158,7 +157,6 @@ static const char *TileTypeToString[] ={
 
 }
 
-
 class BackgroundMap {
 public:
 
@@ -190,7 +188,8 @@ public:
 			// actually, fuck it, ill just do it in preprocessing.
 			
 			
-			bgPointer.set_z_order(zIndex);
+			//bgPointer.set_z_order(zIndex);
+			bgPointer.set_priority(zIndex);
 		}
 	
 	void setTile(int x, int y, int tileIndex) {
@@ -205,6 +204,19 @@ public:
 		// yep, lag occured.
 		// sorta fixed it, but to be safe, im ballin here
 		//bgMap.reload_cells_ref();
+	}
+	
+	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
+		
+		bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
+		bn::regular_bg_map_cell_info current_cell_info(current_cell);
+
+		current_cell_info.set_tile_index(tileIndex);
+		current_cell_info.set_horizontal_flip(flipX);
+		current_cell_info.set_vertical_flip(flipY);
+		
+		current_cell = current_cell_info.cell(); 
+	
 	}
 	
 	void reloadCells() {
@@ -252,6 +264,9 @@ public:
 		rawMap.reloadCells();
 	}
 	
+	void setTile(int x, int y, int tileIndex) { rawMap.setTile(x, y, tileIndex); }
+	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { rawMap.setTile(x, y, tileIndex, flipX, flipY); }
+	
 };
 
 class Pos {
@@ -263,7 +278,7 @@ public:
 	Pos(signed char x_, signed char y_) : x(x_), y(y_) { 
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
-
+	
 	Pos(const Pos& other) : x(other.x), y(other.y) {}
 	
 	Pos& operator=(const Pos& other) {
@@ -339,6 +354,17 @@ public:
 	}
 	
 };
+
+
+inline Pos safePos(signed char x, signed char y) {
+
+	if(x < 0) { x = 0; }
+	if(y < 0) { y = 0; }
+	if(x >= 14) { x = 13; }
+	if(y >= 9) { y = 8; }
+	
+	return Pos(x, y);
+}
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Pos& p) {
 	//stream << "(" << p.x << ", " << p.y << ")";

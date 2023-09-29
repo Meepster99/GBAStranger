@@ -80,6 +80,8 @@ void Game::loadLevel() {
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
+	effectsManager.reset();
+	
 }
 
 void Game::fullDraw() {
@@ -107,6 +109,7 @@ void Game::changePalette(int offset) {
 	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
@@ -114,7 +117,7 @@ void Game::changePalette(int offset) {
 
 Game* globalGame = NULL;
 
-int frame = 0;
+unsigned int frame = 0;
 
 void didVBlank() {
 	
@@ -128,7 +131,7 @@ void didVBlank() {
 }
 
 void Game::doVBlank() {
-	bool a, b, c;
+	static bool a, b, c = false;
 	
 	switch(state) {
 		default:
@@ -138,19 +141,21 @@ void Game::doVBlank() {
 			tileManager.doVBlank();
 			break;
 		case GameState::Exiting:
-			a = entityManager.exitRoom();
-			b = effectsManager.exitRoom();
-			c = tileManager.exitRoom();
+			if(!a) { a = entityManager.exitRoom(); }
+			if(!b) { b = effectsManager.exitRoom(); }
+			if(!c) { c = tileManager.exitRoom(); }
 			if(a && b && c) {
 				state = GameState::Entering;
+				a = b = c = false; // vine boom sound effect
 			}
 			break;
 		case GameState::Entering:
-			a = entityManager.enterRoom();
-			b = effectsManager.enterRoom();
-			c = tileManager.enterRoom();
+			if(!a) { a = entityManager.enterRoom(); }
+			if(!b) { b = effectsManager.enterRoom(); }
+			if(!c) { c = tileManager.enterRoom(); }
 			if(a && b && c) {
 				state = GameState::Normal;
+				a = b = c = false; // vine boom sound effect
 			}
 			break;
 		case GameState::Loading:

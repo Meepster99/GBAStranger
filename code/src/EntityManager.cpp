@@ -8,6 +8,9 @@
 
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 	
+	
+	LevStatue::rodUses = 0;
+	
 	// delete old data 
 	// conspiricy time, NULL EVERYTHING.
 	killedPlayer.clear();
@@ -343,14 +346,11 @@ void EntityManager::doMoves() {
 			continue;
 		}
 		
+		// diamonds will be inserted AFTER obstacles move.
 		// (maybe) insert diamonds move into its func? (MORE NEEDS TO BE DONE ON THIS)
+		// nvm we gon be goofy here and do this twice.
+		// nvm x2, gods that sounds horrid for efficiency. 
 		
-		if((*it)->entityType() == EntityType::Diamond) {
-			
-			Diamond* temp = static_cast<Diamond*>(*it);
-			
-			temp->nextMove = canPathToPlayer(temp->p);
-		}
 	}
 
 	
@@ -406,6 +406,16 @@ void EntityManager::doMoves() {
 	updateMap();
 	if(hasKills()) {
 		return;
+	}
+	
+	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
+		if((*it)->entityType() == EntityType::Diamond) {	
+			Diamond* temp = static_cast<Diamond*>(*it);
+			// account for the goofy ahh edge case in which a diamond is one move away from 
+			// the player, have it move to the players previous position
+			// nvm turned out to be less goofy than i thought(no if statements at least)
+			temp->nextMove = canPathToPlayer(temp, playerStart);
+		}
 	}
 	
 	
@@ -773,9 +783,9 @@ bool EntityManager::exitRoom() {
 	// return true when done
 	
 	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
-	
+
 	if(killedPlayer.contains(NULL)) {
-		//player->doUpdate();
+		player->doUpdate();
 		//game->debugText.updateText();
 		//bn::core::update();
 		game->roomManager.nextRoom();
@@ -985,6 +995,7 @@ bn::optional<Direction> EntityManager::canPathToPlayer(Pos p) {
 	
 	queue.push_back(playerPos);
 	
+	// TODO, WHAT IS THE INGAME DIR PRIO. NOT KNOWING IS A SIMPLE FIX OMFG
 	const Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
 	const Direction invertTestDirections[4] = {Direction::Down, Direction::Up, Direction::Right, Direction::Left};
 	
@@ -1034,6 +1045,30 @@ bn::optional<Direction> EntityManager::canPathToPlayer(Pos p) {
 	return bn::optional<Direction>();
 }
 
+bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStart) {
+	
+	const Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
+	
+	// this whole loop is an affront to the gods 
+	// nvm this whole func is.
+	for(int i=0; i<4; i++) {
+		Pos testPos = e->p;
+		if(!testPos.move(testDirections[i])) {
+			continue;
+		}
+		
+		if(testPos == playerStart) {
+			
+			e->nextMove = testDirections[i];
+			
+			if(moveEntity(e, true)) {
+				return testDirections[i];
+			}
+		}
+	}
+	
+	return canPathToPlayer(e->p);
+}
 
 // -----
 

@@ -26,7 +26,9 @@ public:
 			//defaultPalette.getSpritePalette().create_palette())
 			spritePalette->getSpritePalette().create_palette())
 			)
-		{ }
+		{
+		spritePointer.set_bg_priority(1);
+		}
 		
 	
 		
@@ -750,6 +752,8 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_watcher);
 		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_watcher_shaken, 8));
 	}
+	
+	static int rodUses = 0;
 
 	LevStatue* clone() const override { return new LevStatue(*this); }
 

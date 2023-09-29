@@ -64,7 +64,7 @@ public:
 	
 	
 	Game() : collision(bn::regular_bg_tiles_items::dw_tile_bg_1, 3),
-	details(bn::regular_bg_tiles_items::dw_tile_edges, 2),
+	details(bn::regular_bg_tiles_items::dw_tile_edges, 3),
 	entityManager(this),
 	effectsManager(this),
 	tileManager(this),
@@ -78,6 +78,8 @@ public:
 		Entity::tileManager = &tileManager;
 		entityManager.effectsManager = &effectsManager;
 		entityManager.tileManager = &tileManager;
+		effectsManager.tileManager = &tileManager;
+		effectsManager.entityManager = &entityManager;
 		
 	}
 	

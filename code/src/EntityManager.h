@@ -80,6 +80,8 @@ public:
 	
 	bn::optional<Direction> canSeePlayer(Pos p);
 	bn::optional<Direction> canPathToPlayer(Pos p);
+	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStart);
+	
 	
 	void sanity();
 			

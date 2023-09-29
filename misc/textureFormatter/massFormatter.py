@@ -617,19 +617,20 @@ def generateEffectsTiles(outputPath):
 	# for saftey, im always having the first tile be a transparent one
 	# additionally, these tiles no longer need to be 16x16, and tbh i should make them,,,
 	# fuck it ill 8x8 
+	# reconsidered on that, in the case that in the future i want more complex background effects, going 16x16 will be better
 	
-	tiles = np.full((64+8, 8, 3), (0, 255, 255), dtype=np.uint8)
+	tiles = np.full((256+16, 16, 3), (0, 255, 255), dtype=np.uint8)
 	
-	for i in range(0, 64+8, 8):
+	for i in range(0, 256+16, 16):
 		
-		temp = tiles[i:i+8, 0:8]
+		temp = tiles[i:i+16, 0:16]
 
-		for j in range(0, (64-i)//8):
-			temp[j, 0:8] = (0, 0, 0)
+		for j in range(0, (256-i)//16):
+			temp[j, 0:16] = (0, 0, 0)
 		
 
 		
-	tiles = np.vstack((np.full((8, 8, 3), (0, 255, 255), dtype=np.uint8), tiles))
+	tiles = np.vstack((np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8), tiles))
 		
 	writeBitmap(Image.fromarray(tiles), os.path.join(outputPath, "customeffecttiles.bmp"))
 
