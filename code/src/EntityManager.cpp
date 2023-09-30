@@ -18,8 +18,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	shadowQueue.clear();
 	
 	if(player != NULL) {
-		delete player->rod;
-		player->rod = NULL;
+		if(player->rod != NULL) {
+			delete player->rod;
+			player->rod = NULL;
+		}
 	}
 	
 	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
@@ -732,11 +734,8 @@ void EntityManager::updateMap() {
 	if(enemyList.size() == 0 && shadowList.size() == 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 			if((*it)->entityType() == EntityType::TanStatue) {
-				// goofy ahh button check
-				
 				killEntity(*it);
-				it = obstacleList.begin(); // trash code
-				
+				it = obstacleList.begin(); // trash code, killentity only returns the getpos index
 			} else {
 				++it;
 			}

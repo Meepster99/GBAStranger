@@ -11,6 +11,13 @@ void TileManager::loadTiles(TileType* floorPointer) {
 	
 	floorSteps.clear();
 	
+	if(entityManager->player != NULL) {
+		if(entityManager->player->rod != NULL) {
+			delete entityManager->player->rod;	
+			entityManager->player->rod = NULL;
+		}
+	}
+	
 	int switchTracker = 0;
 
 	for(int x=0; x<14; x++) { 

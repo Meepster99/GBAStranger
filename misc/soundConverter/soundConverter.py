@@ -33,7 +33,19 @@ def convertAllMusic():
 
 def convertAllSounds():
 
+	inputPath = "./Exported_Sounds/audiogroup_soundeffects/"
 
+	wavFiles = [f for f in os.listdir(inputPath) if f.lower().endswith('.wav')]
+	
+	
+	for wav in wavFiles:
+		song = AudioSegment.from_wav(os.path.join(inputPath, wav))
+		
+		song = song.set_channels(1)
+	
+		outputFilePath = os.path.join(outputPath, wav.rsplit(".", 1)[0] + ".wav")
+		song.export(outputFilePath, format="wav", parameters=["-ar","22050"])
+		
 
 
 	pass
@@ -45,7 +57,7 @@ if __name__ == "__main__":
 	# run exportallsounds 
 	# move that folder here
 
-	convertAllMusic()
+	#convertAllMusic()
 	convertAllSounds()
 	
 	pass

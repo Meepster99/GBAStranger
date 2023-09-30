@@ -240,6 +240,9 @@ void EusStatue::startFall() {
 
 	tileManager->floorMap[p.x][p.y] = new FloorTile(p);
 
+	// this is trash, please make tilemanager update based on tile
+	tileManager->fullDraw();
+	
 	Obstacle::startFall();
 }
 
