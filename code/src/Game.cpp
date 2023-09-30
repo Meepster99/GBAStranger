@@ -167,9 +167,7 @@ void Game::doVBlank() {
 }
 
 void Game::run() {
-	
-	BN_LOG("hello?");
-	
+
 	globalGame = this;
 
 	bn::core::set_vblank_callback(didVBlank);
@@ -184,6 +182,10 @@ void Game::run() {
 	fullDraw();
 	
 	state = GameState::Normal;
+	
+	
+	//bn::sound_items::msc_013.play(1);
+	 //bn::music_items::cyberrid.play(0.5);
 	
 	while(true) {
 		

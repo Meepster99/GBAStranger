@@ -9,3 +9,6 @@ code.gba
 !creationCodeData.json
 target
 *.sav
+*.ogg
+*.wav
+*.dat

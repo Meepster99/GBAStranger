@@ -1,6 +1,16 @@
 #pragma once
 
+
 #include "dataWinIncludes.h"
+
+
+#include "bn_sound.h"
+
+//#include "bn_music_items.h"
+//#include "bn_music_actions.h"
+
+//#include "bn_sound_items.h"
+//#include "bn_sound_actions.h"
 
 #include "bn_log.h"
 #include "bn_config_log.h"

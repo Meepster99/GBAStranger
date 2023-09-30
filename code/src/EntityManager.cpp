@@ -282,7 +282,7 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 		return false;
 	}
 	
-	if(e->isObstacle() && hasObstacle(testPos)) {
+	if(e->isObstacle() && (hasObstacle(testPos) || hasPlayer(testPos))) {
 		// obstacles cannot move onto other obstacles
 		e->moveFailed();
 		return false;
@@ -815,7 +815,8 @@ bool EntityManager::exitRoom() {
 	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
 
 	if(killedPlayer.contains(NULL)) {
-		player->doUpdate();
+		//player->doUpdate();
+		updateScreen(); // is this ok?	
 		//game->debugText.updateText();
 		//bn::core::update();
 		game->roomManager.nextRoom();
@@ -883,14 +884,21 @@ bool EntityManager::hasEntity(Pos p) {
 		
 		return temp.size() != 0;
 }
+
+bool EntityManager::hasPlayer(Pos p) {
+	if(!hasEntity(p)) {
+		return false;
+	}
 	
+	return getMap(p).contains(player);
+}
+
 bool EntityManager::hasNonPlayerEntity(Pos p) {
 	// this function exists entirely because of the goofyness with shadows technically being players
 	if(!hasEntity(p)) {
 		return false;
 	}
-	BN_LOG("ugh");
-	
+
 	SaneSet<Entity*, 4>& tempMap = getMap(p);
 	
 	if(tempMap.size() == 1 && tempMap.contains(player)) {

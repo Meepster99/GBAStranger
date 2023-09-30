@@ -72,6 +72,7 @@ public:
 	}
 	
 	bool hasEntity(Pos p);
+	bool hasPlayer(Pos p);
 	bool hasNonPlayerEntity(Pos p);
 	bool hasEnemy(Pos p);
 	bool hasObstacle(Pos p);
