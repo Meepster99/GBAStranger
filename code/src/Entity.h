@@ -627,10 +627,7 @@ public:
 class Chest : public Obstacle {
 public:
 
-	Chest(Pos p_) : Obstacle(p_) {
-		spriteTilesArray.clear();
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
-	}
+	Chest(Pos p_);
 
 	Chest* clone() const override { return new Chest(*this); }
 

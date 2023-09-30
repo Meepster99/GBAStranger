@@ -176,6 +176,20 @@ bn::optional<Direction> Diamond::getNextMove() {
 
 // Obstacle
 
+Chest::Chest(Pos p_) : Obstacle(p_) {
+	spriteTilesArray.clear();
+	spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+	
+	// this is horrid, but sometimes chests spawn without any floor under them. 
+	// this fixes that.
+	
+	if(!tileManager->hasFloor(p_)) {
+		tileManager->floorMap[p_.x][p_.y] = new FloorTile(p_);
+	}
+	
+	doUpdate();
+}
+
 bn::optional<Direction> Obstacle::getNextMove() {
 	
 	if(bumpDirections.size() == 0) {
