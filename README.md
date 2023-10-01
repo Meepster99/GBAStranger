@@ -9,3 +9,8 @@ code), use `cargo doc --open --document-private-items`.
 
 If you have mGBA installed, you can build and run code directly using `cargo run`. To run with optimizations,
 use `cargo run --release`. 
+
+
+## Instructions to build C++ code.
+
+i,, really should put some instructions here
