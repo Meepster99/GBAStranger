@@ -13,4 +13,8 @@ use `cargo run --release`.
 
 ## Instructions to build C++ code.
 
-i,, really should put some instructions here
+install [devkitpro](https://devkitpro.org/)
+
+for each folder in misc, follow each respective python scripts instructions and run them
+
+make the makefile in code/
