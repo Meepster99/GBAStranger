@@ -9,6 +9,7 @@ class FloorTile { // default floor.
 public:	
 
 	static EffectsManager* effectsManager;
+	static BackgroundMap* rawMap;
 
 	Pos tilePos; // im not sure how much i like this, but for tiles to call/create effects, this is needed
 	
@@ -29,7 +30,28 @@ public:
 	}
 	
 	virtual int getTileValue() { return startIndex + currentTile; }
+
+	// i rlly should try to do this with a const static.
+	virtual bool drawDropOff() const { return true; }
 	
+	virtual void draw() {
+		u8 x = tilePos.x;
+		u8 y = tilePos.y;
+		int tile = getTileValue();
+		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
+		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+	}
+	
+	static void clear(u8 x, u8 y) {
+		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
+	}
+	
+
 	virtual ~FloorTile() = default;
 	
 	// -----
@@ -61,6 +83,7 @@ public:
 	
 	void stepOff() override;
 		
+	bool drawDropOff() const override { return false; }
 	
 };
 
@@ -165,4 +188,19 @@ public:
 	
 };
 
+class WordTile : public FloorTile { // contains some string. 
 
+	// should i be using dependency injection for the draws here?
+
+	char first = ' ';
+	char second = ' ';
+	
+	WordTile(Pos p) : FloorTile(p, 1+2+7, 4) {}
+	
+	TileType tileType() override { return TileType::WordTile; }
+	
+	bool drawDropOff() const override { return false; }
+	
+	int getTileValue() override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
+
+};

@@ -19,6 +19,8 @@
 
 #include <bn_deque.h>
 
+#include "fontData.h"
+
 typedef unsigned char u8;
 
 // unsure of accuracy, but will make things slightly easier, hopefully
@@ -148,6 +150,7 @@ enum class TileType {
 	Copy,
 	Exit,
 	Switch,
+	WordTile,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const TileType& e) {
@@ -160,6 +163,7 @@ static const char *TileTypeToString[] ={
 	"Copy",
 	"Exit",
 	"Switch",
+	"WordTile,"
 };
 
 	stream << TileTypeToString[static_cast<int>(e)];

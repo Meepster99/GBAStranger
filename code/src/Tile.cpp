@@ -4,6 +4,7 @@
 #include "EffectsManager.h"
 
 EffectsManager* FloorTile::effectsManager = NULL;
+BackgroundMap* FloorTile::rawMap = NULL;
 
 int Switch::pressedCount = 0;
 int Switch::totalCount = 0;

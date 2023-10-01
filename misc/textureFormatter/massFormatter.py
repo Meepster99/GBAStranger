@@ -1,6 +1,6 @@
 
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw
 import os 
 import numpy as np
 import json 
@@ -16,6 +16,9 @@ palette = {
 	
 	# just in here as debug
 	(255, 0, 255)	: 0,
+	
+	# manual sanity fix
+	(20, 255, 255)	: 2,
 }
 
 validChars = '_.%s%s' % (string.ascii_lowercase, string.digits)
@@ -498,6 +501,147 @@ def convertTiles(outputPath):
 	pass
 
 def convertFonts(outputPath):
+
+	# https://github.com/krzys-h/UndertaleModTool/blob/7b876ad457eca5cdd69957dc02ef57a569412e5e/UndertaleModTool/Scripts/Resource%20Unpackers/ExportFontData.csx#L4
+	
+	fontDataFile = open("fontData.h", "w", encoding='utf-8')
+	
+	inputPath = "./Export_Fonts/."
+	
+	fontImageList = [item for item in os.listdir(inputPath) if item.lower().endswith('.png') ]
+	
+	#fontImageList = ["fnt_text_12.png"]
+	
+	for font in fontImageList:
+		
+		fontImageFileName = font
+		fontCSVFileName = "glyphs_" + font.rsplit(".", 1)[0] + ".csv"
+		
+		fontImage = Image.open(os.path.join(inputPath, fontImageFileName))
+		f = open(os.path.join(inputPath, fontCSVFileName))
+		fontCSV = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ][1:]
+		f.close()
+		
+		cyan_background = Image.new("RGBA", fontImage.size, (0, 255, 255, 255))
+		cyan_background.paste(fontImage, (0, 0), fontImage)
+		fontImage = cyan_background.convert("RGB")
+	
+		charData = {}
+		
+		img = ImageDraw.Draw(fontImage) 
+		
+		# no clue why, but chars written are 1 off rn. 
+		# i have 0 clue wtf butano is on rn
+		tiles = np.full(((128-32)*16, 16, 3), (0, 255, 255), dtype=np.uint8)
+		
+		shouldSkip = False
+		
+		for line in fontCSV:
+			char, x, y, width, height, shift, offset = [ int(l) for l in line.split(";") ]
+			
+			if char < 32 or char >= 127:
+				continue
+			
+			"""
+			if width > 16:
+				print("when exporting a font, its width was greater than 16. this is bad.")
+				print("char of {:s} id:{:d}".format(chr(char), char))
+				exit(1)
+		
+			if height > 16:
+				print("when exporting a font, its height was greater than 16. this is bad.")
+				print("char of {:s} id:{:d}".format(chr(char), char))
+				exit(1)
+			"""	
+			
+			if width >= 16:
+				print("im not fucking dealing with {:s} rn".format(font))
+				shouldSkip = True
+				break
+			
+			# shift and offset are probs needed
+			charData[char] = {
+				"x": x,
+				"y": y,
+				"width": width,
+				"height": height,
+				"shift": shift,
+				"offset": offset,
+			}
+			
+			#img.rectangle( ((x, y), (x+width, y+height)), outline="white") 
+			
+		if shouldSkip:
+			continue
+
+		for char, data in charData.items():
+		
+			if char == 32:
+				continue
+			
+			x, y, width, height, shift, offset = data["x"], data["y"], data["width"], data["height"], data["shift"], data["offset"]
+			
+			tempY = (char-32-1)*16
+			tempHeight = min(16, height)
+			
+			tempImage = np.array(fontImage)[y:y+tempHeight, x:x+width]
+			
+			tempImage[np.all(tempImage == [0, 0, 0], axis=-1)] = [0, 0, 255]
+			
+			tiles[tempY:tempY + tempHeight, 0:width] = tempImage
+		
+		
+		
+		temp = Image.fromarray(tiles)
+
+		writeBitmap(temp, os.path.join(outputPath, font.rsplit(".", 1)[0] + ".bmp"))
+
+		
+		outputJson = {
+			"type": "sprite",
+			"bpp_mode": "bpp_4",
+			"height": 16,
+		}
+			
+		with open(os.path.join(outputPath, "dw_" + font.rsplit(".", 1)[0] + ".json"), "w") as jsonFileHandle:
+			json.dump(outputJson, jsonFileHandle)
+			
+		writeBitmap(temp, os.path.join(outputPath, font.rsplit(".", 1)[0] + "_bg.bmp"))
+		outputJson = {
+			"type": "regular_bg_tiles",
+			"bpp_mode": "bpp_4",
+		}	
+		with open(os.path.join(outputPath, "dw_" + font.rsplit(".", 1)[0] + "_bg.json"), "w") as jsonFileHandle:
+			json.dump(outputJson, jsonFileHandle)
+			
+		
+			
+		name = font.rsplit(".", 1)[0]
+		
+		fontDataFile.write("constexpr int8_t dw_{:s}_sprite_font_character_widths[] = {{".format(name))
+		fontDataFile.write(",".join([ str(charData[char]["width"]) for char in range(32, 126+1) ] + ["1"]))
+		fontDataFile.write("};")
+			
+			
+			
+		fontDataFile.write("""\n
+constexpr bn::utf8_character dw_{:s}_sprite_font_utf8_characters[] = {{"Á"}}; // dont ask
+
+constexpr bn::span<const bn::utf8_character> dw_{:s}_sprite_font_utf8_characters_span(dw_{:s}_sprite_font_utf8_characters);
+
+constexpr auto dw_{:s}_sprite_font_utf8_characters_map =
+        bn::utf8_characters_map<dw_{:s}_sprite_font_utf8_characters_span>();
+
+constexpr bn::sprite_font dw_{:s}_sprite_font(
+        bn::sprite_items::dw_{:s},
+		dw_{:s}_sprite_font_utf8_characters_map.reference(),
+        dw_{:s}_sprite_font_character_widths, 1);
+
+		""".format(name, name, name, name, name, name, name, name, name)) # im tired for this.
+			
+	fontDataFile.close()
+			
+		
 	pass
 
 def generateCustomFloorBackground(outputPath):
@@ -565,11 +709,18 @@ def generateCustomFloorBackground(outputPath):
 					detail[i][j] = 0
 			
 		tiles.append(detail)
-		
-		
-	for t in tiles:
-		print(t.shape)
-		
+			
+	# blank white tile for like, yea 
+	tiles.append(np.full((16, 16), 2, dtype=np.uint8))
+	# open and write the text data to here aswell.
+	temp = np.array(Image.open("./formattedOutput/fonts/dw_fnt_text_12.bmp"))
+
+	temp[temp == 2] = 1
+	temp[temp == 0] = 2
+	tiles.append(temp)
+	#print(temp.shape, stackedTiles.shape)
+	#stackedTiles = np.vstack((stackedTiles, temp))
+	
 	
 	stackedTiles = np.vstack(tiles).tolist()
 	
@@ -584,9 +735,9 @@ def generateCustomFloorBackground(outputPath):
 	for i in range(0, len(stackedTiles)):
 		for j in range(0, len(stackedTiles[0])):
 			stackedTiles[i][j] = reversePalette[stackedTiles[i][j]]
+	stackedTiles = np.uint8(stackedTiles)
 	
-
-	temp = Image.fromarray(np.uint8(stackedTiles))
+	temp = Image.fromarray(stackedTiles)
 	
 	writeBitmap(temp, os.path.join(outputPath, "customfloortiles.bmp"))
 	
@@ -723,6 +874,8 @@ if __name__ == "__main__":
 	# run ExportAllSprites(script in this folder) , rename to Export_Textures_Padded, move to folder
 	# run ExportAllTexturesGrouped, copy all 3 folders inside to this folder.
 	
+	# run ExportAllFontData, copy that folder to this folder.
+	
 	createFolder("./formattedOutput/")
 	createFolder("./formattedOutput/sprites/")
 	createFolder("./formattedOutput/fonts/")
@@ -731,15 +884,15 @@ if __name__ == "__main__":
 	createFolder("./formattedOutput/customEffects/")
 	
 
-	convertAllSprite("./formattedOutput/sprites/")
+	#convertAllSprite("./formattedOutput/sprites/")
 	
-	convertTiles("./formattedOutput/tiles/")
+	#convertTiles("./formattedOutput/tiles/")
 	
-	#convertFonts("./formattedOutput/fonts/")
+	convertFonts("./formattedOutput/fonts/")
 	
 	generateCustomFloorBackground("./formattedOutput/customFloor/")
 	
-	generateEffectsTiles("./formattedOutput/customEffects/")
+	#generateEffectsTiles("./formattedOutput/customEffects/")
 
 	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/"])
 	

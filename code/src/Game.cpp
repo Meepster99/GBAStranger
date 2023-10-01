@@ -167,6 +167,29 @@ void Game::doVBlank() {
 }
 
 void Game::run() {
+	
+	/*
+	bn::sprite_text_generator idk(dw_fnt_text_12_sprite_font);
+	bn::string<MAXDEBUGSPRITES> debugString;
+	bn::ostringstream stringStream(debugString);
+	bn::vector<bn::sprite_ptr, MAXDEBUGSPRITES> text_sprites;
+
+		
+	text_sprites.clear();
+	debugString.clear();
+	
+	stringStream.append("42069");
+	
+	idk.generate(bn::fixed(0), bn::fixed(0), 
+		bn::string_view(debugString.data()),
+	text_sprites);
+	
+	while(true) {
+		
+		bn::core::update();
+		
+	}
+	*/
 
 	globalGame = this;
 
@@ -227,16 +250,16 @@ void Game::run() {
 			}
 			
 			entityManager.doMoves();
+			
+			// despite the fact that it 100% shouldnt, having this update here solves the frame drops 
+			bn::core::update();
 
 			if(entityManager.hasKills()) {
 				resetRoom(NULL);
 				continue;
 			}
 			
-			// inefficient, i rlly should of had a floormanager class.
-			
 			tileManager.fullDraw();
-			
 		}
 
 		debugText.updateText();

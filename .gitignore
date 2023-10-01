@@ -12,3 +12,5 @@ target
 *.ogg
 *.wav
 *.dat
+*.csv
+

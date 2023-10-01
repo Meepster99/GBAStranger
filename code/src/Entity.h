@@ -78,6 +78,7 @@ public:
 
 	virtual ~Entity() = default;
 	
+	// these funcs should rllt be changed to const static!
 	virtual bool isEnemy() const = 0;
 	virtual bool isObstacle() const = 0;
 	virtual bool isPlayer() const = 0;
