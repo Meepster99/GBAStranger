@@ -168,29 +168,8 @@ void Game::doVBlank() {
 
 void Game::run() {
 	
-	/*
-	bn::sprite_text_generator idk(dw_fnt_text_12_sprite_font);
-	bn::string<MAXDEBUGSPRITES> debugString;
-	bn::ostringstream stringStream(debugString);
-	bn::vector<bn::sprite_ptr, MAXDEBUGSPRITES> text_sprites;
-
-		
-	text_sprites.clear();
-	debugString.clear();
+	BN_LOG("look at u bein all fancy lookin in the logs");
 	
-	stringStream.append("42069");
-	
-	idk.generate(bn::fixed(0), bn::fixed(0), 
-		bn::string_view(debugString.data()),
-	text_sprites);
-	
-	while(true) {
-		
-		bn::core::update();
-		
-	}
-	*/
-
 	globalGame = this;
 
 	bn::core::set_vblank_callback(didVBlank);

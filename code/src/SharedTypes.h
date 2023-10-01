@@ -26,6 +26,10 @@ typedef unsigned char u8;
 // unsure of accuracy, but will make things slightly easier, hopefully
 #define FRAMETICKS 4372
 
+
+// TODO, GO OVER ALL FUNCS, AND DEFINE WHAT CAN BE AS CONST REF
+// idrk if c++ optimization does that for me? but regardless its a good idea
+
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
@@ -353,6 +357,32 @@ public:
 		return (x + 14 * y) < (other.x + 14 * y);
 	}
 	
+	Pos operator+(const Pos& other) {
+
+		int tempX = x + other.x;
+		int tempY = y + other.y;
+		
+		if(tempX < 0) { tempX = 0; }
+		if(tempY < 0) { tempY = 0; }
+		if(tempX >= 14) { tempX = 13; }
+		if(tempY >= 9) { tempY = 8; }
+		
+		return Pos(tempX, tempY);
+	}
+	
+	Pos operator-(const Pos& other) {
+
+		int tempX = x - other.x;
+		int tempY = y - other.y;
+		
+		if(tempX < 0) { tempX = 0; }
+		if(tempY < 0) { tempY = 0; }
+		if(tempX >= 14) { tempX = 13; }
+		if(tempY >= 9) { tempY = 8; }
+		
+		return Pos(tempX, tempY);
+	}
+	
 	bool move(Direction moveDir) {
 		
 		int newX = x;
@@ -414,7 +444,6 @@ public:
 	}
 	
 };
-
 
 inline Pos safePos(signed char x, signed char y) {
 

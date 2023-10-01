@@ -124,15 +124,11 @@ public:
 	
 };
 
-class GlassBreak : public Effect {
-public:
+// these are defines instead of typedefs bc typedef doesnt allow for constexpr
+#define EffectTypeArray constexpr bn::pair<const bn::sprite_tiles_item, int> 
+#define EffectType bn::pair<const bn::sprite_tiles_item, int> 
+#define EffectTypeCast bn::span<const bn::pair<const bn::sprite_tiles_item, int>>
 
-
-	GlassBreak(Pos p_) : Effect(p_) {
-		effectData.push_back(bn::pair<bn::sprite_tiles_item, int>(bn::sprite_tiles_items::dw_spr_glassfloor, 8));
-	}
-	
-};
 
 class EffectsManager {
 public:
@@ -148,9 +144,17 @@ public:
 
 	EffectsManager(Game* game_) : game(game_) {}
 
-	void newEffect(Effect* e) {
+	void createEffect(Pos p, const bn::span<const bn::pair<const bn::sprite_tiles_item, int>>& inputData) {
+		// i think using a span here is a good idea,,, but, ugh should i vector?
+		// i still cant initialize the type with braces either way bc butanos fucking weird with it
+		Effect* e = new Effect(p);
+		
+		for(int i=0; i<inputData.size(); i++) {
+			e->effectData.push_back(inputData[i]);
+		}
+		
 		effectList.push_back(e);
-	}
+	} 
 
 	bool playerWonLastExit = true;
 	

@@ -366,6 +366,10 @@ void EntityManager::doMoves() {
 	// do player move.
 	Pos playerStart = player->p;
 	bool playerMoved = moveEntity(player);
+	
+	// telling the difference between if the player failed a move vs is talking to something is gonna be weird
+	// actually, i suppose we have the movefailed func, i can just overload that?
+		
 	/*res = updateMap();
 	if(res) {
 		return res;
@@ -866,7 +870,8 @@ bool EntityManager::enterRoom() {
 void EntityManager::doVBlank() {
 	
 	// is modulo expensive???
-	if(frame % 25 == 0) {
+	
+	if(frame % 33 == 0) { // ticks should occur at roughly 110bpm
 		doTicks();
 	}
 

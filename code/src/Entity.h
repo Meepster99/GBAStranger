@@ -213,7 +213,7 @@ public:
 	
 	bn::optional<Direction> getNextMove() override;
 	
-	void moveFailed() override { return; }
+	void moveFailed() override { return; };
 	
 	bn::pair<bool, bn::optional<Direction>> doInput();
 	

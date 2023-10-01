@@ -67,6 +67,38 @@ void TileManager::loadTiles(TileType* floorPointer) {
 	
 	BN_ASSERT(Switch::totalCount == switchTracker, "after loading in new tiles, the number of switches and number inside the class wasnt equal???");
 	
+	// draw out the UI.
+	
+	// SHOULD THE UI BE EFFECT BASED?
+	// i could add funcs for pickup and putdown, and have the tiles possess effectswhich draw them out?
+	// ugh, tbh it looks fine except for the D in void. maybe thats a manual fix.
+	
+	floorMap[0][8] = new WordTile(Pos(0, 8));
+	
+	floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
+	floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
+	
+	floorMap[3][8] = new WordTile(Pos(3, 8));
+	floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
+	
+	floorMap[5][8] = new WordTile(Pos(5, 8), '4', '2');
+	
+	floorMap[6][8] = new WordTile(Pos(6, 8), 'R', 'D');
+	
+	floorMap[7][8] = new WordTile(Pos(7, 8));
+	floorMap[8][8] = new WordTile(Pos(8, 8));
+	floorMap[9][8] = new WordTile(Pos(9, 8));
+	floorMap[10][8] = new WordTile(Pos(10, 8));
+	floorMap[11][8] = new WordTile(Pos(11, 8));
+	
+	// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed
+	int roomIndex = game->roomManager.roomIndex;
+	
+	BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
+	
+	floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
+	floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
+	
 }
 
 // ----- 

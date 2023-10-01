@@ -19,6 +19,8 @@ int LevStatue::totalLev = 0;
 
 // Player
 
+EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_question_black, 9)};
+
 bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	
 	// if a direction was pressed, return that (true, dir)
@@ -33,12 +35,26 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		bool moveRes = tilePos.move(currentDir);
 		
 		if(!moveRes) {
+			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
-	
+
+		if(entityManager->hasCollision(tilePos)) {
+			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			return {false, bn::optional<Direction>()};
+		}
+		
+		if(entityManager->hasObstacle(tilePos)) {
+			// do dialogue here
+			// what abt npcs tho, fuck
+			// shadows not technically being enemies rlly fucks me
+			return {false, bn::optional<Direction>()};
+		}
+		
 		// if there is a entity in this tile, this is an invalid move.
 		
-		if(entityManager->hasEntity(tilePos) || entityManager->hasCollision(tilePos)) {
+		if(entityManager->hasEntity(tilePos)) {
+			effectsManager->createEffect(p+Pos(0, -1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -47,8 +63,10 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
 		
 		if(tile == NULL && rod == NULL) { 
+			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		} else if (tile != NULL && rod != NULL) {
+			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		} else if(tile == NULL && rod != NULL) {
 			// put tile down 

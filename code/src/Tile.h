@@ -189,13 +189,14 @@ public:
 };
 
 class WordTile : public FloorTile { // contains some string. 
-
+public:
 	// should i be using dependency injection for the draws here?
 
 	char first = ' ';
 	char second = ' ';
 	
-	WordTile(Pos p) : FloorTile(p, 1+2+7, 4) {}
+	WordTile(Pos p, char first_ = ' ', char second_ = ' ') : FloorTile(p, 1+2+7+4+4+1+5, 4),
+	first(first_), second(second_) {}
 	
 	TileType tileType() override { return TileType::WordTile; }
 	
@@ -203,4 +204,17 @@ class WordTile : public FloorTile { // contains some string.
 	
 	int getTileValue() override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
 
+	void draw() override {
+		u8 x = tilePos.x;
+		u8 y = tilePos.y;
+		int firstTile = 27 + (first - ' ');
+		int secondTile = 27 + (second - ' ');
+		
+		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * firstTile); 
+		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * firstTile + 2); 
+		
+		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * secondTile); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * secondTile + 2); 
+	}
+	
 };

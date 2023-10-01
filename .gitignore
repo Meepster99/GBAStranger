@@ -6,6 +6,7 @@
 *.gml
 code.elf
 code.gba
+*.json
 !creationCodeData.json
 target
 *.sav
