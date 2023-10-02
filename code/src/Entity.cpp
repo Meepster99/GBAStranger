@@ -54,7 +54,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		// if there is a entity in this tile, this is an invalid move.
 		
 		if(entityManager->hasEntity(tilePos)) {
-			effectsManager->createEffect(p+Pos(0, -1), EffectTypeCast(questionMark));
+			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -196,7 +196,7 @@ bn::optional<Direction> Diamond::getNextMove() {
 
 Chest::Chest(Pos p_) : Obstacle(p_) {
 	spriteTilesArray.clear();
-	spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+	spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_regular);
 	
 	// this is horrid, but sometimes chests spawn without any floor under them. 
 	// this fixes that.
