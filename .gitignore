@@ -12,4 +12,6 @@ target
 *.wav
 *.dat
 *.csv
-
+/misc/CLI-windows-latest-Release-isBundled-true/
+*.pyc
+__pycache__/

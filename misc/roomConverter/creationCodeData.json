@@ -464,6 +464,10 @@
     ],
 	"b_form = 8   if (global.cc_state != 0)   b_form = 4   if (ds_grid_get(obj_inventory.ds_player_info, 13, 0) >= 2)   instance_destroy()": [
 		"b_form = 8"
+	],
+	
+	"if (global.stranger != 0)   instance_destroy()   special_message = 68": [
+		null
 	]
 	
 }

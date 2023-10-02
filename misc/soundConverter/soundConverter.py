@@ -1,7 +1,7 @@
 
 from pydub import AudioSegment
 import os
-
+import shutil
 
 outputPath = "./formattedOutput/"
 
@@ -33,12 +33,15 @@ def convertAllMusic():
 
 def convertAllSounds():
 
-	inputPath = "./Exported_Sounds/audiogroup_soundeffects/"
+	inputPath = "../ExportData/Exported_Sounds/audiogroup_soundeffects/"
 
 	wavFiles = [f for f in os.listdir(inputPath) if f.lower().endswith('.wav')]
 	
 	
-	for wav in wavFiles:
+	for i, wav in enumerate(wavFiles):
+	
+		print("converting soundfile {:5d} out of {:5d}".format(i, len(wavFiles)))
+	
 		song = AudioSegment.from_wav(os.path.join(inputPath, wav))
 		
 		song = song.set_channels(1)
@@ -50,8 +53,9 @@ def convertAllSounds():
 
 	pass
 
-if __name__ == "__main__":
+def main():
 
+	os.chdir(os.path.dirname(__file__))
 
 	# makesure that audiogroup1.dat and audiogroup2.dat are next to data.win
 	# run exportallsounds 
@@ -60,4 +64,14 @@ if __name__ == "__main__":
 	#convertAllMusic()
 	convertAllSounds()
 	
+	[ os.remove(os.path.join("../../code/audio/", f)) for f in os.listdir("../../code/audio/") if f.endswith(".wav") ]
+	
+	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/audio/", f)) for f in os.listdir(copyFrom) if f.endswith(".wav") ]
+	
+	copyFunc("./formattedOutput/")
+	
 	pass
+	
+if __name__ == "__main__":
+	main()
+	

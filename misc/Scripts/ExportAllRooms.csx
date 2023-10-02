@@ -3,16 +3,117 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Text.Json;
+//using System.Text.Json;
+//using Newtonsoft.Json;
 using UndertaleModLib.Models;
+
+// I FUCKING HATE THIS SM.
+// why the fuck does the gui have system.text.json, and the cli doesnt???????
+
+
+public class CustomStreamWriter
+{
+
+	private StreamWriter _streamWriter;
+	
+	string prevLine = "   ";
+	
+	  public CustomStreamWriter(Stream stream)
+    {
+        _streamWriter = new StreamWriter(stream);
+    }
+	
+    public void WriteNull(string shoot)
+    {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "\""+shoot+"\"" + ": null,";
+	}
+	
+	  public void WriteString(string shoot, string me)
+    {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "\""+shoot+"\"" + ":" + "\"" + me + "\",";
+	}
+	
+		  public void WriteNumber(string shoot, uint me)
+    {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "\""+shoot+"\"" + ":" + me + ",";
+	}
+	
+			  public void WriteNumber(string shoot, int me)
+    {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "\""+shoot+"\"" + ":" + me + ",";
+	}
+	
+			  public void WriteNumber(string shoot, float me)
+    {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "\""+shoot+"\"" + ":" + me + ",";
+	}
+	
+		  public void WriteBoolean(string shoot, bool me)
+    {
+		_streamWriter.WriteLine(prevLine);
+		if(me) {
+			prevLine = "\""+shoot+"\"" + ": true,";	
+		} else {
+			prevLine = "\""+shoot+"\"" + ": false,";	
+		}
+		
+	}
+
+		public void WriteStartArray() {
+			_streamWriter.WriteLine(prevLine);
+			prevLine = "   ";
+			_streamWriter.WriteLine("[");
+		}
+	public void WriteStartArray(string shoot) {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "   ";
+		_streamWriter.WriteLine("\""+shoot+"\"" + ": [");
+	}
+	
+		public void WriteEndArray() {
+		_streamWriter.WriteLine(prevLine.Substring(0, prevLine.Length - 1));
+		prevLine = "],";
+	}
+	
+	public void WriteStartObject() {
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "   ";
+		_streamWriter.WriteLine("{");
+	}
+	
+	public void WriteStartObject(string shoot) {
+		
+		_streamWriter.WriteLine(prevLine);
+		prevLine = "   ";
+		_streamWriter.WriteLine("\""+shoot+"\"" + ": {");
+	}
+	
+		
+	public void WriteEndObject() {
+		_streamWriter.WriteLine(prevLine.Substring(0, prevLine.Length - 1));
+		prevLine = "},";
+		
+	}
+	
+	public void Flush() {
+		_streamWriter.WriteLine(prevLine.Substring(0, prevLine.Length - 1));
+		_streamWriter.Flush();
+	}
+}
 
 EnsureDataLoaded();
 
-ScriptMessage("Select the Room output directory");
-string roomOutputPath = PromptChooseDirectory("Export to where");
+string roomOutputPath = "ExportData/Room_Export";
+ Directory.CreateDirectory(roomOutputPath);
 if (roomOutputPath == null) throw new ScriptException("The room exporter's output path was not set.");
 
-JsonWriterOptions writerOptions = new JsonWriterOptions { Indented = true };
+//JsonWriterOptions writerOptions = new JsonWriterOptions { Indented = true };
+
 foreach (UndertaleRoom room in Data.Rooms)
 {
     if (room != null)
@@ -28,7 +129,7 @@ foreach (UndertaleRoom room in Data.Rooms)
     }
 }
 
-void WriteString(Utf8JsonWriter writer, string propertyName, UndertaleString stringToWrite)
+void WriteString(CustomStreamWriter  writer, string propertyName, UndertaleString stringToWrite)
 {
     if (stringToWrite?.Content == null)
         writer.WriteNull(propertyName);
@@ -41,8 +142,8 @@ void WriteString(Utf8JsonWriter writer, string propertyName, UndertaleString str
 
 void WriteRoomToJson(UndertaleRoom room)
 {
-    using MemoryStream stream = new MemoryStream();
-    using Utf8JsonWriter writer = new Utf8JsonWriter(stream, writerOptions);
+    MemoryStream stream = new MemoryStream();
+    CustomStreamWriter  writer = new CustomStreamWriter (stream);
     writer.WriteStartObject();
     // Params
     WriteString(writer, "name", room.Name);

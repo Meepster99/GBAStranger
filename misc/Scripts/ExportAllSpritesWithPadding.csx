@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 int progress = 0;
-string texFolder = GetFolder(FilePath) + "Export_Textures" + Path.DirectorySeparatorChar;
+string texFolder = GetFolder(FilePath) + "ExportData/Export_Textures_Padded" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
 
 if (Directory.Exists(texFolder))

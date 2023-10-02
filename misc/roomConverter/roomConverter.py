@@ -3,7 +3,7 @@ import json
 import os 
 import numpy as np
 import re
-
+import shutil
 from colorama import init, Fore, Back, Style
 
 init(convert=True)
@@ -236,9 +236,9 @@ newCreationCodesData = {}
 def readCreationCode(inst, creationCode):
 
 	x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
-
 	
-	f = open(os.path.join("Export_Code", creationCode + ".gml"))
+	
+	f = open(os.path.join("../ExportData/Export_Code", creationCode + ".gml"))
 	lines = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ]
 	f.close()
 	idek = "   ".join(lines)
@@ -605,6 +605,7 @@ def convertAllRooms(inputPath):
 	successRoomsList = []
 	
 	for file in jsonFiles:
+		print(file, "removethis")
 		with open(os.path.join(inputPath, file)) as jsonFilePointer:
 			data = json.load(jsonFilePointer)
 			
@@ -670,13 +671,19 @@ def convertAllRooms(inputPath):
 	
 	pass
 
-if __name__ == "__main__":
+def main():
+
+	os.chdir(os.path.dirname(__file__))
 
 	# run ExportAllRooms.csx(in this dir), name it roomExport, put it in this dir
 	# run ExportAllCode, move to this folder
 	
-	convertAllRooms("./roomExport/")
+	convertAllRooms("../ExportData/Room_Export/")
+	
+	shutil.copy("AllRooms.h", "../../code/src")
 	
 	pass
 	
+if __name__ == "__main__":
+	main()
 

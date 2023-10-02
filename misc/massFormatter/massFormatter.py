@@ -1,7 +1,7 @@
 
 
 from PIL import Image, ImageOps, ImageDraw
-import os 
+import os
 import numpy as np
 import json 
 import string 
@@ -197,7 +197,7 @@ def preformatSprites():
 	
 	print("preformatting sprites to fit the goofy ahh format from when i first got them")
 
-	currentFolder = "./Export_Textures_Padded/"
+	currentFolder = "../ExportData/Export_Textures_Padded/"
 	outputFolder = "./Sprites_Padded/"
 	
 	createFolder("./Sprites_Padded/")
@@ -373,7 +373,7 @@ def convertAllSprite(outputPath):
 	
 	convertSprites("./Sprites_Padded/.", outputPath)
 	
-	convertSprites("./Sprites/.", outputPath)
+	convertSprites("../ExportData/Export_Textures/Sprites/.", outputPath)
 
 		
 	global spriteSuccess
@@ -386,7 +386,7 @@ def convertAllSprite(outputPath):
 def convertTiles(outputPath):
 
 
-	inputPath = "./Backgrounds/."
+	inputPath = "../ExportData/Export_Textures/Backgrounds/."
 	
 	
 	contents = os.listdir(inputPath)
@@ -506,7 +506,7 @@ def convertFonts(outputPath):
 	
 	fontDataFile = open("fontData.h", "w", encoding='utf-8')
 	
-	inputPath = "./Export_Fonts/."
+	inputPath = "../ExportData/Export_Fonts/."
 	
 	fontImageList = [item for item in os.listdir(inputPath) if item.lower().endswith('.png') ]
 	
@@ -867,7 +867,9 @@ def generateIncludes(folders):
 	
 	pass
 	
-if __name__ == "__main__":
+def main():
+
+	os.chdir(os.path.dirname(__file__))
 
 	# with undertalemodtool:
 	
@@ -884,19 +886,36 @@ if __name__ == "__main__":
 	createFolder("./formattedOutput/customEffects/")
 	
 
-	#convertAllSprite("./formattedOutput/sprites/")
+	convertAllSprite("./formattedOutput/sprites/")
 	
-	#convertTiles("./formattedOutput/tiles/")
+	convertTiles("./formattedOutput/tiles/")
 	
 	convertFonts("./formattedOutput/fonts/")
 	
 	generateCustomFloorBackground("./formattedOutput/customFloor/")
 	
-	#generateEffectsTiles("./formattedOutput/customEffects/")
+	generateEffectsTiles("./formattedOutput/customEffects/")
 
 	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/"])
 	
+	print("copying over files. this may take a little bit")
 	
+	shutil.copy("dataWinIncludes.h", "../../code/src/")
+	shutil.copy("fontData.h", "../../code/src/")
+	
+	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
+	
+	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/graphics/", f)) for f in os.listdir(copyFrom) if f.endswith(".bmp") or f.endswith(".json") ]
+	
+	copyFunc("./formattedOutput/fonts/")
+	copyFunc("./formattedOutput/customEffects/")
+	copyFunc("./formattedOutput/customFloor/")
+	copyFunc("./formattedOutput/sprites/")
+	copyFunc("./formattedOutput/tiles/")
 	
 	pass
+	
+if __name__ == "__main__":
+	main()
+
 	
