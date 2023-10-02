@@ -15,6 +15,6 @@ use `cargo run --release`.
 
 install [devkitpro](https://devkitpro.org/)
 
-for each folder in misc, follow each respective python scripts instructions and run them
+run convertAllAssets.py, located in the misc folder
 
 make the makefile in code/
