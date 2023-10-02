@@ -154,6 +154,9 @@ if __name__ == "__main__":
 	soundConverter.soundConverter.main()
 	
 	
+	print("")
+	print("if you are seeing this, then everything(suprisingly) ran correctly.")
+	
 	# i rlly should include some form of cleanu after all the functions copy to the code area
 	
 	pass
