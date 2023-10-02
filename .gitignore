@@ -15,3 +15,6 @@ target
 /misc/CLI-windows-latest-Release-isBundled-true/
 *.pyc
 __pycache__/
+fontData.h
+dataWinIncludes.h
+AllRooms.h
