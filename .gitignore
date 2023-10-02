@@ -1,7 +1,5 @@
 *.bmp
 *.win
-/code/graphics/
-/code/build/
 *.png
 *.gml
 code.elf
