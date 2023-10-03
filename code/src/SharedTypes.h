@@ -23,6 +23,10 @@
 
 #include "fontData.h"
 
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
+
  
 // i rlly wish that profiling could just be done 
 // for all funcs 
@@ -51,38 +55,67 @@
 // that string funcs were occuring would be added to the timers.
 // gods is there a way to do this during compile time? there really should
 // of course, if the profiler had actual bounds checking
+// ok this is just getting worse and worse.
+// i have literally no idea what im cooking here, but i am cooking
 
+inline int WTF(const char* str) {
+		
+	// look.
+	// i think, that when the compiler saw this func, it saw it was basically strlen, and tried 
+	// to just sub that in, only for strlen to not exist for some unknown ungodly reasons
+	// this is horrid.
+	
+	int length = 0;
+	
+	while (*str != '\0') {
+		++length;
+		++length;
+		++str;
+	} 
+	return length >> 1;
+}
 
+inline const char* extractClassAndFunctionName(const char* prettyFunction) {
+    const char* begin = prettyFunction;
+    const char* end = prettyFunction + WTF(prettyFunction); 
 
+    while (*begin != ' ' && begin < end) {
+        ++begin;
+    }
+	++begin;
+
+    while (*end != '(' && end > begin) {
+        --end;
+    }
+
+	int length = end - begin;
+	
+	length = MIN(length, 24);
+
+  
+    char* functionName = new char[length + 1];
+    //std::strncpy(functionName, begin, length);
+	for(int i=0; i<length; i++) {
+		functionName[i] = begin[i];
+	}
+    functionName[length] = '\0'; 
+
+    return functionName;
+}
 
 class Profiler {
 public:
 
 	const char* prevID;
 	static const char* currentID;
-	
-	static int WTF(const char* str) {
-		
-		// look.
-		// i think, that when the compiler saw this func, it saw it was basically strlen, and tried 
-		// to just sub that in, only for strlen to not exist for some unknown ungodly reasons
-		// this is horrid.
-		
-		int length = 0;
-		
-		while (*str != '\0') {
-			++length;
-			++length;
-			++str;
-		} 
-		return length >> 1;
-	}
 
     Profiler(const char* ID) { 
 	
-		BN_ASSERT(WTF(ID) < BN_CFG_ASSERT_BUFFER_SIZE, "you are fucked");
+		//BN_ASSERT(WTF(ID) < BN_CFG_ASSERT_BUFFER_SIZE, "you are fucked");
 	
-		BN_PROFILER_STOP();
+		if(currentID != NULL) { 
+			BN_PROFILER_STOP();
+		}
 		prevID = currentID;
 		BN_PROFILER_START(ID); 
 		currentID = ID;
@@ -91,7 +124,10 @@ public:
     ~Profiler() { 
 		BN_PROFILER_STOP();
 		currentID = prevID;
-		BN_PROFILER_START(prevID); 
+		if(currentID != NULL) { 
+			// this branch could be avoided by havnig the run func be profiled, but then it will always be #1
+			BN_PROFILER_START(prevID); 
+		}
 	}
 };
 
@@ -100,14 +136,9 @@ public:
 	volatile Profiler PROFILEROBJ(__PRETTY_FUNCTION__);
 */
 
-template <std::size_t N>
-constexpr const char* extractFunctionName(const char (&str)[N], std::size_t i = 0) {
-    return (str[i] == ' ') ? (str + i + 1) : extractFunctionName(str, i + 1);
-}
-
 #define profileFunction() \
-    static constexpr const char* function_name = extractFunctionName(__PRETTY_FUNCTION__); \
-    Profiler<function_name> profiler;
+    static const char* BETTER_FUNCTION_NAME = extractClassAndFunctionName(__PRETTY_FUNCTION__); \
+    volatile Profiler profiler(BETTER_FUNCTION_NAME);
 	
 typedef unsigned char u8;
 
@@ -116,9 +147,6 @@ typedef unsigned char u8;
 
 // TODO, GO OVER ALL FUNCS, AND DEFINE WHAT CAN BE AS CONST REF
 // idrk if c++ optimization does that for me? but regardless its a good idea
-
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#define MAX(a,b) ((a)>(b)?(a):(b))
 
 #define MAXSPRITES 128
 

@@ -103,7 +103,7 @@ void TileManager::loadTiles(TileType* floorPointer) {
 
 // ----- 
 
-void TileManager::doFloorSteps() {
+void TileManager::doFloorSteps() { profileFunction();
 	
 	// rlly should of made a tilemanager
 	
@@ -223,8 +223,7 @@ void TileManager::doVBlank() {
 
 // -----
 
-
-bn::optional<TileType> TileManager::hasFloor(Pos p) {
+bn::optional<TileType> TileManager::hasFloor(Pos p) { profileFunction();
 	FloorTile* temp = floorMap[p.x][p.y];
 	
 	if(temp == NULL || !temp->isAlive) {
@@ -234,14 +233,14 @@ bn::optional<TileType> TileManager::hasFloor(Pos p) {
 	return bn::optional<TileType>(temp->tileType());
 }
 
-void TileManager::stepOff(Pos p) {
+void TileManager::stepOff(Pos p) { profileFunction();
 	// should a check be here for tile isalive as well?
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepoff on a tile, it was null?");
 	
 	floorMap[p.x][p.y]->stepOff();
 }
 
-void TileManager::stepOn(Pos p) {
+void TileManager::stepOn(Pos p) { profileFunction();
 	// should a check be here for tile isalive as well?
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepon on a tile, it was null?");
 	

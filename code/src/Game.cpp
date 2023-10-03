@@ -68,6 +68,7 @@ void Game::resetRoom(bool debug) {
 	
 	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
 	
+	BN_PROFILER_RESET();
 }
 
 void Game::loadLevel() {
@@ -190,8 +191,8 @@ void Game::run() {
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
 	// start the profiler system 
-	Profiler::currentID = __PRETTY_FUNCTION__;	
-	BN_PROFILER_START(__PRETTY_FUNCTION__); 
+	//Profiler::currentID = extractClassAndFunctionName(__PRETTY_FUNCTION__);	
+	//BN_PROFILER_START(Profiler::currentID); 
 	
 	globalGame = this;
 
@@ -253,7 +254,7 @@ void Game::run() {
 			}
 			
 			if(bn::keypad::b_pressed()) {
-				BN_PROFILER_STOP();
+				//BN_PROFILER_STOP();
 				bn::profiler::show();
 			}
 			
