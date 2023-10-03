@@ -9,22 +9,22 @@ public:
 	
 	Game* game;
 	
-	bn::sprite_text_generator debugText;
+	//bn::sprite_text_generator debugText;
 	
-	bn::string<MAXDEBUGSPRITES> debugString;
+	//bn::string<MAXDEBUGSPRITES> debugString;
 	
-	bn::ostringstream stringStream;
+	//bn::ostringstream stringStream;
 
+	char debugString[MAXDEBUGSPRITES];
+	
 	bn::vector<bn::sprite_ptr, MAXDEBUGSPRITES> text_sprites;
 
-	DebugText(Game* game_) : game(game_),
-		debugText(common::fixed_8x8_sprite_font),
-		debugString(bn::string<MAXDEBUGSPRITES>(MAXDEBUGSPRITES, ' ')),
-		stringStream(debugString)
+	DebugText(Game* game_) : game(game_)
 		{
-		debugText.set_one_sprite_per_character(true);	
+		
+		memset(debugString, 0, MAXDEBUGSPRITES);
 	
-	}
+		}
 	
 	void updateText();
 	

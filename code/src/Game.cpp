@@ -3,7 +3,27 @@
 
 #include "Palette.h"
 
+const char* Profiler::currentID = NULL;
+
 Palette* BackgroundMap::backgroundPalette = &defaultPalette;
+
+Game* globalGame = NULL;
+
+unsigned int frame = 0;
+
+// bad syntax.
+//#define BUTANOUPDATE bn::core::update(); debugText.updateText();
+inline void Game::doButanoUpdate() {
+	bn::core::update();
+	
+	debugText.updateText();
+	
+	int temp = bn::core::last_missed_frames();
+	if(temp != 0) {
+		BN_LOG("dropped frames: ", temp);
+	}
+	
+}	
 
 void Game::resetRoom(bool debug) {
 	
@@ -19,8 +39,10 @@ void Game::resetRoom(bool debug) {
 
 		while(state == GameState::Exiting) { // wait for gamestate to no longer be exiting
 			//BN_LOG("looping on ", state);
-			debugText.updateText();
-			bn::core::update(); 
+			
+			//debugText.updateText();
+			//bn::core::update(); 
+			doButanoUpdate();
 		} 
 	}
 
@@ -38,8 +60,9 @@ void Game::resetRoom(bool debug) {
 		state = GameState::Entering;
 		while(state == GameState::Entering) { // wait for gamestate to no longer be entering
 			//BN_LOG("looping on ", state);
-			debugText.updateText();
-			bn::core::update(); 
+			//debugText.updateText();
+			//bn::core::update(); 
+			doButanoUpdate();
 		}
 	}
 	
@@ -116,10 +139,6 @@ void Game::changePalette(int offset) {
 	
 }
 
-Game* globalGame = NULL;
-
-unsigned int frame = 0;
-
 void didVBlank() {
 	
 	//BN_LOG("vblanked ", frame);
@@ -170,6 +189,10 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
+	// start the profiler system 
+	Profiler::currentID = __PRETTY_FUNCTION__;	
+	BN_PROFILER_START(__PRETTY_FUNCTION__); 
+	
 	globalGame = this;
 
 	bn::core::set_vblank_callback(didVBlank);
@@ -213,8 +236,9 @@ void Game::run() {
 			
 			while(miscTimer.elapsed_ticks() < FRAMETICKS * 5) { }
 		
-			debugText.updateText();
-			bn::core::update();
+			//debugText.updateText();
+			//bn::core::update();
+			doButanoUpdate();
 
 			continue;
 		}
@@ -228,21 +252,44 @@ void Game::run() {
 				continue;
 			}
 			
+			if(bn::keypad::b_pressed()) {
+				BN_PROFILER_STOP();
+				bn::profiler::show();
+			}
+			
 			entityManager.doMoves();
 			
 			// despite the fact that it 100% shouldnt, having this update here solves the frame drops 
-			bn::core::update();
+			// it rlly helps on most rooms, but rooms like 0008 (24 rocks), are still a problem
+			// tbh,, im not actually sure of anything anymore,, bc maybe debugtext should get called every vblank?
+			// and putting this here didnt actually help performance
+			// ok,,, debug somehow is taking ~2.2k ticks to run. to call this horrendous would be an understatement
+			// this means that the thing im using to check my fps is decreasing my fps.
+			// yup, its as i feared. last_missed_frames returns the number of of missed frames for the prev update call.
+			
+			//miscTimer.restart();
+			//debugText.updateText();
+			//BN_LOG(miscTimer.elapsed_ticks());
+			//bn::core::update();
 
 			if(entityManager.hasKills()) {
 				resetRoom(NULL);
 				continue;
 			}
 			
-			tileManager.fullDraw();
+			//tileManager.fullDraw();
+			
+			// 0.85 - 0.89 
+			bn::fixed tickCount = inputTimer.elapsed_ticks();
+			
+			BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
+		
+			
 		}
 
-		debugText.updateText();
-		bn::core::update();
+		//debugText.updateText();
+		//bn::core::update();
+		doButanoUpdate();
 	}
 }
 

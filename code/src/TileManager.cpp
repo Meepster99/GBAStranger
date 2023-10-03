@@ -123,7 +123,7 @@ void TileManager::doFloorSteps() {
 	stepOns.clear();
 	stepOffs.clear();
 	
-	for(auto it = floorSteps.begin(); it != floorSteps.end(); ++it) {
+	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
 		
 		BN_ASSERT((*it).second.first != (*it).second.second, "in doFloorSteps, calculating steps. why is a move here with the same start and end??");
 		
@@ -132,14 +132,14 @@ void TileManager::doFloorSteps() {
 	}
 	
 	// stepoffs occur before stepons bc of shadows, and switches
-	for(auto it = stepOffs.begin(); it != stepOffs.end(); ++it) {
+	for(auto it = stepOffs.cbegin(); it != stepOffs.cend(); ++it) {
 		Pos tempPos = *it;
 		if(hasFloor(tempPos)) {
 			stepOff(tempPos);
 		}
 	}
 	
-	for(auto it = stepOns.begin(); it != stepOns.end(); ++it) {
+	for(auto it = stepOns.cbegin(); it != stepOns.cend(); ++it) {
 		Pos tempPos = *it;
 		if(hasFloor(tempPos)) {
 			stepOn(tempPos);
@@ -152,7 +152,7 @@ void TileManager::doFloorSteps() {
 	// ive said it twice before, should of had a tilemanager class.
 	
 	// ok now we are in that class. im still going to leave parts ofthis hardcoded tho
-	for(auto it = floorSteps.begin(); it != floorSteps.end(); ++it) {
+	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
 		if((*it).first == EntityType::Player) {
 			
 			Pos start = (*it).second.first;

@@ -66,26 +66,31 @@ public:
 	
 	bn::vector<Entity*, 4>::iterator killEntity(Entity* e);
 	
-	SaneSet<Entity*, 4>& getMap(Pos p) { 
+	SaneSet<Entity*, 4>& getMap(const Pos &p) { 
 		BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
 		return entityMap[p.x][p.y]; 
 	}
 	
-	bool hasEntity(Pos p);
-	bool hasPlayer(Pos p);
-	bool hasNonPlayerEntity(Pos p);
-	bool hasEnemy(Pos p);
-	bool hasObstacle(Pos p);
-	bool hasCollision(Pos p);
-	bn::optional<TileType> hasFloor(Pos p);
+	const SaneSet<Entity*, 4>& getMap(const Pos &p) const { 
+		BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
+		return entityMap[p.x][p.y]; 
+	}
 	
-	bn::optional<Direction> canSeePlayer(Pos p);
-	bn::optional<Direction> canPathToPlayer(Pos p);
+	bool hasEntity(const Pos& p) const;
+	bool hasPlayer(const Pos& p) const;
+	bool hasNonPlayerEntity(const Pos& p) const;
+	bool hasEnemy(const Pos& p) const;
+	bool hasObstacle(const Pos& p) const;
+	bool hasCollision(const Pos& p) const;
+	bn::optional<TileType> hasFloor(const Pos& p) const;
+	
+	bn::optional<Direction> canSeePlayer(const Pos& p) const;
+	bn::optional<Direction> canPathToPlayer(const Pos& p) const;
 	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStart);
 	
 	void rodUse();
 	
-	void sanity();
+	void sanity() const;
 			
 	void addKill(bn::optional<Entity*> e) {
 		BN_ASSERT(killedPlayer.size() + 1 != killedPlayer.maxSize(), "ran out of entitys for the killplayer vector?");
@@ -94,9 +99,9 @@ public:
 		}
 	}
 	
-	bool hasKills() { return killedPlayer.size() != 0; }
+	bool hasKills() const { return killedPlayer.size() != 0; }
 	// should i just make killedplayer public? idek anymore
-	bool playerWon() { return killedPlayer.contains(NULL); }
+	bool playerWon() const { return killedPlayer.contains(NULL); }
 	
 	bool exitRoom();
 	bool enterRoom();

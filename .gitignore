@@ -6,6 +6,7 @@ code.elf
 code.gba
 *.json
 !creationCodeData.json
+code/build/
 target
 *.sav
 *.ogg

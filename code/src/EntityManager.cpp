@@ -233,9 +233,9 @@ void EntityManager::updatePalette(Palette* pal) {
 	Sprite::spritePalette = pal;
 }
 
-// -----
+// ----- 
 
-bool EntityManager::moveEntity(Entity* e, bool dontSet) {
+bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	
 	bn::optional<Direction> nextMove = e->getNextMove();
 	
@@ -313,21 +313,21 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 	return true;
 }
 
-void EntityManager::moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end) {
+void EntityManager::moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end) { profileFunction();
 	for(auto it = start; it != end; ++it) {
 		moveEntity(*it);
 	}
 }
 
-void EntityManager::moveEnemies() {
+void EntityManager::moveEnemies() { profileFunction();
 	moveEntities(enemyList.begin(), enemyList.end());
 }
 
-void EntityManager::moveObstacles() {
+void EntityManager::moveObstacles() { profileFunction();
 	moveEntities(obstacleList.begin(), obstacleList.end());
 }
 
-void EntityManager::doMoves() {
+void EntityManager::doMoves() { profileFunction();
 	
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -394,6 +394,9 @@ void EntityManager::doMoves() {
 	// still tho, calling doFloorSteps will update the shadows, which is needed 
 	
 	tileManager->doFloorSteps();
+	
+	// ----- the above code was a doUpdate replacement
+	
 	
 	// slightly hacky, but works.
 	bn::optional<Direction> shadowMove = playerRes.second;
@@ -505,7 +508,7 @@ void EntityManager::doMoves() {
 
 // -----
 
-bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
+bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileFunction();
 	
 	if(e->entityType() == EntityType::Player || e->entityType() == EntityType::Shadow) {
 		BN_ERROR("tried to kill either a player or a shadow. thats not a thing you can do fool.");
@@ -528,7 +531,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	return res;
 }
 
-void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
+void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFunction();
 	
 	// IMPORTANT. SHADOWS WILL ALWAYS SPRING UP FROM THE TILE THEY WERE STEPPED ON FROM
 	// HOWEVER, IF THERE IS ANOTHER SHADOW(POSSIBLY ANY ENTITY?) ON SAID TILE 
@@ -633,7 +636,9 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	
 }
 
-void EntityManager::updateMap() {
+void EntityManager::updateMap() { profileFunction();
+
+	return;
 
 	// return an entity if we died an need a reset
 
@@ -882,14 +887,14 @@ void EntityManager::doVBlank() {
 
 // -----
 
-bool EntityManager::hasEntity(Pos p) {
+bool EntityManager::hasEntity(const Pos& p) const {
 		
-		SaneSet<Entity*, 4>& temp = getMap(p);
+	const SaneSet<Entity*, 4>& temp = getMap(p);
 		
-		return temp.size() != 0;
+	return temp.size() != 0;
 }
 
-bool EntityManager::hasPlayer(Pos p) {
+bool EntityManager::hasPlayer(const Pos& p) const {
 	if(!hasEntity(p)) {
 		return false;
 	}
@@ -897,13 +902,13 @@ bool EntityManager::hasPlayer(Pos p) {
 	return getMap(p).contains(player);
 }
 
-bool EntityManager::hasNonPlayerEntity(Pos p) {
+bool EntityManager::hasNonPlayerEntity(const Pos& p) const {
 	// this function exists entirely because of the goofyness with shadows technically being players
 	if(!hasEntity(p)) {
 		return false;
 	}
 
-	SaneSet<Entity*, 4>& tempMap = getMap(p);
+	const SaneSet<Entity*, 4>& tempMap = getMap(p);
 	
 	if(tempMap.size() == 1 && tempMap.contains(player)) {
 		return false;
@@ -912,15 +917,15 @@ bool EntityManager::hasNonPlayerEntity(Pos p) {
 	return true;
 }
 	
-bool EntityManager::hasEnemy(Pos p) {
+bool EntityManager::hasEnemy(const Pos& p) const {
 	
-	SaneSet<Entity*, 4>& temp = getMap(p);
+	const SaneSet<Entity*, 4>& temp = getMap(p);
 	
 	if(temp.size() == 0) {
 		return false;
 	}
 	
-	for(auto it = temp.begin(); it != temp.end(); ++it) {
+	for(auto it = temp.cbegin(); it != temp.cend(); ++it) {
 		if((*it)->isEnemy()) {
 			return true;
 		}
@@ -929,15 +934,15 @@ bool EntityManager::hasEnemy(Pos p) {
 	return false;
 }
 
-bool EntityManager::hasObstacle(Pos p) {
+bool EntityManager::hasObstacle(const Pos& p) const {
 	
-	SaneSet<Entity*, 4>& temp = getMap(p);
+	const SaneSet<Entity*, 4>& temp = getMap(p);
 	
 	if(temp.size() == 0) {
 		return false;
 	}
 	
-	for(auto it = temp.begin(); it != temp.end(); ++it) {
+	for(auto it = temp.cbegin(); it != temp.cend(); ++it) {
 		if((*it)->isObstacle()) {
 			return true;
 		}
@@ -946,7 +951,7 @@ bool EntityManager::hasObstacle(Pos p) {
 	return false;
 }
 
-bool EntityManager::hasCollision(Pos p) {
+bool EntityManager::hasCollision(const Pos& p) const{
 	
 	u8 temp = game->collisionMap[p.x][p.y];
 	
@@ -957,11 +962,11 @@ bool EntityManager::hasCollision(Pos p) {
 	return true;
 }
 
-bn::optional<TileType> EntityManager::hasFloor(Pos p) {
+bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {
 	return tileManager->hasFloor(p);
 }
 
-bn::optional<Direction> EntityManager::canSeePlayer(Pos p) {
+bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const {
 	
 	Pos playerPos = player->p;
 	
@@ -1008,7 +1013,7 @@ bn::optional<Direction> EntityManager::canSeePlayer(Pos p) {
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(Pos p) {
+bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const {
 	
 	// oh boy. this is going to be fun.
 	
@@ -1144,7 +1149,14 @@ void EntityManager::rodUse() {
 
 // -----
 
-void EntityManager::sanity() {
+void EntityManager::sanity() const {
+	
+	// this func kills performance(should it?)
+	// do iterators like fuck performance as well?
+	// i could easily let saneset have indexing(and tbh, why didnt i earlier?)
+	// well, if i want to remove i sorta need iterators.
+	
+	return;
 	
 	// check that all data structures are holding up
 	
@@ -1160,7 +1172,7 @@ void EntityManager::sanity() {
 				continue;
 			}
 			
-			for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ++it) {
+			for(auto it = entityMap[x][y].cbegin(); it != entityMap[x][y].cend(); ++it) {
 				BN_ASSERT((*it)->p == Pos(x, y), "A sprite at ", x, " ", y, " was not updated in the map properly! and instead is at ", (*it)->p.x, " ", (*it)->p.y);
 			}
 		}

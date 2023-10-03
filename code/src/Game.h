@@ -99,5 +99,7 @@ public:
 	int paletteIndex = 0;
 	void changePalette(int offset);
 
+	void doButanoUpdate();
+	
 };
 
