@@ -50,6 +50,8 @@ USERBUILD   :=
 EXTTOOL     :=  
 
 # run make DEBUG=1 for debug
+# make sure to make clean in between 
+# this is a horrid solutions
 
 ifdef DEBUG
     USERFLAGS += -DENABLELOGGING=true -DENABLEPROFILER=true
