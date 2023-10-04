@@ -13,9 +13,18 @@
 #include "bn_sound_items.h"
 #include "bn_sound_actions.h"
 
+#ifdef ENABLELOGGING
+#include "bn_log.h"
+#else 
+#define BN_LOG(...) do {} while (false)
+#endif
+
+/*
 #include "bn_log.h"
 #include "bn_config_log.h"
 #include "bn_log_backend.h"
+*/
+
 #include "Palette.h"
 
 // getting this include to work was such a painful process for reasons i still dont get. a make clean fixed them(i think)?

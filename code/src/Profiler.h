@@ -1,9 +1,16 @@
 #pragma once 
 
+// make with -DENABLEPROFILER to enable
+
+#ifdef ENABLELOGGING
+#include "bn_log.h"
+#else 
+#define BN_LOG(...) do {} while (false)
+#endif
 
 #include "bn_unordered_map.h"
 #include "bn_timer.h"
-#include "bn_log.h"
+
 #include "bn_deque.h"
 #include "bn_fixed.h"
 #include "bn_vector.h"
@@ -185,11 +192,15 @@ public:
 	}
 	
 	static void show() {
-		WTFPROFILER::show();
+		#ifdef ENABLEPROFILER
+			WTFPROFILER::show();
+		#endif
 	}
 	
 	static void reset() {
-		WTFPROFILER::reset();
+		#ifdef ENABLEPROFILER
+			WTFPROFILER::reset();
+		#endif
 	}
 	
 	
@@ -213,9 +224,13 @@ public:
 // ive lost so much time on a feature that i dont really even fucking need tbh omfg
 // and the timeloss wasnt even on actually implimenting it, but just pointer fuckery.
 
+#ifdef ENABLEPROFILER
 #define profileFunction() \
     static const char* BETTER_FUNCTION_NAME = extractClassAndFunctionName(__PRETTY_FUNCTION__); \
 	const unsigned BETTER_FUNCTION_NAME_HASH = bn::hash<unsigned>()(getHash(BETTER_FUNCTION_NAME)); \
     volatile Profiler profiler(BETTER_FUNCTION_NAME, BETTER_FUNCTION_NAME_HASH);
-
+#else
+#define profileFunction() \
+	do {} while(false)
+#endif
 

@@ -40,7 +40,7 @@ ROMTITLE    :=  ROM TITLE
 ROMCODE     :=  SBTP
 # SAVE ME O3
 #USERFLAGS   :=  -O3 -DBN_CFG_PROFILER_ENABLED=true -DBN_CFG_LOG_ENABLED=true
-USERFLAGS   :=  -O3 -DBN_CFG_LOG_ENABLED=true
+USERFLAGS   :=  -O3 
 USERASFLAGS :=  
 USERLDFLAGS :=  -flto=16
 USERLIBDIRS :=  
@@ -48,6 +48,12 @@ USERLIBS    :=
 DEFAULTLIBS :=  
 USERBUILD   :=  
 EXTTOOL     :=  
+
+# run make DEBUG=1 for debug
+
+ifdef DEBUG
+    USERFLAGS += -DENABLELOGGING=true -DENABLEPROFILER=true
+endif
 
 #---------------------------------------------------------------------------------------------------------------------
 # Export absolute butano path:
@@ -62,3 +68,4 @@ endif
 # Include main makefile:
 #---------------------------------------------------------------------------------------------------------------------
 include $(LIBBUTANOABS)/butano.mak
+

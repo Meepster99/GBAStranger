@@ -290,7 +290,7 @@ void Game::run() {
 			
 			// 0.85 - 0.89 
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
-			
+			(void)tickCount; // supress warning if logging is disabled
 			BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
 		
 			
