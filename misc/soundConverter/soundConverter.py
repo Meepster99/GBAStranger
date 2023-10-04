@@ -57,6 +57,9 @@ def main():
 
 	os.chdir(os.path.dirname(__file__))
 
+	if not os.path.exists("./formattedOutput"):
+		os.mkdir("./formattedOutput/")
+
 	# makesure that audiogroup1.dat and audiogroup2.dat are next to data.win
 	# run exportallsounds 
 	# move that folder here

@@ -604,7 +604,7 @@ def convertAllRooms(inputPath):
 	
 	successRoomsList = []
 	
-	for file in jsonFiles:)
+	for file in jsonFiles:
 		with open(os.path.join(inputPath, file)) as jsonFilePointer:
 			data = json.load(jsonFilePointer)
 			

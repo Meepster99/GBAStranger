@@ -23,7 +23,14 @@ def install(package):
 
 
 if __name__ == "__main__":
-	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", "zipfile"] ]
+	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", "zipfile", ("win32api", "pywin32")] ]
+
+	try:
+		res = subprocess.check_output(['which', 'ffmpeg'], stderr=subprocess.STDOUT)
+	except:
+		print("please install ffmpeg")
+		exit(0)
+
 
 import winreg
 import win32api
