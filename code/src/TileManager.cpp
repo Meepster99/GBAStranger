@@ -200,7 +200,7 @@ void TileManager::doFloorSteps() { profileFunction();
 
 }
 
-void TileManager::fullDraw() {
+void TileManager::fullDraw() { profileFunction();
 	floorLayer.draw(game->collisionMap, floorMap);
 }
 

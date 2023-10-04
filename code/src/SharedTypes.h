@@ -3,6 +3,9 @@
 #include "dataWinIncludes.h"
 
 #include "bn_sound.h"
+#include "bn_unordered_map.h"
+
+#include "Profiler.h"
 
 //#include "bn_music_items.h"
 //#include "bn_music_actions.h"
@@ -16,7 +19,7 @@
 #include "Palette.h"
 
 // getting this include to work was such a painful process for reasons i still dont get. a make clean fixed them(i think)?
-#include "bn_profiler.h"
+//#include "bn_profiler.h"
 //#include "bn_config_profiler.h"
 
 #include <bn_deque.h>
@@ -27,119 +30,6 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 
- 
-// i rlly wish that profiling could just be done 
-// for all funcs 
-
-// THE PROFILER DOESNT ALLOW FOR NESTED PROFILING??? WHY????
-// at this point i should just make my own profiler 
-// wait,,, 
-// thats not the worst idea.
-// or i could use their profiler with a stack based system?
-// the only annoying thing would be,, having to write my own display system.
-// so ill try writing a stack system.
-// actually, if we have the profiler keep track of the id it should swap back to,,
-// hehe we are going to have to access a underscore namespace hehehehehe
-// im doing a bad
-
-// ok so, because of them using "good c++ practices" i cannot rawdog the _profiler to get what i want
-// maybe a static variable in here to keep track of it instead?
-// this has got to be one of the weirdest things i have ever wrote.
-// should i have written a stack/queue? maybe? i have like,, 
-// gods i wonder if all the extra allocation from this thing will also cause slowdown
-// but tbh, it works, and ill take it
-
-// if the func name was to long, it was fucking overflowing butano(i think)
-// wonderful.
-// i could have this be fixed in the define, but the issue is then that time 
-// that string funcs were occuring would be added to the timers.
-// gods is there a way to do this during compile time? there really should
-// of course, if the profiler had actual bounds checking
-// ok this is just getting worse and worse.
-// i have literally no idea what im cooking here, but i am cooking
-
-inline int WTF(const char* str) {
-		
-	// look.
-	// i think, that when the compiler saw this func, it saw it was basically strlen, and tried 
-	// to just sub that in, only for strlen to not exist for some unknown ungodly reasons
-	// this is horrid.
-	
-	int length = 0;
-	
-	while (*str != '\0') {
-		++length;
-		++length;
-		++str;
-	} 
-	return length >> 1;
-}
-
-inline const char* extractClassAndFunctionName(const char* prettyFunction) {
-    const char* begin = prettyFunction;
-    const char* end = prettyFunction + WTF(prettyFunction); 
-
-    while (*begin != ' ' && begin < end) {
-        ++begin;
-    }
-	++begin;
-
-    while (*end != '(' && end > begin) {
-        --end;
-    }
-
-	int length = end - begin;
-	
-	length = MIN(length, 24);
-
-  
-    char* functionName = new char[length + 1];
-    //std::strncpy(functionName, begin, length);
-	for(int i=0; i<length; i++) {
-		functionName[i] = begin[i];
-	}
-    functionName[length] = '\0'; 
-
-    return functionName;
-}
-
-class Profiler {
-public:
-
-	const char* prevID;
-	static const char* currentID;
-
-    Profiler(const char* ID) { 
-	
-		//BN_ASSERT(WTF(ID) < BN_CFG_ASSERT_BUFFER_SIZE, "you are fucked");
-	
-		if(currentID != NULL) { 
-			BN_PROFILER_STOP();
-		}
-		prevID = currentID;
-		BN_PROFILER_START(ID); 
-		currentID = ID;
-		}
-		
-    ~Profiler() { 
-		BN_PROFILER_STOP();
-		currentID = prevID;
-		if(currentID != NULL) { 
-			// this branch could be avoided by havnig the run func be profiled, but then it will always be #1
-			BN_PROFILER_START(prevID); 
-		}
-	}
-};
-
-/*
-#define profileFunction() \
-	volatile Profiler PROFILEROBJ(__PRETTY_FUNCTION__);
-*/
-
-#define profileFunction() \
-    static const char* BETTER_FUNCTION_NAME = extractClassAndFunctionName(__PRETTY_FUNCTION__); \
-    volatile Profiler profiler(BETTER_FUNCTION_NAME);
-	
 typedef unsigned char u8;
 
 // unsure of accuracy, but will make things slightly easier, hopefully

@@ -3,7 +3,7 @@
 
 #include "Palette.h"
 
-const char* Profiler::currentID = NULL;
+//const char* Profiler::currentID = NULL;
 
 Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 
@@ -68,7 +68,7 @@ void Game::resetRoom(bool debug) {
 	
 	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
 	
-	BN_PROFILER_RESET();
+	//BN_PROFILER_RESET();
 }
 
 void Game::loadLevel() {
@@ -252,10 +252,18 @@ void Game::run() {
 				changePalette(1);
 				continue;
 			}
+	
+			if(bn::keypad::select_pressed()) {
+				continue;
+			}
 			
 			if(bn::keypad::b_pressed()) {
-				//BN_PROFILER_STOP();
-				bn::profiler::show();
+				if(bn::keypad::select_held()) {
+					Profiler::reset();
+				} else {
+					Profiler::show();
+				}
+				continue;
 			}
 			
 			entityManager.doMoves();
@@ -278,7 +286,7 @@ void Game::run() {
 				continue;
 			}
 			
-			//tileManager.fullDraw();
+			tileManager.fullDraw();
 			
 			// 0.85 - 0.89 
 			bn::fixed tickCount = inputTimer.elapsed_ticks();

@@ -235,7 +235,7 @@ void EntityManager::updatePalette(Palette* pal) {
 
 // ----- 
 
-bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
+bool EntityManager::moveEntity(Entity* e, bool dontSet) { 
 	
 	bn::optional<Direction> nextMove = e->getNextMove();
 	
@@ -313,17 +313,17 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	return true;
 }
 
-void EntityManager::moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end) { profileFunction();
+void EntityManager::moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end) { 
 	for(auto it = start; it != end; ++it) {
 		moveEntity(*it);
 	}
 }
 
-void EntityManager::moveEnemies() { profileFunction();
+void EntityManager::moveEnemies() { 
 	moveEntities(enemyList.begin(), enemyList.end());
 }
 
-void EntityManager::moveObstacles() { profileFunction();
+void EntityManager::moveObstacles() { 
 	moveEntities(obstacleList.begin(), obstacleList.end());
 }
 
@@ -637,8 +637,6 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 }
 
 void EntityManager::updateMap() { profileFunction();
-
-	return;
 
 	// return an entity if we died an need a reset
 
