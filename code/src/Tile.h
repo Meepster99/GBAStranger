@@ -4,11 +4,13 @@
 #include "SharedTypes.h"
 
 class EffectsManager;
+class TileManager;
 
 class FloorTile { // default floor.
 public:	
 
 	static EffectsManager* effectsManager;
+	static TileManager* tileManager;
 	static BackgroundMap* rawMap;
 
 	Pos tilePos; // im not sure how much i like this, but for tiles to call/create effects, this is needed
@@ -44,11 +46,18 @@ public:
 		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
 	}
 	
-	static void clear(u8 x, u8 y) {
+	static void drawPit(u8 x, u8 y) {
 		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
 		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
 		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
 		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
+	}
+	
+	static void drawDropOff(u8 x, u8 y) {
+		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
+		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
 	}
 	
 
@@ -104,12 +113,7 @@ public:
 		return startIndex + 0; 	
 	}
 	
-	void stepOn() override {
-		charge++;
-		if(charge == 2) {
-			isAlive = false;
-		}
-	}
+	void stepOn() override;
 	
 };
 

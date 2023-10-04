@@ -4,6 +4,7 @@
 #include "EffectsManager.h"
 
 EffectsManager* FloorTile::effectsManager = NULL;
+TileManager* FloorTile::tileManager = NULL;
 BackgroundMap* FloorTile::rawMap = NULL;
 
 int Switch::pressedCount = 0;
@@ -20,5 +21,14 @@ void Glass::stepOff() {
 		EffectTypeCast(glassAnimation));
 	}
 	isAlive = false;
+	tileManager->updateTile(tilePos);
+}
+
+void Bomb::stepOn() {
+	charge++;
+	if(charge == 2) {
+		isAlive = false;
+	}
+	tileManager->updateTile(tilePos);
 }
 

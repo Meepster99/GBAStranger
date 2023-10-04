@@ -49,11 +49,11 @@ DEFAULTLIBS :=
 USERBUILD   :=  
 EXTTOOL     :=  
 
-# run make DEBUG=1 for debug
-# make sure to make clean in between 
-# this is a horrid solutions
+ifdef LOG
+	USERFLAGS += -DENABLELOGGING=true 
+endif
 
-ifdef DEBUG
+ifdef PROFILE
     USERFLAGS += -DENABLELOGGING=true -DENABLEPROFILER=true
 endif
 

@@ -6,6 +6,8 @@
 #include "TileManager.h"
 #include "EffectsManager.h"
 
+// should, all managers (and game) be namespaces? it seems so
+
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 
 	LevStatue::rodUses = 0;

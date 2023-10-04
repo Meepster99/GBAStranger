@@ -286,7 +286,7 @@ void Game::run() {
 				continue;
 			}
 			
-			tileManager.fullDraw();
+			//tileManager.fullDraw();
 			
 			// 0.85 - 0.89 
 			bn::fixed tickCount = inputTimer.elapsed_ticks();

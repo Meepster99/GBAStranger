@@ -35,7 +35,7 @@ public:
 				
 				// i pray this doesnt fuck my performance.
 				if(floorMap[x][y] == NULL) {
-					FloorTile::clear(x, y);
+					FloorTile::drawPit(x, y);
 				} else {
 					floorMap[x][y]->draw();
 					
@@ -53,6 +53,48 @@ public:
 		
 		rawMap.reloadCells();
 	}
+	
+	void update(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9], const Pos& p) {
+
+		const u8 x = p.x;
+		const u8 y = p.y;
+
+		if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
+			delete floorMap[x][y];
+			floorMap[x][y] = NULL;
+		}
+		
+		if(floorMap[x][y] == NULL) {
+			
+			// the collision check isnt needed, but im keeping it here just in case
+			if(y > 0 && floorMap[x][y-1] != NULL && collisionMap[x][y-1] < 3 && floorMap[x][y-1]->drawDropOff()) {
+				FloorTile::drawDropOff(x, y);
+			} else {
+				FloorTile::drawPit(x, y);
+			}
+			
+			if(y < 7 && floorMap[x][y+1] == NULL && collisionMap[x][y+1] < 3) {
+				FloorTile::drawPit(x, y+1);
+			}
+			
+		} else {
+			floorMap[x][y]->draw();
+			
+			// y < 7 here bc row 8 is for ui, and we dont want dropoffs going there
+			if(floorMap[x][y]->drawDropOff() && y < 7 && floorMap[x][y+1] == NULL && collisionMap[x][y+1] < 3) {
+				rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 1, 4 * 2); 
+				rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 1, 4 * 2 + 1); 
+				rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 2, 4 * 2 + 2); 
+				rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 2, 4 * 2 + 3); 
+			}
+		}
+		
+	}
+	
+	void reloadCells() {
+		rawMap.reloadCells();
+	}
+
 };
 
 class TileManager {
@@ -84,6 +126,7 @@ public:
 		
 	void doFloorSteps();
 	
+	void updateTile(const Pos& p);
 	void fullDraw();
 	
 	bn::optional<TileType> hasFloor(Pos p); // i really enjoy this use of optional here.

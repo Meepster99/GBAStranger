@@ -83,6 +83,7 @@ public:
 		effectsManager.entityManager = &entityManager;
 		
 		FloorTile::effectsManager = &effectsManager;
+		FloorTile::tileManager = &tileManager;
 		FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
 		
 	}

@@ -200,7 +200,7 @@ namespace WTFPROFILER {
 			ProfilerData& data = profilerMap(temp.hash, temp.ID);
 			
 			// pause
-			data.timer.stop();
+			data.timer.stop(); // does this being slightly delayed from the initial call cause issues?
 		}	
 
 		profilerStack.push_back({ID, hash});

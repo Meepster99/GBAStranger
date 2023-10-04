@@ -74,11 +74,13 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			tileManager->floorMap[tilePos.x][tilePos.y] = rod;
 			rod = NULL;
 			entityManager->rodUse();
+			tileManager->updateTile(tilePos);
 		} else if(tile != NULL && rod == NULL) {
 			// pick tile up
 			rod = tileManager->floorMap[tilePos.x][tilePos.y];
 			tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
 			entityManager->rodUse();
+			tileManager->updateTile(tilePos);
 		}
 
 		nextMove = bn::optional<Direction>();

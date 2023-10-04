@@ -6,6 +6,11 @@
 
 #include "Game.h"
 
+// TODO: should tiles have entitymanagaer access?
+// copy tiles could call shadow spawns from there
+// death tiles could kill from there 
+// also, i would be passing the entity in as an optional param, maybe?
+// assuming that doesnt cause slowdown, that would be a good idea
 
 void TileManager::loadTiles(TileType* floorPointer) {
 	
@@ -145,11 +150,7 @@ void TileManager::doFloorSteps() { profileFunction();
 			stepOn(tempPos);
 		}
 	}
-
 	
-	// check if a player has stepped on a copy tileType
-	// literally spent had to redo so much code just for this omfg 
-	// ive said it twice before, should of had a tilemanager class.
 	
 	// ok now we are in that class. im still going to leave parts ofthis hardcoded tho
 	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
@@ -168,8 +169,15 @@ void TileManager::doFloorSteps() { profileFunction();
 	stepOffs.clear();
 	floorSteps.clear();
 	
+
 	// this code is not efficient
-	// refactor it so that tiles can kill entities!
+	// TODO:refactor it so that tiles can kill entities!
+	// for now, im just going to have death tiles not work, as im on a trail lol
+	/*
+	// this code was causing HORRID slowdown.
+	// but why?
+	
+	=// it would be ideal for me to pass the entity to the tile step func tbh, to do kills
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			if(!hasFloor(Pos(x, y))) {
@@ -192,15 +200,23 @@ void TileManager::doFloorSteps() { profileFunction();
 			}
 		}
 	}
+	*/
 	
 	if(hasFloor(entityManager->player->p) == TileType::Exit && Switch::pressedCount == Switch::totalCount) {
 		entityManager->addKill(NULL);
 	}
 	
-
+	
+	// this does not need to be called every time
+	// if it causes slowdown, fix it
+	floorLayer.reloadCells();
 }
 
-void TileManager::fullDraw() { profileFunction();
+void TileManager::updateTile(const Pos& p) {
+	floorLayer.update(game->collisionMap, floorMap, p);
+}
+
+void TileManager::fullDraw() { 
 	floorLayer.draw(game->collisionMap, floorMap);
 }
 
