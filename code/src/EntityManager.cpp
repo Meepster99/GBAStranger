@@ -951,7 +951,7 @@ bool EntityManager::hasObstacle(const Pos& p) const {
 	return false;
 }
 
-bool EntityManager::hasCollision(const Pos& p) const{
+bool EntityManager::hasCollision(const Pos& p) const {
 	
 	u8 temp = game->collisionMap[p.x][p.y];
 	

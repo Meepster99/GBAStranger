@@ -213,7 +213,44 @@ void TileManager::doFloorSteps() { profileFunction();
 }
 
 void TileManager::updateTile(const Pos& p) {
-	floorLayer.update(game->collisionMap, floorMap, p);
+	
+	const u8 x = p.x;
+	const u8 y = p.y;
+
+	if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
+		delete floorMap[x][y];
+		floorMap[x][y] = NULL;
+	}
+	
+	if(floorMap[x][y] == NULL) {
+		// the collision check isnt needed, but im keeping it here just in case
+		// i also could(and maybe should?) use the hascollison func. 
+		// idk abt speed but it would be good to standardize it, as im currently doing with the hasfloor func
+		
+		if(y > 0 && !hasCollision(Pos(x, y-1)) && hasFloor(x, y-1) && floorMap[x][y-1]->drawDropOff()) {
+			FloorTile::drawDropOff(x, y);
+		} else {
+			FloorTile::drawPit(x, y);
+		}
+		
+		// some issues could be caused here if this tile isnt freed yet. 
+		// rewrite all map calls to hasfloor
+		if(y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
+			FloorTile::drawPit(x, y+1);
+		}
+		
+	} else {
+		floorMap[x][y]->draw();
+		
+		if(floorMap[x][y]->drawDropOff() && y < 7 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
+			FloorTile::drawDropOff(x, y);
+		}
+	}
+	
+}
+
+bool TileManager::hasCollision(const Pos& p) {
+	return entityManager->hasCollision(p);;
 }
 
 void TileManager::fullDraw() { 
@@ -239,8 +276,8 @@ void TileManager::doVBlank() {
 
 // -----
 
-bn::optional<TileType> TileManager::hasFloor(Pos p) { profileFunction();
-	FloorTile* temp = floorMap[p.x][p.y];
+bn::optional<TileType> TileManager::hasFloor(const u8& x, const u8& y) { profileFunction();
+	FloorTile* temp = floorMap[x][y];
 	
 	if(temp == NULL || !temp->isAlive) {
 		return bn::optional<TileType>();

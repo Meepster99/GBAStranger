@@ -74,9 +74,11 @@ public:
 		// goofy
 		tileManager.entityManager = &entityManager;
 		tileManager.effectsManager = &effectsManager;
+		
 		Entity::entityManager = &entityManager;
 		Entity::effectsManager = &effectsManager;
 		Entity::tileManager = &tileManager;
+		
 		entityManager.effectsManager = &effectsManager;
 		entityManager.tileManager = &tileManager;
 		effectsManager.tileManager = &tileManager;

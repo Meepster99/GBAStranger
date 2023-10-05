@@ -31,7 +31,7 @@ void Game::resetRoom(bool debug) {
 	
 	if(!debug) {
 		
-		tileManager.fullDraw();
+		//tileManager.fullDraw();
 		state = GameState::Exiting;
 		
 		// wait for animations to finish 
