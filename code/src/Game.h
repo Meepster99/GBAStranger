@@ -61,9 +61,7 @@ public:
 	
 	int miscDebug = 0; // just here for when i want to disp something on the screen
 	int miscDebug2 = 0;
-	
-	
-	
+
 	Game() : collision(bn::regular_bg_tiles_items::dw_tile_bg_1, 3),
 	details(bn::regular_bg_tiles_items::dw_tile_edges, 3),
 	entityManager(this),
@@ -86,13 +84,14 @@ public:
 		
 		FloorTile::effectsManager = &effectsManager;
 		FloorTile::tileManager = &tileManager;
+		FloorTile::entityManager = &entityManager;
 		FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
 		
 	}
 	
 	void run();
 	
-	void loadLevel();
+	void loadLevel(bool debug = false);
 	void resetRoom(bool debug = false);
 	
 	void fullDraw();

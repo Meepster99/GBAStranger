@@ -5,6 +5,7 @@
 
 class EffectsManager;
 class TileManager;
+class EntityManager;
 
 class FloorTile { // default floor.
 public:	
@@ -12,6 +13,7 @@ public:
 	static EffectsManager* effectsManager;
 	static TileManager* tileManager;
 	static BackgroundMap* rawMap;
+	static EntityManager* entityManager;
 
 	Pos tilePos; // im not sure how much i like this, but for tiles to call/create effects, this is needed
 	
@@ -216,3 +218,30 @@ public:
 	}
 	
 };
+
+class RodTile : public FloorTile { // tile displays rod state 
+public:
+
+	RodTile(Pos p) : FloorTile(p, 124, 10) {}
+	
+	bool drawDropOff() const override { return false; }
+
+	TileType tileType() const override { return TileType::RodTile; }
+
+	int getTileValue() const override;
+
+};
+
+class LocustTile : public FloorTile {
+public:
+
+	LocustTile(Pos p) : FloorTile(p, 135, 2) {}
+	
+	bool drawDropOff() const override { return false; }
+
+	TileType tileType() const override { return TileType::LocustTile; }
+
+	int getTileValue() const override;
+	
+};
+

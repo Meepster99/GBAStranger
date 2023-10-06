@@ -2,10 +2,12 @@
 
 #include "Tile.h"
 #include "EffectsManager.h"
+#include "EntityManager.h"
 
 EffectsManager* FloorTile::effectsManager = NULL;
 TileManager* FloorTile::tileManager = NULL;
 BackgroundMap* FloorTile::rawMap = NULL;
+EntityManager* FloorTile::entityManager = NULL;
 
 int Switch::pressedCount = 0;
 int Switch::totalCount = 0;
@@ -43,3 +45,57 @@ void Switch::stepOff() {
 	isSteppedOn = false;
 	tileManager->updateExit();
 }
+
+int RodTile::getTileValue() const {
+
+	if(!entityManager->player->hasRod) {
+		return startIndex;
+	}
+	
+	FloorTile* rodTile = entityManager->player->rod; 
+	
+	if(rodTile == NULL) {
+		return startIndex + 1;
+	}
+	
+	TileType rodTileType = rodTile->tileType();
+	
+	// a switch statement with tiletype is what caused dofloorsteps to lag. will this also cause problems?
+	switch(rodTileType) {
+		case TileType::Death:
+			return startIndex + 1 + 1;
+			break;
+		case TileType::Floor:
+			return startIndex + 1 + 2;
+			break;
+		case TileType::Glass:
+			return startIndex + 1 + 3;
+			break;
+		case TileType::Switch:
+			return startIndex + 1 + 4;
+			break;
+		case TileType::Exit:
+			return startIndex + 1 + 5;
+			break;
+		case TileType::Copy:
+			return startIndex + 1 + 6;
+			break;
+		case TileType::Bomb:
+			// program didnt like static casting to a bomb here, so we are doing this
+			return startIndex + 1 + 7 + (rodTile->getTileValue() == rodTile->startIndex);
+			break;
+		default:
+			return startIndex + 1 + 9;
+			break;	
+	}
+	
+}
+
+int LocustTile::getTileValue() const {
+	return startIndex + (entityManager->player->locustCount != 0);	
+}
+	
+	
+
+
+

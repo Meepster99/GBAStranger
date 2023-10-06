@@ -169,6 +169,8 @@ enum class TileType {
 	Exit,
 	Switch,
 	WordTile,
+	RodTile,
+	LocustTile,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const TileType& e) {
@@ -181,7 +183,9 @@ static const char *TileTypeToString[] ={
 	"Copy",
 	"Exit",
 	"Switch",
-	"WordTile,"
+	"WordTile",
+	"RodTile",
+	"LocustTile",
 };
 
 	stream << TileTypeToString[static_cast<int>(e)];

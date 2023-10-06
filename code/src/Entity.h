@@ -202,7 +202,10 @@ public:
 	Player* clone() const override { return new Player(*this); }
 	EntityType entityType() const override { return EntityType::Player; }
 	
+	bool hasRod = true;
 	FloorTile* rod = NULL;
+	
+	int locustCount = 0;
 	
 	void startFall() override { // have the player do the cyote time thingy
 		tileIndex = static_cast<int>(currentDir);
@@ -262,6 +265,8 @@ public:
 	void doTick() override {}
 	
 	void startFall() override;
+	
+	virtual void interact() {}
 
 	
 };
@@ -638,6 +643,8 @@ public:
 		bumpDirections.clear();
 		return bn::optional<Direction>(); 
 	}
+	
+	void interact() override;
 
 };
 

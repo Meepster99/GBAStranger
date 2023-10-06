@@ -48,6 +48,11 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			// do dialogue here
 			// what abt npcs tho, fuck
 			// shadows not technically being enemies rlly fucks me
+			
+			Obstacle* temp = static_cast<Obstacle*>(*(entityManager->getMap(tilePos).begin()));
+			
+			temp->interact();
+			
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -75,12 +80,14 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			rod = NULL;
 			entityManager->rodUse();
 			tileManager->updateTile(tilePos);
+			tileManager->updateRod();
 		} else if(tile != NULL && rod == NULL) {
 			// pick tile up
 			rod = tileManager->floorMap[tilePos.x][tilePos.y];
 			tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
 			entityManager->rodUse();
 			tileManager->updateTile(tilePos);
+			tileManager->updateRod();
 		}
 
 		nextMove = bn::optional<Direction>();
@@ -208,6 +215,21 @@ Chest::Chest(Pos p_) : Obstacle(p_) {
 	}
 	
 	doUpdate();
+}
+
+void Chest::interact() {
+	
+	if(animationIndex == 0) {
+		animationIndex = 1;
+	
+		doUpdate();
+	
+		entityManager->player->locustCount++;
+		tileManager->updateLocust();
+		// this isnt counted as a successful move, but we should still update locusts
+		tileManager->floorLayer.reloadCells();
+	}
+	
 }
 
 bn::optional<Direction> Obstacle::getNextMove() {

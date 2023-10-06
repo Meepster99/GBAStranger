@@ -67,12 +67,12 @@ public:
 	bn::vector<Entity*, 4>::iterator killEntity(Entity* e);
 	
 	SaneSet<Entity*, 4>& getMap(const Pos &p) { 
-		BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
+		//BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
 		return entityMap[p.x][p.y]; 
 	}
 	
 	const SaneSet<Entity*, 4>& getMap(const Pos &p) const { 
-		BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
+		//BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
 		return entityMap[p.x][p.y]; 
 	}
 	

@@ -67,6 +67,9 @@ public:
 	FloorTile* floorMap[14][9];
 
 	Exit* exitTile = NULL;
+	RodTile* rodTile = NULL;
+	LocustTile* locustTile = NULL;
+	WordTile* locustCounterTile = NULL;
 
 	Game* game = NULL;
 	Floor floorLayer;
@@ -95,6 +98,9 @@ public:
 	
 	void updateTile(const Pos& p);
 	void updateExit();
+	void updateRod();
+	void updateLocust();
+	
 	void fullDraw();
 	
 	bn::optional<TileType> hasFloor(const u8& x, const u8& y);

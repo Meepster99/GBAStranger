@@ -19,7 +19,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	shadowQueue.clear();
 	
+	int locustBackup = 0;
+	
 	if(player != NULL) {
+		locustBackup = player->locustCount;
 		if(player->rod != NULL) {
 			delete player->rod;
 			player->rod = NULL;
@@ -81,6 +84,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				BN_ASSERT(player == NULL, "tried to load in a player when player wasnt NULL in room ", game->roomManager.currentRoomName());
 			
 				player = new Player(tempPos);
+				player->locustCount = locustBackup;
 				entityList.insert(player);
 				break;
 			case EntityType::Leech:

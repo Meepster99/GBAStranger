@@ -721,6 +721,17 @@ def generateCustomFloorBackground(outputPath):
 	#print(temp.shape, stackedTiles.shape)
 	#stackedTiles = np.vstack((stackedTiles, temp))
 	
+	# tiles for rod 
+	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_voidrod_icon.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp)
+	
+	# tiles for locust 
+	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_locust_idol_menu.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp)
+	
+	
 	
 	stackedTiles = np.vstack(tiles).tolist()
 	

@@ -49,8 +49,11 @@ void Game::resetRoom(bool debug) {
 	state = GameState::Loading;
 	
 	BN_LOG("resetroom called");
-	loadLevel();
+	loadLevel(debug);
 	BN_LOG("loadlevel finished");
+	if(!debug) {
+		doButanoUpdate();
+	}
 	fullDraw();
 	BN_LOG("fulldraw finished");
 	
@@ -71,7 +74,7 @@ void Game::resetRoom(bool debug) {
 	//BN_PROFILER_RESET();
 }
 
-void Game::loadLevel() {
+void Game::loadLevel(bool debug) {
 
 	Room idek = roomManager.loadRoom();
 
@@ -86,11 +89,7 @@ void Game::loadLevel() {
 		
 			if(collisionMap[x][y] == 0) {
 				collisionMap[x][y] = 1;
-			} 
-			
-			/*if(detailsMap[x][y] == 0) {
-				detailsMap[x][y] = 1;
-			} */
+			}
 		}
 	}
 	
@@ -99,6 +98,10 @@ void Game::loadLevel() {
 	
 	
 	tileManager.loadTiles(floorPointer);
+	
+	if(!debug) {
+		doButanoUpdate();
+	}
 
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
@@ -141,14 +144,10 @@ void Game::changePalette(int offset) {
 }
 
 void didVBlank() {
-	
-	//BN_LOG("vblanked ", frame);
-	
+
 	frame = (frame + 1) % 60000;
 	
 	globalGame->doVBlank();
-	
-	//bn::core::update();
 }
 
 void Game::doVBlank() {
@@ -190,17 +189,11 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
-	// start the profiler system 
-	//Profiler::currentID = extractClassAndFunctionName(__PRETTY_FUNCTION__);	
-	//BN_PROFILER_START(Profiler::currentID); 
-	
 	globalGame = this;
 
 	bn::core::set_vblank_callback(didVBlank);
 	
 	bn::timer inputTimer;
-
-	//resetRoom();
 	
 	state = GameState::Loading;
 	
@@ -236,9 +229,7 @@ void Game::run() {
 			miscTimer.restart();
 			
 			while(miscTimer.elapsed_ticks() < FRAMETICKS * 5) { }
-		
-			//debugText.updateText();
-			//bn::core::update();
+	
 			doButanoUpdate();
 
 			continue;
@@ -267,28 +258,12 @@ void Game::run() {
 			}
 			
 			entityManager.doMoves();
-			
-			// despite the fact that it 100% shouldnt, having this update here solves the frame drops 
-			// it rlly helps on most rooms, but rooms like 0008 (24 rocks), are still a problem
-			// tbh,, im not actually sure of anything anymore,, bc maybe debugtext should get called every vblank?
-			// and putting this here didnt actually help performance
-			// ok,,, debug somehow is taking ~2.2k ticks to run. to call this horrendous would be an understatement
-			// this means that the thing im using to check my fps is decreasing my fps.
-			// yup, its as i feared. last_missed_frames returns the number of of missed frames for the prev update call.
-			
-			//miscTimer.restart();
-			//debugText.updateText();
-			//BN_LOG(miscTimer.elapsed_ticks());
-			//bn::core::update();
-
+		
 			if(entityManager.hasKills()) {
 				resetRoom(NULL);
 				continue;
 			}
 			
-			//tileManager.fullDraw();
-			
-			// 0.85 - 0.89 
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
 			BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
@@ -296,8 +271,6 @@ void Game::run() {
 			
 		}
 
-		//debugText.updateText();
-		//bn::core::update();
 		doButanoUpdate();
 	}
 }

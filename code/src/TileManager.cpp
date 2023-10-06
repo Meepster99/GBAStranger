@@ -24,6 +24,9 @@ void TileManager::loadTiles(TileType* floorPointer) {
 	}
 	
 	exitTile = NULL;
+	rodTile = NULL;
+	locustTile = NULL;
+	locustCounterTile = NULL;
 	
 	int switchTracker = 0;
 
@@ -90,11 +93,17 @@ void TileManager::loadTiles(TileType* floorPointer) {
 	floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
 	
 	floorMap[3][8] = new WordTile(Pos(3, 8));
-	floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
+	//floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
+	floorMap[4][8] = new LocustTile(Pos(4, 8));
+	locustTile = static_cast<LocustTile*>(floorMap[4][8]);
 	
-	floorMap[5][8] = new WordTile(Pos(5, 8), '4', '2');
+	//floorMap[5][8] = new WordTile(Pos(5, 8), '4', '2');
+	floorMap[5][8] = new WordTile(Pos(5, 8), ' ', ' ');
+	locustCounterTile = static_cast<WordTile*>(floorMap[5][8]);
 	
-	floorMap[6][8] = new WordTile(Pos(6, 8), 'R', 'D');
+	//floorMap[6][8] = new WordTile(Pos(6, 8), 'R', 'D');
+	floorMap[6][8] = new RodTile(Pos(6, 8));
+	rodTile = static_cast<RodTile*>(floorMap[6][8]);
 	
 	floorMap[7][8] = new WordTile(Pos(7, 8));
 	floorMap[8][8] = new WordTile(Pos(8, 8));
@@ -259,7 +268,40 @@ void TileManager::updateExit() {
 	if(exitTile == NULL) {
 		return;
 	}
+	if(exitTile == entityManager->player->rod) {
+		return;
+	}
 	updateTile(exitTile->tilePos);
+}
+
+void TileManager::updateRod() {
+	// i dont like the way these funcs are being coded tbh
+	if(rodTile == NULL) {
+		return;
+	}
+	if(rodTile == entityManager->player->rod) {
+		return;
+	}
+	
+	updateTile(rodTile->tilePos);
+}
+
+void TileManager::updateLocust() {
+
+	if(locustTile != NULL && locustTile != entityManager->player->rod) {
+		updateTile(locustTile->tilePos);
+	}
+	
+	if(locustCounterTile != NULL && locustCounterTile != entityManager->player->rod) {
+		
+		if(entityManager->player->locustCount != 0) {
+			locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
+			locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
+		}
+
+		updateTile(locustCounterTile->tilePos);
+	}
+	
 }
 
 bool TileManager::hasCollision(const Pos& p) {
@@ -267,7 +309,13 @@ bool TileManager::hasCollision(const Pos& p) {
 }
 
 void TileManager::fullDraw() { 
+	
 	floorLayer.draw(game->collisionMap, floorMap);
+	
+	// i do not like this!
+	updateExit();
+	updateRod();
+	updateLocust();
 }
 
 bool TileManager::exitRoom() {
