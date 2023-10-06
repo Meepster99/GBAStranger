@@ -32,3 +32,14 @@ void Bomb::stepOn() {
 	tileManager->updateTile(tilePos);
 }
 
+void Switch::stepOn() {
+	pressedCount++;
+	isSteppedOn = true;
+	tileManager->updateExit();
+}
+
+void Switch::stepOff() {
+	pressedCount--;
+	isSteppedOn = false;
+	tileManager->updateExit();
+}

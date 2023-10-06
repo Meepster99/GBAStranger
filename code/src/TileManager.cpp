@@ -23,6 +23,8 @@ void TileManager::loadTiles(TileType* floorPointer) {
 		}
 	}
 	
+	exitTile = NULL;
+	
 	int switchTracker = 0;
 
 	for(int x=0; x<14; x++) { 
@@ -55,6 +57,9 @@ void TileManager::loadTiles(TileType* floorPointer) {
 					break;
 				case TileType::Exit:
 					floorMap[x][y] = new Exit(tempPos);
+					//BN_ASSERT(exitTile == NULL, "tried loading in two exits on one level?");
+					// i could just,,, loop over the floor every time a switch is pressed, but i dont rlly want to do that
+					exitTile = static_cast<Exit*>(floorMap[x][y]);
 					break;
 				case TileType::Switch:
 					floorMap[x][y] = new Switch(tempPos);
@@ -67,6 +72,7 @@ void TileManager::loadTiles(TileType* floorPointer) {
 		}
 	}
 	
+	//BN_ASSERT(exitTile != NULL, "no exittile was loaded in this level?");
 
 	BN_ASSERT(Switch::pressedCount == 0, "after loading in new tiles, the number of pressed tiles wasnt 0?");
 	
@@ -96,7 +102,7 @@ void TileManager::loadTiles(TileType* floorPointer) {
 	floorMap[10][8] = new WordTile(Pos(10, 8));
 	floorMap[11][8] = new WordTile(Pos(11, 8));
 	
-	// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed
+	// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed(or ???)
 	int roomIndex = game->roomManager.roomIndex;
 	
 	BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
@@ -243,10 +249,17 @@ void TileManager::updateTile(const Pos& p) {
 		floorMap[x][y]->draw();
 		
 		if(floorMap[x][y]->drawDropOff() && y < 7 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
-			FloorTile::drawDropOff(x, y);
+			FloorTile::drawDropOff(x, y+1);
 		}
 	}
 	
+}
+
+void TileManager::updateExit() {
+	if(exitTile == NULL) {
+		return;
+	}
+	updateTile(exitTile->tilePos);
 }
 
 bool TileManager::hasCollision(const Pos& p) {
@@ -298,6 +311,7 @@ void TileManager::stepOn(Pos p) { profileFunction();
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepon on a tile, it was null?");
 	
 	floorMap[p.x][p.y]->stepOn();
+
 }
 
 

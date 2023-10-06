@@ -31,7 +31,7 @@ public:
 		
 	}
 	
-	virtual int getTileValue() { return startIndex + currentTile; }
+	virtual int getTileValue() const { return startIndex + currentTile; }
 
 	// i rlly should try to do this with a const static.
 	virtual bool drawDropOff() const { return true; }
@@ -79,7 +79,7 @@ public:
 	
 	virtual bool shouldExit() { return false; }
 	
-	virtual TileType tileType() { return TileType::Floor; }
+	virtual TileType tileType() const { return TileType::Floor; }
 	
 };
 
@@ -88,7 +88,7 @@ public:
 
 	Glass(Pos p) : FloorTile(p, 1+2, 7) {}
 	
-	TileType tileType() override { return TileType::Glass; }
+	TileType tileType() const override { return TileType::Glass; }
 	
 	void stepOff() override;
 		
@@ -101,11 +101,11 @@ public:
 
 	Bomb(Pos p) : FloorTile(p, 1+2+7, 4) {}
 	
-	TileType tileType() override { return TileType::Bomb; }
+	TileType tileType() const override { return TileType::Bomb; }
 	
 	int charge = 0;
 	
-	int getTileValue() override {
+	int getTileValue() const override {
 		if(charge == 0) {
 			return startIndex + 3; 
 		}
@@ -122,7 +122,7 @@ public:
 
 	Death(Pos p) : FloorTile(p, 1+2+7+4, 4) {}
 	
-	TileType tileType() override { return TileType::Death; }
+	TileType tileType() const override { return TileType::Death; }
 	
 };
 
@@ -131,7 +131,7 @@ public:
 	
 	Copy(Pos p) : FloorTile(p, 1+2+7+4+4, 1) {}
 	
-	TileType tileType() override { return TileType::Copy; }
+	TileType tileType() const override { return TileType::Copy; }
 	
 };
 
@@ -154,17 +154,11 @@ public:
 		}
 	}
 	
-	void stepOn() override {
-		pressedCount++;
-		isSteppedOn = true;
-	}
+	void stepOn() override;
 	
-	virtual void stepOff() {
-		pressedCount--;
-		isSteppedOn = false;
-	}
+	void stepOff() override;
 	
-	TileType tileType() override { return TileType::Switch; }
+	TileType tileType() const override { return TileType::Switch; }
 };
 
 class Exit : public FloorTile { // exit, INCLUDE LOCKED AND UNLOCKED VERSIONS
@@ -179,9 +173,9 @@ public:
 
 	}
 	
-	TileType tileType() override { return TileType::Exit; }
+	TileType tileType() const override { return TileType::Exit; }
 
-	int getTileValue() override {
+	int getTileValue() const override {
 		if(Switch::pressedCount != Switch::totalCount) {
 			return startIndex + 4; 
 		}
@@ -202,11 +196,11 @@ public:
 	WordTile(Pos p, char first_ = ' ', char second_ = ' ') : FloorTile(p, 1+2+7+4+4+1+5, 4),
 	first(first_), second(second_) {}
 	
-	TileType tileType() override { return TileType::WordTile; }
+	TileType tileType() const override { return TileType::WordTile; }
 	
 	bool drawDropOff() const override { return false; }
 	
-	int getTileValue() override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
+	int getTileValue() const override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
 
 	void draw() override {
 		u8 x = tilePos.x;

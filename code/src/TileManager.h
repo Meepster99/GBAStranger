@@ -66,6 +66,8 @@ public:
 
 	FloorTile* floorMap[14][9];
 
+	Exit* exitTile = NULL;
+
 	Game* game = NULL;
 	Floor floorLayer;
 	
@@ -73,6 +75,7 @@ public:
 	EffectsManager* effectsManager;
 	
 	// goofy, but will work
+	// should i instead pass the entity* into here so that death tiles can properly kill?
 	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
 	
 	TileManager(Game* game_) : game(game_), 
@@ -91,6 +94,7 @@ public:
 	void doFloorSteps();
 	
 	void updateTile(const Pos& p);
+	void updateExit();
 	void fullDraw();
 	
 	bn::optional<TileType> hasFloor(const u8& x, const u8& y);
