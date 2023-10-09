@@ -12,8 +12,8 @@ public:
 
 	// Floor overrides the draw method. 
 
-	Floor(bn::regular_bg_tiles_item tileset, int zIndex) :
-	Layer(tileset, zIndex) 
+	Floor() :
+	Layer(bn::regular_bg_tiles_items::dw_customfloortiles, 2) 
 	{}
 	
 	void draw(u8 (&collisionMap)[14][9]) override { (void)collisionMap; BN_ERROR("dont call floordraw with only one param"); }
@@ -54,10 +54,6 @@ public:
 		
 		rawMap.reloadCells();
 	}
-	
-	void reloadCells() {
-		rawMap.reloadCells();
-	}
 
 };
 
@@ -82,7 +78,7 @@ public:
 	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
 	
 	TileManager(Game* game_) : game(game_), 
-	floorLayer(bn::regular_bg_tiles_items::dw_customfloortiles, 3)
+	floorLayer()
 	{
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {

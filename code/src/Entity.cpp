@@ -232,6 +232,10 @@ void Chest::interact() {
 	
 }
 
+void Boulder::interact() {
+	effectsManager->doDialogue("VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2");
+}
+
 bn::optional<Direction> Obstacle::getNextMove() {
 	
 	if(bumpDirections.size() == 0) {

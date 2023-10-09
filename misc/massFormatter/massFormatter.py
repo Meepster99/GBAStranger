@@ -792,8 +792,51 @@ def generateEffectsTiles(outputPath):
 		
 
 		
-	tiles = np.vstack((np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8), tiles))
-		
+	effectsTiles = np.vstack((np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8), tiles))
+	
+	# generate the tiles for the textbox 
+	image = Image.open("../ExportData/Export_Textures/Sprites/spr_textbox_extra/spr_textbox_extra_4.png")
+	
+	cyan_background = Image.new("RGBA", image.size, (0, 255, 255, 255))
+	cyan_background.paste(image, (0, 0), image)
+	cyan_background = cyan_background.convert("RGB")
+	data = np.array(cyan_background)
+
+	sections = []
+	
+	# black 
+	sections.append(data[16:32, 16:32])
+	
+	# top left 
+	sections.append(data[0:16, 0:16])
+	
+	# top right 
+	sections.append(data[0:16, 224-16:224])
+	
+	# bottom left 
+	sections.append(data[32:48, 0:16])
+	
+	# bottom right
+	sections.append(data[32:48, 224-16:224])
+	
+	# top 
+	sections.append(data[0:16, 16:32])
+	
+	# bottom
+	sections.append(data[32:48, 16:32])
+	
+	# left
+	sections.append(data[16:32, 0:16])
+	
+	# right
+	sections.append(data[16:32, 224-16:224])
+	
+	tiles = np.vstack(sections)
+	
+	#tiles[np.all(tiles == (0, 255, 255), axis=-1)] = (0, 0, 0)
+	
+	tiles = np.vstack((effectsTiles, tiles))
+
 	writeBitmap(Image.fromarray(tiles), os.path.join(outputPath, "customeffecttiles.bmp"))
 
 	outputJson = {
@@ -895,17 +938,13 @@ def main():
 	createFolder("./formattedOutput/tiles/")
 	createFolder("./formattedOutput/customFloor/")
 	createFolder("./formattedOutput/customEffects/")
-	
 
 	convertAllSprite("./formattedOutput/sprites/")
-	
 	convertTiles("./formattedOutput/tiles/")
-	
 	convertFonts("./formattedOutput/fonts/")
-	
-	generateCustomFloorBackground("./formattedOutput/customFloor/")
-	
+	generateCustomFloorBackground("./formattedOutput/customFloor/")	
 	generateEffectsTiles("./formattedOutput/customEffects/")
+
 
 	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/"])
 	
@@ -923,6 +962,7 @@ def main():
 	copyFunc("./formattedOutput/customFloor/")
 	copyFunc("./formattedOutput/sprites/")
 	copyFunc("./formattedOutput/tiles/")
+	
 	
 	pass
 	

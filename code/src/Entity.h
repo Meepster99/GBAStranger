@@ -266,7 +266,7 @@ public:
 	
 	void startFall() override;
 	
-	virtual void interact() {}
+	virtual void interact() { return; }
 
 	
 };
@@ -627,6 +627,8 @@ public:
 	Boulder* clone() const override { return new Boulder(*this); }
 
 	EntityType entityType() const override { return EntityType::Boulder; }
+	
+	void interact() override;
 
 };
 
@@ -644,7 +646,7 @@ public:
 		return bn::optional<Direction>(); 
 	}
 	
-	void interact() override;
+	void interact() override; // spr_textbox_extra
 
 };
 

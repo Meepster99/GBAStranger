@@ -50,27 +50,7 @@ public:
 	// details uses default everything
 	EffectsLayer() :
 	Layer(bn::regular_bg_tiles_items::dw_customeffecttiles, 0) {}
-	
-	u8 tempTileIndicies[4];
-	
-	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
-		
-		// this func actually being able to flip shit properly is UNCONFIRMED bc I AM SLEEPY
-		
-		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
-		tempTileIndicies[1] = 4 * tile + ((flipY << 1) | !flipX);
-		tempTileIndicies[2] = 4 * tile + ((!flipY << 1) | flipX);
-		tempTileIndicies[3] = 4 * tile + ((!flipY << 1) | !flipX);
-		
-		rawMap.setTile(x * 2 + 1, y * 2 + 1, tempTileIndicies[0], flipX, flipY); 
-		rawMap.setTile(x * 2 + 2, y * 2 + 1, tempTileIndicies[1], flipX, flipY); 
-		rawMap.setTile(x * 2 + 1, y * 2 + 2, tempTileIndicies[2], flipX, flipY); 
-		rawMap.setTile(x * 2 + 2, y * 2 + 2, tempTileIndicies[3], flipX, flipY); 	
-	}
-	
-	void update() {
-		rawMap.reloadCells();
-	}
+
 	
 };
 
@@ -140,9 +120,16 @@ public:
 	EffectsLayer effectsLayer;
 	
 	// do these even need to be pointers?
-	bn::vector<Effect*, 32> effectList;
+	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
+	
+	bn::sprite_text_generator textGenerator;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
 
-	EffectsManager(Game* game_) : game(game_) {}
+	EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font) {
+		
+		// may not be the best idea?
+		textGenerator.set_one_sprite_per_character(true);
+	}
 
 	void createEffect(Pos p, const bn::span<const bn::pair<const bn::sprite_tiles_item, int>>& inputData) {
 		// i think using a span here is a good idea,,, but, ugh should i vector?
@@ -165,8 +152,13 @@ public:
 	bool enterRoom();
 	void doVBlank();
 	
-	
 	void reset();
+	
+	// -----
+	
+	void doDialogue(const char* data);
+	
+	
 	
 };
 

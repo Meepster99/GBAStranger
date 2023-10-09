@@ -8,7 +8,6 @@
 #include "EntityManager.h"
 #include "EffectsManager.h"
 
-#include "DebugText.h"
 
 
 
@@ -16,8 +15,8 @@ class Collision : public Layer {
 public:
 
 	// collision uses default everything
-	Collision(bn::regular_bg_tiles_item tileset, int zIndex) :
-	Layer(tileset, zIndex) 
+	Collision() :
+	Layer(bn::regular_bg_tiles_items::dw_tile_bg_1, 2) 
 	{}
 	
 };
@@ -26,8 +25,8 @@ class Details : public Layer {
 public:
 
 	// details uses default everything
-	Details(bn::regular_bg_tiles_item tileset, int zIndex) :
-	Layer(tileset, zIndex, 5)  // why 5? i tried a random number and it worked
+	Details() :
+	Layer(bn::regular_bg_tiles_items::dw_tile_edges, 2, 5)  // why 5? i tried a random number and it worked
 	{}
 	
 };
@@ -53,8 +52,6 @@ public:
 	
 	TileManager tileManager;
 	
-	DebugText debugText;
-	
 	bn::timer miscTimer;
 	
 	GameState state = GameState::Loading;
@@ -62,12 +59,12 @@ public:
 	int miscDebug = 0; // just here for when i want to disp something on the screen
 	int miscDebug2 = 0;
 
-	Game() : collision(bn::regular_bg_tiles_items::dw_tile_bg_1, 3),
-	details(bn::regular_bg_tiles_items::dw_tile_edges, 3),
+	Game() : collision(),
+	details(),
 	entityManager(this),
 	effectsManager(this),
-	tileManager(this),
-	debugText(this) {
+	tileManager(this)
+	{
 		
 		// goofy
 		tileManager.entityManager = &entityManager;

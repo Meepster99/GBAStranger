@@ -49,9 +49,12 @@ typedef unsigned char u8;
 
 #define MAXSPRITES 128
 
-#define MAXDEBUGSPRITES 48
+#define MAXTEXTSPRITES 64
+#define MAXEFFECTSPRITES 16
 
-#define MAXENTITYSPRITES MAXSPRITES - MAXDEBUGSPRITES
+#define MAXENTITYSPRITES MAXSPRITES - MAXTEXTSPRITES - MAXEFFECTSPRITES
+
+static_assert(MAXENTITYSPRITES > 0);
 
 extern unsigned int frame;
 
@@ -60,6 +63,7 @@ enum class GameState {
 	Exiting, // we either just completed a level, or just died
 	Entering, // we just exited the exiting state and are now reloading stuffs. 
 	Loading, // loading in new data, do nothing for now.
+	Paused, // either actually paused(which i havent even thought about making) or in dialogue.
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const GameState& e) {
@@ -346,8 +350,36 @@ public:
 		rawMap.reloadCells();
 	}
 	
+	
+	
 	void setTile(int x, int y, int tileIndex) { rawMap.setTile(x, y, tileIndex); }
 	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { rawMap.setTile(x, y, tileIndex, flipX, flipY); }
+	
+	u8 tempTileIndicies[4];
+	
+	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
+		
+		// this func actually being able to flip shit properly is UNCONFIRMED bc I AM SLEEPY
+		
+		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
+		tempTileIndicies[1] = 4 * tile + ((flipY << 1) | !flipX);
+		tempTileIndicies[2] = 4 * tile + ((!flipY << 1) | flipX);
+		tempTileIndicies[3] = 4 * tile + ((!flipY << 1) | !flipX);
+		
+		rawMap.setTile(x * 2 + 1, y * 2 + 1, tempTileIndicies[0], flipX, flipY); 
+		rawMap.setTile(x * 2 + 2, y * 2 + 1, tempTileIndicies[1], flipX, flipY); 
+		rawMap.setTile(x * 2 + 1, y * 2 + 2, tempTileIndicies[2], flipX, flipY); 
+		rawMap.setTile(x * 2 + 2, y * 2 + 2, tempTileIndicies[3], flipX, flipY); 	
+	}
+	
+	// goofy
+	void update() {
+		rawMap.reloadCells();
+	}
+	
+	void reloadCells() {
+		rawMap.reloadCells();
+	}
 	
 };
 

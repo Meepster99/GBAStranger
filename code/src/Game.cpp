@@ -3,20 +3,14 @@
 
 #include "Palette.h"
 
-//const char* Profiler::currentID = NULL;
-
 Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 
 Game* globalGame = NULL;
 
 unsigned int frame = 0;
 
-// bad syntax.
-//#define BUTANOUPDATE bn::core::update(); debugText.updateText();
-inline void Game::doButanoUpdate() {
+void Game::doButanoUpdate() {
 	bn::core::update();
-	
-	debugText.updateText();
 	
 	int temp = bn::core::last_missed_frames();
 	if(temp != 0) {
@@ -145,12 +139,20 @@ void Game::changePalette(int offset) {
 
 void didVBlank() {
 
-	frame = (frame + 1) % 60000;
+	//frame = (frame + 1) % 600000;
+	frame++;
+	if(frame > 600000) {
+		frame = 0;
+	}
 	
 	globalGame->doVBlank();
 }
 
 void Game::doVBlank() {
+	
+	// can vblank occur during the gameloop, or does this only get called after we call a butano update?
+	// if this can get called in the gameloop, then we will have problems once we integrate dialogue, bc during dialogue this needs to be disabled!
+	
 	static bool a, b, c = false;
 	
 	switch(state) {
@@ -179,6 +181,7 @@ void Game::doVBlank() {
 			}
 			break;
 		case GameState::Loading:
+		case GameState::Paused:
 			break;
 	}
 	
@@ -204,7 +207,7 @@ void Game::run() {
 	
 	
 	//bn::sound_items::msc_013.play(1);
-	 //bn::music_items::cyberrid.play(0.5);
+	//bn::music_items::cyberrid.play(0.5);
 	
 	while(true) {
 		
@@ -260,7 +263,7 @@ void Game::run() {
 			entityManager.doMoves();
 		
 			if(entityManager.hasKills()) {
-				resetRoom(NULL);
+				resetRoom();
 				continue;
 			}
 			
