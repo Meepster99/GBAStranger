@@ -291,6 +291,7 @@ const MessageStr randomBoulderMessages[] = {
 	MSGSTR("please if you know anyone\rwho has a job in CS, give them\nmy contact info, i need a job"),
 	MSGSTR("this program was written in\rpart by the following:\nexcessive ADHD medication,\rdepression,\na NEET lifestyle,\rand viewers like you<3"),
 	MSGSTR("you might be able to still open\rthe chest when you arent facing it\ndepending on if ive fixed that yet"), // it would be funny to program in an exception for this chest only
+	MSGSTR("uwu\nuwuuwuwuwuwuwu"),
 };
 
 void Boulder::interact() {
