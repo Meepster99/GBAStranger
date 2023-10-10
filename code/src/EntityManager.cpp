@@ -19,10 +19,15 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	shadowQueue.clear();
 	
-	int locustBackup = 0;
+	// saving is jank as fuck, and this is evidence of it
+	//int locustCountBackup = 0;
+	//bool isVoidedBackup = false;
 	
 	if(player != NULL) {
-		locustBackup = player->locustCount;
+		
+		//locustCountBackup = player->locustCount;
+		//isVoidedBackup = player->isVoided;
+		
 		if(player->rod != NULL) {
 			delete player->rod;
 			player->rod = NULL;
@@ -49,12 +54,11 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			futureEntityMap[x][y].clear();
 		}
 	}
-
+	
 	entityList.clear();
 	enemyList.clear();
 	obstacleList.clear();
 	shadowList.clear();
-	
 	deadList.clear();
 	
 	
@@ -84,7 +88,13 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				BN_ASSERT(player == NULL, "tried to load in a player when player wasnt NULL in room ", game->roomManager.currentRoomName());
 			
 				player = new Player(tempPos);
-				player->locustCount = locustBackup;
+				
+				//player->locustCount = locustCountBackup;
+				//player->isVoided = isVoidedBackup;
+				
+				player->locustCount = game->saveData.locustCount;
+				player->isVoided = game->saveData.isVoided;
+				
 				entityList.insert(player);
 				break;
 			case EntityType::Leech:
@@ -187,9 +197,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		}
 		
 	}
-	
-	// TODO determine leech and maggot starting directions here.
-	// this could be done with the moveEntity and movefailed funcs, but, no.
+
 	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
 	
 		if((*it)->entityType() != EntityType::Leech && (*it)->entityType() != EntityType::Maggot) {
@@ -819,6 +827,28 @@ void EntityManager::fullUpdate() {
 }
 
 // -----
+
+void EntityManager::hideForDialogueBox(bool vis) {
+	
+	for(auto it = deadList.cbegin(); it != deadList.cend(); ++it) {
+		if((*it) == NULL) {
+			continue;
+		}
+		if((*it)->p.y >= 6) {
+			(*it)->sprite.spritePointer.set_visible(vis);
+		}
+    }
+	
+	for(auto it = entityList.cbegin(); it != entityList.cend(); ++it) {
+		if((*it) == NULL) {
+			continue;
+		}
+		if((*it)->p.y >= 6) {
+			(*it)->sprite.spritePointer.set_visible(vis);
+		}
+    }
+	
+}
 
 bool EntityManager::exitRoom() {
 	

@@ -13,6 +13,9 @@
 #include "bn_sound_items.h"
 #include "bn_sound_actions.h"
 
+#include "bn_random.h"
+#include "bn_sram.h"
+
 #ifdef ENABLELOGGING
 #include "bn_log.h"
 #else 
@@ -57,6 +60,9 @@ typedef unsigned char u8;
 static_assert(MAXENTITYSPRITES > 0);
 
 extern unsigned int frame;
+
+extern bn::random randomGenerator;
+	
 
 enum class GameState {
 	Normal, // normal gameplay

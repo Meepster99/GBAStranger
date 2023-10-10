@@ -125,6 +125,26 @@ bn::optional<Direction> Player::getNextMove() {
 	return temp; 
 }
 
+void Player::startFall() {
+	
+	BN_LOG("playerfal");
+	// have the player do the cyote time thingy
+	tileIndex = static_cast<int>(currentDir);
+	fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
+	
+	// do locust bs
+	if(!isVoided && locustCount > 0) {
+		locustCount--;
+		tileManager->updateLocust();
+	}
+	
+	if(locustCount == 0) {
+		isVoided = true;
+		tileManager->updateVoidTiles();
+	}
+	
+}
+
 // Enemy
 
 bn::optional<Direction> Enemy::getNextMove() {
@@ -219,6 +239,21 @@ Chest::Chest(Pos p_) : Obstacle(p_) {
 
 void Chest::interact() {
 	
+	// this is actually the only place im even using game in here
+	// and i could(actually should? probs just pass the roomManager into here, but idk 
+	// to be 100% real is that i need to go convert all that shit into namespaces, but i 
+	// fucking hate namespaces, and if i have to rewrite a bunch of my h files i will freak
+	
+	if(game->roomManager.roomIndex > 2) {
+		// this if statement is here on purpose for a very stupid easter egg, see the random boulder msgs
+		// its 2 just in case, for future room ordering changes
+		Pos playerPos = entityManager->player->p;
+		playerPos.move(Direction::Up);
+		if(playerPos != p) {
+			return;
+		}
+	}
+	
 	if(animationIndex == 0) {
 		animationIndex = 1;
 	
@@ -232,8 +267,45 @@ void Chest::interact() {
 	
 }
 
+// why doesnt this work??
+//const char* const randomBoulderMessages[] = {"jfdklsafs", "a", "123124", "VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2"};
+
+// i swear, why cant i do this without a struct? idek if the idek var is needed, but im not going to be changing it.
+struct MessageStr {
+	const char* str;
+	const char idek = '\0';
+};
+
+// each string here has a limit of,, 64 non space chars in between lines(seperated with \n)
+// i,, could do something to fix that though? but like ugh 
+// idek 
+
+#define MSGSTR(s) { s }
+const MessageStr randomBoulderMessages[] = { 
+	MSGSTR("i rlly hope this works"), 
+	MSGSTR("Did you know every time you\rsigh, a little bit of happiness\rescapes?"), 
+	MSGSTR("VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2"),
+	MSGSTR("jesus christ i need a job"),
+	MSGSTR("ugh"),
+	MSGSTR("i firmly believe that cif is \rbest lord"),
+	MSGSTR("please if you know anyone\rwho has a job in CS, give them\nmy contact info, i need a job"),
+	MSGSTR("this program was written in\rpart by the following:\nexcessive ADHD medication,\rdepression,\na NEET lifestyle,\rand viewers like you<3"),
+	MSGSTR("you might be able to still open\rthe chest when you arent facing it\ndepending on if ive fixed that yet"), // it would be funny to program in an exception for this chest only
+};
+
 void Boulder::interact() {
-	effectsManager->doDialogue("VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2");
+	
+	static int lastIndex = -1;
+	int index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
+	
+	while(lastIndex == index) {
+		index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
+	}
+	lastIndex = index;
+
+	const char* temp = randomBoulderMessages[index].str;
+		
+	effectsManager->doDialogue(temp);
 }
 
 bn::optional<Direction> Obstacle::getNextMove() {

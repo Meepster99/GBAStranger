@@ -27,7 +27,7 @@ public:
 			spritePalette->getSpritePalette().create_palette())
 			)
 		{
-		spritePointer.set_bg_priority(1);
+		spritePointer.set_bg_priority(2);
 		}
 		
 	
@@ -206,11 +206,9 @@ public:
 	FloorTile* rod = NULL;
 	
 	int locustCount = 0;
+	bool isVoided = false;
 	
-	void startFall() override { // have the player do the cyote time thingy
-		tileIndex = static_cast<int>(currentDir);
-		fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
-	}
+	void startFall() override;
 	
 	bn::optional<Direction> nextMove;
 	

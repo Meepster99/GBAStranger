@@ -117,6 +117,8 @@ public:
 	EntityManager* entityManager = NULL;
 	TileManager* tileManager = NULL;
 	
+	static Palette* spritePalette;
+	
 	EffectsLayer effectsLayer;
 	
 	// do these even need to be pointers?
@@ -142,6 +144,10 @@ public:
 		
 		effectList.push_back(e);
 	} 
+	
+	void updatePalette(Palette* pal);
+	
+	// -----
 
 	bool playerWonLastExit = true;
 	
@@ -156,6 +162,7 @@ public:
 	
 	// -----
 	
+	void hideForDialogueBox(bool vis);
 	void doDialogue(const char* data);
 	
 	

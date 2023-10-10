@@ -4,6 +4,23 @@
 
 #include "Game.h"
 
+Palette* EffectsManager::spritePalette = &defaultPalette;
+
+void EffectsManager::updatePalette(Palette* pal) {
+	
+	for(int i=0; i<effectList.size(); i++) {
+		effectList[i]->sprite.spritePointer.set_palette(pal->getSpritePalette());
+	}
+	
+	for(int i=0; i<textSprites.size(); i++) {
+		textSprites[i].set_palette(pal->getSpritePalette());
+	}
+	
+	EffectsManager::spritePalette = pal;
+}
+
+// -----
+
 bool EffectsManager::zoomEffect(bool inward) {
 	
 	static bool firstRun = true;
@@ -197,8 +214,22 @@ void EffectsManager::reset() {
 
 // -----
 
-void EffectsManager::doDialogue(const char* data) {
+void EffectsManager::hideForDialogueBox(bool vis) {
+	
+	entityManager->hideForDialogueBox(vis);
+	
+	for(auto it = effectList.cbegin(); it != effectList.cend(); ++it) {
+		if((*it) == NULL) {
+			continue;
+		}
+		if((*it)->p.y >= 6) {
+			(*it)->sprite.spritePointer.set_visible(vis);
+		}
+    }
+}
 
+void EffectsManager::doDialogue(const char* data) {
+	
 	// this function has got to be one of the worst things i have ever written in my life.
 
 	// some notes 
@@ -248,9 +279,11 @@ void EffectsManager::doDialogue(const char* data) {
 	
 	effectsLayer.update();
 	
+	hideForDialogueBox(false);
+	
 	// idk how long to make this
-	static char buffer[64];
-	for(int i=0; i<64; i++) {
+	static char buffer[128];
+	for(int i=0; i<128; i++) {
 		buffer[i] = '\0';
 	}
 	
@@ -259,13 +292,18 @@ void EffectsManager::doDialogue(const char* data) {
 	// newline indicates the player should have to press z 
 	// carriage return indicates the that like, to continue this text but on the next line
 	
+	game->doButanoUpdate();
+	bool pressQueued = true;
+	
 	bool newText = false;
 	bool currentlyScrolling = false;
 	int textShowIndex = 0;
 	while(true) {
 		
-		if(bn::keypad::a_pressed()) {
+		if(bn::keypad::a_pressed() || pressQueued) {
 			if(!newText) { // get a whole new thing of text
+				pressQueued = false;
+				game->doButanoUpdate();
 				
 				// this a press will carry over from when the interaction was initiated, meaning that like,,, 
 				// i dont need to have a function which gets the line both inside and outside of this loop
@@ -287,9 +325,9 @@ void EffectsManager::doDialogue(const char* data) {
 				while(*data != '\n' && *data != '\r' && *data != '\0') {
 					*bufferPointer++ = *data++;
 				}
-				BN_ASSERT(bufferPointer - buffer <= 64, "overflowed the dialogue buffer!");
-				
 				*bufferPointer = '\0';
+				
+				BN_ASSERT(bufferPointer - buffer < 128, "overflowed the dialogue buffer! ", buffer);				
 				
 				textGenerator.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + textOffset*16, bn::string_view(buffer), textSprites);
 
@@ -303,6 +341,7 @@ void EffectsManager::doDialogue(const char* data) {
 				for(int i=0; i<textSprites.size(); i++) {
 					textSprites[i].set_bg_priority(3);
 					textSprites[i].set_visible(false);
+					textSprites[i].set_palette(spritePalette->getSpritePalette());
 				}
 
 				newText = true;
@@ -353,10 +392,15 @@ void EffectsManager::doDialogue(const char* data) {
 	}
 	effectsLayer.update();
 	
+	// this is trash, and will cause frame drops 
+	game->fullTileDraw();
+	
+	hideForDialogueBox(true);
 	
 	textSprites.clear();
 	game->state = restoreState;
 	
+
 }
 	
 	

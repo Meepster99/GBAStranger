@@ -103,6 +103,7 @@ public:
 	// should i just make killedplayer public? idek anymore
 	bool playerWon() const { return killedPlayer.contains(NULL); }
 	
+	void hideForDialogueBox(bool vis);
 	bool exitRoom();
 	bool enterRoom();
 	void doVBlank();

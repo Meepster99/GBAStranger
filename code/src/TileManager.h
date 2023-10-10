@@ -66,6 +66,9 @@ public:
 	RodTile* rodTile = NULL;
 	LocustTile* locustTile = NULL;
 	WordTile* locustCounterTile = NULL;
+	
+	WordTile* voidTile1 = NULL;
+	WordTile* voidTile2 = NULL;
 
 	Game* game = NULL;
 	Floor floorLayer;
@@ -96,6 +99,7 @@ public:
 	void updateExit();
 	void updateRod();
 	void updateLocust();
+	void updateVoidTiles();
 	
 	void fullDraw();
 	

@@ -9,6 +9,8 @@ Game* globalGame = NULL;
 
 unsigned int frame = 0;
 
+bn::random randomGenerator = bn::random();
+
 void Game::doButanoUpdate() {
 	bn::core::update();
 	
@@ -22,7 +24,7 @@ void Game::doButanoUpdate() {
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
-	
+
 	if(!debug) {
 		
 		//tileManager.fullDraw();
@@ -41,6 +43,7 @@ void Game::resetRoom(bool debug) {
 	}
 
 	state = GameState::Loading;
+	save();
 	
 	BN_LOG("resetroom called");
 	loadLevel(debug);
@@ -64,6 +67,9 @@ void Game::resetRoom(bool debug) {
 	}
 	
 	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
+	
+	// im (debating) not saving with debug just so that the rooms go faster, tho tbh idrk how much of a difference it will make 
+	//save(); // why am i saving twice? bc im dumb.
 	
 	//BN_PROFILER_RESET();
 }
@@ -115,6 +121,12 @@ void Game::fullDraw() {
 	entityManager.fullUpdate();
 }
 
+void Game::fullTileDraw() {
+	collision.draw(collisionMap);
+	details.draw(detailsMap);
+	tileManager.fullDraw();
+}
+
 void Game::changePalette(int offset) {
 	
 	// https://stackoverflow.com/questions/3417183/modulo-of-negative-numbers
@@ -127,11 +139,13 @@ void Game::changePalette(int offset) {
 	paletteIndex = ((paletteIndex % paletteListSize) + paletteListSize) % paletteListSize;
 	
 	entityManager.updatePalette(paletteList[paletteIndex]);
+	effectsManager.updatePalette(paletteList[paletteIndex]);
 	
 	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
@@ -192,6 +206,8 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
+	load();
+	
 	globalGame = this;
 
 	bn::core::set_vblank_callback(didVBlank);
@@ -204,7 +220,6 @@ void Game::run() {
 	fullDraw();
 	
 	state = GameState::Normal;
-	
 	
 	//bn::sound_items::msc_013.play(1);
 	//bn::music_items::cyberrid.play(0.5);
@@ -269,12 +284,61 @@ void Game::run() {
 			
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
-			BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
-		
-			
+			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
+			BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
 		}
-
+		
 		doButanoUpdate();
 	}
+}
+
+uint64_t Game::getSaveHash() {
+	uint64_t hash = 0;
+	
+	#define rotateHash(n) hash = (hash << n) | (hash >> ((sizeof(hash) * 8) - n))
+	
+	// this is barely even a hash algorithm, but it will work ig
+	
+	hash ^= saveData.locustCount;
+	rotateHash(sizeof(saveData.locustCount) * 8);
+	
+	hash ^= saveData.isVoided;
+	rotateHash(sizeof(saveData.isVoided) * 8);
+	
+	hash ^= saveData.roomIndex;
+	rotateHash(sizeof(saveData.roomIndex) * 8);
+
+	return hash;
+}
+
+void Game::save() {
+	BN_LOG("saving save");
+	
+	saveData.locustCount = entityManager.player->locustCount;
+	saveData.isVoided = entityManager.player->isVoided;
+	saveData.roomIndex = roomManager.roomIndex;
+	
+	saveData.hash = getSaveHash();
+	bn::sram::write(saveData);
+	
+	BN_LOG("locust: ", saveData.locustCount);
+	BN_LOG("void: ", saveData.isVoided);
+	BN_LOG("room: ", saveData.roomIndex);
+}
+
+void Game::load() {
+	BN_LOG("loading save");
+	bn::sram::read(saveData);
+	
+	if(saveData.hash != getSaveHash()) {
+		BN_LOG("either a save wasnt found, or it was corrupted. creating new save");
+		saveData = GameSave();
+	}
+	
+	BN_LOG("locust: ", saveData.locustCount);
+	BN_LOG("void: ", saveData.isVoided);
+	BN_LOG("room: ", saveData.roomIndex);
+	
+	roomManager.roomIndex = saveData.roomIndex;
 }
 

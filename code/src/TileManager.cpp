@@ -92,6 +92,9 @@ void TileManager::loadTiles(TileType* floorPointer) {
 	floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
 	floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
 	
+	voidTile1 = static_cast<WordTile*>(floorMap[1][8]);
+	voidTile2 = static_cast<WordTile*>(floorMap[2][8]);
+	
 	floorMap[3][8] = new WordTile(Pos(3, 8));
 	//floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
 	floorMap[4][8] = new LocustTile(Pos(4, 8));
@@ -304,6 +307,31 @@ void TileManager::updateLocust() {
 	
 }
 
+void TileManager::updateVoidTiles() {
+	
+	bool isVoided = entityManager->player->isVoided;
+	
+	BN_LOG("player void status ", isVoided);
+	
+	if(voidTile1 != NULL && voidTile1 != entityManager->player->rod) {
+		
+		voidTile1->first = isVoided ? 'V' : 'H';
+		voidTile1->second = isVoided ? 'O' : 'P';
+		
+		updateTile(voidTile1->tilePos);
+	}
+	
+	if(voidTile2 != NULL && voidTile2 != entityManager->player->rod) {
+		
+		voidTile2->first = isVoided ? 'I' : '0';
+		voidTile2->second = isVoided ? 'D' : '7';
+		
+		updateTile(voidTile2->tilePos);
+	}
+	
+	
+}
+
 bool TileManager::hasCollision(const Pos& p) {
 	return entityManager->hasCollision(p);;
 }
@@ -316,6 +344,7 @@ void TileManager::fullDraw() {
 	updateExit();
 	updateRod();
 	updateLocust();
+	updateVoidTiles();
 }
 
 bool TileManager::exitRoom() {

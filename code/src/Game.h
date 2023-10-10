@@ -9,7 +9,7 @@
 #include "EffectsManager.h"
 
 
-
+// collision and details should REALLY be on the same layer. this is just legacy bs
 
 class Collision : public Layer {
 public:
@@ -33,6 +33,14 @@ public:
 
 // ----
 
+struct GameSave {
+	u8 locustCount = 0;
+	bool isVoided = false;
+	int roomIndex = 0;
+	
+	uint64_t hash = 0;
+};
+
 class Game {
 public:
 	
@@ -42,6 +50,7 @@ public:
 	u8 collisionMap[14][9];
 	u8 detailsMap[14][9];
 	
+	GameSave saveData;
 	
 	RoomManager roomManager;
 	
@@ -84,14 +93,20 @@ public:
 		FloorTile::entityManager = &entityManager;
 		FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
 		
+		Entity::game = this;
 	}
 	
 	void run();
+	
+	void save();
+	void load();
+	uint64_t getSaveHash();
 	
 	void loadLevel(bool debug = false);
 	void resetRoom(bool debug = false);
 	
 	void fullDraw();
+	void fullTileDraw();
 	
 	void doVBlank();
 	
