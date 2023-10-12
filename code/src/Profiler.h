@@ -227,7 +227,7 @@ public:
 #ifdef ENABLEPROFILER
 #define profileFunction() \
     static const char* BETTER_FUNCTION_NAME = extractClassAndFunctionName(__PRETTY_FUNCTION__); \
-	const unsigned BETTER_FUNCTION_NAME_HASH = bn::hash<unsigned>()(getHash(BETTER_FUNCTION_NAME)); \
+	const unsigned BETTER_FUNCTION_NAME_HASH = bn::hash<unsigned>()(getHash(BETTER_FUNCTION_NAME));  \
     volatile Profiler profiler(BETTER_FUNCTION_NAME, BETTER_FUNCTION_NAME_HASH);
 #else
 #define profileFunction() \

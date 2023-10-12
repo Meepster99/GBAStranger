@@ -26,18 +26,10 @@ void Game::resetRoom(bool debug) {
 	BN_LOG("entered reset room with debug=",debug);
 
 	if(!debug) {
-		
-		//tileManager.fullDraw();
 		state = GameState::Exiting;
 		
 		// wait for animations to finish 
-		// IS THERE A NON BUSYLOOP VER OF THIS?
-
 		while(state == GameState::Exiting) { // wait for gamestate to no longer be exiting
-			//BN_LOG("looping on ", state);
-			
-			//debugText.updateText();
-			//bn::core::update(); 
 			doButanoUpdate();
 		} 
 	}
@@ -45,33 +37,24 @@ void Game::resetRoom(bool debug) {
 	state = GameState::Loading;
 	save();
 	
-	BN_LOG("resetroom called");
 	loadLevel(debug);
-	BN_LOG("loadlevel finished");
 	if(!debug) {
 		doButanoUpdate();
 	}
 	fullDraw();
-	BN_LOG("fulldraw finished");
 	
 	state = GameState::Normal;
 	
 	if(!debug) {
 		state = GameState::Entering;
 		while(state == GameState::Entering) { // wait for gamestate to no longer be entering
-			//BN_LOG("looping on ", state);
-			//debugText.updateText();
-			//bn::core::update(); 
 			doButanoUpdate();
 		}
 	}
 	
 	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
 	
-	// im (debating) not saving with debug just so that the rooms go faster, tho tbh idrk how much of a difference it will make 
-	//save(); // why am i saving twice? bc im dumb.
-	
-	//BN_PROFILER_RESET();
+	BN_LOG("reset room done");
 }
 
 void Game::loadLevel(bool debug) {
@@ -94,8 +77,6 @@ void Game::loadLevel(bool debug) {
 	}
 	
 	TileType* floorPointer = (TileType*)idek.floor;
-	
-	
 	
 	tileManager.loadTiles(floorPointer);
 	

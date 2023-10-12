@@ -119,8 +119,15 @@ namespace WTFPROFILER {
 	BN_DATA_EWRAM char buffer[maxFuncLength + 64];
 	
 	void reset() {
+		
+		BN_ASSERT(profilerStack.size() == 0, "when reseting the profiler make sure nothing is currently being profiled");
+		
 		profilerStack.clear();
 		profilerMap.clear();
+		
+		// i have 0 clue whats going on here. i updated my butano version, and clear started giving me insanely weird bugs. this fixes them
+		profilerMap = bn::unordered_map<const char*, ProfilerData, MAXPROFILERFUNCS>();
+		
 		BN_LOG("Profiler reset");
 	}
 	
@@ -157,7 +164,7 @@ namespace WTFPROFILER {
 		}
 		
 		
-		
+		BN_LOG("-----");
 		BN_LOG("Displaying profiler results");
 		BN_LOG(profilerMap.size(), " funcs tracked");
 		//BN_LOG("Bruh::realllylongfunctionname    	      474 	      254 	        2 	      237                   
@@ -197,12 +204,13 @@ namespace WTFPROFILER {
 
 		if(profilerStack.size() != 0) {
 			charHashPair& temp = profilerStack.back();
-			ProfilerData& data = profilerMap(temp.hash, temp.ID);
+			ProfilerData& tempData = profilerMap(temp.hash, temp.ID);
 			
 			// pause
-			data.timer.stop(); // does this being slightly delayed from the initial call cause issues?
+			tempData.timer.stop(); // does this being slightly delayed from the initial call cause issues?
 		}	
 
+		
 		profilerStack.push_back({ID, hash});
 
 		// i despise, and dont understand this syntax. 
