@@ -79,48 +79,38 @@ constexpr static inline Room rooms[{:d}] = {{ {:s} }};
 constexpr static inline char roomNames[{:d}][{:d}] = {{ {:s} }};
 """
 
-	idjk="""
+	# reorder the room list, drop unneeded rooms
+	
+	roomSelectFile = open("../ExportData/Export_code/gml_GlobalScript_scr_roomselect.gml")
+	lines = [ l.strip() for l in roomSelectFile.readlines() if len(l.strip()) != 0 ]
+	roomSelectFile.close()
+	#successRoomsList
+	
+	newRoomsList = []
+	
+	
+	# its 3am, forgive me for this 
+	for i, line in enumerate(lines):
+		if line == "switch room_number":
+			
+			i += 1
+			
+			while lines[i] != "}":
+				
+				if "case" in lines[i]:
+					while lines[i] != "}":
+						if "room_goto" in lines[i]:
+							newRoomsList.append(lines[i].split("(")[1].split(")")[0])
+							break
+						i += 1
+					
+				i+=1
+				
+			
+			
+			break
 
-class RoomManager {{
-public:
-	// what i am about to do here, is in a word, horrible 
-	// but my gods im tired.
-	// literally just put a array of strings and array of structs
-	//,, will the structs be like
-	// GODS 
-	// i fucking hate how paranoid i am with memory here. 
-	// im trying my best to make sure that we only load the room needed from rom but 
-	// maybe im being to paranoid
-	// also i havent ate.
-
-	// getready for a bad time.
-	
-	// should be constexpr but im tired
-	
-	
-
-	int roomIndex = 100;
-	
-	Room loadRoom() {{
-	
-		if(roomIndex < 0 || roomIndex >= (int)(sizeof(roomNames)/sizeof(roomNames[0]))) {{
-			BN_ERROR("Roomindex ", roomIndex, " out of bounds, max ", sizeof(roomNames)/sizeof(roomNames[0]));
-		}}
-
-		return rooms[roomIndex];
-	}}
-	
-	const char* currentRoomName() {{ 
-	if(roomIndex < 0 || roomIndex >= (int)(sizeof(roomNames)/sizeof(roomNames[0]))) {{
-			BN_ERROR("Roomindex ", roomIndex, " out of bounds, max ", sizeof(roomNames)/sizeof(roomNames[0]));
-	}}
-	
-	return roomNames[roomIndex]; 
-	}}
-
-}};
-
-"""
+	successRoomsList = newRoomsList
 
 	successRoomsCount = len(successRoomsList)
 	longestRoomStringLen = 1+len(max(successRoomsList, key=len))
@@ -411,7 +401,7 @@ def convertObjects(layerData):
 			pass
 
 		def obj_enter_the_danger(p, creationCode):
-			pass
+			ObjectFunctions.obj_spawnpoint(p, creationCode)
 
 		def obj_spawn_intro(p, creationCode):
 			ObjectFunctions.obj_spawnpoint(p, creationCode)
