@@ -157,26 +157,31 @@ void TileManager::doFloorSteps() { profileFunction();
 	// stepoffs occur before stepons bc of shadows, and switches
 	for(auto it = stepOffs.cbegin(); it != stepOffs.cend(); ++it) {
 		Pos tempPos = *it;
-		if(hasFloor(tempPos)) {
+		if(hasFloor(tempPos)) [[likely]] {
 			stepOff(tempPos);
 		}
 	}
 	
 	for(auto it = stepOns.cbegin(); it != stepOns.cend(); ++it) {
 		Pos tempPos = *it;
-		if(hasFloor(tempPos)) {
+		if(hasFloor(tempPos)) [[likely]] {
 			stepOn(tempPos);
 		}
 	}
-	
 	
 	// ok now we are in that class. im still going to leave parts ofthis hardcoded tho
 	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
 		if((*it).first == EntityType::Player) {
 			
 			Pos start = (*it).second.first;
-
-			if(hasFloor(start) == TileType::Copy) {
+			//Pos end = (*it).second.second;
+			
+			// todo,  could i impliment deathtiles in here?
+			// but since floorsteps only has the entity type and not the entity, i cant?
+			// gods 
+			// actually i just now realized that this is in a if player ifstatement
+			
+			if(hasFloor(start) == TileType::Copy) { 
 				entityManager->shadowQueue.push_back(start);
 			}
 		}
@@ -230,7 +235,7 @@ void TileManager::doFloorSteps() { profileFunction();
 	floorLayer.reloadCells();
 }
 
-void TileManager::updateTile(const Pos& p) {
+void TileManager::updateTile(const Pos& p) { profileFunction();
 	
 	const u8 x = p.x;
 	const u8 y = p.y;
@@ -367,7 +372,7 @@ void TileManager::doVBlank() {
 // -----
 
 bn::optional<TileType> TileManager::hasFloor(const u8& x, const u8& y) { profileFunction();
-	FloorTile* temp = floorMap[x][y];
+	const FloorTile* temp = floorMap[x][y];
 	
 	if(temp == NULL || !temp->isAlive) {
 		return bn::optional<TileType>();

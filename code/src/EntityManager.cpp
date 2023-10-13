@@ -112,6 +112,17 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			case EntityType::Chester:
 				entityList.insert(new Chester(tempPos));
 				break;
+			case EntityType::Mimic:
+				BN_ASSERT(player != NULL); // player should be the first entity in the entity list from the roomdata, this just just a sanity chek
+				
+				if(tempPos.x == player->p.x) {
+					entityList.insert(new GrayMimic(tempPos));
+				} else if(tempPos.y == player->p.y) {
+					entityList.insert(new WhiteMimic(tempPos));
+				} else {
+					entityList.insert(new BlackMimic(tempPos));
+				}	
+				break;
 			case EntityType::WhiteMimic:
 				entityList.insert(new WhiteMimic(tempPos));
 				break;
@@ -524,6 +535,8 @@ void EntityManager::doMoves() { profileFunction();
 
 bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileFunction();
 	
+	// this func really needs to be rewritten to just work with killing players tbh, also its return value is scuffed af.
+	
 	if(e->entityType() == EntityType::Player || e->entityType() == EntityType::Shadow) {
 		BN_ERROR("tried to kill either a player or a shadow. thats not a thing you can do fool.");
 	}
@@ -686,67 +699,70 @@ void EntityManager::updateMap() { profileFunction();
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			
+			// i tried haveing a iscollision check here, but it slowed it down??
+			
+			Entity* temp = NULL;
+			
 			// should probs use a swtitch statement here, maybe?
-			
-			if(entityMap[x][y].size() == 0) {
-				continue;
-			}
-			
-			if(entityMap[x][y].size() == 1) {
-				
-				Entity* temp = *entityMap[x][y].begin();
-				
-				if(!hasFloor(Pos(x, y))) {
-					if(temp->isPlayer() || temp->entityType() == EntityType::Shadow) {
-						//res = temp;
-						BN_LOG("no floor kill");
-						addKill(temp);
-					} else {
-						killEntity(temp);
+			// yup, made it a lil faster
+			switch(entityMap[x][y].size()) {
+				case 0: [[likely]]
+					continue;
+				case 1: [[likely]]
+					
+					temp = *entityMap[x][y].begin();
+					
+					if(!hasFloor(Pos(x, y))) {
+						if(temp->isPlayer() || temp->entityType() == EntityType::Shadow) {
+							BN_LOG("no floor kill");
+							addKill(temp);
+						} else {
+							killEntity(temp);
+						}
 					}
-				}
-				
-				continue;
-			}
-			
-			// remove all enemies, keep obstacles
-			//for(int i=0; i<entityMap[x][y].size(); i++) {
-			for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ) {
-				
-				Entity* temp = *it;
-				
-				if(temp->entityType() == EntityType::Player) {
 					
-					// grab another(any) one entity in this square to be the death reason
-					SaneSet<Entity*, 4> tempMap = entityMap[x][y];
-					
-					tempMap.erase(temp);
-					
-					Entity* tempKiller = *tempMap.begin();
-					
-					BN_LOG("intersect kill with a ", tempKiller->entityType());
-					//res = *tempMap.begin();
-					addKill(tempKiller);
-					++it;
-					// break, NOT ITERATE here so that we dont delete the thing that killed us
-					// for death animation reasons.
-					//break;
-				} else if(temp->entityType() == EntityType::Shadow) {
-					//res = temp;
-					addKill(temp);
-					++it;
-				} else if(temp->isObstacle()) {
-					++it;
 					continue;
-				} else if(temp->isEnemy()) {
-					// kill
-					
-					// the it wasnt being set here but stuff was still running fine for a while. why??
-					it = killEntity(temp);
+				default: [[unlikely]]
+					// remove all enemies, keep obstacles
+					//for(int i=0; i<entityMap[x][y].size(); i++) {
+					for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ) {
+						
+						temp = *it;
+						
+						if(temp->entityType() == EntityType::Player) {
+							
+							// grab another(any) one entity in this square to be the death reason
+							SaneSet<Entity*, 4> tempMap = entityMap[x][y];
+							
+							tempMap.erase(temp);
+							
+							Entity* tempKiller = *tempMap.begin();
+							
+							BN_LOG("intersect kill with a ", tempKiller->entityType());
+							//res = *tempMap.begin();
+							addKill(tempKiller);
+							++it;
+							// break, NOT ITERATE here so that we dont delete the thing that killed us
+							// for death animation reasons.
+							//break;
+						} else if(temp->entityType() == EntityType::Shadow) {
+							//res = temp;
+							addKill(temp);
+							++it;
+						} else if(temp->isObstacle()) {
+							++it;
+							continue;
+						} else if(temp->isEnemy()) {
+							// kill
+							
+							// the it wasnt being set here but stuff was still running fine for a while. why??
+							it = killEntity(temp);
+							continue;
+						} else {
+							BN_ERROR("a entity was somehow not a player, obstacle, or enemy. wtf.");
+						}
+					}
 					continue;
-				} else {
-					BN_ERROR("a entity was somehow not a player, obstacle, or enemy. wtf.");
-				}
 			}
 		}
 	}
@@ -756,7 +772,7 @@ void EntityManager::updateMap() { profileFunction();
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 			if((*it)->entityType() == EntityType::TanStatue) {
 				killEntity(*it);
-				it = obstacleList.begin(); // trash code, killentity only returns the getpos index
+				it = obstacleList.begin(); // trash code, killentity only returns the getpos index, this needs to be fixed, TODO
 			} else {
 				++it;
 			}
@@ -987,7 +1003,7 @@ bool EntityManager::hasObstacle(const Pos& p) const {
 
 bool EntityManager::hasCollision(const Pos& p) const {
 	
-	u8 temp = game->collisionMap[p.x][p.y];
+	const u8 temp = game->collisionMap[p.x][p.y];
 	
 	if(temp == 12 || temp < 3) {
 		return false;
@@ -1000,7 +1016,7 @@ bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {
 	return tileManager->hasFloor(p);
 }
 
-bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const {
+bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profileFunction();
 	
 	Pos playerPos = player->p;
 	
@@ -1047,7 +1063,7 @@ bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const {
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const {
+bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const { profileFunction();
 	
 	// oh boy. this is going to be fun.
 	
@@ -1126,12 +1142,13 @@ bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const {
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStart) {
+bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStart) { profileFunction();
 	
 	const Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
 	
 	// this whole loop is an affront to the gods 
-	// nvm this whole func is.
+	// nvm this whole func is. 
+	// jesus it really is
 	for(int i=0; i<4; i++) {
 		Pos testPos = e->p;
 		if(!testPos.move(testDirections[i])) {

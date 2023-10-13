@@ -15,204 +15,6 @@ WHITE = Fore.WHITE
 
 RESET = Style.RESET_ALL
 
-
-# there might be a way to,,,, do this via a datamine?
-# but for now like,,, things are still much to difficult 
-# how does the game decide what direction a enemy should start facing?
-# fuck it, ill deal with that later.
-# how does the game decide what enemies to spawn during,, hard mode??
-# some sprites are even spawned on top of each other?
-# i need a room order as well??
-
-
-# gml_GlobalScript_scr_roomselect
-# seems important 
-# gods, i guess i need to export all code now.
-
-"""
-
-gml_Object_obj_na_secret_exit_Alarm_5
-gml_GlobalScript_scr_roomselect
-
-
-
-
-"""
-
-"""
-
-# each sprite has a creation code, which contains either:
-
-gml_RoomCC_rm_0095_3_Create 
-if (global.loop == 1)
-    instance_destroy()
-	
-if (global.loop == 0)
-    instance_destroy()
-
-it seems that global.loop represents hardmode state. 
-fuck.
-we are going to have to import that too??????????
-also some sprites are layered upon each other??
-
-but there are also some varieties between allthis like,, 
-gods this is going to be EXTREMELY painful.
-im going to have to change up my 
-
-gods.
-
-"""
-
-"""
-# christ 
-
-MyClass* (*factories[])() = {
-		[]() -> MyClass* { return new MyClass(42); },
-		[]() -> MyClass* { return new MyClass(32, 5); },
-
-	};
-
-"""
-
-def createSpawnData(d, x, y):
-	#return "new Player({:d}, {:d})".format(x, y)
-	return "EntityType::Player,{:d},{:d}".format(x, y)
-	
-def createLeech(d, x, y):
-	#return "new Leech({:d}, {:d}, {:s})".format(x, y, "Direction::Right")
-	return "EntityType::Leech,{:d},{:d}".format(x, y)
-
-def createMaggot(d, x, y):
-	# no clue abt starting dir
-	#return "new Maggot({:d}, {:d}, {:s})".format(x, y, "Direction::Down")
-	return "EntityType::Maggot,{:d},{:d}".format(x, y)
-
-def createEye(d, x, y):
-	#return "new Eye({:d}, {:d})".format(x, y)
-	return "EntityType::Eye,{:d},{:d}".format(x, y)
-
-def createBull(d, x, y):
-	#return "new Bull({:d}, {:d})".format(x, y)
-	return "EntityType::Bull,{:d},{:d}".format(x, y)
-
-def createChester(d, x, y):
-	#return "new Chester({:d}, {:d}, {:s})".format(x, y, "Direction::Right")
-	return "EntityType::Chester,{:d},{:d}".format(x, y)
-
-	
-# abysmal use of globals.
-playerX, playerY = -1, -1 
-	
-def createMimic(d, x, y):
-	# gml_Object_obj_enemy_cm_Create_0
-	
-	"""
-	if x > playerX:
-		x_rotation = 0
-	if x <= playerX:
-		x_rotation = 1
-	if y > playerY:
-		y_rotation = 1
-	if y <= playerY:
-		y_rotation = 0
-		
-	# black people are the default, i think?
-	res = "white"
-	
-	
-	if x_rotation == 0 and y_rotation == 1: # greater x greater y
-		# black 
-		res = "black"
-	elif x_rotation == 1 and y_rotation == 0: # lessereq x lessereq y
-		res = "gray"
-	elif x_rotation == 1 and y_rotation == 1: # lessereq x greater y
-		res = "white"
-	else:
-		print(RED + "TRAUMATIC" + RESET)
-	"""
-	
-	res = "black"
-	
-	if x == playerX:
-		res = "gray"
-		
-	if y == playerY:
-		res = "white"
-		
-		
-	temp = {
-		"black": "EntityType::BlackMimic,{:d},{:d}".format(x, y),
-		"gray": "EntityType::GrayMimic,{:d},{:d}".format(x, y),
-		"white": "EntityType::WhiteMimic,{:d},{:d}".format(x, y),
-	}
-	
-	return temp[res]
-
-instanceMap = {
-	"obj_spawnpoint": createSpawnData,
-	"obj_enter_the_secret": createSpawnData,
-	
-	#"obj_npc_nun": createDefault,
-
-	"obj_enemy_cl": createLeech,
-	"obj_enemy_cc": createMaggot,
-	"obj_enemy_ch": createEye,
-	"obj_enemy_cg": createBull,
-	"obj_enemy_cs": createChester,
-	
-	"obj_boulder": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	
-	"obj_npc_riddle": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	
-	"obj_riddle_000": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_001": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_002": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_003": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_004": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_005": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_006": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	"obj_riddle_007": lambda d, x, y : "EntityType::Boulder,{:d},{:d}".format(x, y),
-	
-	
-	
-	"obj_chest_small": lambda d, x, y : "EntityType::Chest,{:d},{:d}".format(x, y),
-	
-	"b_form = 8": lambda d, x, y : "EntityType::AddStatue,{:d},{:d}".format(x, y),
-	"b_form = 7": lambda d, x, y : "EntityType::MonStatue,{:d},{:d}".format(x, y),
-	"b_form = 6": lambda d, x, y : "EntityType::EusStatue,{:d},{:d}".format(x, y),
-	"b_form = 5": lambda d, x, y : "EntityType::GorStatue,{:d},{:d}".format(x, y),
-	"b_form = 4": lambda d, x, y : "EntityType::CifStatue,{:d},{:d}".format(x, y),
-	"b_form = 3": lambda d, x, y : "EntityType::TanStatue,{:d},{:d}".format(x, y),
-	"b_form = 2": lambda d, x, y : "EntityType::BeeStatue,{:d},{:d}".format(x, y),
-	"b_form = 1": lambda d, x, y : "EntityType::LevStatue,{:d},{:d}".format(x, y),
-	
-	"obj_enemy_cm": createMimic,
-	
-	"obj_enemy_co": lambda d, x, y : "EntityType::Diamond,{:d},{:d}".format(x, y),
-	
-	
-	
-}
-
-
-floorMap = {
-
-	"obj_floor": "Floor",
-	"obj_glassfloor": "Glass",
-	"obj_pit": "Pit",
-	"obj_exit": "Exit",
-	
-	# this is just temp
-	#"obj_chest_small": 0,
-	"obj_chest_small": "FUCk",
-	"obj_boulder": "FUCK",
-	
-	"obj_floorswitch": "Switch",
-	"obj_bombfloor": "Bomb",
-	"obj_deathfloor": "Death",
-	"obj_copyfloor": "Copy",
-}
-
 failures = {}
 
 isHardMode = False
@@ -227,16 +29,26 @@ isHardMode = False
 # lev: id: 1 spr_watcher
 # cif: id: 4 spr_atoner
 
+class Pos:
+	def __init__(self, x, y):
+		self.rawX = x
+		self.rawY = y
+		self.x = (x - 8) // 16
+		self.y = (y - 8) // 16
+
 
 creationCodeData = { }
 
 newCreationCodesData = {}
 
 # fuck it, going to be doing this manually.
-def readCreationCode(inst, creationCode):
+def readCreationCode(creationCode):
 
-	x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
+	#x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
 	
+	if creationCode is None:
+		return None
+		
 	
 	f = open(os.path.join("../ExportData/Export_Code", creationCode + ".gml"))
 	lines = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ]
@@ -245,15 +57,15 @@ def readCreationCode(inst, creationCode):
 	#creationCodeData[idek] = [None]
 	
 	if idek not in creationCodeData:
-		print(idek + " wasnt found in creationcode data!!! this is rlly fucking bad!!!! add it!!!!")
+		print(RED + idek + " wasnt found in creationcode data!!! this is rlly fucking bad!!!! add it!!!!" + RESET)
 		
 		
-		#newCreationCodesData[idek] = [None]
+		newCreationCodesData[idek] = [None]
 
-		#return [None]
+		#return None
 		exit(1)
 	
-	return creationCodeData[idek]
+	return creationCodeData[idek][isHardMode]
 	
 def writeFooter(f, successRoomsList):
 	
@@ -331,176 +143,770 @@ public:
 def convertCollisionAndDetails(layerData):
 	
 	details = {}	
-	details["tileset"] = layerData["Tiles_2"]["layer_data"]["background"]
-	details["data"] = [ elem["id"] for line in layerData["Tiles_2"]["layer_data"]["tile_data"] for elem in line]
+	
+	if "Tiles_2" in layerData:
+		
+		details["tileset"] = layerData["Tiles_2"]["layer_data"]["background"]
+		details["data"] = [ elem["id"] for line in layerData["Tiles_2"]["layer_data"]["tile_data"] for elem in line]
 
-	if details["tileset"] == "tile_house_2":
-		print("tile_house_2 aint properly converted!")
-		return None
+		if details["tileset"] == "tile_house_2":
+			print("tile_house_2 aint properly converted!")
+			return None
+	else:
+		details["data"] = [ 0 for i in range(0, 14*9) ]
 	
 	collision = {}	
-	collision["tileset"] = layerData["Tiles_1"]["layer_data"]["background"]
-	collision["data"] = [ elem["id"] for line in layerData["Tiles_1"]["layer_data"]["tile_data"] for elem in line]
+	
+	if "Tiles_1" in layerData:
+		
+		collision["tileset"] = layerData["Tiles_1"]["layer_data"]["background"]
+		collision["data"] = [ elem["id"] for line in layerData["Tiles_1"]["layer_data"]["tile_data"] for elem in line]
 
-	if collision["tileset"] == "tile_house_2":
-		print("tile_house_2 aint properly converted!")
-		return None
+		if collision["tileset"] == "tile_house_2":
+			print("tile_house_2 aint properly converted!")
+			return None
+	else:
+		collision["data"] = [ 0 for i in range(0, 14*9) ]
 		
 	return collision, details
 
+def convertObjects(layerData):
 	
-# obj_fakewall are the fake boulders btw
-# I REALLY SHOULD OF JUST SKIPPED EVERYTHING WITH NPC IN ITS NAME OMFG
-skipObjects = set(["obj_fakewall", "obj_na_secret_exit", "obj_solarsystem", "obj_secret_exit", "obj_mural", "obj_collision", "obj_npc_failure_006", "obj_na_secret_exit", "obj_rest", "obj_dustemiter_unknown", "obj_dustemit", "obj_npc_friend", "obj_mural", "obj_secret_exit", "obj_enemy_nm", "obj_npc_mon", "obj_npc_ykko", "obj_npc_failure_001", "obj_npc_nun", "obj_tail_kill", "obj_npc_failure_002", "obj_npc_bride", "obj_demonlords_statue", "obj_npc_failure_003", "obj_npc_famished", "obj_npc_unknown", "obj_npc_spawner", "obj_npc_gor", "obj_baal_m_d", "obj_npc_failure_008", "obj_npc_oldman", "obj_enemy_invisiblemon", "obj_npc_nomad", "obj_npc_nomad2", "obj_npc_failure_005", "obj_npc_failure_007", "obj_enemy_nm_b", "obj_npc_tail_floor", "obj_npc_failure_004", "obj_npc_randobandit", "obj_tot_mural", "obj_npc_tail_lowerfloor", "obj_npc_tail", "obj_npc_tail_tail"])
+	# due to the extremely large amount of difficulty ive had with floor objects being instances, and vice versa, this is here to fix thtat
 	
-def convertFloor(layerData):
 	
 	floorExport = [ ["Pit" for i in range(9)] for j in range(14)]
 	
-	floorData = layerData["Floor"]["layer_data"]["instances"]
-	pitData = layerData["Pit"]["layer_data"]["instances"]
+	entityExport = []
 	
-	exitData = layerData["Floor_INS"]["layer_data"]["instances"]
+	effectExport = []
+	
+	# goofy 
+	# oh god its so goofy
+	# does python seriously not allow lambdas to be multiline/assign shit?
+	# i despise that this is actually the best/most readable/easiest way to do this
+	class ObjectFunctions:
+		
+		def obj_floor(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Floor"
+	
+		def obj_glassfloor(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Glass"
+			
+		def obj_pit(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Pit"
+			
+		def obj_exit(p, creationCode):
+			if creationCode is not None:
+				if creationCode == "b_form = 1":
+					print("a exit had a bform of 1. still no idea why")
+					floorExport[p.x][p.y] = "Exit"
+					return
+			
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Exit"
+			
+		def obj_floorswitch(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Switch"
+			
+		def obj_bombfloor(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Bomb"
+			
+		def obj_deathfloor(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Death"
+			
+		def obj_copyfloor(p, creationCode):
+			if creationCode is not None:
+				getattr(ObjectFunctions, creationCode)(p, None)
+				return
+			floorExport[p.x][p.y] = "Copy"
+			
+	
+	
 
-	floorPassObjects = ["obj_chest_small", "obj_boulder", "obj_enter_the_secret"]
-	
-	for floorInstance in floorData + pitData + exitData:
-		
-		if floorInstance["object_definition"] in skipObjects:
-			continue
-			
-		if "riddle" in floorInstance["object_definition"] or floorInstance["object_definition"] in floorPassObjects:
-			layerData["Instances"]["layer_data"]["instances"].append(floorInstance)
-			continue
-		
-		x, y = (floorInstance["x"] - 8) // 16, (floorInstance["y"] - 8) // 16
-	
-		if floorInstance["object_definition"] not in floorMap:
-			print("we dont have a definition for {:s}".format(floorInstance["object_definition"]))
-			
-			
-			if floorInstance["object_definition"] not in failures:
-				failures[floorInstance["object_definition"]] = []
-			failures[floorInstance["object_definition"]].append(layerData["roomName"])
-			
-			return None
-		
-		if floorInstance["creation_code"] == None:
-		
-		
-			if floorInstance["object_definition"] == "obj_chest_small":
-				# if the instance is a chest and is in here for some reason, we 
-				# want to move that over to being a sprite
-				
-				layerData["Instances"]["layer_data"]["instances"].append(floorInstance)
-				continue
-					
-			floorExport[x][y] = floorMap[floorInstance["object_definition"]]
-		
-		else:
-		
-			res = readCreationCode(floorInstance, floorInstance["creation_code"])
-			
-			res = res[isHardMode]
-			
-			if res == "destroy":
-				continue
-		
-			# now that we know this obj aint getting destroyed, do this test
-			if floorInstance["object_definition"] == "obj_chest_small" or floorInstance["object_definition"] == "obj_boulder":
-				# if the instance is a chest and is in here for some reason, we 
-				# want to move that over to being a sprite
-				
-				layerData["Instances"]["layer_data"]["instances"].append(floorInstance)
-				continue
-				
-			if res is not None and "b_form" in res:
-				print(RED + "there is somehow a form setter in a floor tile. this is undefined." + RESET)
-				res = None
-			
-			if res is None:
-				floorExport[x][y] = floorMap[floorInstance["object_definition"]]
-			else:
-				#print(x,y)
-				floorExport[x][y] = floorMap[res]
-	
-	return floorExport
-	
-def convertEntities(layerData):
+		def obj_spawnpoint(p, creationCode):	
+			entityExport.insert(0, "EntityType::Player,{:d},{:d}".format(p.x, p.y))
 
-	tempInstanceData = layerData["Instances"]["layer_data"]["instances"]
-	
-	instanceExport = []
-	
-	global playerX
-	global playerY
-	
-	for inst in tempInstanceData:
-		if inst["object_definition"] == "obj_spawnpoint" or inst["object_definition"] == "obj_enter_the_secret":
+		def obj_chest_small(p, creationCode):
+			entityExport.append("EntityType::Chest,{:d},{:d}".format(p.x, p.y))
+
+		def obj_boulder(p, creationCode):
 		
-				if inst["creation_code"] != None:
-					print(RED + "a player had a creation code? oh gods" + RESET)
-					#exit(1)
-				
-				x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
-				instanceExport.insert(0, instanceMap[inst["object_definition"]](inst, x, y))
-				playerX, playerY = x, y
-				break
-	else:
-		print("we couldnt find a player spawnpoint")
-		return None
-			
-	# from what i can tell, this just overlays already existing collision?
-	
-	for inst in tempInstanceData:
-	
-		if inst["object_definition"] == "obj_spawnpoint" or inst["object_definition"] == "obj_enter_the_secret":
-			continue
-	
-		if inst["object_definition"] in skipObjects:
-			continue
-	
-		if inst["object_definition"] not in instanceMap:
-			print("we dont have a definition for {:s}".format(inst["object_definition"]))
-			
-			if inst["object_definition"] not in failures:
-				failures[inst["object_definition"]] = []
-			
-			failures[inst["object_definition"]].append(layerData["roomName"])
-			
-			return None
-			
-		x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
-		
-		if x < 0 or y < 0 or x >= 14 or y >= 9:
-			continue
-		
-		if inst["creation_code"] == None:
-			instanceExport.append(instanceMap[inst["object_definition"]](inst, x, y))
-		else:
-		
-			res = readCreationCode(inst, inst["creation_code"])
-		
-			res = res[isHardMode]
-			
-			if res == "destroy":
-				continue
-				
-			if res is not None and "b_form" in res and inst["object_definition"] != "obj_boulder":
-				print(RED + "why the fuck is a non boulder object have a bform???" + RESET)
-	
-			
-			if res is None:
-				instanceExport.append(instanceMap[inst["object_definition"]](inst, x, y))
+			if creationCode is None:
+				entityExport.append("EntityType::Boulder,{:d},{:d}".format(p.x, p.y))
 			else:				
-				instanceExport.append(instanceMap[res](inst, x, y))
+				
+				# this being here is an assumption of that only boulders will be statues. i hope that holds.
+				
+				statueMap = {
+					"b_form = 8": lambda p : "EntityType::AddStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 7": lambda p : "EntityType::MonStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 6": lambda p : "EntityType::EusStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 5": lambda p : "EntityType::GorStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 4": lambda p : "EntityType::CifStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 3": lambda p : "EntityType::TanStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 2": lambda p : "EntityType::BeeStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 1": lambda p : "EntityType::LevStatue,{:d},{:d}".format(p.x, p.y),
+				}
+				
+				entityExport.append(statueMap[creationCode](p))
+				
+		def obj_enemy_cg(p, creationCode):
+			# i should be checking creationcode here, but i,,,, dont want to!
+			entityExport.append("EntityType::Bull,{:d},{:d}".format(p.x, p.y))
 		
+		def obj_enemy_cl(p, creationCode):
+			entityExport.append("EntityType::Leech,{:d},{:d}".format(p.x, p.y))
+		
+		def obj_enemy_cc(p, creationCode):
+			entityExport.append("EntityType::Maggot,{:d},{:d}".format(p.x, p.y))
+		
+		def obj_enemy_ch(p, creationCode):
+			entityExport.append("EntityType::Eye,{:d},{:d}".format(p.x, p.y))
+		
+		def obj_enemy_cs(p, creationCode):
+			entityExport.append("EntityType::Chester,{:d},{:d}".format(p.x, p.y))
+		
+		def obj_enemy_cl(p, creationCode):
+			entityExport.append("EntityType::Leech,{:d},{:d}".format(p.x, p.y))
+		
+		def obj_enemy_cm(p, creationCode):
+			 entityExport.append("EntityType::Mimic,{:d},{:d}".format(p.x, p.y))
+			 
+		def obj_enemy_co(p, creationCode):
+			entityExport.append("EntityType::Diamond,{:d},{:d}".format(p.x, p.y))
+	
+	
+	
+	
+		def obj_collision(p, creationCode):
+			# for now, donothing, but i could maybe,,, modify this to put a black tile in collision/details that has collision?
+			pass
 			
+		def obj_dustemiter_unknown(p, creationCode):
+			pass
+			
+		def obj_enter_the_secret(p, creationCode):
+			ObjectFunctions.obj_spawnpoint(p, creationCode)
+		
+		def obj_na_secret_exit(p, creationCode):
+			pass
+			
+		def obj_npc_friend(p, creationCode):
+			pass
+			
+		def obj_mural(p, creationCode):
+			pass
+			
+		def obj_enemy_nm(p, creationCode):
+			pass
+			
+		def obj_secret_exit(p, creationCode):
+			pass
+			
+		def obj_solarsystem(p, creationCode):
+			pass
+		
+		def obj_rest(p, creationCode):
+			pass
+			
+		def obj_dustemit(p, creationCode):
+			pass
+			
+		def obj_fakewall(p, creationCode):
+			pass
+			
+		def obj_enemy_invisiblemon(p, creationCode):
+			pass
+
+		def obj_npc_mon(p, creationCode):
+			pass
+
+		def obj_npc_riddle(p, creationCode):
+			pass
+
+		def obj_npc_ykko(p, creationCode):
+			pass
+
+		def obj_demonlords_statue(p, creationCode):
+			pass
+
+		def obj_enemy_nm_b(p, creationCode):
+			pass
+
+		def obj_gray_d(p, creationCode):
+			pass
+
+		def obj_sealchest(p, creationCode):
+			pass
+
+		def obj_npc_failure_001(p, creationCode):
+			pass
+
+		def obj_npc_nun(p, creationCode):
+			pass
+
+		def obj_npc_tail(p, creationCode):
+			pass
+
+		def obj_npc_failure_002(p, creationCode):
+			pass
+
+		def obj_npc_bride(p, creationCode):
+			pass
+
+		def obj_npc_famished(p, creationCode):
+			pass
+
+		def obj_npc_failure_004(p, creationCode):
+			pass
+
+		def obj_npc_nomad(p, creationCode):
+			pass
+
+		def obj_npc_unknown(p, creationCode):
+			pass
+
+		def obj_npc_nomad2(p, creationCode):
+			pass
+
+		def obj_npc_failure_005(p, creationCode):
+			pass
+
+		def obj_npc_spawner(p, creationCode):
+			pass
+
+		def obj_npc_gor(p, creationCode):
+			pass
+
+		def obj_npc_failure_006(p, creationCode):
+			pass
+
+		def obj_npc_failure_008(p, creationCode):
+			pass
+
+		def obj_npc_oldman(p, creationCode):
+			pass
+
+		def obj_randomfloorlayout(p, creationCode):
+			pass
+
+		def obj_enter_the_danger(p, creationCode):
+			pass
+
+		def obj_spawn_intro(p, creationCode):
+			ObjectFunctions.obj_spawnpoint(p, creationCode)
+
+		def obj_intermission(p, creationCode):
+			pass
+
+		def obj_change_music(p, creationCode):
+			pass
+
+		def obj_cc_menu(p, creationCode):
+			pass
+
+		def obj_cif_epilogue2(p, creationCode):
+			pass
+
+		def obj_gateofdis(p, creationCode):
+			pass
+
+		def obj_ex_aftermath(p, creationCode):
+			pass
+
+		def obj_riddle_000(p, creationCode):
+			pass
+
+		def obj_tot_mural(p, creationCode):
+			pass
+
+		def obj_riddle_002(p, creationCode):
+			pass
+
+		def obj_riddle_003(p, creationCode):
+			pass
+
+		def obj_riddle_004(p, creationCode):
+			pass
+
+		def obj_riddle_005(p, creationCode):
+			pass
+
+		def obj_riddle_006(p, creationCode):
+			pass
+
+		def obj_riddle_001(p, creationCode):
+			pass
+
+		def obj_elevator_activate(p, creationCode):
+			pass
+
+		def obj_stainedglass_eclipse(p, creationCode):
+			pass
+
+		def obj_gray_finalmeeting(p, creationCode):
+			pass
+
+		def obj_zero_d(p, creationCode):
+			pass
+
+		def obj_lillie_d(p, creationCode):
+			pass
+
+		def obj_results(p, creationCode):
+			pass
+
+		def obj_confinement(p, creationCode):
+			pass
+
+		def obj_enemy_ct(p, creationCode):
+			pass
+
+		def obj_soundtest(p, creationCode):
+			pass
+
+		def obj_staffroll_b(p, creationCode):
+			pass
+
+		def obj_npc_dr_ab___on(p, creationCode):
+			pass
+		
+		def obj_baal_d(p, creationCode):
+			pass
+
+		def obj_npc_tail_tail(p, creationCode):
+			pass
+
+		def obj_npc_failure_003(p, creationCode):
+			pass
+
+		def obj_npc_randobandit(p, creationCode):
+			pass
+
+		def obj_baal_m_d(p, creationCode):
+			pass
+
+		def obj_npc_failure_007(p, creationCode):
+			pass
+
+		def obj_chest(p, creationCode):
+			pass
+
+		def obj_baal_epilogue2(p, creationCode):
+			pass
+
+		def obj_gateofdis_roots(p, creationCode):
+			pass
+
+		def obj_sera_d(p, creationCode):
+			pass
+
+		def obj_intro2_bg(p, creationCode):
+			pass
+
+		def obj_lillie_finalmeeting(p, creationCode):
+			pass
+
+		def obj_freya_d(p, creationCode):
+			pass
+
+		def obj_a_corpse(p, creationCode):
+			pass
+
+		def obj_cifer_d(p, creationCode):
+			pass
+
+		def obj_tail_kill(p, creationCode):
+			pass
+
+		def obj_statue_abaddon(p, creationCode):
+			pass
+
+		def obj_gateofdis_bg(p, creationCode):
+			pass
+
+		def obj_cutscene_finalwaltz(p, creationCode):
+			pass
+
+		def obj_fm_cemetery(p, creationCode):
+			pass
+
+		def obj_npc_tail_floor(p, creationCode):
+			pass
+
+		def obj_cutscene_epilogue_part3(p, creationCode):
+			pass
+
+		def obj_cutscene_grayend(p, creationCode):
+			pass
+
+		def obj_cutscene_finalmeeting(p, creationCode):
+			pass
+
+		def obj_cutscene_lillie_end(p, creationCode):
+			pass
+
+		def obj_npc_tail_lowerfloor(p, creationCode):
+			pass
+
+		def obj_cifandbee_bg(p, creationCode):
+			pass
+
+		def obj_stinklines(p, creationCode):
+			pass
+
+		def obj_spawnpoint__dream(p, creationCode):
+			pass
+
+		def obj_npc_nolla(p, creationCode):
+			pass
+
+		def obj_floor_lev(p, creationCode):
+			pass
+
+		def obj_npc_levextra(p, creationCode):
+			pass
+
+		def obj_gor_cube(p, creationCode):
+			pass
+
+		def obj_horse(p, creationCode):
+			pass
+
+		def obj_johann_dreamIX(p, creationCode):
+			pass
+
+		def obj_gray_dreamVII(p, creationCode):
+			pass
+
+		def obj_gray_dreamVI(p, creationCode):
+			pass
+
+		def obj_prin_dreamV(p, creationCode):
+			pass
+
+		def obj_seal(p, creationCode):
+			pass
+
+		def obj_floor_hpn(p, creationCode):
+			pass
+
+		def obj_music_controller_v2(p, creationCode):
+			pass
+
+		def obj_gray_dreamIII(p, creationCode):
+			pass
+
+		def obj_bigwindow(p, creationCode):
+			pass
+
+		def obj_gray_dreamXI(p, creationCode):
+			pass
+
+		def obj_gray_dreamIX_b(p, creationCode):
+			pass
+
+		def obj_torch(p, creationCode):
+			pass
+
+		def obj_prin_c(p, creationCode):
+			pass
+
+		def obj_gray_dreamVIII(p, creationCode):
+			pass
+
+		def obj_prin_dreamVIII(p, creationCode):
+			pass
+
+		def obj_johann_dreamVIII(p, creationCode):
+			pass
+
+		def obj_ee_eclipse(p, creationCode):
+			pass
+
+		def obj_enemy_floormaster(p, creationCode):
+			pass
+
+		def obj_og_jewel(p, creationCode):
+			pass
+
+		def obj_dr_un(p, creationCode):
+			pass
+
+		def obj_player_a(p, creationCode):
+			pass
+
+		def obj_player_child(p, creationCode):
+			pass
+
+		def obj_enemy_5(p, creationCode):
+			pass
+
+		def obj_tan_intro(p, creationCode):
+			pass
+
+		def obj_mas_stuff(p, creationCode):
+			pass
+
+		def obj_baal_battleintro(p, creationCode):
+			pass
+
+		def obj_mon_battleintro(p, creationCode):
+			pass
+
+		def obj_enemy_cifhandl(p, creationCode):
+			pass
+
+		def obj_wagon(p, creationCode):
+			pass
+
+		def obj_npc_ran001(p, creationCode):
+			pass
+
+		def obj_prin_dreamVI(p, creationCode):
+			pass
+
+		def obj_gray_dreamV(p, creationCode):
+			pass
+
+		def obj_prin_dreamIII(p, creationCode):
+			pass
+
+		def obj_gray_dreamIV(p, creationCode):
+			pass
+
+		def obj_prison_bucket(p, creationCode):
+			pass
+
+		def obj_torch_fallen(p, creationCode):
+			pass
+
+		def obj_prin_dreamIX(p, creationCode):
+			pass
+
+		def obj_baal_dreamIX(p, creationCode):
+			pass
+
+		def obj_curtains(p, creationCode):
+			pass
+
+		def obj_gray_c(p, creationCode):
+			pass
+
+		def obj_enter_door(p, creationCode):
+			pass
+
+		def obj_eclipse_begin(p, creationCode):
+			pass
+
+		def obj_jguard_dreamVIII_a(p, creationCode):
+			pass
+
+		def obj_prin_dreamVII(p, creationCode):
+			pass
+
+		def obj_npc_ran002_dreamV(p, creationCode):
+			pass
+
+		def obj_npc_ran003_dreamV(p, creationCode):
+			pass
+
+		def obj_npc_ran001_dreamV(p, creationCode):
+			pass
+
+		def obj_ee_enemies(p, creationCode):
+			pass
+
+		def obj_ee_bg_future(p, creationCode):
+			pass
+
+		def obj_ex_levbg_001(p, creationCode):
+			pass
+
+		def obj_giant(p, creationCode):
+			pass
+
+		def obj_dummyfloor(p, creationCode):
+			pass
+
+		def obj_og_onion(p, creationCode):
+			pass
+
+		def obj_stairs_001(p, creationCode):
+			pass
+
+		def obj_lock(p, creationCode):
+			pass
+
+		def obj_tan_intro_body(p, creationCode):
+			pass
+
+		def obj_riddle_007(p, creationCode):
+			pass
+
+		def obj_cif_monbattleintro(p, creationCode):
+			pass
+
+		def obj_enemy_cifhandr(p, creationCode):
+			pass
+		
+		def obj_pr_cupboard(p, creationCode):
+			pass
+
+		def obj_cifer_dreamIX(p, creationCode):
+			pass
+
+		def obj_exit_dream(p, creationCode):
+			pass
+
+		def obj_npc_ran002(p, creationCode):
+			pass
+
+		def obj_wagon_inside(p, creationCode):
+			pass
+
+		def obj_rando_dreamIII(p, creationCode):
+			pass
+
+		def obj_bandit_dreamIII(p, creationCode):
+			pass
+
+		def obj_johann_dreamIV(p, creationCode):
+			pass
+
+		def obj_jguard_dreamVIII_b(p, creationCode):
+			pass
+
+		def obj_johann_dreamV(p, creationCode):
+			pass
+
+		def obj_stairs_002(p, creationCode):
+			pass
+
+		def obj_enemy_invmon_prelude(p, creationCode):
+			pass
+
+		def obj_npc_ran003(p, creationCode):
+			pass
+
+		def obj_henchman_ded_dreamIII(p, creationCode):
+			pass
+
+		def obj_judgement_crater(p, creationCode):
+			pass
+
+		def obj_zero_dreamIX(p, creationCode):
+			pass
+
+		def obj_open_door(p, creationCode):
+			pass
+
+		def obj_jguard_dreamVIII(p, creationCode):
+			pass
+
+		def obj_jguard_dreamV(p, creationCode):
+			pass
+
+		def obj_stairs_002b(p, creationCode):
+			pass
+
+		def obj_mural_dream(p, creationCode):
+			pass
+
+		def obj_stairs_003(p, creationCode):
+			pass
+
+		def obj_floor_un(p, creationCode):
+			pass
+	
+		def obj_console(p, creationCode):
+			pass
+
+		def obj_un_bgdecour_001(p, creationCode):
+			pass
+
+		def obj_memorywindow(p, creationCode):
+			pass
+
+		def obj_un_bgdecour_002(p, creationCode):
+			pass
+
+
+
+
+
+	
+	allData = []
+	
+	for label in ["Instances", "Floor_INS", "Floor", "Pit"]:
+		if label in layerData:
+			allData += layerData[label]["layer_data"]["instances"]
+	
 			
 	
-	#instanceExport.append("NULL")
+	for inst in allData:
+	
+		#x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
+		
+		p = Pos(inst["x"], inst["y"])
 
-	return instanceExport
+		objectDef = inst["object_definition"]
+		creationCodeFilename = inst["creation_code"]
+		
+		
+		
+		if p.x < 0 or p.x >= 14 or p.y < 0 or p.y >= 9:
+			continue
+		
+	
+		
+	
+		if hasattr(ObjectFunctions, objectDef):
+		
+			creationCode = readCreationCode(creationCodeFilename)
+			# avoid needing this check every time 
+			if creationCode == "destroy":
+				continue
+		
+			getattr(ObjectFunctions, objectDef)(p, creationCode)
+		else:
+		
+			print("we dont have a definition for {:s} in convert entities".format(objectDef))
+		
+			if objectDef not in failures:
+				failures[objectDef] = []
+		
+			failures[objectDef].append(layerData["roomName"])
+			
+			return None
+	
+	# MAKE SURE THE PLAYER HAS A SPAWNPOINT HERE
+	if len(entityExport) == 0:
+		print(RED + "there were no entities, not even a player??" + RESET)
+		return None
+		
+	
+	return [floorExport, entityExport, effectExport]
 	
 def convertRoom(data, outputFile):
 
@@ -508,12 +914,6 @@ def convertRoom(data, outputFile):
 	
 	for l in data["layers"]:
 		layerData[l["layer_name"]] = l
-	
-	if "Tiles_2" not in layerData:
-		return None
-	
-	if "Tiles_1" not in layerData:
-		return None
 	
 	layerData["roomName"] = data["name"]
 	
@@ -524,10 +924,12 @@ def convertRoom(data, outputFile):
 	temp = convertCollisionAndDetails(layerData)
 	
 	if temp is None:
+		print("collision/details convert failed!")
 		return None
 		
 	collision, details = temp
 		
+	"""
 	floorExport = convertFloor(layerData)
 	
 	if floorExport is None:
@@ -537,7 +939,13 @@ def convertRoom(data, outputFile):
 	
 	if instanceExport is None:
 		return None
+	"""
 	
+	objectsExport = convertObjects(layerData)
+	if objectsExport is None:
+		return None
+		
+	floorExport, instanceExport, statueExport = objectsExport
 	
 	output = []
 	
@@ -557,14 +965,18 @@ def convertRoom(data, outputFile):
 	output.append("".join([ "{{{:s}}},".format(instance) for instance in instanceExport ]))
 	output.append("};")
 	
-	
 	output.append("constexpr static inline int entityCount = {:d};".format(len(instanceExport)))
+	
+	#output.append("constexpr static inline EntityHolder effects[] = {")
+	#output.append("};")	
+	
+	output.append("constexpr static inline int effectCount = {:d};".format(len(instanceExport)))
 	
 	output.append("};")
 	
 	[ outputFile.write(line + "\n") for line in output ]
 
-	# TODO, WE DONT EXPORT THE TILESET HERE.
+	# TODO, WE DONT EXPORT THE TILESET HERE(of what the room tiles should be)
 	
 	return True
 
@@ -588,16 +1000,19 @@ def convertAllRooms(inputPath):
 	#jsonFiles = [ f for f in jsonFiles if f.rsplit(".", 1)[0] not in removeRooms ]
 
 	#removeStrings = ["secret", "test", "misc", "trailer"]
-	removeStrings = ["stg", "house", "secret", "test", "misc", "trailer", "dream", "memories", "bee", "lev", "_ee_"]
+	#removeStrings = ["stg", "house", "secret", "test", "misc", "trailer", "dream", "memories", "bee", "lev", "_ee_"]
+	removeStrings = []
 	
 	for removeStr in removeStrings:
 		# i could, and should one line this
 		jsonFiles = [ f for f in jsonFiles if removeStr not in f ]
 	
+	
 	#jsonFiles = ["rm_0005.json"]
 	#jsonFiles = ["rm_0027.json"]
 	#jsonFiles = ["rm_0008.json"]
 	#jsonFiles = ["rm_0018.json"]
+	#jsonFiles = ["rm_2intro.json"]
 	
 	successRooms = 0 
 	totalRooms = len(jsonFiles)
@@ -615,7 +1030,7 @@ def convertAllRooms(inputPath):
 				successRooms += 1
 				successRoomsList.append(file)
 			else:
-				print("failure")
+				print(RED + "failure" + RESET)
 			
 	
 	#print(successRoomsList)
@@ -639,11 +1054,11 @@ def convertAllRooms(inputPath):
 			print("wtf")
 			exit(1)
 	
-	temp = sorted([ [k, len(v), v] for k, v in failures.items() ], key = lambda elem : len(elem[2]), reverse=True)
+	tempSorted = sorted([ [k, len(v), v] for k, v in failures.items() ], key = lambda elem : len(elem[2]), reverse=True)
 	
 	highlightStrings = ["mon", "_e_"]
 	
-	for t in temp:
+	for t in tempSorted:
 		temp = str(t)
 		
 		col = WHITE
@@ -655,13 +1070,13 @@ def convertAllRooms(inputPath):
 				
 		print(col + temp + RESET)
 		
-		
-		
 	
-	"""
-	with open('tempCreationCodeData.json', 'w') as f:
-		json.dump(creationCodeData, f, indent=4)
-	"""
+	tempFile = open("temp.txt", "w")
+	for t in tempSorted:
+		tempFile.write("def {:s}(p, creationCode):\n".format(t[0]))
+		tempFile.write("\tpass\n")
+		tempFile.write("\n")
+	tempFile.close()
 	
 	
 	with open('tempCreationCodeData.json', 'w') as f:

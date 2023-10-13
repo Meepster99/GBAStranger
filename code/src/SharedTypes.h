@@ -52,8 +52,8 @@ typedef unsigned char u8;
 
 #define MAXSPRITES 128
 
-#define MAXTEXTSPRITES 64
-#define MAXEFFECTSPRITES 16
+#define MAXTEXTSPRITES 56
+#define MAXEFFECTSPRITES 8
 
 #define MAXENTITYSPRITES MAXSPRITES - MAXTEXTSPRITES - MAXEFFECTSPRITES
 
@@ -118,6 +118,7 @@ enum class EntityType {
 	Bull,
 	Chester,
 	
+	Mimic,
 	WhiteMimic,
 	GrayMimic,
 	BlackMimic,
@@ -147,6 +148,7 @@ static const char *EntityTypeToString[] ={
 	"Eye",
 	"Bull",
 	"Chester",
+	"Mimic",
 	"WhiteMimic",
 	"GrayMimic",
 	"BlackMimic",
@@ -609,7 +611,7 @@ public:
 
 	SaneSet(const SaneSet& other) : data(other.data) {}
 	
-	SaneSet& operator=(const SaneSet& other) {
+	SaneSet& operator=(const SaneSet& other) { 
         if (this != &other) {
             data = other.data;
         }

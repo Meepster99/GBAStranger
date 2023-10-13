@@ -186,7 +186,7 @@ void Game::doVBlank() {
 void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
-	
+
 	load();
 	
 	globalGame = this;

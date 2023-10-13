@@ -273,7 +273,7 @@ void Chest::interact() {
 // i swear, why cant i do this without a struct? idek if the idek var is needed, but im not going to be changing it.
 struct MessageStr {
 	const char* str;
-	const char idek = '\0';
+	const char idek = '\0'; // sanity
 };
 
 // each string here has a limit of,, 64 non space chars in between lines(seperated with \n)

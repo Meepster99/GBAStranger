@@ -235,6 +235,20 @@ def preformatSprites():
 
 spriteSuccess = 0
 spriteTotal = 0
+
+validSizes = set([
+(8, 8), 
+(16, 16), 
+(32, 32), 
+(64, 64), 
+(16, 8), 
+(32, 8), 
+(32, 16), 
+(8, 16), 
+(8, 32), 
+(16, 32), 
+(32, 64),
+])
 	
 def convertSprites(spritePath, outputPath):
 	
@@ -265,21 +279,6 @@ def convertSprites(spritePath, outputPath):
 	
 	
 	"""
-	
-	validSizes = set([
-	(8, 8), 
-	(16, 16), 
-	(32, 32), 
-	(64, 64), 
-	(16, 8), 
-	(32, 8), 
-	(32, 16), 
-	(8, 16), 
-	(8, 32), 
-	(16, 32), 
-	(32, 64),
-	])
-	
 	
 	#spritePath = "./Sprites/."
 	
@@ -346,6 +345,8 @@ def convertSprites(spritePath, outputPath):
 
 		tempImage = cyan_background
 		
+		# this rlly needs to become all one func, its so dumb how one appends the dw and another doesnt
+		
 		writeBitmap(tempImage, os.path.join(outputPath, folder + ".bmp"))
 		
 		outputJson = {
@@ -372,15 +373,174 @@ def convertAllSprite(outputPath):
 	os.makedirs(outputPath)
 	
 	convertSprites("./Sprites_Padded/.", outputPath)
-	
 	convertSprites("../ExportData/Export_Textures/Sprites/.", outputPath)
-
-		
+	
 	global spriteSuccess
 	global spriteTotal
 	
 	print("we converted {:6.2f}% sprites({:d}/{:d}), i hope thats acceptable.".format(100*spriteSuccess/spriteTotal, spriteSuccess, spriteTotal))
 	
+	pass
+
+# goofy 
+# key val is sprite name, sprite path
+bigSpriteData = {}
+
+def generateBigSpritePaths(spritePath):
+
+	# gods looking back on all of the other code i wrote like, the progress bars mean nothing tbh
+	
+	# TODO, THESE IMAGES SHOULD REALLY BE CACHED
+	
+	contents = os.listdir(spritePath)
+	folders = [item for item in contents if os.path.isdir(os.path.join(spritePath, item))]
+
+	for i, folder in enumerate(folders):
+	
+		currentFolder = os.path.join(spritePath, folder)
+
+		png_files = [f for f in os.listdir(currentFolder) if f.lower().endswith('.png')]
+		
+		png_files = sorted(png_files)
+		
+		max_width = 0
+		total_height = 0
+		max_height = 0 
+		
+		for png_file in png_files:
+			image = Image.open(os.path.join(currentFolder, png_file))
+			width, height = image.size
+			max_width = max(max_width, width)
+			total_height += height
+			max_height = max(max_height, height)
+		
+		if (max_width, max_height) in validSizes:
+			continue
+		
+		temp = {
+			"spritePath": currentFolder,
+			"maxWidth": max_width,
+			"maxHeight": max_height,
+		}
+		
+		if folder not in bigSpriteData:
+			bigSpriteData[folder] = temp
+		else:
+			# check if our current numbers will fit better 
+			if max_width % 16 == 0 and bigSpriteData[folder]["maxWidth"] % 16 != 0:
+				bigSpriteData[folder] = temp
+			elif max_height % 16 == 0 and bigSpriteData[folder]["maxHeight"] % 16 != 0:
+				bigSpriteData[folder] = temp
+	
+	pass
+
+def convertBigSprite(spriteName, spritePath, outputPath):
+
+	# for now, im just going to have all these be 16x16 sprites, simply bc thats what my system works with
+
+	png_files = [f for f in os.listdir(spritePath) if f.lower().endswith('.png')]
+
+	png_files = sorted(png_files)
+
+	max_width = 0
+	total_height = 0
+	max_height = 0 
+	
+	images = []
+	
+	# Determine the maximum width and calculate the total height
+	for png_file in png_files:
+		image = Image.open(os.path.join(spritePath, png_file))
+		width, height = image.size
+		max_width = max(max_width, width)
+		total_height += height
+		max_height = max(max_height, height)
+		
+		images.append(image)
+		
+	if max_height % 16 != 0:
+		return False
+	if max_width % 16 != 0:
+		return False
+		
+	total_height = max_height * len(png_files)
+	
+	# Create a new blank image to stack PNGs vertically
+	stacked_image = Image.new('RGBA', (max_width, total_height))
+	
+	# Paste each PNG file onto the stacked image
+	y_offset = 0
+	#for png_file in png_files:
+	for image in images:
+		#image = Image.open(os.path.join(spritePath, png_file))
+		width, height = image.size
+		image = image.convert("RGBA")
+		stacked_image.paste(image, (0, y_offset))
+		y_offset += max_height
+
+	cyan_background = Image.new("RGBA", (max_width, total_height), (0, 255, 255, 255))
+	cyan_background.paste(stacked_image, (0, 0), stacked_image)
+	
+	cyan_background = cyan_background.convert("RGB")
+
+	tempImage = np.array(cyan_background)
+	
+	# gods so many of these funcs could, and should of been standaridized
+	
+	tiles = []
+	
+	for x in range(0, max_width, 16):
+		for y in range(0, max_height, 16):
+			tiles.append(tempImage[y:y+16, x:x+16])
+
+	tempImage = Image.fromarray(np.vstack(tiles))
+	
+	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
+	# the width of the bigsprite 
+	#,, possibly the loading position of the bigsprite? do i have access to that easily?
+	
+	writeBitmap(tempImage, os.path.join(outputPath, spriteName.lower() + ".bmp"))
+	outputJson = {
+		"type": "sprite_tiles",
+		"height": 16,
+	}
+	with open(os.path.join(outputPath, "dw_" + spriteName.lower() + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	
+	return True
+
+def convertAllBigSprite(outputPath):
+
+	print("converting bigsprites")
+
+	shutil.rmtree(outputPath)
+	os.makedirs(outputPath)
+	
+	
+	# first, calculate how many total bigsprites ther
+	generateBigSpritePaths("./Sprites_Padded/")
+	generateBigSpritePaths("../ExportData/Export_Textures/Sprites/")
+	
+	successCount = 0
+	
+	testData = [  [k, v] for k, v in bigSpriteData.items() ] # does looping through a list here allow python to cache file loads ahead of time?
+	
+	i = 0
+	#for spriteName, data in bigSpriteData.items():
+	for spriteName, data in testData:
+		i += 1
+		
+		print("working on {:50s} {:5d}/{:5d}   {:6.2f}% done".format(spriteName, i, len(bigSpriteData), 100*i/len(bigSpriteData)))
+		
+		res = convertBigSprite(spriteName, data["spritePath"], outputPath)
+		
+		if res:
+			successCount += 1
+	
+	print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
+	
+	print("done converting bigsprites")
+
 	pass
 	
 def convertTiles(outputPath):
@@ -938,15 +1098,17 @@ def main():
 	createFolder("./formattedOutput/tiles/")
 	createFolder("./formattedOutput/customFloor/")
 	createFolder("./formattedOutput/customEffects/")
+	createFolder("./formattedOutput/bigSprites/")
 
 	convertAllSprite("./formattedOutput/sprites/")
+	convertAllBigSprite("./formattedOutput/bigSprites/")
 	convertTiles("./formattedOutput/tiles/")
 	convertFonts("./formattedOutput/fonts/")
 	generateCustomFloorBackground("./formattedOutput/customFloor/")	
 	generateEffectsTiles("./formattedOutput/customEffects/")
 
 
-	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/"])
+	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/bigSprites/"])
 	
 	print("copying over files. this may take a little bit")
 	
@@ -962,6 +1124,7 @@ def main():
 	copyFunc("./formattedOutput/customFloor/")
 	copyFunc("./formattedOutput/sprites/")
 	copyFunc("./formattedOutput/tiles/")
+	copyFunc("./formattedOutput/bigSprites/")
 	
 	
 	pass

@@ -88,7 +88,6 @@ public:
 				floorMap[x][y] = NULL;
 			}
 		}
-		
 	}
 
 	void loadTiles(TileType* floorPointer);

@@ -41,6 +41,8 @@ ROMCODE     :=  SBTP
 # SAVE ME O3
 #USERFLAGS   :=  -O3 -DBN_CFG_PROFILER_ENABLED=true -DBN_CFG_LOG_ENABLED=true
 USERFLAGS   :=  -O3 
+#USERFLAGS   :=  -Ofast -funroll-loops
+#USERFLAGS   :=  -Ofast
 USERASFLAGS :=  
 USERLDFLAGS :=  -flto=16
 USERLIBDIRS :=  

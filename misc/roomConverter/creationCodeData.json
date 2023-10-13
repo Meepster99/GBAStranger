@@ -468,6 +468,305 @@
 	
 	"if (global.stranger != 0)   instance_destroy()   special_message = 68": [
 		null
-	]
+	],
+	
+	"if (global.stranger >= 2)   {   if (ds_grid_get(obj_inventory.ds_player_info, 17, 1) == 0 || ds_grid_get(obj_inventory.ds_player_info, 17, 3) == 0)   instance_destroy()   }": [
+		null
+	],
+	
+	"na_secret = 4": [
+		null
+	],
+	
+	"na_secret = 5": [
+		null
+	],
+	
+	"na_secret = 10": [
+		null
+	],
+	
+	"na_secret = 6": [
+		null
+	],
+	
+	"na_secret = 7": [
+		null
+	],
+	"na_secret = 8": [
+		null
+	],
+	"na_secret = 9": [
+		null
+	],
+	"na_secret = 3": [
+		null
+	],
+	"na_secret = 1": [
+		null
+	],
+	"na_secret = 2": [
+		null
+	],
+	"if (global.stranger != 1)   instance_destroy()   if (global.voider == 1)   instance_destroy()": [
+		"destroy"
+	],
+	"if (global.stranger != 1)   instance_destroy()   if (global.voider == 1)   instance_destroy()   if (ds_grid_get(obj_inventory.ds_player_info, 16, 3) == 0)   instance_destroy()": [
+		"destroy"
+	],
+	 "inscription = 1": [
+        null
+    ],
+    "inscription = 2": [
+        null
+    ],
+    "inscription = 3": [
+        null
+    ],
+    "inscription = 4": [
+        null
+    ],
+    "inscription = 5": [
+        null
+    ],
+    "inscription = 6": [
+        null
+    ],
+    "inscription = 7": [
+        null
+    ],
+    "inscription = 8": [
+        null
+    ],
+    "inscription = 19": [
+        null
+    ],
+    "inscription = 11   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "inscription = 12   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "inscription = 13   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "inscription = 17   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "inscription = 15   sprite_index = spr_mural_tile": [
+        null
+    ],
+	"end_secret = 2": [
+        null
+    ],
+    "end_secret = 1": [
+        null
+    ],
+	"withered = 1   image_speed = 1": [
+        null
+    ],
+	"if (global.loop != 0)   instance_destroy()": [
+		null
+	],
+	
+	
+    "if (global.loop == 1 || global.stranger != 0)   instance_destroy()": [
+        null
+    ],
+    "if (global.loop == 1 || global.stranger >= 2)   instance_destroy()": [
+        null
+    ],
+    "spr_n_neutral = 542   n_direction = 0   sprite_index = spr_n_right": [
+        null
+    ],
+    "if (global.loop == 0 || global.stranger != 1)   instance_destroy()": [
+        "destroy"
+    ],
+    "dl_form = 1": [
+        null
+    ],
+    "if (global.stranger >= 2)   instance_destroy()": [
+        null
+    ],
+    "set_n_direction = 2   n_direction = 180   face_dir = 1   if (global.stranger >= 2)   instance_destroy()": [
+        null
+    ],
+    "dl_form = 2": [
+        null
+    ],
+    "dl_form = 3": [
+        null
+    ],
+    "if (global.stranger != 1)   instance_destroy()": [
+        "destroy"
+    ],
+    "image_speed = 1": [
+        null
+    ],
+    "lev_state = 4": [
+        null
+    ],
+    "inscription = 14   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "image_speed = 1   depth = 480": [
+        null
+    ],
+	
+	"lev_room = 1": [
+        null
+    ],
+    "inscription = 10   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "contents = 2   if (ds_grid_get(obj_inventory.ds_equipment, 0, 2) != 3 && ds_grid_get(obj_inventory.ds_player_info, 15, 1) != 0)   {   var tan_boulder = instance_create_layer(x, y, \"Instances\", obj_boulder)   with (tan_boulder)   b_form = 3   }": [
+        null
+    ],
+    "inscription = 16   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "special_message = 40": [
+        null
+    ],
+    "inscription = 9": [
+        null
+    ],
+    "b_form = 9   jukebox_song = songlist_max": [
+        null
+    ],
+    "na_secret = 11   secret_stars = 1": [
+        null
+    ],
+    "na_secret = 12   secret_stars = 1": [
+        null
+    ],
+    "na_secret = 13   secret_stars = 1": [
+        null
+    ],
+    "contents = 10": [
+        null
+    ],
+    "b_form = 3   if (ds_grid_get(obj_inventory.ds_player_info, 18, 1) == 2)   instance_destroy()   if (global.stranger < 2)   instance_destroy()": [
+        "destroy"
+    ],
+	
+	"inscription = 18   sprite_index = spr_mural_tile": [
+        null
+    ],
+    "dream_state = 1": [
+        null
+    ],
+    "dream_state = 2": [
+        null
+    ],
+    "image_speed = 3": [
+        null
+    ],
+    "image_speed = 0": [
+        null
+    ],
+    "g_status = 3": [
+        null
+    ],
+    "image_speed = 1   x_scale = -1": [
+        null
+    ],
+    "image_speed = 2": [
+        null
+    ],
+    "image_speed = 4": [
+        null
+    ],
+    "image_speed = 5": [
+        null
+    ],
+    "image_speed = 6": [
+        null
+    ],
+    "p_status = 2": [
+        null
+    ],
+    "g_status = 0": [
+        null
+    ],
+    "secret_stars = 1": [
+        null
+    ],
+    "lev_message = 1": [
+        null
+    ],
+    "lev_message = 2": [
+        null
+    ],
+    "if (ds_grid_get(obj_inventory.ds_player_info, 20, 0) == 2)   {   instance_destroy()   instance_create_layer(x, y, \"Floor\", obj_exit)   }": [
+        null
+    ],
+    "hflip = -1": [
+        null
+    ],
+    "special_message = 63": [
+        null
+    ],
+    "special_message = 64": [
+        null
+    ],
+    "mas_stuff = 1": [
+        null
+    ],
+    "mas_stuff = 0": [
+        null
+    ],
+    "b_form = 1   unfinished = 1": [
+        "b_form = 1"
+    ],
+    "b_form = 8   unfinished = 1": [
+        "b_form = 8"
+    ],
+    "mas_stuff = 6": [
+        null
+    ],
+    "mas_stuff = 4": [
+        null
+    ],
+    "mas_stuff = 5": [
+        null
+    ],
+    "mas_stuff = 2": [
+        null
+    ],
+    "mas_stuff = 3": [
+        null
+    ],
+    "contents = 9": [
+        null
+    ],
+    "dummy_value = 1": [
+        null
+    ],
+    "b_form = 3   if (ds_grid_get(obj_inventory.ds_player_info, 18, 0) > 1)   instance_destroy()": [
+        "b_form = 3"
+    ],
+    "if (global.stranger != 2)   instance_destroy()": [
+        "destroy"
+    ],
+    "if (global.stranger < 2)   instance_destroy()   if (ds_grid_get(obj_inventory.ds_player_info, 18, 1) != 0)   instance_destroy()": [
+        "destroy"
+    ],
+    "contents = 5   if (global.stranger != 2)   contents = 1": [
+        null
+    ],
+    "if (global.stranger == 4)   x = 112": [
+        null
+    ],
+    "if (ds_grid_get(obj_inventory.ds_player_info, 18, 2) == 0)   {   instance_create_layer(x, y, \"Floor\", obj_exit)   instance_destroy()   }   if (ds_grid_get(obj_inventory.ds_player_info, 18, 2) >= 2)   {   instance_create_layer(x, y, \"Floor\", obj_exit)   instance_destroy()   }": [
+        null
+    ],
+    "if (ds_grid_get(obj_inventory.ds_player_info, 18, 2) == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }   if (ds_grid_get(obj_inventory.ds_player_info, 18, 2) >= 2)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
+        null
+    ]
+
+	
+	
+	
 	
 }
