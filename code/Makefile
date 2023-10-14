@@ -33,10 +33,10 @@ PYTHON      :=  python
 SOURCES     :=  src ../butano/common/src
 INCLUDES    :=  include ../butano/common/include ./build
 DATA        :=
-GRAPHICS    :=  graphics ../butano/common/graphics
-AUDIO       :=  audio ../butano/common/audio
+GRAPHICS    :=  graphics ../butano/common/graphics 
+AUDIO       :=  audio ../butano/common/audio 
 DMGAUDIO    :=  dmg_audio ../butano/common/dmg_audio
-ROMTITLE    :=  ROM TITLE
+ROMTITLE    :=  GBAStranger
 ROMCODE     :=  SBTP
 # SAVE ME O3
 #USERFLAGS   :=  -O3 -DBN_CFG_PROFILER_ENABLED=true -DBN_CFG_LOG_ENABLED=true

@@ -1,11 +1,20 @@
 
 
 from PIL import Image, ImageOps, ImageDraw
-import os
+import os, sys
 import numpy as np
 import json 
 import string 
 import shutil
+#from ..EasyPoolProcessing/poolQueue import PoolQueue
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
+
+from poolQueue import PoolQueue
+from multiprocessing import Queue, Pool, cpu_count, Event
+import queue
+import time 
+from threading import Thread
 
 palette = {
 	(0, 255, 255)	: 0,
@@ -255,34 +264,6 @@ def convertSprites(spritePath, outputPath):
 	global spriteSuccess
 	global spriteTotal
 	
-	"""
-	Invalid sprite width: 224 (valid sprite sizes: 8x8, 16x16, 32x32, 64x64, 16x8, 32x8, 32x16, 8x16, 8x32, 16x32, 32x64)
-	dw_spr_white_screen.bmp error: Invalid sprite width: 224 (valid sprite sizes: 8x8, 16x16, 32x32, 64x64, 16x8, 32x8, 32x16, 8x16, 8x32, 16x32, 32x64)
-	dw_spr_windowframe.bmp error: Invalid sprite width: 224 (valid sprite sizes: 8x8, 16x16, 32x32, 64x64, 16x8, 32x8, 32x16, 8x16, 8x32, 16x32, 32x64)
-	dw_spr_window_001.bmp error: Invalid width: 58
-	dw_spr_window_002.bmp error: Invalid width: 50
-	dw_spr_window_003.bmp error: Invalid width: 66
-	dw_spr_window_004.bmp error: Invalid width: 82
-	dw_spr_window_005.bmp error: Invalid width: 42
-	dw_spr_window_error.bmp error: Invalid width: 66
-	dw_spr_window_errorbg.bmp error: Invalid width: 60
-	dw_spr_wings_001.bmp error: Invalid width: 50
-	dw_spr_wings_0012134.bmp error: Invalid width: 50
-	dw_spr_wings_001b.bmp error: Invalid width: 50
-
-	why the inconsistencies?
-
-	dw_spr_zerostate_glow.bmp error: File height is not divisible by item height: 120 - 16
-	
-	ugh screw it, ill just skip sprites that would error
-	i dont need most of them anyway, at least in this phase
-	
-	
-	"""
-	
-	#spritePath = "./Sprites/."
-	
-	
 	contents = os.listdir(spritePath)
 	folders = [item for item in contents if os.path.isdir(os.path.join(spritePath, item))]
 	
@@ -415,6 +396,10 @@ def generateBigSpritePaths(spritePath):
 			max_height = max(max_height, height)
 		
 		if (max_width, max_height) in validSizes:
+		
+			if folder in bigSpriteData:
+				del bigSpriteData[folder]
+		
 			continue
 		
 		temp = {
@@ -509,6 +494,22 @@ def convertBigSprite(spriteName, spritePath, outputPath):
 	
 	return True
 
+def convertBigSpriteWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
+
+	while not shouldStop.is_set():
+			
+			try:
+				data = jobQueue.get(timeout = 0.5)
+			except queue.Empty:
+				time.sleep(0.001)
+				continue
+
+			spriteName, spritePath, outputPath = data
+
+			res = convertBigSprite(spriteName, spritePath, outputPath)
+			
+			returnQueue.put([spriteName, res])
+
 def convertAllBigSprite(outputPath):
 
 	print("converting bigsprites")
@@ -525,18 +526,32 @@ def convertAllBigSprite(outputPath):
 	
 	testData = [  [k, v] for k, v in bigSpriteData.items() ] # does looping through a list here allow python to cache file loads ahead of time?
 	
-	i = 0
+	pool = PoolQueue(convertBigSpriteWorker)
+	
+	pool.start()
+	
+	#i = 0
 	#for spriteName, data in bigSpriteData.items():
 	for spriteName, data in testData:
-		i += 1
+		#i += 1
 		
-		print("working on {:50s} {:5d}/{:5d}   {:6.2f}% done".format(spriteName, i, len(bigSpriteData), 100*i/len(bigSpriteData)))
+		#print("working on {:50s} {:5d}/{:5d}   {:6.2f}% done".format(spriteName, i, len(bigSpriteData), 100*i/len(bigSpriteData)))
 		
-		res = convertBigSprite(spriteName, data["spritePath"], outputPath)
+		#res = convertBigSprite(spriteName, data["spritePath"], outputPath)
 		
+		#if res:
+		#	successCount += 1
+		
+		pool.send([spriteName, data["spritePath"], outputPath])
+	
+	#print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
+	
+	resData = pool.join()
+	
+	for spriteName, res in resData.items():
 		if res:
 			successCount += 1
-	
+			
 	print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
 	
 	print("done converting bigsprites")
@@ -1116,9 +1131,7 @@ def main():
 	shutil.copy("fontData.h", "../../code/src/")
 	
 	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
-	
 	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/graphics/", f)) for f in os.listdir(copyFrom) if f.endswith(".bmp") or f.endswith(".json") ]
-	
 	copyFunc("./formattedOutput/fonts/")
 	copyFunc("./formattedOutput/customEffects/")
 	copyFunc("./formattedOutput/customFloor/")

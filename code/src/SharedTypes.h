@@ -530,6 +530,12 @@ struct EntityHolder {
 	const u8 y;
 };
 
+struct BigSpriteHolder {
+	const bn::sprite_tiles_item tiles;
+	const u8 x;
+	const u8 y;
+};
+
 class Room {
 public:
 	const void* collision;

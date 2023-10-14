@@ -113,7 +113,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new Chester(tempPos));
 				break;
 			case EntityType::Mimic:
-				BN_ASSERT(player != NULL); // player should be the first entity in the entity list from the roomdata, this just just a sanity chek
+				BN_ASSERT(player != NULL, "player was null when loading in a mimic"); // player should be the first entity in the entity list from the roomdata, this just just a sanity chek
 				
 				if(tempPos.x == player->p.x) {
 					entityList.insert(new GrayMimic(tempPos));
@@ -550,8 +550,9 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 
 	deadList.insert(e);
 	
-	// this line here is good for tan statues, but may cause issues with other entities?
-	if(tileManager->hasFloor(tempPos)) {
+	// this initially called on all entities, should it?
+	// if two entities collide on a tile, the tile should collapse
+	if(tileManager->hasFloor(tempPos) && e->entityType() == EntityType::TanStatue) {
 		tileManager->stepOff(tempPos);
 	}
 	

@@ -68,9 +68,7 @@ def main():
 	convertAllSounds()
 	
 	[ os.remove(os.path.join("../../code/audio/", f)) for f in os.listdir("../../code/audio/") if f.endswith(".wav") ]
-	
 	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/audio/", f)) for f in os.listdir(copyFrom) if f.endswith(".wav") ]
-	
 	copyFunc("./formattedOutput/")
 	
 	pass
