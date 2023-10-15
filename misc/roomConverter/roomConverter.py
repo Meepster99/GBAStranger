@@ -409,6 +409,8 @@ def convertObjects(layerData):
 			pass
 
 		def obj_npc_gor(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_gor,{:d},{:d},3,4".format(x, y))
 			pass
 
 		def obj_npc_failure_006(p, creationCode):
