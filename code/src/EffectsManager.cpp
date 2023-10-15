@@ -5,6 +5,83 @@
 #include "Game.h"
 
 Palette* EffectsManager::spritePalette = &defaultPalette;
+Game* BigSprite::game = NULL;
+
+
+BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide) :
+	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_) {
+	
+	// was *16, div two, now just *8
+	// is that really ok?
+	xPos -= (8 * width);
+	yPos -= (8 * height);
+	
+	for(int y=0; y<height; y++) {
+		for(int x=0; x<width; x++) {
+						
+			int spriteXPos = xPos + x * 16;
+			int spriteYPos = yPos + y * 16;
+			
+			// check if this sprite will even be drawn onscreen.
+			// check occurs first as it is inexpensive
+			// a bit generious, just in case 
+			if(spriteXPos < -16 || spriteXPos > 240+16 || spriteYPos < -16 || spriteYPos > 160+16) {
+				continue;
+			}
+			
+			// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
+			for(int j=0; j<4; j++) {
+				// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
+				int offset = 4 * (x + (y * width)) + j;
+				
+				const uint32_t* tileRef = (tiles->tiles_ref())[offset].data;
+				
+				for(int i=0; i<8; i++) {
+					if(tileRef[i] != 0) {
+						goto doBigTile;
+					}
+				}
+			}
+			
+			continue;
+			
+			doBigTile:
+
+			Sprite tempSprite = Sprite(*tiles);
+			
+			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
+			
+			int tempX = xPos/16 + x;
+			int tempY = yPos/16 + y;
+			
+			if(collide) {
+				game->collisionMap[tempX][tempY] = 2;
+			} else {
+				tempSprite.spritePointer.set_bg_priority(1);
+			}
+			
+			tempSprite.spritePointer.set_tiles(
+				*tiles,
+				x + (y * width)
+			);
+			
+			sprites.push_back(tempSprite);
+		}
+	}
+		
+	
+	
+}
+
+void BigSprite::updatePalette(Palette* pal) {
+	for(int i=0; i<sprites.size(); i++) {
+		sprites[i].spritePointer.set_palette(pal->getSpritePalette());
+	}
+	
+	
+}
+
+// -----
 
 void EffectsManager::updatePalette(Palette* pal) {
 	
@@ -17,6 +94,13 @@ void EffectsManager::updatePalette(Palette* pal) {
 	}
 	
 	EffectsManager::spritePalette = pal;
+	
+	
+	for(int i=0; i<bigSprites.size(); i++) {
+		bigSprites[i]->updatePalette(pal);
+	}
+	
+	
 }
 
 // -----
@@ -197,7 +281,7 @@ void EffectsManager::doVBlank() {
 	
 }
 
-void EffectsManager::reset() {
+void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 
 	// eventually, cleanup leftover effects here
 
@@ -209,6 +293,28 @@ void EffectsManager::reset() {
 	}
 	
 	effectList.clear();
+	
+	for(int i=0; i<bigSprites.size(); i++) {
+		if(bigSprites[i] != NULL) {
+			delete bigSprites[i];
+		}
+		bigSprites[i] = NULL;
+	}
+	
+	bigSprites.clear();
+	
+	if(effectsCount == 1) { // the first effect is just a dummy to avoid 0 length arrays
+		return;
+	}
+	
+	effectsCount--;
+	effects++;
+	
+	for(int i=0; i<effectsCount; i++) {
+		bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide) );
+		effects++;
+	}
+	
 	
 }
 

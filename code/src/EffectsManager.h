@@ -49,7 +49,16 @@ public:
 
 	// details uses default everything
 	EffectsLayer() :
-	Layer(bn::regular_bg_tiles_items::dw_customeffecttiles, 0) {}
+	Layer(bn::regular_bg_tiles_items::dw_customeffecttiles, 0, 5) {
+		
+		for(int x=0; x<14; x++) {
+			for(int y=0; y<9; y++) {
+				setBigTile(x, y, 0);
+			}
+		}
+		reloadCells();
+	}
+	
 
 	
 };
@@ -104,6 +113,30 @@ public:
 	
 };
 
+class BigSprite {
+public:
+
+	
+	// i need to change all sprite arrays to just use 128
+	
+	static Game* game;
+	
+	int width;
+	int height;
+	
+	const bn::sprite_tiles_item* tiles;
+	int xPos;
+	int yPos;
+	bn::vector<Sprite, 128> sprites;
+
+	
+	BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide);
+	
+	void updatePalette(Palette* pal);
+	
+	
+};
+
 // these are defines instead of typedefs bc typedef doesnt allow for constexpr
 #define EffectTypeArray constexpr bn::pair<const bn::sprite_tiles_item, int> 
 #define EffectType bn::pair<const bn::sprite_tiles_item, int> 
@@ -126,6 +159,8 @@ public:
 	
 	bn::sprite_text_generator textGenerator;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
+	
+	bn::vector<BigSprite*, 128> bigSprites;
 
 	EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font) {
 		
@@ -158,7 +193,7 @@ public:
 	bool enterRoom();
 	void doVBlank();
 	
-	void reset();
+	void loadEffects(EffectHolder* effects, int effectsCount);
 	
 	// -----
 	

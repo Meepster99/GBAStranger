@@ -583,7 +583,7 @@
         "destroy"
     ],
     "dl_form = 1": [
-        null
+        "dl_form = 1"
     ],
     "if (global.stranger >= 2)   instance_destroy()": [
         null
@@ -592,10 +592,10 @@
         null
     ],
     "dl_form = 2": [
-        null
+        "dl_form = 2"
     ],
     "dl_form = 3": [
-        null
+        "dl_form = 3"
     ],
     "if (global.stranger != 1)   instance_destroy()": [
         "destroy"
@@ -762,6 +762,31 @@
         null
     ],
     "if (ds_grid_get(obj_inventory.ds_player_info, 18, 2) == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }   if (ds_grid_get(obj_inventory.ds_player_info, 18, 2) >= 2)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
+        null
+    ],
+	
+    "b_form = 2   if (ds_grid_get(obj_inventory.ds_player_info, 11, 0) == 1)   instance_destroy()": [
+        "b_form = 2"
+    ],
+	
+	
+	"soldier_mirror = 0   soldier_count = 1": [
+        null
+    ],
+    "soldier_mirror = 0   soldier_count = 0": [
+        null
+    ],
+    "soldier_mirror = 1   soldier_count = 1": [
+        null
+    ],
+    "soldier_mirror = 1   soldier_count = 0": [
+        null
+    ],
+    "lev_state = 1": [
+        null
+    ],
+	
+	"if (ds_grid_get(obj_inventory.ds_player_info, 18, 1) != 0)   instance_destroy()   if (global.stranger != 2)   instance_destroy()": [
         null
     ]
 

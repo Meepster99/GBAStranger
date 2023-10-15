@@ -245,6 +245,7 @@ def preformatSprites():
 spriteSuccess = 0
 spriteTotal = 0
 
+"""
 validSizes = set([
 (8, 8), 
 (16, 16), 
@@ -258,7 +259,13 @@ validSizes = set([
 (16, 32), 
 (32, 64),
 ])
-	
+"""
+
+validSizes = set([
+(16, 16),
+])
+
+
 def convertSprites(spritePath, outputPath):
 	
 	global spriteSuccess
@@ -397,9 +404,14 @@ def generateBigSpritePaths(spritePath):
 		
 		if (max_width, max_height) in validSizes:
 		
-			if folder in bigSpriteData:
-				del bigSpriteData[folder]
+			bigSpriteData[folder] = None
 		
+			#if folder in bigSpriteData:
+			#	del bigSpriteData[folder]
+		
+			continue
+			
+		if folder in bigSpriteData and bigSpriteData[folder] == None:
 			continue
 		
 		temp = {
@@ -420,6 +432,8 @@ def generateBigSpritePaths(spritePath):
 	pass
 
 def convertBigSprite(spriteName, spritePath, outputPath):
+
+	# CONVERTING BIGSPRITE TO 64X64 WILL SAVE SPRITE INDICIES
 
 	# for now, im just going to have all these be 16x16 sprites, simply bc thats what my system works with
 
@@ -442,11 +456,6 @@ def convertBigSprite(spriteName, spritePath, outputPath):
 		max_height = max(max_height, height)
 		
 		images.append(image)
-		
-	if max_height % 16 != 0:
-		return False
-	if max_width % 16 != 0:
-		return False
 		
 	total_height = max_height * len(png_files)
 	
@@ -474,9 +483,22 @@ def convertBigSprite(spriteName, spritePath, outputPath):
 	
 	tiles = []
 	
-	for x in range(0, max_width, 16):
-		for y in range(0, max_height, 16):
-			tiles.append(tempImage[y:y+16, x:x+16])
+	for y in range(0, max_height, 16):
+		for x in range(0, max_width, 16):
+		
+			xMax = min(x + 16, max_width)
+			yMax = min(y + 16, max_height)
+			
+			idrk = tempImage[y:yMax, x:xMax]
+			
+			correctSize = np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8)
+			
+			correctSize[0:yMax-y, 0:xMax-x] = idrk
+			
+			# why does this func repeat values, so dumb
+			#idrk = np.resize(idrk, (16, 16, 3))
+			
+			tiles.append(correctSize)
 
 	tempImage = Image.fromarray(np.vstack(tiles))
 	
@@ -522,6 +544,12 @@ def convertAllBigSprite(outputPath):
 	generateBigSpritePaths("./Sprites_Padded/")
 	generateBigSpritePaths("../ExportData/Export_Textures/Sprites/")
 	
+	for k, v in [ [k, v] for k, v in bigSpriteData.items() ]:
+		if bigSpriteData[k] is None:
+			del bigSpriteData[k]
+	
+	# remove nones from the items
+	
 	successCount = 0
 	
 	testData = [  [k, v] for k, v in bigSpriteData.items() ] # does looping through a list here allow python to cache file loads ahead of time?
@@ -543,15 +571,17 @@ def convertAllBigSprite(outputPath):
 		#	successCount += 1
 		
 		pool.send([spriteName, data["spritePath"], outputPath])
+		
 	
 	#print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
 	
-	resData = pool.join()
 	
+	resData = pool.join()
 	for spriteName, res in resData.items():
 		if res:
 			successCount += 1
-			
+	
+	
 	print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
 	
 	print("done converting bigsprites")
@@ -1107,6 +1137,7 @@ def main():
 	
 	# run ExportAllFontData, copy that folder to this folder.
 	
+	
 	createFolder("./formattedOutput/")
 	createFolder("./formattedOutput/sprites/")
 	createFolder("./formattedOutput/fonts/")
@@ -1122,6 +1153,7 @@ def main():
 	generateCustomFloorBackground("./formattedOutput/customFloor/")	
 	generateEffectsTiles("./formattedOutput/customEffects/")
 
+	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
 
 	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/bigSprites/"])
 	
@@ -1132,6 +1164,7 @@ def main():
 	
 	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/graphics/", f)) for f in os.listdir(copyFrom) if f.endswith(".bmp") or f.endswith(".json") ]
+	
 	copyFunc("./formattedOutput/fonts/")
 	copyFunc("./formattedOutput/customEffects/")
 	copyFunc("./formattedOutput/customFloor/")

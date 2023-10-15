@@ -4,6 +4,7 @@ import os
 import numpy as np
 import re
 import shutil
+import math 
 from colorama import init, Fore, Back, Style
 
 init(convert=True)
@@ -71,7 +72,7 @@ def writeFooter(f, successRoomsList):
 	
 	data = """
 
-#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount)	
+#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount)	
 
 constexpr static inline Room rooms[{:d}] = {{ {:s} }};
 
@@ -317,8 +318,13 @@ def convertObjects(layerData):
 			pass
 		
 		def obj_rest(p, creationCode):
-			pass
+			x, y = p.rawX, p.rawY 
+			# ideally, these offsets would be gotten from the images themself, but like,,, im tired 
+	
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_birch,{:d},{:d},3,4".format(x, y))
 			
+			pass
+		
 		def obj_dustemit(p, creationCode):
 			pass
 			
@@ -338,6 +344,20 @@ def convertObjects(layerData):
 			pass
 
 		def obj_demonlords_statue(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			
+			if creationCode is None:
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_baal,{:d},{:d},6,4".format(x, y))
+			elif creationCode == "dl_form = 1":
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_sa,{:d},{:d},6,4".format(x, y))
+			elif creationCode == "dl_form = 2":
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_lev,{:d},{:d},3,4".format(x, y))
+			elif creationCode == "dl_form = 3":
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_cif,{:d},{:d},4,4".format(x, y))
+			else:
+				print("demonlord statue loaded with unknown creation code: " + creationCode)
+				exit(1)
+
 			pass
 
 		def obj_enemy_nm_b(p, creationCode):
@@ -356,6 +376,9 @@ def convertObjects(layerData):
 			pass
 
 		def obj_npc_tail(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			x += 4
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_upperbody,{:d},{:d},3,5".format(x, y))
 			pass
 
 		def obj_npc_failure_002(p, creationCode):
@@ -485,6 +508,9 @@ def convertObjects(layerData):
 			pass
 
 		def obj_npc_tail_tail(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			x += 4
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_lowerbody,{:d},{:d},6,3".format(x, y))
 			pass
 
 		def obj_npc_failure_003(p, creationCode):
@@ -530,6 +556,11 @@ def convertObjects(layerData):
 			pass
 
 		def obj_statue_abaddon(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			# ideally, these offsets would be gotten from the images themself, but like,,, im tired 
+
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_abaddon,{:d},{:d},6,4".format(x, y))
+			
 			pass
 
 		def obj_gateofdis_bg(p, creationCode):
@@ -841,6 +872,484 @@ def convertObjects(layerData):
 		def obj_un_bgdecour_002(p, creationCode):
 			pass
 
+		def obj_ee_bonus(p, creationCode):
+			pass
+
+		def obj_soul_eyecatch(p, creationCode):
+			pass
+
+		def obj_voidtail_004(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 128, 32
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_004,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_voidtail_005(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 176, 56
+			
+			x += int(w / 2)
+			y += int(h / 2) + 4
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_x56,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+		
+			pass
+
+		def obj_voidtail_013(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 56, 48
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_013,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_prin_dreamII(p, creationCode):
+			pass
+
+		def obj_gray_dreamIX(p, creationCode):
+			pass
+
+		def obj_prin_blanket(p, creationCode):
+			pass
+
+		def obj_ex_prine_wakeup(p, creationCode):
+			pass
+
+		def obj_og_p_turret(p, creationCode):
+			pass
+
+		def obj_un_bgdecour_003(p, creationCode):
+			pass
+
+		def obj_prin_ending_eyecatch(p, creationCode):
+			pass
+
+		def obj_prin_d(p, creationCode):
+			pass
+
+		def obj_dustemiter_lev(p, creationCode):
+			pass
+
+		def obj_voidtail_001(p, creationCode):
+			
+			x, y = p.rawX, p.rawY 
+			
+			x += int(16 * 5 / 2)
+			y += int(16 * 8 / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_001,{:d},{:d},5,8,false".format(x, y))
+		
+			pass
+
+		def obj_voidtail_014(p, creationCode):
+	
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 112, 128
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_014,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_jguard_dreamIX(p, creationCode):
+			pass
+
+		def obj_princess_room(p, creationCode):
+			pass
+
+		def obj_princess_room_dreamV(p, creationCode):
+			pass
+
+		def obj_ex_testspawn(p, creationCode):
+			pass
+
+		def obj_music_controller(p, creationCode):
+			pass
+
+		def obj_begin(p, creationCode):
+			pass
+
+		def obj_sm_statue(p, creationCode):
+			pass
+
+		def obj_voidtail_008(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+			
+			x += int(4 / 2) * 16 
+			y += int(4 / 2) * 16 
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_008,{:d},{:d},4,4,false".format(x, y))
+			pass
+
+		def obj_voidtail_003(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 80, 16
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_003,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+	
+			pass
+
+		def obj_voidtail_009(p, creationCode):
+		
+			# tails are going to cause collision issues, and i rlly should do something abt that, but i wont
+			x, y = p.rawX, p.rawY 
+			
+			x += int(6 / 2) * 16
+			y += int(10 / 2) * 16
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_009,{:d},{:d},6,10,false".format(x, y))
+		
+			pass
+
+		def obj_voidtail_007(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 64, 148
+			
+			x += int(w / 2) - 2
+			y += int(h / 2) + 4 + 2
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_007,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_voidtail_012(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 56, 32
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_012,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_voidtail_011(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 112, 128
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_011,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+
+		
+			pass
+
+		def obj_voidtail_006(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 128, 56
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_006,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_voidtail_010(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 112, 160
+			
+			x += int(w / 2)
+			y += int(h / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_010,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+			pass
+
+		def obj_rando_d(p, creationCode):
+			pass
+
+		def obj_dreamIII_battle(p, creationCode):
+			pass
+
+		def obj_bandit_d(p, creationCode):
+			pass
+
+		def obj_king_d(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIV_snowfall(p, creationCode):
+			pass
+
+		def obj_jguard_dreamIXb(p, creationCode):
+			pass
+
+		def obj_ranknight_dreamIX(p, creationCode):
+			pass
+
+		def obj_archway(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_sacrifice(p, creationCode):
+			pass
+
+		def obj_battle_dreamXI(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_void(p, creationCode):
+			pass
+
+		def obj_dream_battle(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVIII_morning(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVII_dress(p, creationCode):
+			pass
+
+		def obj_johann_dreamVII(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamV_intro(p, creationCode):
+			pass
+
+		def obj_ee_gray(p, creationCode):
+			pass
+
+		def obj_ee_bg_elements(p, creationCode):
+			pass
+
+		def obj_ee_earlyconcept(p, creationCode):
+			pass
+
+		def obj_ee_lillie(p, creationCode):
+			pass
+
+		def obj_cutscene_intro(p, creationCode):
+			pass
+
+		def obj_cutscene_floormaster(p, creationCode):
+			pass
+
+		def obj_og_bg(p, creationCode):
+			pass
+
+		def obj_soldier_un(p, creationCode):
+			pass
+
+		def obj_enemy_tan_dummy(p, creationCode):
+			pass
+
+		def obj_stg_menu(p, creationCode):
+			pass
+
+		def obj_test_0000(p, creationCode):
+			pass
+
+		def obj_teaser(p, creationCode):
+			pass
+
+		def obj_cutscene_true_beebattle(p, creationCode):
+			pass
+
+		def obj_mon_d(p, creationCode):
+			pass
+
+		def obj_cutscene_true_cifbattle1(p, creationCode):
+			pass
+
+		def obj_johannc_d(p, creationCode):
+			pass
+
+		def obj_jguard_d(p, creationCode):
+			pass
+
+		def obj_ballroom(p, creationCode):
+			pass
+
+		def obj_ex_controller(p, creationCode):
+			pass
+
+		def obj_init(p, creationCode):
+			pass
+
+		def obj_camera(p, creationCode):
+			pass
+
+		def obj_voidtail_002(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 64, 48
+			
+			x += int(16 * (w / 16) / 2)
+			y += int(16 * (h / 16) / 2)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_002,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
+		
+		
+			pass
+
+		def obj_cutscene_dreamIII_wagon(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIII_bandit(p, creationCode):
+			pass
+
+		def obj_johann_d(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamII_introp(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamII_cemetery(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIV_intro(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_prison(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_escape1(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_escape2(p, creationCode):
+			pass
+
+		def obj_jguard_dreamIXd(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_menacing(p, creationCode):
+			pass
+
+		def obj_princess_room_fore(p, creationCode):
+			pass
+
+		def obj_cutscene_prin_reveal(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVIII_balcony(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVI_rytmipeli(p, creationCode):
+			pass
+
+		def obj_og_controller(p, creationCode):
+			pass
+
+		def obj_mon_m_d(p, creationCode):
+			pass
+
+		def obj_ex_background_controller(p, creationCode):
+			pass
+
+		def obj_dragwindow(p, creationCode):
+			pass
+
+		def obj_collision_persistent(p, creationCode):
+			pass
+
+		def obj_henchman_dreamIII(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIII_rescue(p, creationCode):
+			pass
+
+		def obj_gray_dreamII(p, creationCode):
+			pass
+
+		def obj_blackwall(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_knights(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamIX_sacrifice_part2(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVIII_betrayal(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVII_johann(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVI_practice(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamVI_break(p, creationCode):
+			pass
+
+		def obj_cutscene_dreamV_announcement(p, creationCode):
+			pass
+
+		def obj_dr_d(p, creationCode):
+			pass
+
+		def obj_enemy_mon_dummy(p, creationCode):
+			pass
+
+		def obj_snowy_bg(p, creationCode):
+			pass
+
+		def obj_ex_wavecontroller(p, creationCode):
+			pass
+
+		def obj_game(p, creationCode):
+			pass
+
+		def obj_ranknight_d(p, creationCode):
+			pass
+
+		def obj_cutscene_dr_end(p, creationCode):
+			pass
+
+		def obj_cutscene_monbattle(p, creationCode):
+			pass
+
+		def obj_com_d(p, creationCode):
+			pass
+
+		def obj_stg_modecontroller(p, creationCode):
+			pass
+
+		def obj_voidshatter(p, creationCode):
+			pass
+
+
+
 
 
 
@@ -848,7 +1357,7 @@ def convertObjects(layerData):
 	
 	allData = []
 	
-	for label in ["Instances", "Floor_INS", "Floor", "Pit"]:
+	for label in ["Instances", "Floor_INS", "Floor", "Pit", "Player"]:
 		if label in layerData:
 			allData += layerData[label]["layer_data"]["instances"]
 	
@@ -865,8 +1374,8 @@ def convertObjects(layerData):
 		
 		
 		
-		if p.x < 0 or p.x >= 14 or p.y < 0 or p.y >= 9:
-			continue
+		#if p.x < 0 or p.x >= 14 or p.y < 0 or p.y >= 9:
+		#	continue
 		
 	
 		
@@ -890,10 +1399,22 @@ def convertObjects(layerData):
 			
 			return None
 	
+	# remove any entities at a below 0
+	# we allow effects
+	for e in list([ e for e in entityExport ]):
+		x, y = [ int(x) for x in e.split(",")[1:] ]
+		
+		if x < 0 or x >= 14 or y < 0 or y >= 9:
+			entityExport.remove(e)
+			
 	# MAKE SURE THE PLAYER HAS A SPAWNPOINT HERE
 	if len(entityExport) == 0:
 		print(RED + "there were no entities, not even a player??" + RESET)
 		return None
+		
+		
+	# this is dumb, and also (i think) slows compile time considerably.
+	effectExport.insert(0, "&bn::sprite_tiles_items::dw_spr_statue_abaddon,-1,-1,-1,-1")
 		
 	
 	return [floorExport, entityExport, effectExport]
@@ -935,7 +1456,7 @@ def convertRoom(data, outputFile):
 	if objectsExport is None:
 		return None
 		
-	floorExport, instanceExport, statueExport = objectsExport
+	floorExport, instanceExport, effectExport = objectsExport
 	
 	output = []
 	
@@ -957,10 +1478,11 @@ def convertRoom(data, outputFile):
 	
 	output.append("constexpr static inline int entityCount = {:d};".format(len(instanceExport)))
 	
-	#output.append("constexpr static inline EntityHolder effects[] = {")
-	#output.append("};")	
+	output.append("constexpr static inline EffectHolder effects[] = {")
+	output.append("".join([ "{{{:s}}},".format(effect) for effect in effectExport ]))
+	output.append("};")	
 	
-	output.append("constexpr static inline int effectCount = {:d};".format(len(instanceExport)))
+	output.append("constexpr static inline int effectsCount = {:d};".format(len(effectExport)))
 	
 	output.append("};")
 	

@@ -530,10 +530,13 @@ struct EntityHolder {
 	const u8 y;
 };
 
-struct BigSpriteHolder {
-	const bn::sprite_tiles_item tiles;
-	const u8 x;
-	const u8 y;
+struct EffectHolder {
+	const bn::sprite_tiles_item* tiles;
+	const int x;
+	const int y;
+	const int width;
+	const int height;
+	const bool collide = true;
 };
 
 class Room {
@@ -544,9 +547,12 @@ public:
 
 	const void* entities;
 	const int entityCount;
+	
+	const void* effects;
+	const int effectsCount;
 
-	constexpr Room(const void* collision_, const void* floor_, const void* details_, const void* entities_, const int entityCount_) :
-	collision(collision_), floor(floor_), details(details_), entities(entities_), entityCount(entityCount_)
+	constexpr Room(const void* collision_, const void* floor_, const void* details_, const void* entities_, const int entityCount_, const void* effects_, const int effectsCount_) :
+	collision(collision_), floor(floor_), details(details_), entities(entities_), entityCount(entityCount_), effects(effects_), effectsCount(effectsCount_)
 	{ }
 	
 };

@@ -94,6 +94,8 @@ public:
 		FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
 		
 		Entity::game = this;
+		
+		BigSprite::game = this;
 	}
 	
 	void run();

@@ -33,8 +33,15 @@ public:
 	
 		
 	void updatePosition(const Pos& p) {
-		screenx = p.x * 16 - 8 - (6 * 16);
+		screenx = p.x * 16 - 8 - (6 * 16); 
 		screeny = p.y * 16 - (4 * 16);
+		spritePointer.set_x(screenx);
+		spritePointer.set_y(screeny);
+	}
+	
+	void updateRawPosition(const int x, const int y) {
+		screenx = x - 224/2 + 8;
+		screeny = y - 144/2 + 8;
 		spritePointer.set_x(screenx);
 		spritePointer.set_y(screeny);
 	}

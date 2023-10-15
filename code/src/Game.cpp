@@ -87,9 +87,16 @@ void Game::loadLevel(bool debug) {
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
 	
+	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
-	effectsManager.reset();
+
+	EffectHolder* effectsPointer = (EffectHolder*)idek.effects;
+	int effectsCount = idek.effectsCount;
+	
+	effectsManager.loadEffects(effectsPointer, effectsCount);
+	
+	
 	
 }
 

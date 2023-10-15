@@ -1006,7 +1006,8 @@ bool EntityManager::hasCollision(const Pos& p) const {
 	
 	const u8 temp = game->collisionMap[p.x][p.y];
 	
-	if(temp == 12 || temp < 3) {
+	//if(temp == 12 || temp < 3) {
+	if(temp == 1 || temp == 12) {
 		return false;
 	}
 	

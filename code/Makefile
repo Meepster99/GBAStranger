@@ -33,8 +33,8 @@ PYTHON      :=  python
 SOURCES     :=  src ../butano/common/src
 INCLUDES    :=  include ../butano/common/include ./build
 DATA        :=
-GRAPHICS    :=  graphics ../butano/common/graphics 
-AUDIO       :=  audio ../butano/common/audio 
+GRAPHICS    :=  graphics ../butano/common/graphics
+AUDIO       :=  audio ../butano/common/audio
 DMGAUDIO    :=  dmg_audio ../butano/common/dmg_audio
 ROMTITLE    :=  GBAStranger
 ROMCODE     :=  SBTP
@@ -44,7 +44,9 @@ USERFLAGS   :=  -O3
 #USERFLAGS   :=  -Ofast -funroll-loops
 #USERFLAGS   :=  -Ofast
 USERASFLAGS :=  
-USERLDFLAGS :=  -flto=16
+# flto needs to be modified to like, get a core count automatically for when building on others systems!
+#USERLDFLAGS :=  -flto=16
+USERLDFLAGS :=  -flto=auto
 USERLIBDIRS :=  
 USERLIBS    :=  
 DEFAULTLIBS :=  
