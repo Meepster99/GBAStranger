@@ -37,6 +37,7 @@ struct GameSave {
 	u8 locustCount = 0;
 	bool isVoided = false;
 	int roomIndex = 1;
+	int paletteIndex = 0;
 	
 	uint64_t hash = 0;
 };

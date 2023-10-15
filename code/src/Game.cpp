@@ -120,6 +120,8 @@ void Game::changePalette(int offset) {
 	// https://stackoverflow.com/questions/3417183/modulo-of-negative-numbers
 	// lol
 	
+	// this is a horrid way of doing it, i should be able to just like,,, access the actual palette table???
+	
 	const int paletteListSize = (int)(sizeof(paletteList) / sizeof(paletteList[0]));
 	
 	paletteIndex += offset;
@@ -136,6 +138,8 @@ void Game::changePalette(int offset) {
 	
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
+	
+	save();
 	
 }
 
@@ -195,6 +199,7 @@ void Game::run() {
 	BN_LOG("look at u bein all fancy lookin in the logs");
 
 	load();
+	changePalette(0);
 	
 	globalGame = this;
 
@@ -296,6 +301,9 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.roomIndex;
 	rotateHash(sizeof(saveData.roomIndex) * 8);
 
+	hash ^= saveData.paletteIndex;
+	rotateHash(sizeof(saveData.paletteIndex) * 8);
+
 	return hash;
 }
 
@@ -305,6 +313,7 @@ void Game::save() {
 	saveData.locustCount = entityManager.player->locustCount;
 	saveData.isVoided = entityManager.player->isVoided;
 	saveData.roomIndex = roomManager.roomIndex;
+	saveData.paletteIndex = paletteIndex;
 	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);
@@ -328,5 +337,6 @@ void Game::load() {
 	BN_LOG("room: ", saveData.roomIndex);
 	
 	roomManager.roomIndex = saveData.roomIndex;
+	paletteIndex = saveData.paletteIndex;
 }
 
