@@ -117,6 +117,7 @@ public:
 	void changePalette(int offset);
 
 	void doButanoUpdate();
+	void uncompressData(u8 res[126], u8* input);
 	
 };
 

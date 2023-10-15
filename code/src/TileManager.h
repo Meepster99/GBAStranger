@@ -90,7 +90,7 @@ public:
 		}
 	}
 
-	void loadTiles(TileType* floorPointer);
+	void loadTiles(u8* floorPointer);
 		
 	void doFloorSteps();
 	

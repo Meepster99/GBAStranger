@@ -5,6 +5,7 @@ import numpy as np
 import re
 import shutil
 import math 
+
 from colorama import init, Fore, Back, Style
 
 init(convert=True)
@@ -131,6 +132,108 @@ constexpr static inline char roomNames[{:d}][{:d}] = {{ {:s} }};
 
 	pass
 
+uncompressedBytes = 0
+compressedBytes = 0
+
+byteFrequency = {}
+frequencyFrequency = {}
+
+def compressData(arr):
+
+	global uncompressedBytes
+	global compressedBytes
+	global maxByteVal
+	
+	# basic rle
+	
+	# further stuff could be compressed by combining everything into one array(tbh why didnt i do that)
+	
+	#maxByteVal = max(maxByteVal, max(arr))
+	for elem in arr:
+		if elem not in byteFrequency:
+			byteFrequency[elem] = 0
+		byteFrequency[elem] += 1
+	
+	res = []
+	
+	count = 1
+	val = arr[0]
+	for i in range(1, len(arr) + 1):
+		
+		# using this second bit here fucks me in terms of the 126 thing, but i still think it will help me in the long run
+		# this reduced my bits by like,, 2% but idc, im leaving it in
+		if arr[min(i, len(arr)-1)] & 0xC0: # 1100 0000 
+			print("a value passed into the compression func had bit 7 or bit 6 set. this is not allowed!")
+			exit(1)
+		
+		if i == len(arr) or arr[i] != val:
+			
+			if count == 1 or count == 2 or count == 3:
+				if count not in frequencyFrequency:
+					frequencyFrequency[count] = 0
+				frequencyFrequency[count] += 1
+				
+				res.append(val | (count << 6))
+			else:
+				res.append(count)
+				res.append(val)
+				
+				if count not in frequencyFrequency:
+					frequencyFrequency[count] = 0
+				frequencyFrequency[count] += 1
+			
+			if i == len(arr):
+				break
+		
+			count = 1
+			val = arr[i]
+		else:
+			count += 1
+			
+			if count == 0x40:
+				
+				count-=1
+			
+				# this range is about to overflow into the upper two bits, prevent that
+				if count not in frequencyFrequency:
+					frequencyFrequency[count] = 0
+				frequencyFrequency[count] += 1
+				
+				res.append(count)
+				res.append(val)
+				
+				count = 1
+				val = arr[i]
+				
+		
+	uncompressedBytes += len(arr)
+	compressedBytes += len(res)
+	
+	return res
+	
+def uncompressData(comp):
+
+	# because 14*9=126 < 128, this means that bit 8 will always be safe, thank the gods
+
+	uncomp = []
+	i = 0
+	while i < len(comp):
+		
+		if comp[i] & 0xC0:
+			
+			count = comp[i] >> 6
+			val = comp[i] & ~0xC0
+		
+			uncomp += [val] * count
+			i+=1
+		else:
+			count = comp[i]
+			val = comp[i+1]
+			uncomp += [val] * count
+			i += 2
+			
+	return uncomp
+
 def convertCollisionAndDetails(layerData):
 	
 	details = {}	
@@ -139,6 +242,10 @@ def convertCollisionAndDetails(layerData):
 		
 		details["tileset"] = layerData["Tiles_2"]["layer_data"]["background"]
 		details["data"] = [ elem["id"] for line in layerData["Tiles_2"]["layer_data"]["tile_data"] for elem in line]
+
+		for elem in details["data"]:
+			if elem >= 64:
+				return None
 
 		if details["tileset"] == "tile_house_2":
 			print("tile_house_2 aint properly converted!")
@@ -153,11 +260,44 @@ def convertCollisionAndDetails(layerData):
 		collision["tileset"] = layerData["Tiles_1"]["layer_data"]["background"]
 		collision["data"] = [ elem["id"] for line in layerData["Tiles_1"]["layer_data"]["tile_data"] for elem in line]
 
+		for elem in collision["data"]:
+			if elem >= 64:
+				return None
+
 		if collision["tileset"] == "tile_house_2":
 			print("tile_house_2 aint properly converted!")
 			return None
 	else:
 		collision["data"] = [ 0 for i in range(0, 14*9) ]
+	
+	if len(details["data"]) == 0:
+		details["data"] = [ 0 for i in range(0, 14*9) ]
+	
+	if len(collision["data"]) == 0:
+		collision["data"] = [ 0 for i in range(0, 14*9) ]
+	
+	
+	# basic compression
+		
+	start = collision["data"]
+	comp = compressData(start)
+	uncomp = uncompressData(comp)
+
+	if not np.array_equal(np.array(start), np.array(uncomp)):
+		print("array decomp somehow failed???")
+		exit()
+		
+	collision["data"] = comp
+	
+	start = details["data"]
+	comp = compressData(start)
+	uncomp = uncompressData(comp)
+
+	if not np.array_equal(np.array(start), np.array(uncomp)):
+		print("array decomp somehow failed???")
+		exit()
+
+	details["data"] = comp
 		
 	return collision, details
 
@@ -1417,7 +1557,37 @@ def convertObjects(layerData):
 		
 	# this is dumb, and also (i think) slows compile time considerably.
 	effectExport.insert(0, "&bn::sprite_tiles_items::dw_spr_statue_abaddon,-1,-1,-1,-1")
+	
+	# convert the floor array to values
+	floorExport = np.transpose(floorExport).flatten()
+	
+	# MAKE SURE THIS IS THE SAME AS THE ENUM IN SHAREDTYPES
+	
+	tileTypes = {
+		"Pit": 0,
+		"Floor": 1,
+		"Glass": 2,
+		"Bomb": 3,
+		"Death": 4,
+		"Copy": 5,
+		"Exit": 6,
+		"Switch": 7,
+		"WordTile": 8,
+		"RodTile": 9,
+		"LocustTile": 10,
+	}
+	
+	floorExport = [ tileTypes[tile] for tile in floorExport ]
+	
+	start = floorExport
+	comp = compressData(start)
+	uncomp = uncompressData(comp)
+
+	if not np.array_equal(np.array(start), np.array(uncomp)):
+		print("array decomp somehow failed???")
+		exit()
 		
+	floorExport = comp
 	
 	return [floorExport, entityExport, effectExport]
 	
@@ -1437,7 +1607,7 @@ def convertRoom(data, outputFile):
 	temp = convertCollisionAndDetails(layerData)
 	
 	if temp is None:
-		print("collision/details convert failed!")
+		print(RED + "collision/details convert failed!" + RESET)
 		return None
 		
 	collision, details = temp
@@ -1447,7 +1617,7 @@ def convertRoom(data, outputFile):
 	
 	if floorExport is None:
 		return None
-	
+	'
 	instanceExport = convertEntities(layerData)
 	
 	if instanceExport is None:
@@ -1470,8 +1640,8 @@ def convertRoom(data, outputFile):
 	output.append(formatFullArray("collision", collision["data"]))
 	output.append(formatFullArray("details", details["data"]))
 
-	output.append("constexpr static inline TileType floor[] = {")
-	output.append("".join([ "TileType::{:s},".format(instance) for instance in np.transpose(floorExport).flatten() ]))
+	output.append("constexpr static inline u8 floor[] = {")
+	output.append("".join([ "{:d},".format(instance) for instance in floorExport ]))
 	output.append("};")
 	
 	output.append("constexpr static inline EntityHolder entities[] = {")	
@@ -1592,9 +1762,18 @@ def convertAllRooms(inputPath):
 		tempFile.write("\n")
 	tempFile.close()
 	
-	
 	with open('tempCreationCodeData.json', 'w') as f:
 		json.dump(newCreationCodesData, f, indent=4)
+	
+	print("compressed data had a ratio of {:6.2f}%".format(100 * compressedBytes / uncompressedBytes))
+	
+	#temp = sorted([ [k, v] for k, v in byteFrequency.items() ], key = lambda x : x[1], reverse=True)
+	#for byte, freq in temp:
+	#	print("{:5d} {:5d}".format(byte, freq))
+	
+	#temp = sorted([ [k, v] for k, v in frequencyFrequency.items() ], key = lambda x : x[1], reverse=True)
+	#for byte, freq in temp:
+	#	print("{:5d} {:5d}".format(byte, freq))
 	
 	
 	pass

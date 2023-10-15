@@ -21,6 +21,36 @@ void Game::doButanoUpdate() {
 	
 }	
 
+void Game::uncompressData(u8 res[126], u8* input) {
+	
+	int i = 0;
+	
+	int val = -1;
+	int count = -1;
+	
+	while(i <= 126) {
+		
+		if(*input & 0xC0) {
+			count = (*input & 0xC0) >> 6;
+			val = (*input & ~0xC0);
+		} else {
+			count = *input;
+			input++;
+			val = *input;
+		}
+		
+		input++;
+		
+		for(int j=0; j<count; j++) {
+			res[i] = val;
+			i++;
+		}
+		
+	}
+	
+	
+}
+
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
@@ -60,12 +90,19 @@ void Game::resetRoom(bool debug) {
 void Game::loadLevel(bool debug) {
 
 	Room idek = roomManager.loadRoom();
+	
+	u8 uncompressedCollision[126];
+	u8 uncompressedDetails[126];
+	
+	uncompressData(uncompressedCollision, (u8*)idek.collision);
+	uncompressData(uncompressedDetails, (u8*)idek.details);
+	
 
 	for(int x=0; x<14; x++) { 
 		for(int y=0; y<9; y++) {
 			
-			collisionMap[x][y] = ((u8*)idek.collision)[x + 14 * y];
-			detailsMap[x][y] = ((u8*)idek.details)[x + 14 * y];
+			collisionMap[x][y] = uncompressedCollision[x + 14 * y];
+			detailsMap[x][y] = uncompressedDetails[x + 14 * y];
 			
 			// when changing the color palettes, some weird shit happened where, areas 
 			// would be transparent when they shouldnt be? this hopefully fixes that
@@ -76,7 +113,7 @@ void Game::loadLevel(bool debug) {
 		}
 	}
 	
-	TileType* floorPointer = (TileType*)idek.floor;
+	u8* floorPointer = (u8*)idek.floor;
 	
 	tileManager.loadTiles(floorPointer);
 	
@@ -197,9 +234,13 @@ void Game::doVBlank() {
 void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
+	
+	// why does simply instantiating the game class cause frame drops?
+	// wont be much of an issue tho, i suppose
+	//doButanoUpdate(); 
 
 	load();
-	changePalette(0);
+	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 	
 	globalGame = this;
 
@@ -216,7 +257,7 @@ void Game::run() {
 	
 	//bn::sound_items::msc_013.play(1);
 	//bn::music_items::cyberrid.play(0.5);
-	
+	BN_LOG("starting main gameloop");
 	while(true) {
 		
 		miscDebug = LevStatue::rodUses;

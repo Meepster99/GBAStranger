@@ -40,7 +40,9 @@ ROMTITLE    :=  GBAStranger
 ROMCODE     :=  SBTP
 # SAVE ME O3
 #USERFLAGS   :=  -O3 -DBN_CFG_PROFILER_ENABLED=true -DBN_CFG_LOG_ENABLED=true
-USERFLAGS   :=  -O3 
+# is -mthumb-interwork -mthumb a good idea? 
+# https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
+USERFLAGS   :=  -O3  -mthumb-interwork -mthumb
 #USERFLAGS   :=  -Ofast -funroll-loops
 #USERFLAGS   :=  -Ofast
 USERASFLAGS :=  

@@ -12,7 +12,10 @@
 // also, i would be passing the entity in as an optional param, maybe?
 // assuming that doesnt cause slowdown, that would be a good idea
 
-void TileManager::loadTiles(TileType* floorPointer) {
+void TileManager::loadTiles(u8* floorPointer) {
+	
+	u8 uncompressedFloor[126];
+	game->uncompressData(uncompressedFloor, floorPointer);
 	
 	floorSteps.clear();
 	
@@ -40,7 +43,7 @@ void TileManager::loadTiles(TileType* floorPointer) {
 			
 			Pos tempPos(x, y);
 
-			switch(floorPointer[x + 14 * y]) {
+			switch(static_cast<TileType>(uncompressedFloor[x + 14 * y])) {
 				case TileType::Pit:
 					break;
 				case TileType::Floor:
@@ -315,8 +318,6 @@ void TileManager::updateLocust() {
 void TileManager::updateVoidTiles() {
 	
 	bool isVoided = entityManager->player->isVoided;
-	
-	BN_LOG("player void status ", isVoided);
 	
 	if(voidTile1 != NULL && voidTile1 != entityManager->player->rod) {
 		

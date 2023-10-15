@@ -50,7 +50,7 @@ public:
 	// details uses default everything
 	EffectsLayer() :
 	Layer(bn::regular_bg_tiles_items::dw_customeffecttiles, 0, 5) {
-		
+	
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				setBigTile(x, y, 0);
@@ -152,8 +152,9 @@ public:
 	
 	static Palette* spritePalette;
 	
-	EffectsLayer effectsLayer;
+	bn::regular_bg_tiles_ptr effectTilesPtr = bn::regular_bg_tiles_ptr::allocate(bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref().size(), bn::bpp_mode::BPP_4);
 	
+
 	// do these even need to be pointers?
 	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
 	
@@ -162,10 +163,15 @@ public:
 	
 	bn::vector<BigSprite*, 128> bigSprites;
 
+	EffectsLayer effectsLayer;	
+
+
 	EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font) {
 		
 		// may not be the best idea?
 		textGenerator.set_one_sprite_per_character(true);
+		
+	
 	}
 
 	void createEffect(Pos p, const bn::span<const bn::pair<const bn::sprite_tiles_item, int>>& inputData) {

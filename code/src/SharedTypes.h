@@ -4,6 +4,7 @@
 
 #include "bn_sound.h"
 #include "bn_unordered_map.h"
+#include "bn_regular_bg_tiles_ptr.h"
 
 #include "Profiler.h"
 

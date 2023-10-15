@@ -279,6 +279,21 @@ void EffectsManager::doVBlank() {
 		}
 	}
 	
+	
+	// i wanted to be able to modify the vram tiles of the effects layer here, but i is for some reason extremely hard?? 
+	/*
+	bn::span<bn::tile> vramRef = effectTilesPtr.vram().value();
+	
+	uint32_t* tileRef = vramRef[5].data;
+	
+	BN_LOG(tileRef[0]);
+	//tileRef[0] = 0x12341234;
+	
+	for(int i=0; i<8; i++) {
+		tileRef[i] = randomGenerator.get();
+	}
+	*/
+	
 }
 
 void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
@@ -449,6 +464,7 @@ void EffectsManager::doDialogue(const char* data) {
 					textSprites[i].set_visible(false);
 					textSprites[i].set_palette(spritePalette->getSpritePalette());
 				}
+				game->doButanoUpdate();
 
 				newText = true;
 				textShowIndex = 0;			
@@ -490,7 +506,7 @@ void EffectsManager::doDialogue(const char* data) {
 		game->doButanoUpdate();
 	}
 	
-	
+	game->doButanoUpdate();
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			effectsLayer.setBigTile(x, y, 0);
@@ -501,6 +517,7 @@ void EffectsManager::doDialogue(const char* data) {
 	// this is trash, and will cause frame drops 
 	game->fullTileDraw();
 	
+	game->doButanoUpdate();
 	hideForDialogueBox(true);
 	
 	textSprites.clear();
