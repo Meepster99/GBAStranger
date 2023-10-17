@@ -299,6 +299,7 @@ void Game::run() {
 			}
 	
 			if(bn::keypad::select_pressed()) {
+				//bn::sound_items::sfx.play();	
 				continue;
 			}
 			

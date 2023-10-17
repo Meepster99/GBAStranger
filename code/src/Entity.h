@@ -97,6 +97,7 @@ public:
 	
 	virtual bn::optional<Direction> getNextMove() = 0;
 	virtual void moveFailed() = 0;
+	virtual void moveSucceded() = 0;
 
 	virtual void updateTileIndex() {
 		
@@ -197,7 +198,11 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_left);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_right);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_fall, 6));
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_u);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_d);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_l);
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_r);
+
 	}
 	
 	bool isEnemy() const override { return false; }
@@ -220,10 +225,15 @@ public:
 	bn::optional<Direction> nextMove;
 	
 	bn::optional<Direction> getNextMove() override;
-	
-	void moveFailed() override { return; };
-	
+
 	bn::pair<bool, bn::optional<Direction>> doInput();
+	
+	void updateTileIndex() override;
+	
+	int pushAnimation = 0;
+	
+	void moveFailed() override { return; }
+	void moveSucceded() override { return; }
 	
 };
 
@@ -242,6 +252,7 @@ public:
 	bn::optional<Direction> getNextMove() override;
 	
 	void moveFailed() override { return; }
+	void moveSucceded() override { return; }
 	
 };
 
@@ -262,6 +273,7 @@ public:
 	bn::optional<Direction> getNextMove() override;
 	
 	void moveFailed() override { return; }
+	void moveSucceded() override { return; }
 	
 	void updateTileIndex() override {
 		tileIndex = 0;

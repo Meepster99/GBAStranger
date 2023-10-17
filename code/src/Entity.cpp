@@ -128,9 +128,17 @@ bn::optional<Direction> Player::getNextMove() {
 void Player::startFall() {
 	
 	BN_LOG("playerfal");
-	// have the player do the cyote time thingy
-	tileIndex = static_cast<int>(currentDir);
-	fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
+	
+	if(entityManager->enemyKill()) { // died from enemy
+		// is 16 actually the ideal number here?
+		// also wow, falldata needs to be its own struct now tbh.
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_hit, 16)); 
+	} else { // fall death
+		// have the player do the cyote time thingy
+		tileIndex = static_cast<int>(currentDir);
+		fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
+		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_fall, 6));
+	}
 	
 	// do locust bs
 	if(!isVoided && locustCount > 0) {
@@ -142,6 +150,20 @@ void Player::startFall() {
 		isVoided = true;
 		tileManager->updateVoidTiles();
 	}
+	
+}
+
+void Player::updateTileIndex() {
+	
+	// there should of been a way to do this by,,, setting the bool in hasmoved, but that didnt seem to work.
+	// now the bool is updated by movefailed and movesucceded
+	// nope, im just going to use the playermoved bool from the entityManager, fuck it
+	// nope, player->p == playerStart
+	// gods this is so dumb
+	
+	tileIndex = static_cast<int>(currentDir) + (4 * !!pushAnimation);
+	
+	BN_ASSERT(tileIndex < spriteTilesArray.size(), "tried loading a tileIndex out of the sprite array bounds! ", __PRETTY_FUNCTION__);
 	
 }
 

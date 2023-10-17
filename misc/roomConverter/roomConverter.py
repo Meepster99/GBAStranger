@@ -5,6 +5,8 @@ import numpy as np
 import re
 import shutil
 import math 
+import inspect
+
 
 from colorama import init, Fore, Back, Style
 
@@ -19,7 +21,8 @@ RESET = Style.RESET_ALL
 
 failures = {}
 
-isHardMode = False
+#isHardMode = False
+isHardMode = True
 
 
 # add: id: 8 spr_voider
@@ -42,14 +45,281 @@ creationCodeData = { }
 
 newCreationCodesData = {}
 
-# fuck it, going to be doing this manually.
-def readCreationCode(creationCode):
+# shit horrible code omfg
+room = "ugh"
 
-	#x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
+
+# fuck it, going to be doing this manually.
+def readCreationCode(p, creationCode):
 	
 	if creationCode is None:
 		return None
 		
+	if creationCode == "gml_RoomCC_rm_e_000_1_Create":
+		# this rooms the push 8 tiles in a row room, i do not want to deal with it rn"
+		return None
+		
+	if creationCode == "dont":
+		return None
+		
+	f = open(os.path.join("../ExportData/Export_Code", creationCode + ".gml"))
+	originalLines = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ]
+	f.close()	
+	
+	lines = list(originalLines)	
+
+	i = 0
+	while i < len(lines):
+		# to call this bad is an understatement
+		if "with " in lines[i] or "with(" in lines[i]:
+			lines[i] = "while False:"
+			if lines[i+1] != "{":
+				lines.insert(i+1, "{")
+				lines.insert(i+3, "}")
+		i += 1
+				
+			
+	# an alternative. it is HELLA JANK, tho
+	execString = ""
+
+	indentLevel = 1
+	
+	i = 0
+	while i < len(lines):
+		if ("if" in lines[i] or lines[i] == "else") and lines[i+1] != "{":
+			lines.insert(i+1, "{")
+			lines.insert(i+3, "}")
+		i += 1
+		
+	i = 0
+	while i < len(lines):
+		if lines[i] == "{" and lines[i+1] == "}":
+			lines.insert(i+1, "pass")
+		i += 1
+	
+	stranger = int(isHardMode)
+	obj_music_controller = 0
+	spr_n_right = 0
+	spr_mural_tile = 0
+	# THIS MAY BE HORRID IF X AND Y ARE EVER USED IN COMPARASINS
+	x = p.rawX
+	y = p.rawY
+	destroy = False
+	layer = None
+	b_form = None
+	dl_form = None
+
+	def instance_destroy():
+		global destroy
+		destroy = True
+		
+	def ds_grid_get(a, b, c):
+		return 0
+		
+	def instance_create_layer(x, y, idek, data):
+	
+	
+		
+		
+		# ive done a lot of coding in my life.
+		# and i can safely say that this is the most atrocious thing ive ever done. 
+		# why didnt i just make objectfunctions global 
+		
+		frames = inspect.stack()
+
+		for i, f in enumerate(frames):
+			if frames[i].function == "convertObjects":
+				break
+		else:
+			print("fuck")
+			exit(1)
+			
+		frame = frames[i]
+			
+		try:
+			#frames[4].ObjectFunctions.obj_spawnpoint(x, y, None)
+			#print(frames[4].frame.f_locals)
+			#exec("ObjectFunctions.obj_spawnpoint(Pos({:d}, {:d}), 'dont')".format(x, y), globals(), frame.frame.f_locals)
+			
+			#temp = "getattr(ObjectFunctions, '{:s}')(Pos({:d}, {:d}), None)".format(data, x, y)
+			#temp = "print(getattr(ObjectFunctions, '{:s}'))".format(data)
+			#print(temp)
+			#exec(temp, frame.frame.f_globals, frame.frame.f_locals)
+			
+			temp = "getattr(ObjectFunctions, '{:s}')(Pos({:d}, {:d}), None)".format(data, x, y)
+			#print(temp)
+			exec(temp, frame.frame.f_globals, frame.frame.f_locals)
+			#print("-----")
+			
+		except Exception as e:
+			
+			print(e)
+			print("omfg")
+			exit(1)
+		
+		
+		global destroy
+		destroy = True
+		return
+	
+	def instance_create_depth(x, y, idek, data):
+		return None
+	
+	def instance_exists(data):
+		return False
+		
+	removeStrings = [
+		"var px = x",
+		"var py = y",
+		'show_debug_message(((("Player spawn position: " + string(px)) + " x ") + string(py)))',
+		"global.player_blink = 1",
+		"show_debug_message",
+		"randomize()",
+		"irandom_range",
+	]
+		
+	pattern = r'rm_\d+(?:_void)?'
+		
+	for i, l in enumerate(lines):
+	
+		l = re.sub(pattern, lambda match: f'"{match.group(0)}"', l)
+	
+		if l == "{":
+			indentLevel += 1
+			continue
+	
+		if l == "}":
+			indentLevel -= 1
+			continue
+
+		temp = l
+
+		if "if" in temp:
+			temp += ":"
+		
+		if temp == "else":
+			temp += ":"
+		
+		
+		temp = temp.replace("global.stranger", str(stranger))
+		temp = temp.replace("global.loop", str(stranger))
+		temp = temp.replace("global.voider", str(stranger))
+		
+		temp = temp.replace("global.collect_wings", "0")
+		
+		temp = temp.replace("||", "or")
+		temp = temp.replace("&&", "and")
+		
+		# autism, omfg 
+		temp = temp.replace("!=", "JESUSFUCKINGCHRIST")
+		
+		temp = temp.replace("!", "not ")
+		
+		temp = temp.replace("JESUSFUCKINGCHRIST", "!=")
+		
+		temp = temp.replace("else if", "elif")
+		temp = temp.replace("global.cc_state", "None")
+		temp = temp.replace("obj_inventory.ds_player_info", "None")
+		temp = temp.replace("obj_inventory.ds_equipment", "None")
+		temp = temp.replace("global.voidrod_get", "1")
+		temp = temp.replace("var ", "")
+		
+		for s in removeStrings:
+			if s in temp:
+				temp = "pass"
+				break
+	
+		temp = temp.replace("return;", "break")
+	
+		if "instance_create_layer" in temp or "instance_create_depth" in temp:
+			lastSpaceIndex = temp.rfind(" ")+1
+			temp = temp[:lastSpaceIndex] + "\"" + temp[lastSpaceIndex:]
+			
+			
+			temp = temp[:-1] + "\"" + temp[-1:]
+			
+		if "instance_exists" in temp:
+			index = temp.find("instance_exists") + len("instance_exists") + 1
+			temp = temp[:index] + "\"" + temp[index:]
+			
+			while index < len(temp):
+				if temp[index] == ")":
+					break
+				index += 1
+			else:
+				print("wtf, what the fuck. what the fuck")
+				exit(1)
+			
+			temp = temp[:index] + "\"" + temp[index:]
+			
+				
+
+		execString += ("\t" * indentLevel) + temp + "\n"
+	
+		
+	# this lets break break out of the while loop, which is basically the same as like, just returning
+	execString = "while True:\n" + execString + "\tbreak\n"
+	
+	bruh = locals()
+	globalBruh = globals()
+	globalBruh["layer"] = None
+	globalBruh["destroy"] = False
+
+	try:
+		exec(execString, globalBruh, bruh)
+	except Exception as e:
+		
+		print(RED + "readCreationCode fucked up" + RESET)
+		
+	
+		print(creationCode)
+		print("\n".join(originalLines))
+		print("---\n")
+		print("\n".join(lines))
+		print("---\n")
+		print(execString)
+		print("-----")
+		
+		print(RED + "readCreationCode fucked up" + RESET)
+		print(e)
+		print("\n")
+		exit(1)
+		
+	
+	if "layer" in globalBruh:
+		layer = globalBruh["layer"]
+	
+	if "destroy" in globalBruh:
+		destroy = globalBruh["destroy"]
+	
+	b_form = bruh["b_form"]
+	dl_form = bruh["dl_form"]
+	
+	
+	#print(creationCode)
+	#print("\n".join(originalLines))
+	#print("\n")
+	#print("\n".join(lines))
+	#print("\n")
+	#print(execString)
+	#print(layer, destroy, b_form, dl_form)
+	#print("-----")
+	
+	if layer:
+		return layer
+	
+	if destroy: # low prio, since the code destroys the prev thing after creating another
+		return "destroy"
+	
+	if b_form:
+		return "b_form = {:d}".format(b_form)
+
+	if dl_form:
+		return "dl_form = {:d}".format(dl_form)
+	
+	return None
+	
+	
 	
 	f = open(os.path.join("../ExportData/Export_Code", creationCode + ".gml"))
 	lines = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ]
@@ -65,6 +335,10 @@ def readCreationCode(creationCode):
 
 		#return None
 		exit(1)
+		
+	thisCode = creationCodeData[idek]
+	if len(thisCode) == 1:
+		return creationCodeData[idek][0]
 	
 	return creationCodeData[idek][isHardMode]
 	
@@ -375,8 +649,29 @@ def convertObjects(layerData):
 	
 
 		def obj_spawnpoint(p, creationCode):	
+		
+			res = ""
+		
+			# this code makes me want to cry 
+			
+			# i was going to pass "dont" in as a creation code, but that fucked to many things up. so now, im going to see if 
+			# this is being called from exec via the stack frames. omfg 
+			
+		
+			res = readCreationCode(p, "gml_Object_obj_spawnpoint_Create_0")
+			if res == "destroy":
+				#print(CYAN + "room: {:s} creating player at alternate pos, i hope lmao".format(room) + RESET)
+				return
+			elif res is not None:
+				print("a player had a creation code, this is not defined!")
+				exit(1)
+						
 			entityExport.insert(0, "EntityType::Player,{:d},{:d}".format(p.x, p.y))
-
+			
+		def obj_player(p, creationCode): 
+			# this one like,, gods idek whats going on anymore
+			entityExport.insert(0, "EntityType::Player,{:d},{:d}".format(p.x, p.y))
+			
 		def obj_chest_small(p, creationCode):
 			entityExport.append("EntityType::Chest,{:d},{:d}".format(p.x, p.y))
 
@@ -1524,7 +1819,7 @@ def convertObjects(layerData):
 	
 		if hasattr(ObjectFunctions, objectDef):
 		
-			creationCode = readCreationCode(creationCodeFilename)
+			creationCode = readCreationCode(p, creationCodeFilename)
 			# avoid needing this check every time 
 			if creationCode == "destroy":
 				continue
@@ -1591,6 +1886,14 @@ def convertObjects(layerData):
 		
 	floorExport = comp
 	
+	entityPoses = set()
+	for e in entityExport:
+		temp = tuple([ int(x) for x in e.split(",")[1:]])
+		if temp in entityPoses:
+			print(RED + "room " + room + " had a duplicate entity at " + str(temp))
+			exit(1)
+		entityPoses.add(temp)
+	
 	return [floorExport, entityExport, effectExport]
 	
 def convertRoom(data, outputFile):
@@ -1601,6 +1904,10 @@ def convertRoom(data, outputFile):
 		layerData[l["layer_name"]] = l
 	
 	layerData["roomName"] = data["name"]
+	
+	global room
+	room = data["name"]
+	
 	
 	formatArray = lambda arr : "".join([ "{:d},".format(elem) for elem in np.array(arr).flatten() ])
 	
@@ -1619,6 +1926,8 @@ def convertRoom(data, outputFile):
 		return None
 		
 	floorExport, instanceExport, effectExport = objectsExport
+	
+	
 	
 	output = []
 	
@@ -1687,6 +1996,9 @@ def convertAllRooms(inputPath):
 	#jsonFiles = ["rm_0008.json"]
 	#jsonFiles = ["rm_0018.json"]
 	#jsonFiles = ["rm_2intro.json"]
+	#jsonFiles = ["rm_0002.json"]
+	#jsonFiles = ["rm_0009.json"]
+	#jsonFiles = ["rm_0008.json", "rm_0009.json"]
 	
 	successRooms = 0 
 	totalRooms = len(jsonFiles)

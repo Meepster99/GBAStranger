@@ -102,6 +102,7 @@ public:
 	bool hasKills() const { return killedPlayer.size() != 0; }
 	// should i just make killedplayer public? idek anymore
 	bool playerWon() const { return killedPlayer.contains(NULL); }
+	bool enemyKill() const { return !killedPlayer.contains(player); }
 	
 	void hideForDialogueBox(bool vis);
 	bool exitRoom();

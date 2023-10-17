@@ -1,6 +1,6 @@
 {
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor_INS\", obj_glassfloor)   instance_destroy()   }": [
-        null
+        null, "obj_glassfloor"
     ],
     "return;": [
         null
@@ -9,91 +9,91 @@
         null
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_bombfloor)   instance_destroy()   }": [
-        null
+        null, "obj_bombfloor"
     ],
     "if (global.loop == 0)   instance_destroy()   b_form = 1": [
-        "destroy"
+        "destroy", "b_form = 1"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floorswitch)   instance_destroy()   }": [
-        null
+        null, "obj_floorswitch"
     ],
     "b_form = 4": [
         "b_form = 4"
     ],
     "contents = 1   if (global.loop == 1)   {   instance_create_layer(x, y, \"Instances\", obj_boulder)   instance_destroy()   }": [
-        null
+        null, "obj_boulder"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
-        null
+        null, "obj_floor"
     ],
     "if (global.loop == 0)   instance_destroy()": [
-        "destroy"
+        "destroy", null
     ],
     "b_form = 3   if (global.loop == 0)   instance_destroy()": [
-         "destroy"
+         "destroy", "b_form = 3"
     ],
     "contents = 1": [
         null
     ],
     "if (global.loop == 1)   instance_destroy()": [
-        null
+        null, "destroy"
     ],
     "if (global.loop == 1)   b_form = 3": [
-        null
+        null, "b_form = 3"
     ],
     "b_form = 1   if (global.loop == 0)   instance_destroy()": [
-        "destroy"
+        "destroy", "b_form = 1"
     ],
     "if (global.loop == 1)   b_form = 1": [
-        null
+        null, "b_form = 1"
     ],
     "if (global.loop == 0)   b_form = 4   if (global.loop == 1)   b_form = 1": [
-        "b_form = 4"
+        "b_form = 4", "b_form = 1"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor_INS\", obj_exit)   instance_destroy()   }": [
-        null
+        null, "obj_exit"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_create_layer(x, y, \"Floor_INS\", obj_chest_small)   instance_destroy()   }": [
-        null
+        null, "obj_chest_small"
     ],
     "contents = 1   if (global.loop == 1)   instance_destroy()": [
-        null
+        null, "destroy"
     ],
     "special_message = 9   if (global.loop == 1)   instance_destroy()": [
-        null
+        null, "destroy"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_exit)   instance_destroy()   }": [
-        null
+        null, "obj_exit"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Pit\", obj_pit)   instance_destroy()   }": [
-        null
+        null, "obj_pit"
     ],
     "special_message = 10   if (global.loop == 1)   b_form = 1": [
-        null
+        null, "b_form = 1"
     ],
     "special_message = 11   if (global.loop == 1)   b_form = 2": [
-        null
+        null, "b_form = 2"
     ],
     "b_form = 2": [
         "b_form = 2"
     ],
     "special_message = 12   if (global.loop == 1)   b_form = 2": [
-        null
+        null, "b_form = 2"
     ],
     "if (global.loop == 1)   {   instance_create_layer(x, y, \"Floor\", obj_copyfloor)   instance_destroy()   }": [
-        null
+        null, "obj_copyfloor"
     ],
     "special_message = 13   if (global.loop == 1)   instance_destroy()": [
-        null
+        null, "destroy"
     ],
     "contents = 1   if (global.loop == 1)   contents = 5": [
         null
     ],
     "if (global.loop == 0)   special_message = 3   else if (global.loop == 1)   b_form = 4": [
-        null
+        null, "b_form = 4"
     ],
     "b_form = 4   if (global.loop == 0)   instance_destroy()": [
-		"destroy"
+		"destroy", "b_form = 4"
     ],
     "with (obj_music_controller)   {   if audio_is_playing(current_song)   alarm[3] = 4   }": [
         null
@@ -102,19 +102,19 @@
         "b_form = 2"
     ],
     "if (global.loop == 0)   instance_destroy()   b_form = 3": [
-        "destroy"
+        "destroy", "b_form = 3"
     ],
     "special_message = 14   if (global.loop == 1)   b_form = 1": [
-        null
+        null, "b_form = 1"
     ],
     "special_message = 15   if (global.loop == 1)   b_form = 2": [
-        null
+        null, "b_form = 2"
     ],
     "special_message = 16   if (global.loop == 1)   b_form = 2": [
-        null
+        null, "b_form = 2"
     ],
     "special_message = 18   if (global.loop == 1)   b_form = 1": [
-        null
+        null, "b_form = 1"
     ],
     "if (global.loop == 0)   contents = 5": [
         null
@@ -123,19 +123,19 @@
         null
     ],
     "b_form = 2   if (global.loop == 0)   instance_destroy()": [
-        "destroy"
+        "destroy", "b_form = 2"
     ],
     "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor_INS\", obj_glassfloor)   instance_destroy()   }": [
-        "obj_glassfloor"
+        "obj_glassfloor", null
     ],
     "if (global.loop == 0)   {   instance_create_layer(x, y, \"Floor\", obj_floor)   instance_destroy()   }": [
-        "obj_floor"
+        "obj_floor", null
     ],
     "if (global.loop == 0)   instance_destroy()   b_form = 4": [
-        "destroy"
+        "destroy", "b_form = 4"
     ],
     "if (global.loop == 1)   instance_destroy()   special_message = 22": [
-        null
+        null, "destroy"
     ],
     "contents = 5   secret_inspection = 1": [
         null

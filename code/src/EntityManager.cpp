@@ -335,6 +335,8 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 	e->p = testPos;
 
 	futureEntityMap[e->p.x][e->p.y].insert(e);
+	
+	e->moveSucceded();
 	return true;
 }
 
@@ -417,6 +419,10 @@ void EntityManager::doMoves() { profileFunction();
 	
 	// IF WE ARE ONE TILE AWAY FROM EXIT, AND SHADOWS ARE ON BUTTONS, WE DO NOT LEAVE THE LEVE
 	// still tho, calling doFloorSteps will update the shadows, which is needed 
+	
+	player->pushAnimation = player->p == playerStart;
+	player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
+	
 	
 	tileManager->doFloorSteps();
 	
@@ -567,6 +573,10 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 	// ADDITIONALLY, NEW SHADOWS WILL SPAWN AFTER OLD ONES MOVE
 
 	if(!playerDir) {
+		return;
+	}
+	
+	if(shadowQueue.size() == 0 && shadowList.size() == 0) {
 		return;
 	}
 	
@@ -933,6 +943,16 @@ void EntityManager::doVBlank() {
 
 	if(frame % 8 == 0) {
 		doDeaths();
+	}
+	
+	if(frame % 2 == 0) {
+		if(player->pushAnimation) {
+			player->pushAnimation++;
+			if(player->pushAnimation == 8) {
+				player->pushAnimation = 0;
+			}
+			player->doUpdate();
+		}
 	}
 }
 

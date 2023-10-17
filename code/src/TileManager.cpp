@@ -339,7 +339,7 @@ void TileManager::updateVoidTiles() {
 }
 
 bool TileManager::hasCollision(const Pos& p) {
-	return entityManager->hasCollision(p);;
+	return entityManager->hasCollision(p);
 }
 
 void TileManager::fullDraw() { 
@@ -394,7 +394,6 @@ void TileManager::stepOn(Pos p) { profileFunction();
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepon on a tile, it was null?");
 	
 	floorMap[p.x][p.y]->stepOn();
-
 }
 
 
