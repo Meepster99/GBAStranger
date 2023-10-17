@@ -235,6 +235,8 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
+	//u8* test = reinterpret_cast<u8*>(0x00001000);
+	
 	// why does simply instantiating the game class cause frame drops?
 	// wont be much of an issue tho, i suppose
 	//doButanoUpdate(); 

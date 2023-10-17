@@ -38,7 +38,6 @@ class Pos:
 		self.x = (x - 8) // 16
 		self.y = (y - 8) // 16
 
-
 creationCodeData = { }
 
 newCreationCodesData = {}
@@ -151,8 +150,9 @@ def compressData(arr):
 	#maxByteVal = max(maxByteVal, max(arr))
 	for elem in arr:
 		if elem not in byteFrequency:
-			byteFrequency[elem] = 0
+			byteFrequency[elem] = 0	
 		byteFrequency[elem] += 1
+		
 	
 	res = []
 	
@@ -1556,6 +1556,8 @@ def convertObjects(layerData):
 		
 		
 	# this is dumb, and also (i think) slows compile time considerably.
+	# changing this to not waste space
+	# nvm, imjust going to hope O3 works
 	effectExport.insert(0, "&bn::sprite_tiles_items::dw_spr_statue_abaddon,-1,-1,-1,-1")
 	
 	# convert the floor array to values
@@ -1612,18 +1614,6 @@ def convertRoom(data, outputFile):
 		
 	collision, details = temp
 		
-	"""
-	floorExport = convertFloor(layerData)
-	
-	if floorExport is None:
-		return None
-	'
-	instanceExport = convertEntities(layerData)
-	
-	if instanceExport is None:
-		return None
-	"""
-	
 	objectsExport = convertObjects(layerData)
 	if objectsExport is None:
 		return None
@@ -1640,9 +1630,7 @@ def convertRoom(data, outputFile):
 	output.append(formatFullArray("collision", collision["data"]))
 	output.append(formatFullArray("details", details["data"]))
 
-	output.append("constexpr static inline u8 floor[] = {")
-	output.append("".join([ "{:d},".format(instance) for instance in floorExport ]))
-	output.append("};")
+	output.append("constexpr static inline u8 floor[] = {" + "".join([ "{:d},".format(instance) for instance in floorExport ]) + "};")
 	
 	output.append("constexpr static inline EntityHolder entities[] = {")	
 	output.append("".join([ "{{{:s}}},".format(instance) for instance in instanceExport ]))
@@ -1675,6 +1663,7 @@ def convertAllRooms(inputPath):
 	
 	f.write("//Did you know every time you sigh, a little bit of happiness escapes?\n")
 	
+	#f.write("EffectHolder defaultEffectPlaceholder = {&bn::sprite_tiles_items::dw_spr_statue_abaddon,-1,-1,-1,-1};\n")
 	
 	jsonFiles = [f for f in os.listdir(inputPath) if f.lower().endswith('.json')]
 	
@@ -1685,7 +1674,8 @@ def convertAllRooms(inputPath):
 
 	#removeStrings = ["secret", "test", "misc", "trailer"]
 	#removeStrings = ["stg", "house", "secret", "test", "misc", "trailer", "dream", "memories", "bee", "lev", "_ee_"]
-	removeStrings = []
+	# dont need this, but i think it might give me an extra bit for compression
+	removeStrings = ["test", "trailer", "dream", "rm_cc_results", "rm_cif_end", "memories"]
 	
 	for removeStr in removeStrings:
 		# i could, and should one line this
@@ -1753,7 +1743,7 @@ def convertAllRooms(inputPath):
 				break
 				
 		print(col + temp + RESET)
-		
+	print("")
 	
 	tempFile = open("temp.txt", "w")
 	for t in tempSorted:
@@ -1767,14 +1757,17 @@ def convertAllRooms(inputPath):
 	
 	print("compressed data had a ratio of {:6.2f}%".format(100 * compressedBytes / uncompressedBytes))
 	
-	#temp = sorted([ [k, v] for k, v in byteFrequency.items() ], key = lambda x : x[1], reverse=True)
-	#for byte, freq in temp:
-	#	print("{:5d} {:5d}".format(byte, freq))
+	"""
+	temp = sorted([ [k, v] for k, v in byteFrequency.items() ], key = lambda x : x[1], reverse=True)
+	for byte, freq in temp:
+		print("{:5d} {:5d}".format(byte, freq))
+	print("max byte value was " + str(max(byteFrequency.keys())))
+	print("-----")
 	
-	#temp = sorted([ [k, v] for k, v in frequencyFrequency.items() ], key = lambda x : x[1], reverse=True)
-	#for byte, freq in temp:
-	#	print("{:5d} {:5d}".format(byte, freq))
-	
+	temp = sorted([ [k, v] for k, v in frequencyFrequency.items() ], key = lambda x : x[1], reverse=True)
+	for byte, freq in temp:
+		print("{:5d} {:5d}".format(byte, freq))
+	"""
 	
 	pass
 

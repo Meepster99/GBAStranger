@@ -1,4 +1,4 @@
-
+	
 
 #include "Profiler.h"
 
@@ -126,7 +126,8 @@ namespace WTFPROFILER {
 		profilerMap.clear();
 		
 		// i have 0 clue whats going on here. i updated my butano version, and clear started giving me insanely weird bugs. this fixes them
-		profilerMap = bn::unordered_map<const char*, ProfilerData, MAXPROFILERFUNCS>();
+		// https://github.com/GValiente/butano/commit/010ce11208ee5bb42b6fbba0baf06b9f02cc0426
+		//profilerMap = bn::unordered_map<const char*, ProfilerData, MAXPROFILERFUNCS>();
 		
 		BN_LOG("Profiler reset");
 	}

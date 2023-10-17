@@ -452,13 +452,9 @@ void EffectsManager::doDialogue(const char* data) {
 				
 				textGenerator.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + textOffset*16, bn::string_view(buffer), textSprites);
 
-				if(*data == '\r') {
-					// bad code 
-					data++;
-					textOffset++;
-					goto drawNextLine;
-				}
 
+				// this section of code should MAYBE be below the below check
+				// nope, moving this finally fixed the rare framedrops	
 				for(int i=0; i<textSprites.size(); i++) {
 					textSprites[i].set_bg_priority(3);
 					textSprites[i].set_visible(false);
@@ -466,10 +462,20 @@ void EffectsManager::doDialogue(const char* data) {
 				}
 				game->doButanoUpdate();
 
+				if(*data == '\r') {
+					// bad code 
+					data++;
+					textOffset++;
+					goto drawNextLine;
+				}
+
+				
+
 				newText = true;
 				textShowIndex = 0;			
 			} else { // scroll the existing text
 				if(currentlyScrolling) { // we never finished displaying the current text, so do that.
+					game->doButanoUpdate();
 					for(int i=0; i<textSprites.size(); i++) {
 						if(textSprites[i].y() == 40 || textSprites[i].y() == 40+16) {
 							textSprites[i].set_visible(true);

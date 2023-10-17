@@ -1045,7 +1045,7 @@ bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profil
 		//BN_LOG("Entity at ", p, " checking LOS at ", testPos.x, " ", testPos.y, " ", hasNonPlayerEntity(testPos));
 	
 		if(hasCollision(testPos) || hasNonPlayerEntity(testPos)) {
-			BN_LOG("FOUND COLLISION");
+			//BN_LOG("FOUND COLLISION");
 			return bn::optional<Direction>();
 		}
 	}

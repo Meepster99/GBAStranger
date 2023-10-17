@@ -1,6 +1,6 @@
 
 #include "Palette.h"
-
+ 
 // why didnt i just go dark to light omfg
 
 //Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));

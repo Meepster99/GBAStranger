@@ -5,8 +5,6 @@ import shutil
 
 outputPath = "./formattedOutput/"
 
-
-
 def convertAllMusic():
 
 	# msc_013.ogg	
