@@ -269,7 +269,7 @@ void Chest::interact() {
 	// to be 100% real is that i need to go convert all that shit into namespaces, but i 
 	// fucking hate namespaces, and if i have to rewrite a bunch of my h files i will freak
 	
-	if(game->roomManager.roomIndex > 2) {
+	if(game->roomManager.roomIndex > 3) {
 		// this if statement is here on purpose for a very stupid easter egg, see the random boulder msgs
 		// its 2 just in case, for future room ordering changes
 		Pos playerPos = entityManager->player->p;

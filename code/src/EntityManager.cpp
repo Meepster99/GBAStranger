@@ -884,7 +884,7 @@ void EntityManager::hideForDialogueBox(bool vis) {
 	
 }
 
-bool EntityManager::exitRoom() {
+bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it to do one initial check for what entity is above you, and maybe also,, ugh idek
 	
 	// return true when done
 	

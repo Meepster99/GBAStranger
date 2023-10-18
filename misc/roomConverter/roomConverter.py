@@ -49,7 +49,7 @@ newCreationCodesData = {}
 room = "ugh"
 
 
-# fuck it, going to be doing this manually.
+# fuck it, going to be doing this manually. ( not anymore )
 def readCreationCode(p, creationCode):
 	
 	if creationCode is None:
