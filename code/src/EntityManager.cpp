@@ -899,11 +899,15 @@ bool EntityManager::exitRoom() {
 		// check for cif statue
 		bool cifReset = false;
 		Pos testPos = player->p;
-		testPos.move(Direction::Up);
-		for(auto it = obstacleList.begin(); it != obstacleList.end(); it++) {
-			if((*it)->p == testPos && (*it)->entityType() == EntityType::CifStatue) {
-				cifReset = true;
-				break;
+		if(testPos.move(Direction::Up)) {
+			
+			SaneSet<Entity*, 4> tempMap = getMap(testPos);
+			
+			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+				if((*it)->entityType() == EntityType::CifStatue) {
+					cifReset = true;
+					break;
+				}	
 			}
 		}
 		
@@ -917,6 +921,30 @@ bool EntityManager::exitRoom() {
 		bn::sound_items::snd_stairs.play();
 		return true;
 	} 
+	
+	// do a check for if we are doing a bee statue shortcut (or in the future, a shortcut shortcut)((or in the future future, brands???))
+	// because of the goofy ahh way this is written, this is going to get called every time until the falling anim finishes?, i dont like that tbh, but i cannot do anything
+	// i can at least like,,, do a check to not duplicate inc room via just setting locusts to 0
+	if(killedPlayer.contains(player) && player->locustCount != 0) {
+		bool beeReset = false;
+		Pos testPos = player->p;
+		if(testPos.move(Direction::Up)) {
+			SaneSet<Entity*, 4> tempMap = getMap(testPos);
+			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+				if((*it)->entityType() == EntityType::BeeStatue) {
+						beeReset = true;
+						break;
+				}
+			}
+			
+			if(beeReset) {
+				game->roomManager.changeFloor(player->locustCount);
+				player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this shit
+				// but does this update the save file?
+			}
+			
+		}
+	}
 	
 	
 	//update the pos of entities that DONT collide with the player.
@@ -941,7 +969,7 @@ bool EntityManager::exitRoom() {
 		player->updatePosition();
 	}
 	
-	if(killedPlayer.contains(player) && frame % 8 == 0) {
+	if(killedPlayer.contains(player) && frame % 8 == 0) {		
 		return player->fallDeath();
 	} else {
 		if(frame % 8 == 0) {

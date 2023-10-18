@@ -283,6 +283,8 @@ void Chest::interact() {
 		animationIndex = 1;
 	
 		doUpdate();
+		
+		bn::sound_items::snd_open.play();
 	
 		entityManager->player->locustCount++;
 		tileManager->updateLocust();

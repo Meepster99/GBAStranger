@@ -12,4 +12,5 @@ public:
 	void nextRoom();
 	void prevRoom();
 	void cifReset();
+	void changeFloor(int val);
 };

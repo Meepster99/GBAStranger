@@ -39,3 +39,11 @@ void RoomManager::cifReset() {
 	roomIndex = 1;
 	BN_LOG("cifReset called! roomIndex set to ", roomIndex);
 }
+
+void RoomManager::changeFloor(int val) {
+	roomIndex = MIN(roomIndex + val, (int)(sizeof(rooms)/sizeof(rooms[0])) - 1);
+	roomIndex = MAX(roomIndex, 0);
+	BN_LOG("roomIndex changed to ", roomIndex);
+}
+
+
