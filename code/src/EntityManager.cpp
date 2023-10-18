@@ -908,11 +908,11 @@ bool EntityManager::exitRoom() {
 		}
 		
 		if(cifReset) {
+			// todo, in the future, put a special anim here
 			game->roomManager.cifReset();
 		} else {
 			game->roomManager.nextRoom();
 		}
-		
 		
 		bn::sound_items::snd_stairs.play();
 		return true;

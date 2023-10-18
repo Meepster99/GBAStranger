@@ -37,5 +37,5 @@ void RoomManager::prevRoom() {
 
 void RoomManager::cifReset() {
 	roomIndex = 1;
-	BN_LOG("roomIndex set to ", roomIndex);
+	BN_LOG("cifReset called! roomIndex set to ", roomIndex);
 }

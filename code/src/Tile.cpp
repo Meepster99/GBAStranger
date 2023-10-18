@@ -35,7 +35,25 @@ void Bomb::stepOn() {
 	charge++;
 	if(charge == 2) {
 		isAlive = false;
+		
+		// this may be bad 
+		// break adjacent bomb tiles,,,, i think?
+		Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
+		for(int i=0; i<4; i++) {
+			Pos testPos = tilePos;
+			if(!testPos.move(testDirections[i])) {
+				continue;
+			}
+			
+			if(tileManager->hasFloor(testPos) == TileType::Bomb) {
+				Bomb* tempBomb = static_cast<Bomb*>(tileManager->floorMap[testPos.x][testPos.y]);
+				if(tempBomb->charge == 1) {
+					tempBomb->stepOn();
+				}
+			}
+		}
 	}
+		
 	tileManager->updateTile(tilePos);
 }
 
