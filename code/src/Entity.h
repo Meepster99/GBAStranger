@@ -273,7 +273,7 @@ public:
 	bn::optional<Direction> getNextMove() override;
 	
 	void moveFailed() override { return; }
-	void moveSucceded() override { return; }
+	void moveSucceded() override;
 	
 	void updateTileIndex() override {
 		tileIndex = 0;

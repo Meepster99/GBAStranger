@@ -75,6 +75,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			return {false, bn::optional<Direction>()};
 		} else if(tile == NULL && rod != NULL) {
 			// put tile down 
+			bn::sound_items::snd_voidrod_place.play();
 			rod->tilePos = tilePos;
 			tileManager->floorMap[tilePos.x][tilePos.y] = rod;
 			rod = NULL;
@@ -83,6 +84,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			tileManager->updateRod();
 		} else if(tile != NULL && rod == NULL) {
 			// pick tile up
+			bn::sound_items::snd_voidrod_store.play();
 			rod = tileManager->floorMap[tilePos.x][tilePos.y];
 			tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
 			entityManager->rodUse();
@@ -95,7 +97,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		return {true, bn::optional<Direction>()};
 	}
 	
-	if(bn::keypad::down_pressed()) {		
+	if(bn::keypad::down_pressed()) {
 		currentDir = Direction::Down;
 		nextMove = bn::optional<Direction>(currentDir);
 		return {true, bn::optional<Direction>(currentDir)};
@@ -134,6 +136,9 @@ void Player::startFall() {
 		// also wow, falldata needs to be its own struct now tbh.
 		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_hit, 16)); 
 	} else { // fall death
+	
+		bn::sound_items::snd_player_fall.play();
+	
 		// have the player do the cyote time thingy
 		tileIndex = static_cast<int>(currentDir);
 		fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
@@ -386,6 +391,10 @@ void Obstacle::startFall() {
 				
 	//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[0], 9));
 	
+}
+
+void Obstacle::moveSucceded() {
+	bn::sound_items::snd_push.play();
 }
 
 void EusStatue::startFall() {

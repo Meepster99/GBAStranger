@@ -35,26 +35,40 @@ def convertAllSounds():
 
 	wavFiles = [f for f in os.listdir(inputPath) if f.lower().endswith('.wav')]
 	
-	
+	successCount = 0
+	failCount = 0
 	for i, wav in enumerate(wavFiles):
 	
-		print("converting soundfile {:5d} out of {:5d}".format(i, len(wavFiles)))
+		print("converting soundfile {:50s}, {:5d} out of {:5d}".format(wav, i, len(wavFiles)))
 	
 		song = AudioSegment.from_wav(os.path.join(inputPath, wav))
+		
+		if song.duration_seconds > 5:
+			print("{:50s} is to long, skipping".format(wav))
+			
+			failCount += 1
+			continue
 		
 		song = song.set_channels(1)
 	
 		outputFilePath = os.path.join(outputPath, wav.rsplit(".", 1)[0] + ".wav")
-		song.export(outputFilePath, format="wav", parameters=["-ar","22050"])
+		#song.export(outputFilePath, format="wav", parameters=["-ar","22050"])
+		song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
+
 		
+		successCount += 1
 
-
+	totalCount = successCount + failCount
+	print("converted {:5.2f}% ({:d}/{:d}) of sound effects, hope thats good enough".format(100 * successCount / totalCount, successCount, totalCount))
+		
 	pass
 
 def main():
 
 	os.chdir(os.path.dirname(__file__))
 
+	shutil.rmtree("./formattedOutput")
+	
 	if not os.path.exists("./formattedOutput"):
 		os.mkdir("./formattedOutput/")
 

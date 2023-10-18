@@ -17,6 +17,10 @@ int Switch::totalCount = 0;
 EffectTypeArray glassAnimation[] = {EffectType(bn::sprite_tiles_items::dw_spr_glassfloor, 8)};
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
+void Glass::stepOn() {
+	bn::sound_items::snd_stepglassfloor.play();
+}
+
 void Glass::stepOff() {
 	if(isAlive) {
 		effectsManager->createEffect(tilePos, 
@@ -24,6 +28,7 @@ void Glass::stepOff() {
 	}
 	isAlive = false;
 	tileManager->updateTile(tilePos);
+	bn::sound_items::snd_breakglassfloor.play();
 }
 
 void Bomb::stepOn() {
@@ -38,12 +43,14 @@ void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
 	tileManager->updateExit();
+	bn::sound_items::snd_activate.play();
 }
 
 void Switch::stepOff() {
 	pressedCount--;
 	isSteppedOn = false;
 	tileManager->updateExit();
+	bn::sound_items::snd_activate.play();
 }
 
 int RodTile::getTileValue() const {

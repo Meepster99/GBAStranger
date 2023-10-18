@@ -423,6 +423,11 @@ void EntityManager::doMoves() { profileFunction();
 	player->pushAnimation = player->p == playerStart;
 	if(player->p != playerStart) {
 		player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
+	} else {
+		//,, this will play at the same time as a boulder push,,, but im tired ok
+		if(playerRes.second.has_value()) {
+			bn::sound_items::snd_push_small.play(); 
+		}
 	}
 	
 	
@@ -891,6 +896,7 @@ bool EntityManager::exitRoom() {
 		//game->debugText.updateText();
 		//bn::core::update();
 		game->roomManager.nextRoom();
+		bn::sound_items::snd_stairs.play();
 		return true;
 	} 
 	

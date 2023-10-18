@@ -92,6 +92,7 @@ public:
 	
 	TileType tileType() const override { return TileType::Glass; }
 	
+	void stepOn() override;
 	void stepOff() override;
 		
 	bool drawDropOff() const override { return false; }

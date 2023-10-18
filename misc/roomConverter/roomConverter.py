@@ -21,8 +21,8 @@ RESET = Style.RESET_ALL
 
 failures = {}
 
-#isHardMode = False
-isHardMode = True
+isHardMode = False
+#isHardMode = True
 
 
 # add: id: 8 spr_voider
