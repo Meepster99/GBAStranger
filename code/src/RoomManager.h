@@ -11,5 +11,5 @@ public:
 
 	void nextRoom();
 	void prevRoom();
-	
+	void cifReset();
 };

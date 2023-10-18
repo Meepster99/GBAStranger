@@ -34,3 +34,8 @@ void RoomManager::prevRoom() {
 		BN_LOG("roomIndex decremented to ", roomIndex);
 	}
 }
+
+void RoomManager::cifReset() {
+	roomIndex = 1;
+	BN_LOG("roomIndex set to ", roomIndex);
+}

@@ -895,7 +895,25 @@ bool EntityManager::exitRoom() {
 		updateScreen(); // is this ok?	
 		//game->debugText.updateText();
 		//bn::core::update();
-		game->roomManager.nextRoom();
+		
+		// check for cif statue
+		bool cifReset = false;
+		Pos testPos = player->p;
+		testPos.move(Direction::Up);
+		for(auto it = obstacleList.begin(); it != obstacleList.end(); it++) {
+			if((*it)->p == testPos && (*it)->entityType() == EntityType::CifStatue) {
+				cifReset = true;
+				break;
+			}
+		}
+		
+		if(cifReset) {
+			game->roomManager.cifReset();
+		} else {
+			game->roomManager.nextRoom();
+		}
+		
+		
 		bn::sound_items::snd_stairs.play();
 		return true;
 	} 
