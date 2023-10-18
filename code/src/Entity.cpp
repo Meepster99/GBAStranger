@@ -144,9 +144,7 @@ void Player::startFall() {
 	if(!isVoided && locustCount > 0) {
 		locustCount--;
 		tileManager->updateLocust();
-	}
-	
-	if(locustCount == 0) {
+	} else if(locustCount == 0) {
 		isVoided = true;
 		tileManager->updateVoidTiles();
 	}

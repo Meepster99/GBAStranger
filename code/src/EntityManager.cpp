@@ -421,7 +421,9 @@ void EntityManager::doMoves() { profileFunction();
 	// still tho, calling doFloorSteps will update the shadows, which is needed 
 	
 	player->pushAnimation = player->p == playerStart;
-	player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
+	if(player->p != playerStart) {
+		player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
+	}
 	
 	
 	tileManager->doFloorSteps();

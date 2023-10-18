@@ -176,7 +176,8 @@ void Game::changePalette(int offset) {
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
-	save();
+	// this is a problem, fuck it ima just have palette not cause a save.
+	//save();
 	
 }
 
@@ -379,7 +380,7 @@ void Game::load() {
 	BN_LOG("locust: ", saveData.locustCount);
 	BN_LOG("void: ", saveData.isVoided);
 	BN_LOG("room: ", saveData.roomIndex);
-	
+
 	roomManager.roomIndex = saveData.roomIndex;
 	paletteIndex = saveData.paletteIndex;
 }
