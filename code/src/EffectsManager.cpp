@@ -107,12 +107,19 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 		tileRef[i].data[7] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[7];
 	}
 
+	/*
 	for(int i=0; i<8; i+=2) {
 		tileRef[126].data[i+0] = 0x00000002;
 		tileRef[126].data[i+1] = 0x00000003;
 	}	
 	tileRef[127].data[0] = 0x23232323;
+	*/
 	
+	for(int i=0; i<8; i++) {
+		tileRef[126].data[i] = 0x11111111;
+		tileRef[127].data[i] = 0x11111111;
+	}
+		
 	for(int i=0+1; i<30-1; i++) {
 		effectsLayer.rawMap.setTile(i, 0, 127, false, true);
 		effectsLayer.rawMap.setTile(i, 19, 127, true, false);
@@ -324,9 +331,61 @@ void EffectsManager::doVBlank() {
 			++it;
 		}
 	}
+
+
+	static Pos spiralPos(3, 3);
+	static int layerIndex = 0;
+	static int layer = 1;
+	static int layerCount = 0;
+	static int dirIndex = 0;
+	const Direction dirArray[4] = {Direction::Down, Direction::Right, Direction::Up, Direction::Left};
+
+	// should this be static? should this be a class var honestly?
+	static bn::span<bn::tile> tileRef = tilesPointer.vram().value();
+	
+	if(layerIndex == layer) {
+		dirIndex = (dirIndex + 1) % 4;
+		layerIndex = 0;
+			
+		layerCount++;
+		if(layerCount == 2) {
+			layerCount = 0;
+			layer++;
+		}
+		if(layer == 8 && layerCount == 1) {
+			layer = 1;
+			spiralPos = Pos(3, 3);
+			dirIndex = 0;
+			layerCount = 0;
+		}
+	}
+	
+
+	if(layerIndex < layer) {
+		//BN_ASSERT(spiralPos.y >=0 && spiralPos.y < 8, "spiralPos y out of range at ", spiralPos.y);
+		//BN_ASSERT(spiralPos.x >=0 && spiralPos.x < 8, "spiralPos x out of range at ", spiralPos.x);
+		
+		//uint32_t val = tileRef[126].data[spiralPos.y] ^ (((uint32_t)2) << 4*spiralPos.x);
+		
+		uint32_t val = tileRef[126].data[spiralPos.y];
+		uint32_t temp = (val & (((uint32_t)0xF) << 4*spiralPos.x)) >> 4*spiralPos.x;
+		
+		temp = (temp + 1) % 5;
+		val = (val & ~(((uint32_t)0xF) << 4*spiralPos.x)) | (temp << 4*spiralPos.x) ;
+		
+		tileRef[126].data[spiralPos.y] = val;
+		tileRef[127].data[spiralPos.y] = val;
+		
+		spiralPos.move(dirArray[dirIndex]);
+		
+		layerIndex++;
+	}
 	
 	
-	static int vramIndex = 0;
+	
+	
+	
+	
 	
 }
 
