@@ -370,7 +370,7 @@ void EffectsManager::doVBlank() {
 		uint32_t val = tileRef[126].data[spiralPos.y];
 		uint32_t temp = (val & (((uint32_t)0xF) << 4*spiralPos.x)) >> 4*spiralPos.x;
 		
-		temp = (temp + 1) % 5;
+		temp = (temp % 4) + 1;
 		val = (val & ~(((uint32_t)0xF) << 4*spiralPos.x)) | (temp << 4*spiralPos.x) ;
 		
 		tileRef[126].data[spiralPos.y] = val;
