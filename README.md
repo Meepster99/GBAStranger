@@ -15,6 +15,9 @@ use `cargo run --release`.
 
 install [devkitpro](https://devkitpro.org/)
 
+clone the repo
+do `git submodule update --init --recursive`
+
 run convertAllAssets.py, located in the misc folder
 
-make the makefile in code/
+make the makefile in code/ preferably with -j8 or -j16
