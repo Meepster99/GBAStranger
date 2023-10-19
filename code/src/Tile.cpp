@@ -3,11 +3,13 @@
 #include "Tile.h"
 #include "EffectsManager.h"
 #include "EntityManager.h"
+#include "Game.h"
 
 EffectsManager* FloorTile::effectsManager = NULL;
 TileManager* FloorTile::tileManager = NULL;
 BackgroundMap* FloorTile::rawMap = NULL;
 EntityManager* FloorTile::entityManager = NULL;
+Game* FloorTile::game = NULL;
 
 int Switch::pressedCount = 0;
 int Switch::totalCount = 0;
@@ -18,7 +20,9 @@ EffectTypeArray glassAnimation[] = {EffectType(bn::sprite_tiles_items::dw_spr_gl
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
 void Glass::stepOn() {
-	bn::sound_items::snd_stepglassfloor.play();
+	if(game->state == GameState::Normal) {
+		bn::sound_items::snd_stepglassfloor.play();
+	}
 }
 
 void Glass::stepOff() {
@@ -28,7 +32,9 @@ void Glass::stepOff() {
 	}
 	isAlive = false;
 	tileManager->updateTile(tilePos);
-	bn::sound_items::snd_breakglassfloor.play();
+	if(game->state == GameState::Normal) {
+		bn::sound_items::snd_breakglassfloor.play();
+	}
 }
 
 void Bomb::stepOn() {

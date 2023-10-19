@@ -33,7 +33,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			
 			// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
 			// is this 4, or ithis 8???
-			for(int j=0; j<8; j++) {
+			// omfg dumbass, its 4 for the number of subtiles, idiot
+			for(int j=0; j<4; j++) {
 				// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
 				int offset = 4 * (x + (y * width)) + j;
 				

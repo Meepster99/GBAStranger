@@ -94,9 +94,9 @@ public:
 		FloorTile::tileManager = &tileManager;
 		FloorTile::entityManager = &entityManager;
 		FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
-		
+	
+		FloorTile::game = this;
 		Entity::game = this;
-		
 		BigSprite::game = this;
 		
 		MenuOption::effectsManager = &effectsManager;

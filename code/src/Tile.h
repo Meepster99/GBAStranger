@@ -6,6 +6,7 @@
 class EffectsManager;
 class TileManager;
 class EntityManager;
+class Game;
 
 class FloorTile { // default floor.
 public:	
@@ -14,6 +15,7 @@ public:
 	static TileManager* tileManager;
 	static BackgroundMap* rawMap;
 	static EntityManager* entityManager;
+	static Game* game;
 
 	Pos tilePos; // im not sure how much i like this, but for tiles to call/create effects, this is needed
 	
