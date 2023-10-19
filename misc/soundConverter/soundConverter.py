@@ -1,7 +1,15 @@
 
 from pydub import AudioSegment
-import os
+import os, sys
 import shutil
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
+
+from poolQueue import PoolQueue
+from multiprocessing import Queue, Pool, cpu_count, Event
+import queue
+import time 
+from threading import Thread
 
 outputPath = "./formattedOutput/"
 
@@ -67,10 +75,10 @@ def main():
 
 	os.chdir(os.path.dirname(__file__))
 
-	shutil.rmtree("./formattedOutput")
-	
-	if not os.path.exists("./formattedOutput"):
-		os.mkdir("./formattedOutput/")
+	if os.path.exists("./formattedOutput"):
+		shutil.rmtree("./formattedOutput")
+		
+	os.mkdir("./formattedOutput/")
 
 	# makesure that audiogroup1.dat and audiogroup2.dat are next to data.win
 	# run exportallsounds 

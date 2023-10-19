@@ -37,18 +37,11 @@ GRAPHICS    :=  graphics ../butano/common/graphics
 AUDIO       :=  audio ../butano/common/audio
 DMGAUDIO    :=  dmg_audio ../butano/common/dmg_audio
 ROMTITLE    :=  GBAStranger
-ROMCODE     :=  SBTP
+ROMCODE     :=  GBST
 # SAVE ME O3
-#USERFLAGS   :=  -O3 -DBN_CFG_PROFILER_ENABLED=true -DBN_CFG_LOG_ENABLED=true
-# is -mthumb-interwork -mthumb a good idea? 
 # https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
-USERFLAGS   :=  -O3  -mthumb-interwork -mthumb 
-#USERFLAGS   :=  -O0
-#USERFLAGS   :=  -Ofast -funroll-loops
-#USERFLAGS   :=  -Ofast
+USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
 USERASFLAGS :=  
-# flto needs to be modified to like, get a core count automatically for when building on others systems!
-#USERLDFLAGS :=  -flto=16
 USERLDFLAGS :=  -flto=auto
 USERLIBDIRS :=  
 USERLIBS    :=  

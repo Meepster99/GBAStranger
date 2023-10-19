@@ -236,8 +236,29 @@ public:
 			// should overwrite that with transparent here.
 			// actually, fuck it, ill just do it in preprocessing.
 			
+			init(zIndex);
 			
-			//bgPointer.set_z_order(zIndex);
+		}
+	
+	// alternate constructor for when (trying) to use an allocated tileset instead of a normal one(for vram modifications)
+	BackgroundMap(bn::regular_bg_tiles_ptr tilesPointer, int zIndex) :
+		mapItem(cells[0], bn::size(32, 32)),
+		
+		bg_item(
+			tilesPointer.vram().value(), 
+			backgroundPalette->getColors(),
+			backgroundPalette->getBPP(),
+			*cells,
+			bn::size(32, 32)
+		),
+		bgPointer(bg_item.create_bg(8, 48)),
+		bgMap(bgPointer.map())
+	{
+		init(zIndex);	
+	}
+		
+	void init(int zIndex) {
+		//bgPointer.set_z_order(zIndex);
 			bgPointer.set_priority(zIndex);
 			
 			//setTile(0,21,4);
@@ -283,9 +304,7 @@ public:
 			
 			setTile(15,24,4);
 			setTile(16,24,4);
-			
-			
-		}
+	}
 	
 	void setTile(int x, int y, int tileIndex) {
 		
@@ -323,27 +342,38 @@ public:
 class Layer {
 public:
 
+	// rawmap is now a pointer to avoid all the bs in regards to statically allocating the bs in it
+	// WILL THIS BEING IN HEAP SLOW SHIT DOWN??
+	// bc if so,, we are fucked
 	BackgroundMap rawMap;
-
 	// dont ask
-	Layer(bn::regular_bg_tiles_item tileset, int zIndex, int fillIndex = 0) : rawMap(tileset, zIndex)
-		{
-			
-
-			//setup black border., just black the whole screen
-			for(int i=0; i<30; i++) {
-				for(int j=0; j<20; j++) {
-			//for(int i=0; i<32; i++) {
-			//	for(int j=0; j<32; j++) {
-					rawMap.setTile(i, j, fillIndex);
-				}
-			}
-			rawMap.reloadCells();
+	Layer(bn::regular_bg_tiles_item tileset, int zIndex, int fillIndex = 0) :
+	rawMap(tileset, zIndex)
+	{				
+			init(fillIndex);
 		}
+		
+	Layer(bn::regular_bg_tiles_ptr tilesPointer, int zIndex, int fillIndex = 0) :
+		rawMap(tilesPointer, zIndex)
+		{
+			init(fillIndex);
+		}
+		
+	void init(int fillIndex) {
+		
+		//setup black border., just black the whole screen
+		for(int i=0; i<30; i++) {
+			for(int j=0; j<20; j++) {
+				rawMap.setTile(i, j, fillIndex);
+			}
+		}
+		rawMap.reloadCells();
+	}
+		
 	virtual ~Layer() = default;
 	
 	virtual void draw(u8 (&gameMap)[14][9]) {
-
+		
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				
@@ -361,13 +391,17 @@ public:
 	
 	
 	
-	void setTile(int x, int y, int tileIndex) { rawMap.setTile(x, y, tileIndex); }
-	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { rawMap.setTile(x, y, tileIndex, flipX, flipY); }
+	void setTile(int x, int y, int tileIndex) { 
+		rawMap.setTile(x, y, tileIndex); 
+	}
+	
+	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { 
+		rawMap.setTile(x, y, tileIndex, flipX, flipY);
+	}
 	
 	u8 tempTileIndicies[4];
 	
 	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
-		
 		// this func actually being able to flip shit properly is UNCONFIRMED bc I AM SLEEPY
 		
 		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);

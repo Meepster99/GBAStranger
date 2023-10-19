@@ -47,15 +47,29 @@ i deserve a break, i made good progress today.
 class EffectsLayer : public Layer {
 public:
 
-	// details uses default everything
-	EffectsLayer() :
-	Layer(bn::regular_bg_tiles_items::dw_customeffecttiles, 0, 5) {
+
+	// using an alloced thingy allows us to modify vram 
+	//bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref().size(), bn::bpp_mode::BPP_4);
+	// 128 is just a guess, bc im thinking that getting the tiles ref was causing shit to go down for some reason??
+
+	// this is trash and i shouldnt be calling this alloc twice, but it wont work without it
+	//bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(1, bn::bpp_mode::BPP_4);
+
+	bn::regular_bg_tiles_ptr tilesPointer;
 	
+	// details uses default everything
+	EffectsLayer(bn::regular_bg_tiles_ptr tilesPointer_) : Layer(tilesPointer_, 0, 5), tilesPointer(tilesPointer_)
+	 {
+
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				setBigTile(x, y, 0);
 			}
 		}
+		
+		// why is this needed??? is this needed each time i update shit?
+		rawMap.bgPointer.set_tiles(tilesPointer_);
+		
 		reloadCells();
 	}
 	
@@ -152,9 +166,6 @@ public:
 	
 	static Palette* spritePalette;
 	
-	bn::regular_bg_tiles_ptr effectTilesPtr = bn::regular_bg_tiles_ptr::allocate(bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref().size(), bn::bpp_mode::BPP_4);
-	
-
 	// do these even need to be pointers?
 	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
 	
@@ -163,16 +174,13 @@ public:
 	
 	bn::vector<BigSprite*, 128> bigSprites;
 
-	EffectsLayer effectsLayer;	
+	// the amount of time spent on this is pathetic.
+	// WHY, when i declared tilesPointer as a member var in effects layer did this not work?? but this does???
+	bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(128, bn::bpp_mode::BPP_4);
+	EffectsLayer effectsLayer = EffectsLayer(tilesPointer);	
 
 
-	EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font) {
-		
-		// may not be the best idea?
-		textGenerator.set_one_sprite_per_character(true);
-		
-	
-	}
+	EffectsManager(Game* game_);
 
 	void createEffect(Pos p, const bn::span<const bn::pair<const bn::sprite_tiles_item, int>>& inputData) {
 		// i think using a span here is a good idea,,, but, ugh should i vector?

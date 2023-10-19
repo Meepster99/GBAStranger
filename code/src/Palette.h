@@ -28,6 +28,17 @@ public:
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
+	bn::bpp_mode getBPP() {
+		return bn::bpp_mode::BPP_4;
+	}
+
+	const bn::span<const bn::color> getColors() {
+		bn::span<bn::color> spanthing(colorArray);
+		return bn::bg_palette_item(spanthing, bn::bpp_mode::BPP_4).colors_ref();
+	}
+	
+	
+	
 };
 
 extern Palette defaultPalette;

@@ -30,7 +30,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			}
 			
 			// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
-			for(int j=0; j<4; j++) {
+			// is this 4, or ithis 8???
+			for(int j=0; j<8; j++) {
 				// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
 				int offset = 4 * (x + (y * width)) + j;
 				
@@ -38,11 +39,12 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 				
 				for(int i=0; i<8; i++) {
 					if(tileRef[i] != 0) {
-						goto doBigTile;
+						goto doBigTile; // shit code
 					}
 				}
 			}
 			
+			// is continueing here ideal? the collision map wont update for blank tiles. is that ok?
 			continue;
 			
 			doBigTile:
@@ -82,6 +84,50 @@ void BigSprite::updatePalette(Palette* pal) {
 }
 
 // -----
+
+EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font) {
+		
+	// may not be the best idea?
+	textGenerator.set_one_sprite_per_character(true);
+	
+	// copy over effectstiles
+	bn::optional<bn::span<bn::tile>> tileRefOpt = tilesPointer.vram();
+	BN_ASSERT(tileRefOpt.has_value(), "wtf");
+	bn::span<bn::tile> tileRef = tileRefOpt.value();
+	
+	// now that these tiles can be made in memory, we could/should also change the,,, like, whats in them, but thats for later
+	for(int i=0; i<bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref().size(); i++) {
+		tileRef[i].data[0] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[0];
+		tileRef[i].data[1] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[1];
+		tileRef[i].data[2] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[2];
+		tileRef[i].data[3] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[3];
+		tileRef[i].data[4] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[4];
+		tileRef[i].data[5] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[5];
+		tileRef[i].data[6] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[6];
+		tileRef[i].data[7] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[7];
+	}
+
+	for(int i=0; i<8; i+=2) {
+		tileRef[126].data[i+0] = 0x00000002;
+		tileRef[126].data[i+1] = 0x00000003;
+	}	
+	tileRef[127].data[0] = 0x23232323;
+	
+	for(int i=0+1; i<30-1; i++) {
+		effectsLayer.rawMap.setTile(i, 0, 127, false, true);
+		effectsLayer.rawMap.setTile(i, 19, 127, true, false);
+	}
+
+	for(int i=0+1; i<20-1; i++) {
+		effectsLayer.rawMap.setTile(0, i, 126, true, false);
+		effectsLayer.rawMap.setTile(29, i, 126, false, true);
+	}
+
+	
+	effectsLayer.reloadCells();
+	
+}
+
 
 void EffectsManager::updatePalette(Palette* pal) {
 	
@@ -280,19 +326,7 @@ void EffectsManager::doVBlank() {
 	}
 	
 	
-	// i wanted to be able to modify the vram tiles of the effects layer here, but i is for some reason extremely hard?? 
-	/*
-	bn::span<bn::tile> vramRef = effectTilesPtr.vram().value();
-	
-	uint32_t* tileRef = vramRef[5].data;
-	
-	BN_LOG(tileRef[0]);
-	//tileRef[0] = 0x12341234;
-	
-	for(int i=0; i<8; i++) {
-		tileRef[i] = randomGenerator.get();
-	}
-	*/
+	static int vramIndex = 0;
 	
 }
 
