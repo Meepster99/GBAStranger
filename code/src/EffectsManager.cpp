@@ -87,7 +87,7 @@ void BigSprite::updatePalette(Palette* pal) {
 
 // -----
 
-EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font) {
+EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font) {
 		
 	// may not be the best idea?
 	textGenerator.set_one_sprite_per_character(true);
@@ -157,6 +157,10 @@ void EffectsManager::updatePalette(Palette* pal) {
 	
 	for(int i=0; i<menuOptions.size(); i++) {
 		menuOptions[i].draw();
+	}
+	
+	for(int i=0; i<verTextSprites.size(); i++) {
+		verTextSprites[i].set_palette(pal->getFontSpritePalette());
 	}
 	
 	
@@ -701,7 +705,35 @@ void EffectsManager::doMenu() {
 	}
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
+	
 
+
+	#define VERMSG1 "made with love with:" 
+	const char* vermsgString1 = VERMSG1;
+	
+	#define VERMSG2 "butano version " BN_VERSION_STRING
+	const char* vermsgString2 = VERMSG2;
+	
+	#define VERMSG3 "on " __DATE__ " at " __TIME__
+	const char* vermsgString3 = VERMSG3;
+	
+	#define VERMSG4 "pls msg Meepster99 on disc 2 report bugs"
+	const char* vermsgString4 = VERMSG4;
+	
+	verTextSprites.clear();
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view(vermsgString1), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view(vermsgString2), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view(vermsgString3), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString4), verTextSprites);
+	
+	
+	
+	
+	for(int i=0; i<verTextSprites.size(); i++) {
+		verTextSprites[i].set_palette(spritePalette->getFontSpritePalette());
+		verTextSprites[i].set_bg_priority(0);
+		verTextSprites[i].set_visible(true);
+	}
 	
 	MenuOption::yIndex = -60;
 	
@@ -804,7 +836,7 @@ void EffectsManager::doMenu() {
 	}
 	
 
-	
+	verTextSprites.clear();
 	// this causes frame drops, and isnt ideal, but will work for now
 	if(startRoomIndex != game->roomManager.roomIndex) {
 		game->resetRoom(true);

@@ -15,6 +15,7 @@
 
 #include "bn_sound_items.h"
 #include "bn_sound_actions.h"
+#include "common_variable_8x8_sprite_font.h"
 
 #include "bn_random.h"
 #include "bn_sram.h"

@@ -206,6 +206,9 @@ public:
 	bn::sprite_text_generator textGenerator;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
 	
+	bn::sprite_text_generator verTextGenerator;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
+	
 	bn::vector<BigSprite*, 128> bigSprites;
 
 	// the amount of time spent on this is pathetic.
