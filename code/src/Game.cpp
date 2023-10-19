@@ -17,6 +17,8 @@ void Game::doButanoUpdate() {
 	int temp = bn::core::last_missed_frames();
 	if(temp != 0) {
 		BN_LOG("dropped frames: ", temp);
+		//BN_LOG(bn::core::last_cpu_usage());
+		//BN_LOG(bn::core::last_vblank_usage());
 	}
 	
 }	
@@ -241,7 +243,7 @@ void Game::run() {
 	// why does simply instantiating the game class cause frame drops?
 	// wont be much of an issue tho, i suppose
 	//doButanoUpdate(); 
-
+	
 	load();
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 	
@@ -295,12 +297,11 @@ void Game::run() {
 			inputTimer.restart();
 			
 			if(bn::keypad::start_pressed()) {
-				changePalette(1);
+				effectsManager.doMenu();	
 				continue;
 			}
 	
 			if(bn::keypad::select_pressed()) {
-				//bn::sound_items::sfx.play();	
 				continue;
 			}
 			

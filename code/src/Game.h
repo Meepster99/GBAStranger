@@ -8,6 +8,7 @@
 #include "EntityManager.h"
 #include "EffectsManager.h"
 
+extern Game* globalGame;
 
 // collision and details should REALLY be on the same layer. this is just legacy bs
 
@@ -97,6 +98,8 @@ public:
 		Entity::game = this;
 		
 		BigSprite::game = this;
+		
+		MenuOption::effectsManager = &effectsManager;
 	}
 	
 	void run();

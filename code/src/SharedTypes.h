@@ -8,6 +8,8 @@
 
 #include "Profiler.h"
 
+#include "bn_version.h"
+
 //#include "bn_music_items.h"
 //#include "bn_music_actions.h"
 
@@ -53,12 +55,17 @@ typedef unsigned char u8;
 
 #define MAXSPRITES 128
 
-#define MAXTEXTSPRITES 56
-#define MAXEFFECTSPRITES 8
+//#define MAXTEXTSPRITES 56
+//#define MAXEFFECTSPRITES 8
 
-#define MAXENTITYSPRITES MAXSPRITES - MAXTEXTSPRITES - MAXEFFECTSPRITES
+#define MAXTEXTSPRITES 128
+#define MAXEFFECTSPRITES 128
 
-static_assert(MAXENTITYSPRITES > 0);
+#define MAXENTITYSPRITES 128
+
+//#define MAXENTITYSPRITES MAXSPRITES - MAXTEXTSPRITES - MAXEFFECTSPRITES
+
+//static_assert(MAXENTITYSPRITES > 0);
 
 extern unsigned int frame;
 
@@ -734,4 +741,28 @@ public:
 	
 };
 
+inline char *strcpy(char *dest, const char *src) {
+	char *original_dest = dest;
+
+	while (*src != '\0') {
+		*dest = *src;
+		dest++;
+		src++;
+	}
+
+	*dest = '\0';
+
+	return original_dest;
+}
+
+inline void *memset(void *ptr, int value, size_t num) {
+	unsigned char *byte_ptr = (unsigned char *)ptr;
+	unsigned char byte_value = (unsigned char)value;
+
+	for (size_t i = 0; i < num; i++) {
+		byte_ptr[i] = byte_value;
+	}
+
+	return ptr;
+}
 

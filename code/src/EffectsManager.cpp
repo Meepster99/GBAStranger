@@ -6,6 +6,8 @@
 
 Palette* EffectsManager::spritePalette = &defaultPalette;
 Game* BigSprite::game = NULL;
+EffectsManager* MenuOption::effectsManager = NULL;
+int MenuOption::yIndex = -1;
 
 
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide) :
@@ -151,6 +153,10 @@ void EffectsManager::updatePalette(Palette* pal) {
 	
 	for(int i=0; i<bigSprites.size(); i++) {
 		bigSprites[i]->updatePalette(pal);
+	}
+	
+	for(int i=0; i<menuOptions.size(); i++) {
+		menuOptions[i].draw();
 	}
 	
 	
@@ -624,7 +630,199 @@ void EffectsManager::doDialogue(const char* data) {
 	
 
 }
+
+// -----
+
+// jesus fuck
+MenuOption::MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int)) :
+	optionName(optionName_),
+	getOption(getOption_),
+	changeOption(changeOption_),
+	textGenerator(dw_fnt_text_12_sprite_font)
+	{
+		yDraw = yIndex;
+		yIndex += 16;
+}
+
+
+void MenuOption::fullDraw(bool isActive) { // use white color for active, use darkest ver for non active
+	isActiveState = isActive;
+	textSprites.clear();
+
+	strcpy(buffer, optionName);
+	strcpy(buffer + WTF(optionName), getOption());
+	
+	// why is this so pathetically slow?
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)yDraw, bn::string_view(buffer), textSprites);
+	
+	auto spritePalettePalette = effectsManager->spritePalette->getAlternateSpritePalette();
+	if(isActive) {
+		spritePalettePalette = effectsManager->spritePalette->getSpritePalette();
+	}
 	
 	
+	for(int i=0; i<textSprites.size(); i++) {
+		textSprites[i].set_palette(spritePalettePalette);
+		textSprites[i].set_bg_priority(0);
+		textSprites[i].set_visible(true);
+	}
+	
+}
+
+void MenuOption::draw(bool isActive) {
+	isActiveState = isActive;
+	for(int i=0; i<textSprites.size(); i++) {
+	
+		if(isActive) {
+			textSprites[i].set_palette(effectsManager->spritePalette->getSpritePalette());
+		} else {
+			textSprites[i].set_palette(effectsManager->spritePalette->getAlternateSpritePalette());
+		}
+	}
+}
+
+void MenuOption::draw() {
+	draw(isActiveState);
+}
+
+void EffectsManager::doMenu() {
+	
+	// room switching, profiler reseting, palete switching, and such
+	// also show compile time, date, and butano version 
+	// BN_VERSION_STRING   __DATE__   __TIME__
+	
+	GameState restoreState = game->state;
+	game->state = GameState::Paused;
+	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			effectsLayer.setBigTile(x, y, 1);
+		}
+	}
+	effectsLayer.reloadCells();
+	game->doButanoUpdate();
+
+	
+	MenuOption::yIndex = -60;
+	
+	// oh god im getting goofy again
+	menuOptions.push_back(
+		MenuOption("Stranger: ", 
+		[]() -> const char* { return globalGame->roomManager.currentRoomName(); },
+		[](int val) { return globalGame->roomManager.changeFloor(val); }
+		)
+	);
+	
+	menuOptions.push_back(
+		MenuOption("Room: ", 
+		[]() -> const char* { return globalGame->roomManager.currentRoomName(); },
+		[](int val) { return globalGame->roomManager.changeFloor(val); }
+		)
+	);
+	
+	menuOptions.push_back(
+		MenuOption("Palette: ", 
+		[]() -> const char* { return paletteNameList[globalGame->paletteIndex]; },
+		[](int val) { return globalGame->changePalette(val); }
+		)
+	);
+	
+	menuOptions.push_back(
+		MenuOption("Back", 
+		[]() -> const char* { return "\0"; },
+		[](int val) { (void)val; return; }
+		)
+	);
+	
+	game->doButanoUpdate();
+
+	bn::timer tempTimer;
+	
+	for(int i=0; i<menuOptions.size(); i++) {
+		tempTimer.restart();
+		menuOptions[i].fullDraw(i == 0);
+		// this many butanoupdates SHOULD NOT BE NECCESSARY!
+		game->doButanoUpdate();
+	}
+	
+	
+	// everything in here could(and should) of been done with just palette table manip omfg
+	
+	int selectedOption = 0;
+	bool isActive = false;
+	bool flashing = false;
+	
+	int startRoomIndex = game->roomManager.roomIndex;
+	
+	BN_LOG("start menu loop");
+	
+	while(true) {
+		
+		if(bn::keypad::any_pressed()) {
+			// i rlly with they gave me direct access to bn::keypad::data
+			
+			if(!isActive && bn::keypad::up_pressed()) {
+				menuOptions[selectedOption].draw(false);
+				
+				selectedOption--;
+				selectedOption = ((selectedOption % menuOptions.size()) + menuOptions.size()) % menuOptions.size();
+				
+				menuOptions[selectedOption].draw(true);
+			} else if(!isActive && bn::keypad::down_pressed()) {
+				menuOptions[selectedOption].draw(false);
+				
+				selectedOption++;
+				selectedOption = ((selectedOption % menuOptions.size()) + menuOptions.size()) % menuOptions.size();
+				
+				menuOptions[selectedOption].draw(true);
+			} else if(isActive && bn::keypad::left_pressed()) {
+				menuOptions[selectedOption].changeOption(-1);
+				menuOptions[selectedOption].fullDraw(flashing);
+			} else if(isActive && bn::keypad::right_pressed()) {
+				menuOptions[selectedOption].changeOption(1);
+				menuOptions[selectedOption].fullDraw(flashing);
+			} else if(bn::keypad::a_pressed()) {
+				isActive = !isActive;
+				menuOptions[selectedOption].draw(true);
+				
+				if(selectedOption == menuOptions.size() - 1) {
+					break;
+				}
+				
+			} else {
+				
+			}
+		}
+		
+		if(isActive && frame % 8 == 0) {
+			menuOptions[selectedOption].draw(flashing);
+			flashing = !flashing;
+		}
+
+		
+		game->doButanoUpdate();
+	}
+	
+
+	
+	// this causes frame drops, and isnt ideal, but will work for now
+	if(startRoomIndex != game->roomManager.roomIndex) {
+		game->resetRoom(true);
+	}
+	menuOptions.clear();
+	game->doButanoUpdate();
+	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			effectsLayer.setBigTile(x, y, 0);
+		}
+	}
+	effectsLayer.reloadCells();
+	game->doButanoUpdate();
+	
+	game->state = restoreState;
+
+	
+}
 
 

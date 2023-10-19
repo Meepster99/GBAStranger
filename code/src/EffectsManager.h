@@ -9,7 +9,6 @@ class Game;
 class EntityManager;
 class TileManager;
 
-
 // while effects will be entities, they may also involve background tiles. 
 // for that reason, we are balling here, instead of going more into entityManager
 // additionally, while Effects and entities will share a lot of stuff, i am still 
@@ -156,6 +155,41 @@ public:
 #define EffectType bn::pair<const bn::sprite_tiles_item, int> 
 #define EffectTypeCast bn::span<const bn::pair<const bn::sprite_tiles_item, int>>
 
+class MenuOption {
+public:
+
+	static EffectsManager* effectsManager;
+	static int yIndex;
+
+	
+	// i could do this via an array, but its pretty dumb to do that for things like,, the room list 
+	// so we are going with jank
+	//bn::vector<const char*, 1024> options;
+	
+
+	
+	const char* optionName = NULL;
+	const char* (*getOption)() = NULL;
+	void (*changeOption)(int) = NULL;
+	int yDraw = 0;
+	
+	// why can this buffer only be static when in a function??
+	char buffer[64];
+	bool isActiveState = false;
+	
+	// gods what am i on 
+	// i was previously using the generator in effectsmanager, but like, this is the only way shit is feasable with length resizing
+	bn::sprite_text_generator textGenerator;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
+	
+	
+	MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int));
+	void fullDraw(bool isActive);
+	void draw(bool isActive);
+	void draw();
+	
+};
+
 
 class EffectsManager {
 public:
@@ -179,6 +213,7 @@ public:
 	bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(128, bn::bpp_mode::BPP_4);
 	EffectsLayer effectsLayer = EffectsLayer(tilesPointer);	
 
+	bn::vector<MenuOption, 16> menuOptions;
 
 	EffectsManager(Game* game_);
 
@@ -214,7 +249,9 @@ public:
 	void hideForDialogueBox(bool vis);
 	void doDialogue(const char* data);
 	
+	void doMenu();
 	
 	
 };
+
 

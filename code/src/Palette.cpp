@@ -41,6 +41,8 @@ Palette ZERORANGERPALETTE = PALETTEGEN(1579812,806758,14325314,15851985);
 
 Palette* paletteList[10] = {&GRAYPALETTE,&REDPALETTE,&ORANGEPALETTE,&YELLOWPALETTE,&GREENPALETTE,&BLUEPALETTE,&INDIGOPALETTE,&VIOLETPALETTE,&BLUEBERRYJAMPALETTE,&ZERORANGERPALETTE};
 
+const char* paletteNameList[10] = {"GRAY\0", "RED\0", "ORANGE\0", "YELLOW\0", "GREEN\0", "BLUE\0", "INDIGO\0", "VIOLET\0", "BLUEBERRYJAM\0", "ZERORANGER\0"};
+
 Palette redText(bn::color(0, 0, 0), bn::color(31, 0, 0), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));
 Palette greenText(bn::color(0, 0, 0), bn::color(0, 31, 0), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));
 Palette blueText(bn::color(0, 0, 0), bn::color(0, 0, 31), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));
