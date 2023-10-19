@@ -711,20 +711,38 @@ void EffectsManager::doMenu() {
 	#define VERMSG1 "made with love with:" 
 	const char* vermsgString1 = VERMSG1;
 	
-	#define VERMSG2 "butano version " BN_VERSION_STRING
+	#if defined(ENABLEPROFILER)
+		#define VERMSG2 "butano version " BN_VERSION_STRING " with log + prof"
+	#elif defined(ENABLELOGGING)
+		#define VERMSG2 "butano version " BN_VERSION_STRING " with logging"
+	#else 
+		#define VERMSG2 "butano version " BN_VERSION_STRING
+	#endif
+	
+
 	const char* vermsgString2 = VERMSG2;
 	
 	#define VERMSG3 "on " __DATE__ " at " __TIME__
 	const char* vermsgString3 = VERMSG3;
 	
-	#define VERMSG4 "pls msg Meepster99 on disc 2 report bugs"
+	#define VERMSG4 "actual game by System Erasure"
 	const char* vermsgString4 = VERMSG4;
 	
+	#define VERMSG5 "BlueberryJam palette by gooeyphantasm"
+	const char* vermsgString5 = VERMSG5;
+	
+	#define VERMSG6 "pls msg Meepster99 on disc 2 report bugs"
+	const char* vermsgString6 = VERMSG6;
+	
 	verTextSprites.clear();
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view(vermsgString1), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view(vermsgString2), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view(vermsgString3), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString4), verTextSprites);
+	
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)24, bn::string_view(vermsgString1), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view(vermsgString2), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view(vermsgString3), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view(vermsgString4), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view(vermsgString5), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString6), verTextSprites);
+
 	
 	
 	
@@ -740,8 +758,8 @@ void EffectsManager::doMenu() {
 	// oh god im getting goofy again
 	menuOptions.push_back(
 		MenuOption("Stranger: ", 
-		[]() -> const char* { return globalGame->roomManager.currentRoomName(); },
-		[](int val) { return globalGame->roomManager.changeFloor(val); }
+		[]() -> const char* { return "noimp"; },
+		[](int val) { (void)val; return; }
 		)
 	);
 	
@@ -785,8 +803,7 @@ void EffectsManager::doMenu() {
 	bool flashing = false;
 	
 	int startRoomIndex = game->roomManager.roomIndex;
-	
-	BN_LOG("start menu loop");
+
 	
 	while(true) {
 		
