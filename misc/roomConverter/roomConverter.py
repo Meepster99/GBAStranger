@@ -836,8 +836,22 @@ def convertObjects(layerData):
 		def obj_npc_tail(p, creationCode):
 			x, y = p.rawX, p.rawY 
 			x += 4
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_upperbody,{:d},{:d},3,5".format(x, y))
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_upperbody,{:d},{:d},3,5,false".format(x, y))
+			
+			
+			#x, y = 100, 100
+			y += 2 * 16
+			y -= 3
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_boobytrap,{:d},{:d},3,3,false".format(x, y))
+			
 			pass
+			
+		def obj_npc_tail_tail(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			x += 4
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_lowerbody,{:d},{:d},6,3,false".format(x, y))
+			pass
+
 
 		def obj_npc_failure_002(p, creationCode):
 			pass
@@ -966,13 +980,7 @@ def convertObjects(layerData):
 		
 		def obj_baal_d(p, creationCode):
 			pass
-
-		def obj_npc_tail_tail(p, creationCode):
-			x, y = p.rawX, p.rawY 
-			x += 4
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_lowerbody,{:d},{:d},6,3".format(x, y))
-			pass
-
+			
 		def obj_npc_failure_003(p, creationCode):
 			pass
 

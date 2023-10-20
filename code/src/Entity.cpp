@@ -200,7 +200,6 @@ Player::Player(Pos p_) : Entity(p_) {
 	spriteTilesArray.clear(); 
 	
 	switch(game->mode) {
-		
 		default:
 		case 0:
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_up);

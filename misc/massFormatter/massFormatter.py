@@ -460,7 +460,9 @@ def convertBigSprite(spriteName, spritePath, outputPath):
 	total_height = max_height * len(png_files)
 	
 	# Create a new blank image to stack PNGs vertically
-	stacked_image = Image.new('RGBA', (max_width, total_height))
+	#stacked_image = Image.new('RGBA', (max_width, total_height))
+	
+	tiles = []
 	
 	# Paste each PNG file onto the stacked image
 	y_offset = 0
@@ -469,36 +471,38 @@ def convertBigSprite(spriteName, spritePath, outputPath):
 		#image = Image.open(os.path.join(spritePath, png_file))
 		width, height = image.size
 		image = image.convert("RGBA")
-		stacked_image.paste(image, (0, y_offset))
+		#stacked_image.paste(image, (0, y_offset))
 		y_offset += max_height
 
-	cyan_background = Image.new("RGBA", (max_width, total_height), (0, 255, 255, 255))
-	cyan_background.paste(stacked_image, (0, 0), stacked_image)
+		cyan_background = Image.new("RGBA", (max_width, total_height), (0, 255, 255, 255))
+		cyan_background.paste(image, (0, 0), image)
 	
-	cyan_background = cyan_background.convert("RGB")
+		cyan_background = cyan_background.convert("RGB")
 
-	tempImage = np.array(cyan_background)
+		#cyan_background.save("test.png")
 	
-	# gods so many of these funcs could, and should of been standaridized
+		tempImage = np.array(cyan_background)
 	
-	tiles = []
-	
-	for y in range(0, max_height, 16):
-		for x in range(0, max_width, 16):
+		# gods so many of these funcs could, and should of been standaridized
 		
-			xMax = min(x + 16, max_width)
-			yMax = min(y + 16, max_height)
+
+		
+		for y in range(0, max_height, 16):
+			for x in range(0, max_width, 16):
 			
-			idrk = tempImage[y:yMax, x:xMax]
-			
-			correctSize = np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8)
-			
-			correctSize[0:yMax-y, 0:xMax-x] = idrk
-			
-			# why does this func repeat values, so dumb
-			#idrk = np.resize(idrk, (16, 16, 3))
-			
-			tiles.append(correctSize)
+				xMax = min(x + 16, max_width)
+				yMax = min(y + 16, max_height)
+				
+				idrk = tempImage[y:yMax, x:xMax]
+				
+				correctSize = np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8)
+				
+				correctSize[0:yMax-y, 0:xMax-x] = idrk
+				
+				# why does this func repeat values, so dumb
+				#idrk = np.resize(idrk, (16, 16, 3))
+				
+				tiles.append(correctSize)
 
 	tempImage = Image.fromarray(np.vstack(tiles))
 	
@@ -571,6 +575,7 @@ def convertAllBigSprite(outputPath):
 		#	successCount += 1
 		
 		pool.send([spriteName, data["spritePath"], outputPath])
+	
 		
 	
 	#print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
@@ -1129,7 +1134,10 @@ def generateIncludes(folders):
 def main():
 
 	os.chdir(os.path.dirname(__file__))
-
+	
+	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
+	#return 
+	
 	# with undertalemodtool:
 	
 	# run ExportAllSprites(script in this folder) , rename to Export_Textures_Padded, move to folder
