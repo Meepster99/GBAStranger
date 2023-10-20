@@ -26,6 +26,7 @@ public:
 	bn::vector<Pos, 64> shadowQueue;
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
+	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
 
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
 	
@@ -98,6 +99,8 @@ public:
 			killedPlayer.insert(e.value());
 		}
 	}
+	
+	void addEntity(Entity* e);
 	
 	bool hasKills() const { return killedPlayer.size() != 0; }
 	// should i just make killedplayer public? idek anymore

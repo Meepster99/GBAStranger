@@ -258,6 +258,29 @@ void EntityManager::updatePalette(Palette* pal) {
 	Sprite::spritePalette = pal;
 }
 
+void EntityManager::addEntity(Entity* e) {
+	
+	BN_ASSERT(entityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
+	BN_ASSERT(futureEntityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
+	BN_ASSERT(hasFloor(e->p), "tried adding entity to position without floor");
+	BN_ASSERT(!hasCollision(e->p), "tried adding entity to position without floor");
+	
+	entityList.insert(e);
+	if(e->isObstacle()) {
+		BN_LOG("added obstacle");
+		obstacleList.insert(e);
+	}
+	
+	if(e->isEnemy()) {
+		enemyList.insert(e);
+	}
+	
+	entityMap[e->p.x][e->p.y].insert(e);
+	futureEntityMap[e->p.x][e->p.y].insert(e);
+	
+	
+}
+
 // ----- 
 
 bool EntityManager::moveEntity(Entity* e, bool dontSet) { 
@@ -299,6 +322,7 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 		e->currentDir = move;
 		
 		toPush->bumpDirections.push_back(move);
+		kickedList.insert(toPush);
 		return false;
 	}
 	
@@ -701,7 +725,7 @@ void EntityManager::updateMap() { profileFunction();
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			entityMap[x][y] = futureEntityMap[x][y];
-			futureEntityMap[x][y].clear();
+			//futureEntityMap[x][y].clear();
 		}
 	}
 	
@@ -1008,6 +1032,18 @@ void EntityManager::doVBlank() {
 			player->doUpdate();
 		}
 	}
+	
+	if(kickedList.size() != 0) {
+		for(auto it = kickedList.begin(); it != kickedList.end(); ) {
+			bool res = (*it)->kicked();
+			if(res) {
+				it = kickedList.erase(it);
+			} else {
+				++it;
+			}
+		}
+	}
+	
 }
 
 // -----

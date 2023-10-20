@@ -842,7 +842,7 @@ def convertObjects(layerData):
 			#x, y = 100, 100
 			y += 2 * 16
 			y -= 3
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_boobytrap,{:d},{:d},3,3,false".format(x, y))
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_boobytrap,{:d},{:d},3,3,false,1".format(x, y))
 			
 			pass
 			

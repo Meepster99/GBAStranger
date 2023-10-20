@@ -100,6 +100,9 @@ public:
 		Entity::game = this;
 		BigSprite::game = this;
 		
+		BigSprite::entityManager = &entityManager;
+		BigSprite::tileManager = &tileManager;
+		
 		MenuOption::effectsManager = &effectsManager;
 	}
 	

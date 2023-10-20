@@ -27,7 +27,8 @@ public:
 			spritePalette->getSpritePalette().create_palette())
 			)
 		{
-		spritePointer.set_bg_priority(2);
+		//spritePointer.set_bg_priority(2);
+		spritePointer.set_bg_priority(1);
 		}
 		
 	
@@ -272,6 +273,9 @@ public:
 	void startFall() override;
 	
 	virtual void interact() { return; }
+	
+	virtual bool kicked() { return true; }
+	
 
 	
 };
@@ -686,7 +690,7 @@ public:
 	void startFall() override;
 
 };
-
+	
 class BeeStatue : public Obstacle {
 public:
 
@@ -800,4 +804,47 @@ public:
 	EntityType entityType() const override { return EntityType::CifStatue; }
 
 };
+
+// 
+
+class Interactable : public Obstacle {
+public:
+
+	
+	// oh gods. oh. gods.
+	// this,,, this function, this whole class. what am i on
+	// there rlly should be a way to pass the function with the params inside of it, but im tired, and this works
+	void (*interactFunc)(void*);
+	bool (*kickFunc)(void*);
+	
+	void* interactFuncParams;
+	void* kickFuncParams;
+
+	// i dont like this naming convention at all
+	
+	Interactable(Pos p_, void (*interactFunc_)(void*), bool (*kickFunc_)(void*), void* interactFuncParams_, void* kickFuncParams_) : 
+		Obstacle(p_), 
+		interactFunc(interactFunc_), kickFunc(kickFunc_),
+		interactFuncParams(interactFuncParams_), kickFuncParams(kickFuncParams_)
+		{
+		//sprite.setVisible(true);
+		sprite.setVisible(0);
+		sprite.spritePointer.set_bg_priority(0);
+	}
+	
+	// i think this func should be depracated by now right?
+	Interactable* clone() const override { return new Interactable(*this); }
+	
+	EntityType entityType() const override { return EntityType::Interactable; }
+	
+	void interact() override { return interactFunc(interactFuncParams); }
+	bool kicked() override { return kickFunc(kickFuncParams); }
+	
+	bn::optional<Direction> getNextMove() { 
+		bumpDirections.clear();
+		return bn::optional<Direction>(); 
+	}
+	
+};
+
 

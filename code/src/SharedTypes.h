@@ -147,6 +147,8 @@ enum class EntityType {
 	GorStatue,
 	LevStatue,
 	CifStatue,
+	
+	Interactable,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {
@@ -174,6 +176,7 @@ static const char *EntityTypeToString[] ={
 	"GorStatue",
 	"LevStatue",
 	"CifStatue",
+	"Interactable",
 };
 
 	stream << EntityTypeToString[static_cast<int>(e)];
@@ -581,6 +584,7 @@ struct EffectHolder {
 	const int width;
 	const int height;
 	const bool collide = true;
+	const int priority = 2;
 };
 
 class Room {

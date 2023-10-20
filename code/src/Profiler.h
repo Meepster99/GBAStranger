@@ -42,7 +42,6 @@ inline int WTF(const char* str) {
 	return length >> 1;
 }
 
-
 inline const char* extractClassAndFunctionName(const char* prettyFunction) {
     const char* begin = prettyFunction;
     const char* end = prettyFunction + WTF(prettyFunction); 

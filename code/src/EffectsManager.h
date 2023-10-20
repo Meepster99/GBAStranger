@@ -133,19 +133,31 @@ public:
 	// i need to change all sprite arrays to just use 128
 	
 	static Game* game;
+	static EntityManager* entityManager;
+	static TileManager* tileManager;
 	
 	int width;
 	int height;
-	
 	const bn::sprite_tiles_item* tiles;
 	int xPos;
 	int yPos;
+	bool collide;
+	int optionCount;
+	int animationIndex = 0;
+	int priority;
+	
+	
+
 	bn::vector<Sprite, 128> sprites;
 
 	
-	BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide);
+	BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_);
 	
 	void updatePalette(Palette* pal);
+	
+	void draw(int index);
+	
+	void animate();
 	
 	
 };
@@ -189,7 +201,6 @@ public:
 	void draw();
 	
 };
-
 
 class EffectsManager {
 public:

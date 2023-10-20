@@ -8,15 +8,103 @@ Palette* EffectsManager::spritePalette = &defaultPalette;
 Game* BigSprite::game = NULL;
 EffectsManager* MenuOption::effectsManager = NULL;
 int MenuOption::yIndex = -1;
+EntityManager* BigSprite::entityManager = NULL;
+TileManager* BigSprite::tileManager = NULL;
 
-
-BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide) :
-	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_) {
+BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_) :
+	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_) {
 	
-	// was *16, div two, now just *8
-	// is that really ok?
+	BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
+	
+	optionCount = tiles->tiles_ref().size() / (4 * width * height);
+	
 	xPos -= (8 * width);
 	yPos -= (8 * height);
+
+	draw(0);
+	
+	// i dont like this code, but tbh im not sure of a better way around this.
+	// i also really wish i could use a switch statement here
+	
+	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
+		
+		BN_LOG("booba detected");
+		
+		Interactable* temp1 = new Interactable(Pos(9, 3),
+			[](void* obj) -> void { (void)obj; return; },
+			[](void* obj) -> bool {
+				if(frame % 2 != 0) {
+					return false;
+				}
+				static int timesCalled = 0;
+				static_cast<BigSprite*>(obj)->animate(); 
+				timesCalled++;
+				if(timesCalled == 4) {
+					timesCalled = 0;
+					return true;
+				} 
+				return false;
+			},
+			NULL,
+			(void*)this
+		);
+		
+		// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
+		Interactable* temp2 = new Interactable(Pos(10, 3),
+			[](void* obj) -> void { (void)obj; return; },
+			[](void* obj) -> bool {
+				if(frame % 2 != 0) {
+					return false;
+				}
+				static int timesCalled = 0;
+				static_cast<BigSprite*>(obj)->animate(); 
+				timesCalled++;
+				if(timesCalled == 4) {
+					timesCalled = 0;
+					return true;
+				} 
+				return false;
+			},
+			NULL,
+			(void*)this
+		);
+		
+		entityManager->addEntity(temp1);
+		entityManager->addEntity(temp2);
+		
+		for(int i=3 ; i<=8; i++) {
+			
+			Interactable* temp = new Interactable(Pos(i, 3),
+				[](void* obj) -> void { (void)obj; return; },
+				[](void* obj) -> bool { (void)obj; return true; },
+				NULL,
+				NULL
+			);
+			entityManager->addEntity(temp);
+		}
+		
+		BN_ASSERT(tileManager->floorMap[9][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
+		BN_ASSERT(tileManager->floorMap[10][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
+		
+		tileManager->floorMap[9][4] = new FloorTile(Pos(9,4));
+		tileManager->floorMap[10][4] = new FloorTile(Pos(10,4));
+		
+	} else {
+		
+	}
+	
+}
+
+void BigSprite::draw(int index) {
+	BN_ASSERT(index >= 0 && index < optionCount, "a bigsprite tried to draw on an invalid index!");
+	
+	for(int i=0; i<sprites.size(); i++) {
+		sprites[i].setVisible(false);
+	}
+	
+	sprites.clear();
+	
+	int indexOffset = index * 4 * width * height;
 	
 	for(int y=0; y<height; y++) {
 		for(int x=0; x<width; x++) {
@@ -36,8 +124,11 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			// omfg dumbass, its 4 for the number of subtiles, idiot
 			for(int j=0; j<4; j++) {
 				// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
-				int offset = 4 * (x + (y * width)) + j;
+				int offset = 4 * (x + (y * width)) + j + indexOffset;
 				
+				BN_ASSERT(offset < tiles->tiles_ref().size(), "bigsprite tried to load a invalid tile. max tileindex = ", tiles->tiles_ref().size(), " tried loading at ", offset);
+				
+				// is this pointer like,,, what tf
 				const uint32_t* tileRef = (tiles->tiles_ref())[offset].data;
 				
 				for(int i=0; i<8; i++) {
@@ -59,22 +150,25 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			int tempX = xPos/16 + x;
 			int tempY = yPos/16 + y;
 			
+			// this array doesnt need to be updated each time we do an update draw omg
 			if(collide) {
 				game->collisionMap[tempX][tempY] = 2;
-			} else {
-				tempSprite.spritePointer.set_bg_priority(1);
 			}
+			
+			tempSprite.spritePointer.set_bg_priority(priority);
 			
 			tempSprite.spritePointer.set_tiles(
 				*tiles,
-				x + (y * width)
+				x + (y * width) + (index * width * height)
 			);
 			
 			sprites.push_back(tempSprite);
 		}
 	}
-		
 	
+	for(int i=0; i<sprites.size(); i++) {
+		sprites[i].setVisible(true);
+	}
 	
 }
 
@@ -82,8 +176,13 @@ void BigSprite::updatePalette(Palette* pal) {
 	for(int i=0; i<sprites.size(); i++) {
 		sprites[i].spritePointer.set_palette(pal->getSpritePalette());
 	}
+}
+
+void BigSprite::animate() {
+	BN_LOG("animate called with animationIndex ", animationIndex);
 	
-	
+	animationIndex = (animationIndex + 1) % optionCount;
+	draw(animationIndex);
 }
 
 // -----
@@ -430,7 +529,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	effects++;
 	
 	for(int i=0; i<effectsCount; i++) {
-		bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide) );
+		bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority) );
 		effects++;
 	}
 	

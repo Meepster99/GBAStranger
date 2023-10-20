@@ -238,6 +238,8 @@ Player::Player(Pos p_) : Entity(p_) {
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_r_attack);
 			break;
 	}
+	
+	sprite.spritePointer.set_z_order(-1);
 }
 
 
