@@ -265,9 +265,6 @@ void Game::run() {
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
-		miscDebug = LevStatue::rodUses;
-		miscDebug2 = LevStatue::totalLev;
-		
 		if(bn::keypad::l_held() || bn::keypad::r_held()) {
 			
 			int debugIncrement = bn::keypad::select_held() ? 5 : 1;
@@ -349,6 +346,9 @@ uint64_t Game::getSaveHash() {
 
 	hash ^= saveData.paletteIndex;
 	rotateHash(sizeof(saveData.paletteIndex) * 8);
+	
+	hash ^= saveData.mode;
+	rotateHash(sizeof(saveData.mode) * 8);
 
 	return hash;
 }
@@ -360,6 +360,7 @@ void Game::save() {
 	saveData.isVoided = entityManager.player->isVoided;
 	saveData.roomIndex = roomManager.roomIndex;
 	saveData.paletteIndex = paletteIndex;
+	saveData.mode = mode;
 	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);
@@ -384,5 +385,6 @@ void Game::load() {
 
 	roomManager.roomIndex = saveData.roomIndex;
 	paletteIndex = saveData.paletteIndex;
+	mode = saveData.mode;
 }
 

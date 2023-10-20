@@ -5,12 +5,17 @@
 #include "AllRooms.h"
 #include "RoomManager.h"
 
+
+RoomManager::RoomManager() {
+	setMode(0);
+}
+
 Room RoomManager::loadRoom() {
 	if(roomIndex < 0 || roomIndex >= (int)(sizeof(roomNames)/sizeof(roomNames[0]))) {
 		BN_ERROR("Roomindex ", roomIndex, " out of bounds, max ", sizeof(roomNames)/sizeof(roomNames[0]));
 	}
 
-	return rooms[roomIndex];
+	return roomArray[roomIndex];
 }
 
 const char* RoomManager::currentRoomName() { 
@@ -18,7 +23,7 @@ const char* RoomManager::currentRoomName() {
 			BN_ERROR("Roomindex ", roomIndex, " out of bounds, max ", sizeof(roomNames)/sizeof(roomNames[0]));
 	}
 	
-	return roomNames[roomIndex]; 
+	return roomNameArray[roomIndex].str; 
 }
 
 void RoomManager::nextRoom() {
@@ -46,4 +51,19 @@ void RoomManager::changeFloor(int val) {
 	BN_LOG("roomIndex changed to ", roomIndex);
 }
 
+void RoomManager::setMode(int mode) {
+	
+	if(mode == 0) {
+		roomArray = &rooms[0];
+		roomNameArray = roomNames;
+	} else if(mode == 1) {
+		roomArray = &hard_rooms[0];
+		roomNameArray = hard_roomNames;
+	} else if(mode == 2) {
+		// i rlly need to impliment this
+	} else {
+		BN_ERROR("unknown room mode set, val= ", mode);
+	}
+	
+}
 

@@ -191,19 +191,7 @@ private:
 class Player : public Entity {
 public:
 	
-	Player(Pos p_) : Entity(p_) {
-		spriteTilesArray.clear(); 
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_up);
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_down);
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_left);
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_right);
-		
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_u);
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_d);
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_l);
-		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_r);
-
-	}
+	Player(Pos p_);
 	
 	bool isEnemy() const override { return false; }
 	bool isObstacle() const override { return false; }

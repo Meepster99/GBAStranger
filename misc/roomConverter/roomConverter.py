@@ -353,13 +353,11 @@ def readCreationCode(p, creationCode):
 def writeFooter(f, successRoomsList):
 	
 	data = """
-
-#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount)	
-
-constexpr static inline Room rooms[{:d}] = {{ {:s} }};
+	
+constexpr static inline Room {:s}rooms[{:d}] = {{ {:s} }};
 
 // inneffecient, but my gods do i not care at this point
-constexpr static inline char roomNames[{:d}][{:d}] = {{ {:s} }};
+constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 """
 
 	# reorder the room list, drop unneeded rooms
@@ -398,16 +396,33 @@ constexpr static inline char roomNames[{:d}][{:d}] = {{ {:s} }};
 	successRoomsCount = len(successRoomsList)
 	longestRoomStringLen = 1+len(max(successRoomsList, key=len))
 	
+	if isHardMode:
+		longestRoomStringLen += 5
 	
 	formatArray = lambda prepend, append, arr : ",".join([ "{:s}{:s}{:s}".format(prepend, elem, append) for elem in arr ])
 
+	if not isHardMode:
+		f.write("#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount)\n")
+
+		f.write("""
+// should this be different between normal and hard?? idek
+#define MAXROOMS {:d}
+		
+// i fucking despise that this is the only way i can get this to work
+struct MessageStrJank {{
+	const char* str;
+	const char idek = '\\0'; // sanity
+}};
+""".format(successRoomsCount))
 	
+	prepend = "LOADROOMMACRO(" if not isHardMode else "LOADROOMMACRO(hard_"
+	roomData = formatArray(prepend, ")", successRoomsList)
 	
-	roomData = formatArray("LOADROOMMACRO(", ")", successRoomsList)
-	roomNameData = formatArray("\"", "\"", successRoomsList)
+	prepend = "MessageStrJank(\"" if not isHardMode else "MessageStrJank(\"hard_"
+	roomNameData = formatArray(prepend, "\")", successRoomsList)
 	
-	
-	data = data.format(successRoomsCount, roomData, successRoomsCount, longestRoomStringLen, roomNameData)
+	hardModeString = "hard_" if isHardMode else ""
+	data = data.format(hardModeString, successRoomsCount, roomData, hardModeString, roomNameData)
 	
 	f.write(data + "\n")
 
@@ -621,7 +636,7 @@ def convertObjects(layerData):
 		def obj_exit(p, creationCode):
 			if creationCode is not None:
 				if creationCode == "b_form = 1":
-					print("a exit had a bform of 1. still no idea why")
+					print(RED + "a exit had a bform of 1. still no idea why" + RESET)
 					floorExport[p.x][p.y] = "Exit"
 					return
 			
@@ -1935,11 +1950,12 @@ def convertRoom(data, outputFile):
 		
 	floorExport, instanceExport, effectExport = objectsExport
 	
-	
-	
+
 	output = []
 	
-	output.append("namespace {:s} {{".format(data["name"]))
+	tempNamespaceName = data["name"] if not isHardMode else "hard_" + data["name"]
+	
+	output.append("namespace {:s} {{".format(tempNamespaceName))
 	
 	if len(details["data"]) == 0:
 		details["data"] = [ [0 for i in range(9)] for j in range(14)]
@@ -1968,7 +1984,7 @@ def convertRoom(data, outputFile):
 	# TODO, WE DONT EXPORT THE TILESET HERE(of what the room tiles should be)
 	
 	return True
-
+	
 def convertAllRooms(inputPath):
 
 	global creationCodeData
@@ -1982,112 +1998,123 @@ def convertAllRooms(inputPath):
 	
 	#f.write("EffectHolder defaultEffectPlaceholder = {&bn::sprite_tiles_items::dw_spr_statue_abaddon,-1,-1,-1,-1};\n")
 	
-	jsonFiles = [f for f in os.listdir(inputPath) if f.lower().endswith('.json')]
-	
-	
-	#removeRooms = ["rm_misc_0002"]
-	
-	#jsonFiles = [ f for f in jsonFiles if f.rsplit(".", 1)[0] not in removeRooms ]
+	def convertAllRoomsWorker(f):
+		jsonFiles = [file for file in os.listdir(inputPath) if file.lower().endswith('.json')]
+		
+		
+		#removeRooms = ["rm_misc_0002"]
+		
+		#jsonFiles = [ f for f in jsonFiles if f.rsplit(".", 1)[0] not in removeRooms ]
 
-	#removeStrings = ["secret", "test", "misc", "trailer"]
-	#removeStrings = ["stg", "house", "secret", "test", "misc", "trailer", "dream", "memories", "bee", "lev", "_ee_"]
-	# dont need this, but i think it might give me an extra bit for compression
-	removeStrings = ["test", "trailer", "dream", "rm_cc_results", "rm_cif_end", "memories"]
-	
-	for removeStr in removeStrings:
-		# i could, and should one line this
-		jsonFiles = [ f for f in jsonFiles if removeStr not in f ]
-	
-	
-	#jsonFiles = ["rm_0005.json"]
-	#jsonFiles = ["rm_0027.json"]
-	#jsonFiles = ["rm_0008.json"]
-	#jsonFiles = ["rm_0018.json"]
-	#jsonFiles = ["rm_2intro.json"]
-	#jsonFiles = ["rm_0002.json"]
-	#jsonFiles = ["rm_0009.json"]
-	#jsonFiles = ["rm_0008.json", "rm_0009.json"]
-	
-	successRooms = 0 
-	totalRooms = len(jsonFiles)
-	
-	successRoomsList = []
-	
-	for file in jsonFiles:
-		with open(os.path.join(inputPath, file)) as jsonFilePointer:
-			data = json.load(jsonFilePointer)
+		#removeStrings = ["secret", "test", "misc", "trailer"]
+		#removeStrings = ["stg", "house", "secret", "test", "misc", "trailer", "dream", "memories", "bee", "lev", "_ee_"]
+		# dont need this, but i think it might give me an extra bit for compression
+		removeStrings = ["test", "trailer", "dream", "rm_cc_results", "rm_cif_end", "memories"]
+		
+		for removeStr in removeStrings:
+			# i could, and should one line this
+			jsonFiles = [ file for file in jsonFiles if removeStr not in file ]
+		
+		
+		#jsonFiles = ["rm_0005.json"]
+		#jsonFiles = ["rm_0027.json"]
+		#jsonFiles = ["rm_0008.json"]
+		#jsonFiles = ["rm_0018.json"]
+		#jsonFiles = ["rm_2intro.json"]
+		#jsonFiles = ["rm_0002.json"]
+		#jsonFiles = ["rm_0009.json"]
+		#jsonFiles = ["rm_0008.json", "rm_0009.json"]
+		
+		successRooms = 0 
+		totalRooms = len(jsonFiles)
+		
+		successRoomsList = []
+		
+		for file in jsonFiles:
+			with open(os.path.join(inputPath, file)) as jsonFilePointer:
+				data = json.load(jsonFilePointer)
+				
+				print("doing room {:s}".format(data["name"]))
+				
+				res = convertRoom(data, f)
+				if res is not None:
+					successRooms += 1
+					successRoomsList.append(file)
+				else:
+					print(RED + "failure" + RESET)
+				
+		
+		#print(successRoomsList)
+		
+		writeFooter(f, [ elem.rsplit(".json", 1)[0] for elem in successRoomsList ])
+		
+		print("")
+		
+		print("we converted {:6.2f}% rooms({:d}/{:d}), i hope thats acceptable.".format(100*successRooms/totalRooms, successRooms, totalRooms))
+		
+		print("")
+		
+		print("primary failure sources:")
+		
+		#print(json.dumps(failures, indent=4))
+		
+		for _, v in failures.items():
+			if type(v) != list:
+				print("wtf")
+				exit(1)
+		
+		tempSorted = sorted([ [k, len(v), v] for k, v in failures.items() ], key = lambda elem : len(elem[2]), reverse=True)
+		
+		highlightStrings = ["mon", "_e_"]
+		
+		for t in tempSorted:
+			temp = str(t)
 			
-			print("doing room {:s}".format(data["name"]))
+			col = WHITE
 			
-			res = convertRoom(data, f)
-			if res is not None:
-				successRooms += 1
-				successRoomsList.append(file)
-			else:
-				print(RED + "failure" + RESET)
-			
+			for s in highlightStrings:
+				if s in temp:
+					col = RED
+					break
+					
+			print(col + temp + RESET)
+		print("")
+		
+		"""
+		tempFile = open("temp.txt", "w")
+		for t in tempSorted:
+			tempFile.write("def {:s}(p, creationCode):\n".format(t[0]))
+			tempFile.write("\tpass\n")
+			tempFile.write("\n")
+		tempFile.close()
+		
+		with open('tempCreationCodeData.json', 'w') as f:
+			json.dump(newCreationCodesData, f, indent=4)
+		"""
+		
+		print("compressed data had a ratio of {:6.2f}%".format(100 * compressedBytes / uncompressedBytes))
+		
+		"""
+		temp = sorted([ [k, v] for k, v in byteFrequency.items() ], key = lambda x : x[1], reverse=True)
+		for byte, freq in temp:
+			print("{:5d} {:5d}".format(byte, freq))
+		print("max byte value was " + str(max(byteFrequency.keys())))
+		print("-----")
+		
+		temp = sorted([ [k, v] for k, v in frequencyFrequency.items() ], key = lambda x : x[1], reverse=True)
+		for byte, freq in temp:
+			print("{:5d} {:5d}".format(byte, freq))
+	"""
 	
-	#print(successRoomsList)
+	global isHardMode
 	
-	writeFooter(f, [ elem.rsplit(".json", 1)[0] for elem in successRoomsList ])
+	# this is fucking dumb, i should be recording the CHANGES between the normal and hard mode, this turns all the effort i put into compression to shit
+	isHardMode = False
+	convertAllRoomsWorker(f)
+	isHardMode = True
+	convertAllRoomsWorker(f)
 	
 	f.close()
-	
-	print("")
-	
-	print("we converted {:6.2f}% rooms({:d}/{:d}), i hope thats acceptable.".format(100*successRooms/totalRooms, successRooms, totalRooms))
-	
-	print("")
-	
-	print("primary failure sources:")
-	
-	#print(json.dumps(failures, indent=4))
-	
-	for _, v in failures.items():
-		if type(v) != list:
-			print("wtf")
-			exit(1)
-	
-	tempSorted = sorted([ [k, len(v), v] for k, v in failures.items() ], key = lambda elem : len(elem[2]), reverse=True)
-	
-	highlightStrings = ["mon", "_e_"]
-	
-	for t in tempSorted:
-		temp = str(t)
-		
-		col = WHITE
-		
-		for s in highlightStrings:
-			if s in temp:
-				col = RED
-				break
-				
-		print(col + temp + RESET)
-	print("")
-	
-	tempFile = open("temp.txt", "w")
-	for t in tempSorted:
-		tempFile.write("def {:s}(p, creationCode):\n".format(t[0]))
-		tempFile.write("\tpass\n")
-		tempFile.write("\n")
-	tempFile.close()
-	
-	with open('tempCreationCodeData.json', 'w') as f:
-		json.dump(newCreationCodesData, f, indent=4)
-	
-	print("compressed data had a ratio of {:6.2f}%".format(100 * compressedBytes / uncompressedBytes))
-	
-	"""
-	temp = sorted([ [k, v] for k, v in byteFrequency.items() ], key = lambda x : x[1], reverse=True)
-	for byte, freq in temp:
-		print("{:5d} {:5d}".format(byte, freq))
-	print("max byte value was " + str(max(byteFrequency.keys())))
-	print("-----")
-	
-	temp = sorted([ [k, v] for k, v in frequencyFrequency.items() ], key = lambda x : x[1], reverse=True)
-	for byte, freq in temp:
-		print("{:5d} {:5d}".format(byte, freq))
-	"""
 	
 	pass
 

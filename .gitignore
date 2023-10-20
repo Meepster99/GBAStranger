@@ -2,8 +2,8 @@
 *.win
 *.png
 *.gml
-code.elf
-code.gba
+*.elf
+*.gba
 *.json
 !creationCodeData.json
 code/build/

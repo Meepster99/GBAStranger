@@ -39,6 +39,7 @@ struct GameSave {
 	bool isVoided = false;
 	int roomIndex = 1;
 	int paletteIndex = 0;
+	int mode = 0;
 	
 	uint64_t hash = 0;
 };
@@ -67,8 +68,8 @@ public:
 	
 	GameState state = GameState::Loading;
 	
-	int miscDebug = 0; // just here for when i want to disp something on the screen
-	int miscDebug2 = 0;
+	int mode = 0;
+	const char* strangerNames[3] = {"Gray\0", "Lillie\0", "Cif\0"};
 
 	Game() : collision(),
 	details(),
@@ -121,6 +122,16 @@ public:
 
 	void doButanoUpdate();
 	void uncompressData(u8 res[126], u8* input);
+	
+	void changeMode(int val) {
+		mode += val;
+		mode = ((mode % 3) + 3) % 3;
+		roomManager.setMode(mode);
+	}
+	
+	const char* getMode() {
+		return strangerNames[mode];
+	}
 	
 };
 

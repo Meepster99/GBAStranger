@@ -134,7 +134,21 @@ void Player::startFall() {
 	if(entityManager->enemyKill()) { // died from enemy
 		// is 16 actually the ideal number here?
 		// also wow, falldata needs to be its own struct now tbh.
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_hit, 16)); 
+		
+		
+		switch(game->mode) {
+			default:
+			case 0:
+				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_hit, 16)); 
+				break;
+			case 1:
+				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_lil_hit, 16)); 
+				break;
+			case 2:
+				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cif_hit, 16)); 
+				break;
+		}
+		
 	} else { // fall death
 	
 		bn::sound_items::snd_player_fall.play();
@@ -142,7 +156,19 @@ void Player::startFall() {
 		// have the player do the cyote time thingy
 		tileIndex = static_cast<int>(currentDir);
 		fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_fall, 6));
+		
+		switch(game->mode) {
+			default:
+			case 0:
+				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_fall, 6));
+				break;
+			case 1:
+				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_lil_fall, 6));
+				break;
+			case 2:
+				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cif_fall, 6));
+				break;
+		}
 	}
 	
 	// do locust bs
@@ -169,6 +195,52 @@ void Player::updateTileIndex() {
 	BN_ASSERT(tileIndex < spriteTilesArray.size(), "tried loading a tileIndex out of the sprite array bounds! ", __PRETTY_FUNCTION__);
 	
 }
+
+Player::Player(Pos p_) : Entity(p_) {
+	spriteTilesArray.clear(); 
+	
+	switch(game->mode) {
+		
+		default:
+		case 0:
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_up);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_down);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_left);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_right);
+			
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_u);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_d);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_l);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_r);
+			break;
+		case 1:
+		
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_up);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_down);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_left);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_right);
+			
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_u);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_d);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_l);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_r);
+		
+			break;
+		case 2:
+		
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_up);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_down);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_left);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_right);
+			
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_u_attack);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_d_attack);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_l_attack);
+			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_r_attack);
+			break;
+	}
+}
+
 
 // Enemy
 

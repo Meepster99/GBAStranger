@@ -732,7 +732,7 @@ void EffectsManager::doMenu() {
 	#define VERMSG5 "BlueberryJam palette by gooeyphantasm"
 	const char* vermsgString5 = VERMSG5;
 	
-	#define VERMSG6 "pls msg Meepster99 on disc 2 report bugs"
+	#define VERMSG6 "pls msg meepster99 on disc 2 report bugs"
 	const char* vermsgString6 = VERMSG6;
 	
 	verTextSprites.clear();
@@ -759,8 +759,8 @@ void EffectsManager::doMenu() {
 	// oh god im getting goofy again
 	menuOptions.push_back(
 		MenuOption("Stranger: ", 
-		[]() -> const char* { return "noimp"; },
-		[](int val) { (void)val; return; }
+		[]() -> const char* { return globalGame->getMode(); },
+		[](int val) { globalGame->changeMode(val); }
 		)
 	);
 	
@@ -804,7 +804,7 @@ void EffectsManager::doMenu() {
 	bool flashing = false;
 	
 	int startRoomIndex = game->roomManager.roomIndex;
-
+	int startRoomMode = game->mode;
 	
 	while(true) {
 		
@@ -856,7 +856,8 @@ void EffectsManager::doMenu() {
 
 	verTextSprites.clear();
 	// this causes frame drops, and isnt ideal, but will work for now
-	if(startRoomIndex != game->roomManager.roomIndex) {
+	if(startRoomIndex != game->roomManager.roomIndex ||
+		startRoomMode != game->mode) {
 		game->resetRoom(true);
 	}
 	menuOptions.clear();
