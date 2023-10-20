@@ -585,6 +585,7 @@ struct EffectHolder {
 	const int height;
 	const bool collide = true;
 	const int priority = 2;
+	const bool autoAnimate = false;
 };
 
 class Room {

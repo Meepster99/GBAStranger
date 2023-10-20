@@ -11,8 +11,8 @@ int MenuOption::yIndex = -1;
 EntityManager* BigSprite::entityManager = NULL;
 TileManager* BigSprite::tileManager = NULL;
 
-BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_) :
-	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_) {
+BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
+	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
 	
 	BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
 	
@@ -429,6 +429,14 @@ void EffectsManager::doVBlank() {
 		return;
 	}
 	
+	
+	for(int i=0; i<bigSprites.size(); i++) {
+		if(bigSprites[i]->autoAnimate) {
+			bigSprites[i]->animate();
+		}
+	}
+	
+	
 	for(auto it = effectList.begin(); it != effectList.end(); ) {
 		
 		bool res = (*it)->animate();
@@ -529,7 +537,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	effects++;
 	
 	for(int i=0; i<effectsCount; i++) {
-		bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority) );
+		bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
 		effects++;
 	}
 	

@@ -146,12 +146,14 @@ public:
 	int animationIndex = 0;
 	int priority;
 	
+	bool autoAnimate;
+	
 	
 
 	bn::vector<Sprite, 128> sprites;
 
 	
-	BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_);
+	BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_);
 	
 	void updatePalette(Palette* pal);
 	
