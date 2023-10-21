@@ -923,6 +923,7 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 	
 	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
 
+
 	if(killedPlayer.contains(NULL)) {
 		//player->doUpdate();
 		updateScreen(); // is this ok?	
@@ -948,7 +949,11 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 			// todo, in the future, put a special anim here
 			game->roomManager.cifReset();
 		} else {
-			game->roomManager.nextRoom();
+			if(tileManager->exitDestination == NULL) {
+				game->roomManager.nextRoom();
+			} else {
+				game->roomManager.gotoRoom(tileManager->exitDestination);
+			}
 		}
 		
 		bn::sound_items::snd_stairs.play();
@@ -979,6 +984,15 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 		}
 	}
 	
+	// this bool is scuffed af in its reset
+	static bool firstRun = true;
+
+	if(firstRun && killedPlayer.contains(player) && tileManager->secretDestination != NULL && player->p == tileManager->secretPos) {
+		firstRun = false;
+		
+		game->roomManager.gotoRoom(tileManager->secretDestination);
+	}
+	
 	
 	//update the pos of entities that DONT collide with the player.
 	// wee woo wee woo horrid code.
@@ -1002,14 +1016,16 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 		player->updatePosition();
 	}
 	
-	if(killedPlayer.contains(player) && frame % 8 == 0) {		
-		return player->fallDeath();
+	if(killedPlayer.contains(player) && frame % 8 == 0) {
+		firstRun = player->fallDeath();
+		return firstRun;
 	} else {
 		if(frame % 8 == 0) {
 			for(auto it = killedPlayer.begin(); it != killedPlayer.end(); ++it) {
 				(*it)->doTick();
 			}
-			return player->fallDeath();
+			firstRun = player->fallDeath();
+			return firstRun;
 		}
 	}
 	

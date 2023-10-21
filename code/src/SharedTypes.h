@@ -617,9 +617,25 @@ public:
 	
 	const void* effects;
 	const int effectsCount;
+	
+	const void* secrets;
+	const int secretsCount;
+	
+	const void* collisionTiles;
+	const void* detailsTiles;
 
-	constexpr Room(const void* collision_, const void* floor_, const void* details_, const void* entities_, const int entityCount_, const void* effects_, const int effectsCount_) :
-	collision(collision_), floor(floor_), details(details_), entities(entities_), entityCount(entityCount_), effects(effects_), effectsCount(effectsCount_)
+	constexpr Room(
+	const void* collision_, const void* floor_, const void* details_, 
+	const void* entities_, const int entityCount_, 
+	const void* effects_, const int effectsCount_,
+	const void* secrets_, const int secretsCount_,
+	const void* collisionTiles_, const void* detailsTiles_
+	) :
+	collision(collision_), floor(floor_), details(details_), 
+	entities(entities_), entityCount(entityCount_), 
+	effects(effects_), effectsCount(effectsCount_),
+	secrets(secrets_), secretsCount(secretsCount_),
+	collisionTiles(collisionTiles_), detailsTiles(detailsTiles_)
 	{ }
 	
 };
@@ -791,7 +807,22 @@ inline void *memset(void *ptr, int value, size_t num) {
 	return ptr;
 }
 
+inline int strcmp(const char *str1, const char *str2) {
+	while (*str1 != '\0' && *str2 != '\0') {
+		if (*str1 != *str2) {
+			return (*str1 - *str2);
+		}
+		str1++;
+		str2++;
+	}
+
+	return 0;
+}
+
 struct MessageStr {
 	const char* str;
 	const char idek = '\0'; // sanity
 };
+
+
+

@@ -65,5 +65,35 @@ void RoomManager::setMode(int mode) {
 		BN_ERROR("unknown room mode set, val= ", mode);
 	}
 	
+	modeTracker = mode;
+	
+}
+
+void RoomManager::gotoRoom(const char* roomName) {
+	
+	
+	
+	char buffer[32];
+	char* roomNameBuffer = buffer;
+	
+	// if we are in hard mode we want to search for a hard mode room thingy.
+	if(modeTracker != 0) {
+		roomNameBuffer = strcpy(roomNameBuffer, "hard_");
+	}
+	
+	strcpy(roomNameBuffer, roomName);
+	
+	BN_LOG("bruh ", buffer);
+	
+	
+	// shit time complexity, but im tired.
+	for(int i=0; i<(int)(sizeof(rooms)/sizeof(rooms[0])); i++) {
+		if(strcmp(buffer, roomNameArray[i].str) == 0) {
+			roomIndex = i;
+			return;
+		}
+	}
+	
+	BN_ERROR("in gotoRoom, we were unable to goto the room, ", roomName);
 }
 

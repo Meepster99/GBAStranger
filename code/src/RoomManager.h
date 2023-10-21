@@ -8,6 +8,7 @@ public:
 	RoomManager();
 
 	int roomIndex = 0;
+	int modeTracker = 0;
 	
 	const Room* roomArray = NULL;
 	const MessageStrJank* roomNameArray = NULL;
@@ -21,4 +22,7 @@ public:
 	void cifReset();
 	void changeFloor(int val);
 	void setMode(int mode);
+	
+	void gotoRoom(const char* roomName);
+	
 };

@@ -481,6 +481,11 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test_0006
 	rm_mon_016
 	
+	rm_mon_shortcut_001
+	rm_mon_shortcut_002
+	rm_mon_shortcut_003
+	rm_mon_shortcut_004
+	rm_mon_shortcut_005
 	
 	"""
 	
@@ -499,7 +504,8 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	formatArray = lambda prepend, append, arr : ",".join([ "{:s}{:s}{:s}".format(prepend, elem, append) for elem in arr ])
 
 	if not isHardMode:
-		f.write("#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount)\n")
+		f.write("// goofy legacy code\n");
+		f.write("#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount, (void*)&roomName::secrets, roomName::secretsCount, (void*)roomName::collisionTiles, (void*)roomName::detailsTiles)\n")
 
 		f.write("""
 // should this be different between normal and hard?? idek
@@ -741,6 +747,58 @@ def convertObjects(layerData):
 			
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
+			
+			
+			# gml_Object_obj_exit_Alarm_0 
+			# in the future, the data here should also like,, decide where they go for the voided end?
+			# that may require some reimplimentation, but thats for the future
+			
+			customExitData = {
+				"rm_secret_001": "rm_0025",
+				"rm_secret_002": "rm_0056",
+				"rm_secret_003": "rm_0072",
+				"rm_secret_004": "rm_0114",
+				"rm_secret_005": "rm_rest_area_5",
+				"rm_secret_006": "rm_0168",
+				"rm_secret_007": "rm_0185",
+				"rm_secret_008": "rm_rest_area_8", 
+				"rm_0000": "rm_1intro",
+				"rm_rm4": "rm_2intro",
+				"rm_0230": "rm_rest_area_8",
+				"rm_secret_009": "rm_0235",
+				"rm_rest_area_9": "rm_voidend",
+				"rm_rest_area_8": "rm_0231",
+				"rm_0259": "rm_rest_area_9",
+				"rm_mon_015": "rm_test_0006",
+				"rm_mon_016": "rm_rest_area_7",
+				
+				"rm_mon_shortcut_001": "rm_0023",
+				"rm_mon_shortcut_002": "rm_0054",
+				"rm_mon_shortcut_003": "rm_0112",
+				"rm_mon_shortcut_004": "rm_0172",
+				"rm_mon_shortcut_005": "rm_0202",
+				
+				"rm_mon_001": "rm_0201",
+				
+				"rm_bee_001": "rm_0149",
+				"rm_misc_0001": "rm_rest_area_6",
+				"rm_test2_002": "rm_test2_003",
+				"rm_test2_018": "rm_test2_019",
+				"rm_test2_034": "rm_test2_035",
+				
+				"rm_bee_015": "rm_0165",
+				"rm_return_000": "rm_e_000",
+				"rm_ee_000": "rm_2intro",
+				"rm_ee_006": "rm_2intro",
+				"rm_ee_008": "rm_noway",
+
+				
+			}
+			
+			
+			if layerData["roomName"] in customExitData:
+				specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, customExitData[layerData["roomName"]]))
+			
 			floorExport[p.x][p.y] = "Exit"
 			
 		def obj_floorswitch(p, creationCode):
@@ -864,12 +922,41 @@ def convertObjects(layerData):
 			# 
 			# 
 	
-			print(creationCode)
+			if creationCode is None:
+				return
+			
+			#i could get the room to goto dynamically, but im tired ok
+			
+			creationCode = creationCode[0]
+			
+			secretData = {
+				4: "rm_mon_shortcut_001",
+				1: "next",
+				5: "rm_mon_shortcut_002",
+				6: "rm_mon_shortcut_003",
+				7: "rm_mon_shortcut_004",
+				8: "rm_mon_shortcut_005",
+				9: "rm_return_000",
+				10: "rm_bee_001",
+				2: "rm_mon_001",
+				3: "rm_cif_end",
+			
+			}
 			
 			
-			# creationcode being none means, just goto next 
 			
-		
+			if creationCode not in secretData:
+				print("creationCode not in secret data! how! ", str(creationCode))
+				
+				exit(1)
+			
+			res = secretData[creationCode]
+			
+			if res == "next":
+				specialFloorExport.append("{:d},{:d},NULL".format(p.x, p.y))
+			else:
+				specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, res))
+			
 			pass
 			
 		def obj_npc_friend(p, creationCode):
@@ -2045,7 +2132,9 @@ def convertObjects(layerData):
 			exit(1)
 		entityPoses.add(temp)
 	
-	return [floorExport, entityExport, effectExport]
+	specialFloorExport.insert(0, "-1,-1,NULL")
+	
+	return [floorExport, entityExport, effectExport, specialFloorExport]
 	
 def convertRoom(data, isHardModePass):
 
@@ -2079,7 +2168,7 @@ def convertRoom(data, isHardModePass):
 	if objectsExport is None:
 		return None
 		
-	floorExport, instanceExport, effectExport = objectsExport
+	floorExport, instanceExport, effectExport, specialFloorExport = objectsExport
 	
 
 	output = []
@@ -2108,11 +2197,24 @@ def convertRoom(data, isHardModePass):
 	
 	output.append("constexpr static inline int effectsCount = {:d};".format(len(effectExport)))
 	
-	output.append("};")
+	output.append("constexpr static inline SecretHolder secrets[] = {")
+	output.append("".join([ "{{{:s}}},".format(secret) for secret in specialFloorExport ]))
+	output.append("};")	
 	
-	#[ outputFile.write(line + "\n") for line in output ]
-
-	# TODO, WE DONT EXPORT THE TILESET HERE(of what the room tiles should be)
+	output.append("constexpr static inline int secretsCount = {:d};".format(len(specialFloorExport)))
+	
+	
+	if "tileset" not in collision or collision["tileset"] is None:
+		collision["tileset"] = "tile_bg_1"
+	
+	if "tileset" not in details or details["tileset"] is None:
+		details["tileset"] = "tile_edges"
+	
+	
+	output.append("constexpr static inline const bn::regular_bg_tiles_item* collisionTiles = &bn::regular_bg_tiles_items::dw_{:s};".format(collision["tileset"]))
+	output.append("constexpr static inline const bn::regular_bg_tiles_item* detailsTiles = &bn::regular_bg_tiles_items::dw_{:s};".format(details["tileset"]))
+	
+	output.append("};")
 	
 	return output
 

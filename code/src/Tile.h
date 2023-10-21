@@ -129,6 +129,8 @@ public:
 	
 	TileType tileType() const override { return TileType::Death; }
 	
+	void stepOn() override;
+	
 };
 
 class Copy : public FloorTile { // create shadow clones

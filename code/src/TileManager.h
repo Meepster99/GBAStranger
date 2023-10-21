@@ -89,8 +89,13 @@ public:
 			}
 		}
 	}
+	
+	const char* exitDestination = NULL;
+	
+	Pos secretPos = Pos(0, 0);
+	const char* secretDestination = NULL;
 
-	void loadTiles(u8* floorPointer);
+	void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount);
 		
 	void doFloorSteps();
 	

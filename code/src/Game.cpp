@@ -104,6 +104,8 @@ void Game::loadLevel(bool debug) {
 	uncompressData(uncompressedCollision, (u8*)idek.collision);
 	uncompressData(uncompressedDetails, (u8*)idek.details);
 	
+	collision.rawMap.bgPointer.set_tiles(*(const bn::regular_bg_tiles_item*)idek.collisionTiles);
+	details.rawMap.bgPointer.set_tiles(*(const bn::regular_bg_tiles_item*)idek.detailsTiles);
 
 	for(int x=0; x<14; x++) { 
 		for(int y=0; y<9; y++) {
@@ -122,7 +124,10 @@ void Game::loadLevel(bool debug) {
 	
 	u8* floorPointer = (u8*)idek.floor;
 	
-	tileManager.loadTiles(floorPointer);
+	SecretHolder* secretsPointer = (SecretHolder*)idek.secrets;
+	int secretsCount = idek.secretsCount;
+	
+	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount);
 	
 	if(!debug) {
 		doButanoUpdate();

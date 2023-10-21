@@ -12,7 +12,7 @@
 // also, i would be passing the entity in as an optional param, maybe?
 // assuming that doesnt cause slowdown, that would be a good idea
 
-void TileManager::loadTiles(u8* floorPointer) {
+void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount) {
 	
 	u8 uncompressedFloor[126];
 	game->uncompressData(uncompressedFloor, floorPointer);
@@ -128,6 +128,32 @@ void TileManager::loadTiles(u8* floorPointer) {
 	} else {
 		floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '?');
 		floorMap[13][8] = new WordTile(Pos(13, 8), '?', '?');
+	}
+	
+	
+	exitDestination = NULL;
+	secretDestination = NULL;
+	
+	int tempSecretCount = 0;
+	
+	secretsCount--;
+	secrets++;
+	
+	for(int i=0; i<secretsCount; i++) {
+		
+		Pos tempSecretPos(secrets->x, secrets->y);
+		
+		if(hasFloor(tempSecretPos) == TileType::Exit) {
+			BN_ASSERT(secrets->dest != NULL, "an exit destination was passed in with a NULL dest? this would just bring you down a floor normally! why!");
+			exitDestination = secrets->dest;
+		} else {
+			BN_ASSERT(tempSecretCount == 0, "a second secret dest tried loading in, you only support one, be better.");
+			secretDestination = secrets->dest;
+			secretPos = tempSecretPos;
+			tempSecretCount++;
+		}
+		
+		secrets++;
 	}
 	
 }

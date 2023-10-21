@@ -63,6 +63,20 @@ void Bomb::stepOn() {
 	tileManager->updateTile(tilePos);
 }
 
+void Death::stepOn() {
+	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+	
+	for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+		if((*it)->entityType() == EntityType::Player) {
+			// how can i make it play a death anim?
+			entityManager->addKill(*it);
+		} else {
+			entityManager->killEntity(*it);
+		}
+	}
+	
+}
+
 void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
