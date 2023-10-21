@@ -60,12 +60,17 @@ inline const char* extractClassAndFunctionName(const char* prettyFunction) {
 	length = MIN(length, maxFuncLength);
 
   
-    char* functionName = new char[length + 1];
+    char* functionName = new char[maxFuncLength + 1];
     //std::strncpy(functionName, begin, length);
 	for(int i=0; i<length; i++) {
 		functionName[i] = begin[i];
 	}
-    functionName[length] = '\0'; 
+	for(int i=length; i<maxFuncLength; i++) {
+		functionName[i] = ' ';
+	}
+	
+	functionName[maxFuncLength-1] = '\t'; 
+    functionName[maxFuncLength] = '\0'; 
 
     return functionName;
 }

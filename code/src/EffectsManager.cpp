@@ -21,10 +21,12 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	xPos -= (8 * width);
 	yPos -= (8 * height);
 
-	draw(0);
+	//draw(0);
+	//firstDraw();
 	
 	// i dont like this code, but tbh im not sure of a better way around this.
 	// i also really wish i could use a switch statement here
+	// the decision of if to put the vars in the effectholder struct, or hard coded in here is difficult
 	
 	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
 		
@@ -89,22 +91,63 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		tileManager->floorMap[9][4] = new FloorTile(Pos(9,4));
 		tileManager->floorMap[10][4] = new FloorTile(Pos(10,4));
 		
-	} else {
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
+		autoAnimateFrames = 3;
+		autoAnimate = true;
+		animationIndex = 2;
+		//draw(2);
+		
+		// impliment the head movement here
+		
+		customAnimate = []() -> int {
+			
+			// this was a switch statement until i became a conspiracy theorist.
+			BN_ASSERT(globalGame->entityManager.player != NULL, "WHAT THE FUCK");
+			int playerX = globalGame->entityManager.player->p.x;
+			if(playerX <= 6) {
+				return 2;
+			} else if(playerX <= 8) {
+				return 1;
+			} else if(playerX <= 10) {
+				return 0;
+			} else if(playerX <= 13) {
+				return 3;
+			} else {
+				
+			}
+			
+			return -1;
+		};
+		
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_tail) { 
+		autoAnimate = true;
+		autoAnimateFrames = 24;
+	} else{
 		
 	}
 	
+	// firstdraw occurs down here to ensure that all animation flags are properly set up.
+	firstDraw();
+	
 }
 
-void BigSprite::draw(int index) {
-	BN_ASSERT(index >= 0 && index < optionCount, "a bigsprite tried to draw on an invalid index!");
+void BigSprite::draw(int index) { profileFunction();
 	
-	for(int i=0; i<sprites.size(); i++) {
-		sprites[i].setVisible(false);
-	}
+	// im going to do my best to avoid reallocing this array
+	//sprites.clear();
+	// alrighty kids its time to use 100% of my brain. 
+	// could i, instead of doing all this sprite redrawing, just replace the tileset for each sprite?
+	// issue is that bigsprites are all in one tileset. ill try to maybe just,, ugh change the offsets?
+	// WHY ISNT THERE JUST A CHANGE GRAPHICS INDEX FUNC??? WHY DO I HAVE TO PASS THE TILES IN EACH TIME
 	
-	sprites.clear();
+	// im reimplimenting customanimate to just return a animindex
 	
-	int indexOffset = index * 4 * width * height;
+	// one issue will/would be, collision consistency. this function should/will only be called on animating things 
+	BN_ASSERT(autoAnimate, "tryed calling draw on a non animated bigsprite!");
+	
+	
+	int spriteIndex = 0;
+	int offset = index * width * height;
 	
 	for(int y=0; y<height; y++) {
 		for(int x=0; x<width; x++) {
@@ -119,28 +162,87 @@ void BigSprite::draw(int index) {
 				continue;
 			}
 			
-			// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
-			// is this 4, or ithis 8???
-			// omfg dumbass, its 4 for the number of subtiles, idiot
-			for(int j=0; j<4; j++) {
-				// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
-				int offset = 4 * (x + (y * width)) + j + indexOffset;
-				
-				BN_ASSERT(offset < tiles->tiles_ref().size(), "bigsprite tried to load a invalid tile. max tileindex = ", tiles->tiles_ref().size(), " tried loading at ", offset);
-				
-				// is this pointer like,,, what tf
-				const uint32_t* tileRef = (tiles->tiles_ref())[offset].data;
-				
-				for(int i=0; i<8; i++) {
-					if(tileRef[i] != 0) {
-						goto doBigTile; // shit code
-					}
-				}
+			Sprite* tempSprite = &sprites[spriteIndex];
+			
+			//tempSprite->updateRawPosition(spriteXPos, spriteYPos);
+			
+			// why do i need to also set the tile here each time???
+			tempSprite->spritePointer.set_tiles(
+				*tiles,
+				x + (y * width) + offset
+			);
+			
+			spriteIndex++;
+			
+		}
+	}
+
+	// gods this is going to be so scuffed.
+	
+	// sprite doesnt actually hold its pos data, only its screen pos, which now leads to this extremely weird shit.
+	
+	// so essentially, im going to just do a bunch of map with the new anim index vs the old one, and pray that i dont fuck up these updates.
+	// actually, to be sure 
+	// oh my gods. 
+	// CAN YOU SERIOUSLY NOT GET THE TILE FROM A SPRITE????
+	// ok, im at my limit. 
+	// i will fucking fork butano to fix this bs
+	
+	/*BN_ASSERT(index != animationIndex, "tryed drawing the same animation index that we are currently on in a bigsprite!");
+	
+	int offset = index * width * height;
+	for(int i=0; i<sprites.size(); i++) {
+		tempSprite->spritePointer.set_tiles(
+				*tiles,
+				x + (y * width) + offset
+			);
+		
+	}
+	*/
+}
+
+void BigSprite::firstDraw() {
+	
+	int indexOffset = animationIndex * 4 * width * height;
+	
+	for(int y=0; y<height; y++) {
+		for(int x=0; x<width; x++) {
+						
+			int spriteXPos = xPos + x * 16;
+			int spriteYPos = yPos + y * 16;
+			
+			// check if this sprite will even be drawn onscreen.
+			// check occurs first as it is inexpensive
+			// a bit generious, just in case 
+			if(spriteXPos < -16 || spriteXPos > 240+16 || spriteYPos < -16 || spriteYPos > 160+16) {
+				continue;
 			}
 			
-			// is continueing here ideal? the collision map wont update for blank tiles. is that ok?
-			continue;
 			
+			if(!autoAnimate) {
+				// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
+				// is this 4, or ithis 8???
+				// omfg dumbass, its 4 for the number of subtiles, idiot
+				for(int j=0; j<4; j++) {
+					// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
+					int offset = 4 * (x + (y * width)) + j + indexOffset;
+					
+					BN_ASSERT(offset < tiles->tiles_ref().size(), "bigsprite tried to load a invalid tile. max tileindex = ", tiles->tiles_ref().size(), " tried loading at ", offset);
+					
+					// is this pointer like,,, what tf
+					const uint32_t* tileRef = (tiles->tiles_ref())[offset].data;
+					
+					for(int i=0; i<8; i++) {
+						if(tileRef[i] != 0) {
+							goto doBigTile; // shit code
+						}
+					}
+				}
+				
+				// is continueing here ideal? the collision map wont update for blank tiles. is that ok?
+				continue;
+			
+			}
 			doBigTile:
 
 			Sprite tempSprite = Sprite(*tiles);
@@ -159,17 +261,12 @@ void BigSprite::draw(int index) {
 			
 			tempSprite.spritePointer.set_tiles(
 				*tiles,
-				x + (y * width) + (index * width * height)
+				x + (y * width) + (animationIndex * width * height)
 			);
 			
 			sprites.push_back(tempSprite);
 		}
 	}
-	
-	for(int i=0; i<sprites.size(); i++) {
-		sprites[i].setVisible(true);
-	}
-	
 }
 
 void BigSprite::updatePalette(Palette* pal) {
@@ -178,10 +275,15 @@ void BigSprite::updatePalette(Palette* pal) {
 	}
 }
 
-void BigSprite::animate() {
-	BN_LOG("animate called with animationIndex ", animationIndex);
+void BigSprite::animate() { profileFunction();
 	
-	animationIndex = (animationIndex + 1) % optionCount;
+	// icould maybe make this branchless by having animate be a default, but im tired ok
+	if(customAnimate == NULL) {
+		animationIndex = (animationIndex + 1) % optionCount;
+	} else {
+		animationIndex = customAnimate();
+	}
+	
 	draw(animationIndex);
 }
 
@@ -421,21 +523,22 @@ bool EffectsManager::enterRoom() {
 	return false;
 }
 
-void EffectsManager::doVBlank() {
+void EffectsManager::doVBlank() { profileFunction();
 	
 	// eventually, we should call ticks on random misc effects here
+	// what if i only do bigsprite updates on non,,, everything else frames?
+	
+	for(int i=0; i<bigSprites.size(); i++) {
+		if(bigSprites[i]->autoAnimate) {
+			if(frame % bigSprites[i]->autoAnimateFrames == 0) {
+				bigSprites[i]->animate();
+			}
+		}
+	}
 	
 	if(frame % 4 != 0) {
 		return;
 	}
-	
-	
-	for(int i=0; i<bigSprites.size(); i++) {
-		if(bigSprites[i]->autoAnimate) {
-			bigSprites[i]->animate();
-		}
-	}
-	
 	
 	for(auto it = effectList.begin(); it != effectList.end(); ) {
 		

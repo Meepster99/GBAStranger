@@ -131,22 +131,25 @@ public:
 
 	
 	// i need to change all sprite arrays to just use 128
+	// this func is completley overwritten with way to many params that only come from the effectholder struct sometimes, and are hardcoded other times
 	
 	static Game* game;
 	static EntityManager* entityManager;
 	static TileManager* tileManager;
 	
-	int width;
-	int height;
+	const int width;
+	const int height;
 	const bn::sprite_tiles_item* tiles;
 	int xPos;
 	int yPos;
-	bool collide;
+	const bool collide;
 	int optionCount;
 	int animationIndex = 0;
 	int priority;
 	
 	bool autoAnimate;
+	int autoAnimateFrames = 32;
+	int (*customAnimate)(void) = NULL;
 	
 	
 
@@ -158,6 +161,7 @@ public:
 	void updatePalette(Palette* pal);
 	
 	void draw(int index);
+	void firstDraw();
 	
 	void animate();
 	

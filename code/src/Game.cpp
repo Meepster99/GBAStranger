@@ -8,6 +8,7 @@ Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 Game* globalGame = NULL;
 
 unsigned int frame = 0;
+bool isVblank = false;
 
 bn::random randomGenerator = bn::random();
 
@@ -17,8 +18,8 @@ void Game::doButanoUpdate() {
 	int temp = bn::core::last_missed_frames();
 	if(temp != 0) {
 		BN_LOG("dropped frames: ", temp);
-		//BN_LOG(bn::core::last_cpu_usage());
-		//BN_LOG(bn::core::last_vblank_usage());
+		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
+		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
 	}
 	
 }	
@@ -184,17 +185,21 @@ void Game::changePalette(int offset) {
 }
 
 void didVBlank() {
-
+	
 	//frame = (frame + 1) % 600000;
 	frame++;
-	if(frame > 600000) {
+	/*if(frame > 600000) {
 		frame = 0;
-	}
+	}*/
+	// i save a branch?
+	frame = frame & 0b1111111111111111;
 	
-	globalGame->doVBlank();
+	isVblank = true;
+	globalGame->doVBlank();	
+	isVblank = false;
 }
 
-void Game::doVBlank() {
+void Game::doVBlank() { profileFunction();
 	
 	// can vblank occur during the gameloop, or does this only get called after we call a butano update?
 	// if this can get called in the gameloop, then we will have problems once we integrate dialogue, bc during dialogue this needs to be disabled!

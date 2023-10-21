@@ -129,7 +129,7 @@ void TileManager::loadTiles(u8* floorPointer) {
 
 // ----- 
 
-void TileManager::doFloorSteps() { profileFunction();
+void TileManager::doFloorSteps() { 
 	
 	// rlly should of made a tilemanager
 	
@@ -238,7 +238,7 @@ void TileManager::doFloorSteps() { profileFunction();
 	floorLayer.reloadCells();
 }
 
-void TileManager::updateTile(const Pos& p) { profileFunction();
+void TileManager::updateTile(const Pos& p) { 
 	
 	const u8 x = p.x;
 	const u8 y = p.y;
@@ -361,7 +361,7 @@ bool TileManager::enterRoom() {
 	return true;
 }
 
-void TileManager::doVBlank() {
+void TileManager::doVBlank() { profileFunction();
 	
 	// things like glass breaking(and maybe others) should occur in here!
 	
@@ -372,7 +372,7 @@ void TileManager::doVBlank() {
 
 // -----
 
-bn::optional<TileType> TileManager::hasFloor(const u8& x, const u8& y) { profileFunction();
+bn::optional<TileType> TileManager::hasFloor(const u8& x, const u8& y) { 
 	const FloorTile* temp = floorMap[x][y];
 	
 	if(temp == NULL || !temp->isAlive) {
@@ -382,14 +382,14 @@ bn::optional<TileType> TileManager::hasFloor(const u8& x, const u8& y) { profile
 	return bn::optional<TileType>(temp->tileType());
 }
 
-void TileManager::stepOff(Pos p) { profileFunction();
+void TileManager::stepOff(Pos p) { 
 	// should a check be here for tile isalive as well?
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepoff on a tile, it was null?");
 	
 	floorMap[p.x][p.y]->stepOff();
 }
 
-void TileManager::stepOn(Pos p) { profileFunction();
+void TileManager::stepOn(Pos p) { 
 	// should a check be here for tile isalive as well?
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepon on a tile, it was null?");
 	

@@ -70,6 +70,7 @@ typedef unsigned char u8;
 //static_assert(MAXENTITYSPRITES > 0);
 
 extern unsigned int frame;
+extern bool isVblank;
 
 extern bn::random randomGenerator;
 	

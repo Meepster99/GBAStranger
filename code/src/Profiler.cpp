@@ -88,7 +88,7 @@ namespace WTFPROFILER {
 		
 		// lets just pray we dont overrun the buffer here lmao
 		
-		*start = '\t';
+		//*start = '\t';
 		
 		int numLength = 0;
 		int temp = n;
@@ -104,6 +104,21 @@ namespace WTFPROFILER {
 		return writeNumber(start + leadingSpaces, n);
 	}
 
+	inline char* writeNumberSetLength(char* start, uint64_t n) {
+			
+		int length = 10;
+			
+		char* temp = start + length - 1;
+		
+		while(temp != start) {
+			*temp = '0' + (n % 10);
+			n /= 10;
+			temp--;
+		}
+		
+		return (start + length - 1) + 1;
+	}
+	
 	
 	// this will fuck up heavily on recursive funcs. 
 	
@@ -134,6 +149,8 @@ namespace WTFPROFILER {
 	}
 	
 	void show() {
+		
+		// im changing this to show nums first bc FOR SOME REASON MGBA DOESNT GIVE ME A MONOSPACED FONT OPTION
 		
 		
 		// prepare for goofy sorting
@@ -170,30 +187,29 @@ namespace WTFPROFILER {
 		BN_LOG("Displaying profiler results");
 		BN_LOG(profilerMap.size(), " funcs tracked");
 		//BN_LOG("Bruh::realllylongfunctionname    	      474 	      254 	        2 	      237                   
-		BN_LOG("func name                                       	     total 	      max 	     calls 	      avg");                   
+		//BN_LOG("func name                                       	     total 	      max 	     calls 	      avg");                   
+		BN_LOG("___total _____max ___calls _____avgfunc name");
 		for(const auto& ticks_per_entry_pair : sortedProfilerData) {
 		
 			const ProfilerData& ticks = ticks_per_entry_pair.second;
 		
 			memset(&buffer, ' ', sizeof(buffer));
 			buffer[sizeof(buffer) - 1] = '\0';
-			
-		
-			// got stuck on strlen again until i of course remembered, the WTF function
-			memcpy(&buffer, ticks_per_entry_pair.first, WTF(ticks_per_entry_pair.first));
-		
-		
-			char* temp = padNumber(buffer + maxFuncLength + 1, ticks.total);
-			
-			temp = padNumber(temp + 1, ticks.max);
-			
-			temp = padNumber(temp + 1, ticks.timesCalled);
-		
-		
+				
 			uint64_t averageTickCount = ticks.total / ticks.timesCalled;
 		
-			temp = padNumber(temp + 1, averageTickCount); 
+			// got stuck on strlen again until i of course remembered, the WTF function
+			//memcpy(&buffer, ticks_per_entry_pair.first, WTF(ticks_per_entry_pair.first));
+		
+			char* temp = buffer;
+		
+			temp = writeNumberSetLength(temp, ticks.total);
+			temp = writeNumberSetLength(temp, ticks.max);
+			temp = writeNumberSetLength(temp, ticks.timesCalled);
+			temp = writeNumberSetLength(temp, averageTickCount);
 
+			memcpy(temp+5, ticks_per_entry_pair.first, WTF(ticks_per_entry_pair.first));
+			
 			BN_ASSERT(buffer[sizeof(buffer) - 1] == '\0', "you overran the profiler buffer idiot lmao. be a better programmer");
 			BN_LOG(buffer);
 			//BN_LOG(ticks_per_entry_pair.first, "\t", ticks.total, "\t", ticks., "\t", ticks.timesCalled );

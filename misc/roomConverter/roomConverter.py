@@ -847,10 +847,16 @@ def convertObjects(layerData):
 		def obj_npc_tail_tail(p, creationCode):
 			x, y = p.rawX, p.rawY 
 			x += 4
+			
+			y += 4
+			
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_lowerbody,{:d},{:d},6,3,false".format(x, y))
 			
-			#y += 2 * 16
-			y -= 16
+			x += 16
+			y -= 2 * 16
+			y -= 6
+			x -= 1
+			y -= 1
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_tail,{:d},{:d},4,3,false,1,true".format(x, y))
 			
 			pass

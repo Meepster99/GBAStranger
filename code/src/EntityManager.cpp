@@ -267,7 +267,6 @@ void EntityManager::addEntity(Entity* e) {
 	
 	entityList.insert(e);
 	if(e->isObstacle()) {
-		BN_LOG("added obstacle");
 		obstacleList.insert(e);
 	}
 	
@@ -378,7 +377,7 @@ void EntityManager::moveObstacles() {
 	moveEntities(obstacleList.begin(), obstacleList.end());
 }
 
-void EntityManager::doMoves() { profileFunction();
+void EntityManager::doMoves() {
 	
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -570,7 +569,7 @@ void EntityManager::doMoves() { profileFunction();
 
 // -----
 
-bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileFunction();
+bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	
 	// this func really needs to be rewritten to just work with killing players tbh, also its return value is scuffed af.
 	
@@ -596,7 +595,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	return res;
 }
 
-void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFunction();
+void EntityManager::manageShadows(bn::optional<Direction> playerDir) { 
 	
 	// IMPORTANT. SHADOWS WILL ALWAYS SPRING UP FROM THE TILE THEY WERE STEPPED ON FROM
 	// HOWEVER, IF THERE IS ANOTHER SHADOW(POSSIBLY ANY ENTITY?) ON SAID TILE 
@@ -705,7 +704,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 	
 }
 
-void EntityManager::updateMap() { profileFunction();
+void EntityManager::updateMap() { 
 
 	// return an entity if we died an need a reset
 
@@ -1011,7 +1010,7 @@ bool EntityManager::enterRoom() {
 	return true;
 }
 
-void EntityManager::doVBlank() {
+void EntityManager::doVBlank() { profileFunction();
 	
 	// is modulo expensive???
 	
@@ -1128,7 +1127,7 @@ bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {
 	return tileManager->hasFloor(p);
 }
 
-bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profileFunction();
+bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { 
 	
 	Pos playerPos = player->p;
 	
@@ -1175,7 +1174,7 @@ bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profil
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const { profileFunction();
+bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const { 
 	
 	// oh boy. this is going to be fun.
 	
@@ -1254,7 +1253,7 @@ bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const { pro
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStart) { profileFunction();
+bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStart) { 
 	
 	const Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
 	
