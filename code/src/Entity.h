@@ -18,7 +18,7 @@ public:
 	
 	static Palette* spritePalette;
 
-	Sprite(bn::sprite_tiles_item startTilesItem) : 
+	Sprite(const bn::sprite_tiles_item& startTilesItem) : 
 		spritePointer(
 			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
 			bn::sprite_shape_size(16, 16),
@@ -30,7 +30,18 @@ public:
 		//spritePointer.set_bg_priority(2);
 		spritePointer.set_bg_priority(1);
 		}
-		
+	
+	Sprite(const bn::sprite_tiles_ptr& tilesPtr) : 
+		spritePointer(
+			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
+			bn::sprite_shape_size(16, 16),
+			tilesPtr,
+			spritePalette->getSpritePalette().create_palette())
+			)
+		{
+		//spritePointer.set_bg_priority(2);
+		spritePointer.set_bg_priority(1);
+		}
 	
 		
 	void updatePosition(const Pos& p) {

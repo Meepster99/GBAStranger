@@ -12,11 +12,11 @@ EntityManager* BigSprite::entityManager = NULL;
 TileManager* BigSprite::tileManager = NULL;
 
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
-	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
+	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_),
+	optionCount(tiles->tiles_ref().size() / (4 * width * height))
+	{
 	
 	BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
-	
-	optionCount = tiles->tiles_ref().size() / (4 * width * height);
 	
 	xPos -= (8 * width);
 	yPos -= (8 * height);
@@ -92,13 +92,16 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		tileManager->floorMap[10][4] = new FloorTile(Pos(10,4));
 		
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
-		autoAnimateFrames = 3;
+		//autoAnimateFrames = 3;
+		
+		autoAnimateFrames = 120;
 		autoAnimate = true;
 		animationIndex = 2;
 		//draw(2);
 		
 		// impliment the head movement here
 		
+		/*
 		customAnimate = []() -> int {
 			
 			// this was a switch statement until i became a conspiracy theorist.
@@ -118,6 +121,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			
 			return -1;
 		};
+		*/
 		
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_tail) { 
 		autoAnimate = true;
@@ -127,7 +131,73 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	}
 	
 	// firstdraw occurs down here to ensure that all animation flags are properly set up.
+	
+	BN_LOG(tiles->tiles_ref().size(), " ", optionCount);
+	
+	int tilesPerAlloc = tiles->tiles_ref().size() / optionCount;
+	
+	tilesPerAlloc--;
+	tilesPerAlloc |= tilesPerAlloc >> 1;
+	tilesPerAlloc |= tilesPerAlloc >> 2;
+	tilesPerAlloc |= tilesPerAlloc >> 4;
+	tilesPerAlloc |= tilesPerAlloc >> 8;
+	tilesPerAlloc |= tilesPerAlloc >> 16;
+	tilesPerAlloc++;
+	
+	tilesPerAllocVal = tilesPerAlloc;
+
+	if(tilesPerAlloc > 64) {
+		BN_ASSERT(optionCount == 1, "tried to load a bigsprite but it was to large to be alloced");
+		
+		// i pray that this doesnt do a copy	
+		animationTilesetPointers.push_back(bn::sprite_tiles_ptr::create(*tiles));
+	} else {
+	
+		BN_ASSERT(bn::sprite_tiles_item::valid_tiles_count(tilesPerAlloc, bn::bpp_mode::BPP_4), tilesPerAlloc, " KMS ");
+		
+		for(int i=0; i<optionCount; i++) {
+		
+			bn::sprite_tiles_ptr tempTilesPtr = bn::sprite_tiles_ptr::allocate(tilesPerAlloc, bn::bpp_mode::BPP_4);
+			
+			bn::optional<bn::span<bn::tile>> tileRefOpt = tempTilesPtr.vram();
+			BN_ASSERT(tileRefOpt.has_value(), "wtf");
+			bn::span<bn::tile> tileRef = tileRefOpt.value();
+			
+			int copyOffset = i * (tiles->tiles_ref().size() / 4);
+			
+			for(int j=0; j<tiles->tiles_ref().size() / 4; j++) {
+				tileRef[j].data[0] = tiles->tiles_ref()[j + copyOffset].data[0];
+				tileRef[j].data[1] = tiles->tiles_ref()[j + copyOffset].data[1];
+				tileRef[j].data[2] = tiles->tiles_ref()[j + copyOffset].data[2];
+				tileRef[j].data[3] = tiles->tiles_ref()[j + copyOffset].data[3];
+				tileRef[j].data[4] = tiles->tiles_ref()[j + copyOffset].data[4];
+				tileRef[j].data[5] = tiles->tiles_ref()[j + copyOffset].data[5];
+				tileRef[j].data[6] = tiles->tiles_ref()[j + copyOffset].data[6];
+				tileRef[j].data[7] = tiles->tiles_ref()[j + copyOffset].data[7];
+			}
+			
+			
+			BN_LOG("allocing with ", tilesPerAlloc, " tiles");
+			
+			//bn::sprite_tiles_item tempTilesItem(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAlloc/4);
+			//animationTilesets.push_back(tempTilesItem);
+			
+			//animationTilesetPointers.push_back(tempTilesPtr);
+	
+			//bn::optional<bn::sprite_tiles_ptr> wtf = bn::sprite_tiles_ptr::find(bn::sprite_tiles_item(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAlloc/4));
+			bn::optional<bn::sprite_tiles_ptr> wtf = bn::sprite_tiles_ptr::create(bn::sprite_tiles_item(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAllocVal/4));
+
+			BN_ASSERT(wtf.has_value(), "WHAUFGIASHODFJIF");
+
+			animationTilesetPointers.push_back( wtf.value()  );
+
+
+		}
+	}
+
+	BN_LOG("calling firstdraw");
 	firstDraw();
+	BN_LOG("firstdraw done");
 	
 }
 
@@ -143,11 +213,37 @@ void BigSprite::draw(int index) { profileFunction();
 	// im reimplimenting customanimate to just return a animindex
 	
 	// one issue will/would be, collision consistency. this function should/will only be called on animating things 
-	BN_ASSERT(autoAnimate, "tryed calling draw on a non animated bigsprite!");
+	// is it memcpying in new tiles?
+	// meaning that ill have to be shitty and do this by changing the tile vis, and loading in all of them initially?
+	// if so, why the fuck doesnt the moving tail cause this issue?
+	
+	// the issue is that it sewem
+	
+	// INSTEAD OF LOADING THE WHOLE BS INTO MEMORY, IT HAS INSTEAD OPTED TO ONYL LOAD The currently visible tiles, and 
+	// then do expensive memory swaps instead of just changing the tile????
+	// it seems like the best way i have of fixing this is possibly,,, wait can i alloc sprite tiles like i did with bg tiles?
+	
+	
+	// gods this is going to be so scuffed.
+	
+	// sprite doesnt actually hold its pos data, only its screen pos, which now leads to this extremely weird shit.
+	
+	// so essentially, im going to just do a bunch of map with the new anim index vs the old one, and pray that i dont fuck up these updates.
+	// actually, to be sure 
+	// oh my gods. 
+	// CAN YOU SERIOUSLY NOT GET THE TILE FROM A SPRITE????
+	// ok, im at my limit. 
+	// i will fucking fork butano to fix this bs
+	// why tf can i not set the tile of a sprite with a sprite_tiles_ptr, but only with a sprite_tiles_item, and why 
+	// its like these ppl have never once used/tried the alloc function 
+	// im forking butano.
+	
+	// ok nvm i am not forking butano that shit makes no sense
+	
+	//BN_ASSERT(autoAnimate, "tryed calling draw on a non animated bigsprite!");
 	
 	
 	int spriteIndex = 0;
-	int offset = index * width * height;
 	
 	for(int y=0; y<height; y++) {
 		for(int x=0; x<width; x++) {
@@ -167,43 +263,35 @@ void BigSprite::draw(int index) { profileFunction();
 			//tempSprite->updateRawPosition(spriteXPos, spriteYPos);
 			
 			// why do i need to also set the tile here each time???
+			/*
 			tempSprite->spritePointer.set_tiles(
-				*tiles,
+				animationTilesets[index],
 				x + (y * width) + offset
 			);
+			*/
+
+			//bn::optional<bn::span<bn::tile>> tileRefOpt = animationTilesetPointers[index].vram();
+			//BN_ASSERT(tileRefOpt.has_value(), "wtf");
+			//bn::span<bn::tile> tileRef = tileRefOpt.value();
+			
+			tempSprite->spritePointer.set_tiles(
+				//bn::sprite_tiles_item(tileRef, bn::bpp_mode::BPP_4, tilesPerAllocVal/4),
+				//x + (y * width)
+				animationTilesetPointers[index]
+			);
+
+			
+
 			
 			spriteIndex++;
 			
 		}
 	}
-
-	// gods this is going to be so scuffed.
-	
-	// sprite doesnt actually hold its pos data, only its screen pos, which now leads to this extremely weird shit.
-	
-	// so essentially, im going to just do a bunch of map with the new anim index vs the old one, and pray that i dont fuck up these updates.
-	// actually, to be sure 
-	// oh my gods. 
-	// CAN YOU SERIOUSLY NOT GET THE TILE FROM A SPRITE????
-	// ok, im at my limit. 
-	// i will fucking fork butano to fix this bs
-	
-	/*BN_ASSERT(index != animationIndex, "tryed drawing the same animation index that we are currently on in a bigsprite!");
-	
-	int offset = index * width * height;
-	for(int i=0; i<sprites.size(); i++) {
-		tempSprite->spritePointer.set_tiles(
-				*tiles,
-				x + (y * width) + offset
-			);
-		
-	}
-	*/
 }
 
 void BigSprite::firstDraw() {
 	
-	int indexOffset = animationIndex * 4 * width * height;
+	int indexOffset = 0 * 4 * width * height;
 	
 	for(int y=0; y<height; y++) {
 		for(int x=0; x<width; x++) {
@@ -245,8 +333,11 @@ void BigSprite::firstDraw() {
 			}
 			doBigTile:
 
-			Sprite tempSprite = Sprite(*tiles);
-			
+			//Sprite tempSprite = Sprite(tilePointer);
+			BN_LOG("creating sprite");
+			Sprite tempSprite = Sprite(animationTilesetPointers[0]);
+			BN_LOG("creating done");			
+
 			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
 			
 			int tempX = xPos/16 + x;
@@ -260,8 +351,10 @@ void BigSprite::firstDraw() {
 			tempSprite.spritePointer.set_bg_priority(priority);
 			
 			tempSprite.spritePointer.set_tiles(
+				//animationTilesetPointers[0],
+				// WHY TF CANT I JUST FUCKING SET A GRAPHICS INDEX WITH A POINTER???
 				*tiles,
-				x + (y * width) + (animationIndex * width * height)
+				x + (y * width)
 			);
 			
 			sprites.push_back(tempSprite);

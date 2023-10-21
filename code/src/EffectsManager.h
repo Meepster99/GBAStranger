@@ -137,17 +137,26 @@ public:
 	static EntityManager* entityManager;
 	static TileManager* tileManager;
 	
+	// the gods are dead.
+	
+	//bn::vector<bn::sprite_tiles_item, 16> animationTilesets;
+	bn::vector<bn::sprite_tiles_ptr, 16> animationTilesetPointers;
+	
 	const int width;
 	const int height;
 	const bn::sprite_tiles_item* tiles;
+	
 	int xPos;
 	int yPos;
 	const bool collide;
-	int optionCount;
-	int animationIndex = 0;
 	int priority;
-	
 	bool autoAnimate;
+	const int optionCount;
+	int animationIndex = 0;
+	
+	int tilesPerAllocVal = -1;
+	
+	
 	int autoAnimateFrames = 32;
 	int (*customAnimate)(void) = NULL;
 	
