@@ -71,6 +71,7 @@ typedef unsigned char u8;
 
 extern unsigned int frame;
 extern bool isVblank;
+extern unsigned boobaCount;
 
 extern bn::random randomGenerator;
 	
@@ -774,4 +775,7 @@ inline void *memset(void *ptr, int value, size_t num) {
 	return ptr;
 }
 
-
+struct MessageStr {
+	const char* str;
+	const char idek = '\0'; // sanity
+};

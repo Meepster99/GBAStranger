@@ -371,10 +371,7 @@ void Chest::interact() {
 //const char* const randomBoulderMessages[] = {"jfdklsafs", "a", "123124", "VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2"};
 
 // i swear, why cant i do this without a struct? idek if the idek var is needed, but im not going to be changing it.
-struct MessageStr {
-	const char* str;
-	const char idek = '\0'; // sanity
-};
+// messagestr struct used to be here, now in sharedtypes
 
 // each string here has a limit of,, 64 non space chars in between lines(seperated with \n)
 // i,, could do something to fix that though? but like ugh 

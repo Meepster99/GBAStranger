@@ -135,6 +135,7 @@ public:
 	
 	static Game* game;
 	static EntityManager* entityManager;
+	static EffectsManager* effectsManager;
 	static TileManager* tileManager;
 	
 	const int width;

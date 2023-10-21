@@ -37,6 +37,16 @@ import win32api
 import requests
 import zipfile
 import shutil
+from colorama import init, Fore, Back, Style
+
+init(convert=True)
+
+RED = Fore.RED 
+GREEN = Fore.GREEN 
+CYAN = Fore.CYAN
+WHITE = Fore.WHITE
+
+RESET = Style.RESET_ALL
 
 def read_reg(ep, p = r"", k = ''):
 	try:
@@ -163,7 +173,7 @@ if __name__ == "__main__":
 	
 	
 	print("")
-	print("if you are seeing this, then everything(suprisingly) ran correctly.")
+	print(CYAN + "if you are seeing this, then everything(suprisingly) ran correctly." + RESET)
 	
 	# i rlly should include some form of cleanu after all the functions copy to the code area
 	

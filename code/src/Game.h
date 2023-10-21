@@ -102,6 +102,7 @@ public:
 		
 		BigSprite::entityManager = &entityManager;
 		BigSprite::tileManager = &tileManager;
+		BigSprite::effectsManager = &effectsManager;
 		
 		MenuOption::effectsManager = &effectsManager;
 	}

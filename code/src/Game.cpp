@@ -9,6 +9,7 @@ Game* globalGame = NULL;
 
 unsigned int frame = 0;
 bool isVblank = false;
+unsigned boobaCount = 0;
 
 bn::random randomGenerator = bn::random();
 
@@ -70,6 +71,7 @@ void Game::resetRoom(bool debug) {
 	state = GameState::Loading;
 	save();
 	
+	
 	loadLevel(debug);
 	if(!debug) {
 		doButanoUpdate();
@@ -91,6 +93,8 @@ void Game::resetRoom(bool debug) {
 }
 
 void Game::loadLevel(bool debug) {
+	
+	BN_LOG("entered loadlevel with debug=", debug);
 
 	Room idek = roomManager.loadRoom();
 	
@@ -137,16 +141,22 @@ void Game::loadLevel(bool debug) {
 	effectsManager.loadEffects(effectsPointer, effectsCount);
 	
 	
-	
+	BN_LOG("loadlevel completed");
 }
 
 void Game::fullDraw() {
+	
+	BN_LOG("entering fulldraw");
+	
 	collision.draw(collisionMap);
 	details.draw(detailsMap);
 
 	tileManager.fullDraw();
 	
 	entityManager.fullUpdate();
+	
+	// i swear. why does the game crash without this print here?
+	BN_LOG("fulldraw completed");
 }
 
 void Game::fullTileDraw() {
@@ -196,6 +206,7 @@ void didVBlank() {
 	
 	isVblank = true;
 	globalGame->doVBlank();	
+	randomGenerator.update();
 	isVblank = false;
 }
 

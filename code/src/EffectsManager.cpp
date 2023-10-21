@@ -10,6 +10,7 @@ EffectsManager* MenuOption::effectsManager = NULL;
 int MenuOption::yIndex = -1;
 EntityManager* BigSprite::entityManager = NULL;
 TileManager* BigSprite::tileManager = NULL;
+EffectsManager* BigSprite::effectsManager = NULL;
 
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
 	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
@@ -32,41 +33,91 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		
 		BN_LOG("booba detected");
 		
-		Interactable* temp1 = new Interactable(Pos(9, 3),
-			[](void* obj) -> void { (void)obj; return; },
-			[](void* obj) -> bool {
-				if(frame % 2 != 0) {
-					return false;
+		
+		auto func1 = [](void* obj) -> void {
+			
+			BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+			
+			static unsigned boobaBackup = 0;
+			
+			if(boobaCount != boobaBackup) {
+				boobaBackup = boobaCount;
+				
+				bigSprite->effectsManager->doDialogue(
+				"please dont touch me\rin that manner.\nyou'll regret it."
+				);
+				
+				return;
+			}
+			
+			// wtf. irlly need to switch over to namespaces
+			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
+				bigSprite->effectsManager->doDialogue(
+				"i,,, why did you even do that?\rprobably wanted to see if\ri had programed it in\n"
+				"well, i did\rlet me move that out of the way\n"
+				"it might hurt a little bit though"
+				);
+				bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
+				return;
+			}
+		
+			
+			static unsigned msgIndex = 0;
+			
+			constexpr MessageStr msgs[] = {
+				{"you wouldnt believe how much the\ridiot who made this remake spent on animating\n"
+			"my boobs, head, and tail.\n"
+			"I would say i appreciate it, but\rto be honest, its just borerlining\ron creepy now.\n"
+			"like, jesus christ. you dont even\rhave music, or shortcuts working\r"
+			"but now you have boobs????\rwhy????????"},
+			{"anyway, you know the drill\rhead down the stairs, good luck"}
+			};
+			
+			// i rlly need to rewrite the dialogue system to automatically cut words.
+			if(msgIndex < sizeof(msgs)) {
+				
+				bigSprite->effectsManager->doDialogue(msgs[msgIndex].str);
+				
+				if(msgIndex != sizeof(msgs)/sizeof(msgs[0]) - 1) {
+					msgIndex++;
 				}
-				static int timesCalled = 0;
-				static_cast<BigSprite*>(obj)->animate(); 
-				timesCalled++;
-				if(timesCalled == 4) {
-					timesCalled = 0;
-					return true;
-				} 
+			}
+			
+			
+		
+			return;
+		};
+		auto func2 = [](void* obj) -> bool {
+			if(frame % 2 != 0) {
 				return false;
-			},
+			}
+			
+			if(boobaCount > 8 && randomGenerator.get_int(0, 200 - boobaCount) == 0) {
+				BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error: ", boobaCount);
+			}
+			
+			static int timesCalled = 0;
+			static_cast<BigSprite*>(obj)->animate(); 
+			timesCalled++;
+			if(timesCalled == 4) {
+				timesCalled = 0;
+				boobaCount++;
+				return true;
+			} 
+			return false;
+		};
+			
+		Interactable* temp1 = new Interactable(Pos(9, 3),
+			func1,
+			func2,
 			NULL,
 			(void*)this
 		);
 		
 		// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
 		Interactable* temp2 = new Interactable(Pos(10, 3),
-			[](void* obj) -> void { (void)obj; return; },
-			[](void* obj) -> bool {
-				if(frame % 2 != 0) {
-					return false;
-				}
-				static int timesCalled = 0;
-				static_cast<BigSprite*>(obj)->animate(); 
-				timesCalled++;
-				if(timesCalled == 4) {
-					timesCalled = 0;
-					return true;
-				} 
-				return false;
-			},
+			func1,
+			func2,
 			NULL,
 			(void*)this
 		);
@@ -143,8 +194,7 @@ void BigSprite::draw(int index) { profileFunction();
 	// im reimplimenting customanimate to just return a animindex
 	
 	// one issue will/would be, collision consistency. this function should/will only be called on animating things 
-	BN_ASSERT(autoAnimate, "tryed calling draw on a non animated bigsprite!");
-	
+	//BN_ASSERT(autoAnimate, "tryed calling draw on a non animated bigsprite!");
 	
 	int spriteIndex = 0;
 	int offset = index * width * height;
@@ -155,18 +205,12 @@ void BigSprite::draw(int index) { profileFunction();
 			int spriteXPos = xPos + x * 16;
 			int spriteYPos = yPos + y * 16;
 			
-			// check if this sprite will even be drawn onscreen.
-			// check occurs first as it is inexpensive
-			// a bit generious, just in case 
 			if(spriteXPos < -16 || spriteXPos > 240+16 || spriteYPos < -16 || spriteYPos > 160+16) {
 				continue;
 			}
 			
 			Sprite* tempSprite = &sprites[spriteIndex];
-			
-			//tempSprite->updateRawPosition(spriteXPos, spriteYPos);
-			
-			// why do i need to also set the tile here each time???
+		
 			tempSprite->spritePointer.set_tiles(
 				*tiles,
 				x + (y * width) + offset
@@ -176,32 +220,11 @@ void BigSprite::draw(int index) { profileFunction();
 			
 		}
 	}
-
-	// gods this is going to be so scuffed.
-	
-	// sprite doesnt actually hold its pos data, only its screen pos, which now leads to this extremely weird shit.
-	
-	// so essentially, im going to just do a bunch of map with the new anim index vs the old one, and pray that i dont fuck up these updates.
-	// actually, to be sure 
-	// oh my gods. 
-	// CAN YOU SERIOUSLY NOT GET THE TILE FROM A SPRITE????
-	// ok, im at my limit. 
-	// i will fucking fork butano to fix this bs
-	
-	/*BN_ASSERT(index != animationIndex, "tryed drawing the same animation index that we are currently on in a bigsprite!");
-	
-	int offset = index * width * height;
-	for(int i=0; i<sprites.size(); i++) {
-		tempSprite->spritePointer.set_tiles(
-				*tiles,
-				x + (y * width) + offset
-			);
-		
-	}
-	*/
 }
 
 void BigSprite::firstDraw() {
+	
+	
 	
 	int indexOffset = animationIndex * 4 * width * height;
 	
@@ -292,7 +315,7 @@ void BigSprite::animate() { profileFunction();
 EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font) {
 		
 	// may not be the best idea?
-	textGenerator.set_one_sprite_per_character(true);
+	//textGenerator.set_one_sprite_per_character(true);
 	
 	// copy over effectstiles
 	bn::optional<bn::span<bn::tile>> tileRefOpt = tilesPointer.vram();
@@ -553,6 +576,7 @@ void EffectsManager::doVBlank() { profileFunction();
 		}
 	}
 
+	return;
 
 	static Pos spiralPos(3, 3);
 	static int layerIndex = 0;
@@ -836,9 +860,10 @@ void EffectsManager::doDialogue(const char* data) {
 	
 	// this is trash, and will cause frame drops 
 	game->fullTileDraw();
-	
+
+	hideForDialogueBox(true);	
 	game->doButanoUpdate();
-	hideForDialogueBox(true);
+	
 	
 	textSprites.clear();
 	game->state = restoreState;
