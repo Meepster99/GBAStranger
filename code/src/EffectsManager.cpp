@@ -93,7 +93,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			}
 			
 			if(boobaCount > 8 && randomGenerator.get_int(0, 200 - boobaCount) == 0) {
-				BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error: ", boobaCount);
+				BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
 			}
 			
 			static int timesCalled = 0;

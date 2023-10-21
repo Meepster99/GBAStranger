@@ -122,8 +122,13 @@ void TileManager::loadTiles(u8* floorPointer) {
 	
 	BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
 	
-	floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
-	floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
+	if(roomIndex <= 256) {
+		floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
+		floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
+	} else {
+		floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '?');
+		floorMap[13][8] = new WordTile(Pos(13, 8), '?', '?');
+	}
 	
 }
 

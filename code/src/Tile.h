@@ -203,7 +203,7 @@ public:
 	
 	TileType tileType() const override { return TileType::WordTile; }
 	
-	bool drawDropOff() const override { return false; }
+	bool drawDropOff() const override { return true; }
 	
 	int getTileValue() const override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
 
@@ -227,7 +227,7 @@ public:
 
 	RodTile(Pos p) : FloorTile(p, 124, 10) {}
 	
-	bool drawDropOff() const override { return false; }
+	bool drawDropOff() const override { return true; }
 
 	TileType tileType() const override { return TileType::RodTile; }
 
@@ -240,7 +240,7 @@ public:
 
 	LocustTile(Pos p) : FloorTile(p, 135, 2) {}
 	
-	bool drawDropOff() const override { return false; }
+	bool drawDropOff() const override { return true; }
 
 	TileType tileType() const override { return TileType::LocustTile; }
 

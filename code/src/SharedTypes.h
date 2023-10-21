@@ -10,7 +10,7 @@
 
 #include "bn_version.h"
 
-//#include "bn_music_items.h"
+#include "bn_music_items.h"
 //#include "bn_music_actions.h"
 
 #include "bn_sound_items.h"
@@ -588,6 +588,22 @@ struct EffectHolder {
 	const bool collide = true;
 	const int priority = 2;
 	const bool autoAnimate = false;
+};
+
+struct SecretHolder {
+	
+	// holds the,,, yea secrets
+	// if this secret is on top of an exit,, how do i track that?
+	// ill just set a flag on load.
+	// as for the 0 array issue, first thing will have a pos of -1, -1
+	// if dest is null, just send to the next thing in the list? i suppose
+	// ordering will have to be done manually, but tbh that is fine
+	
+	const int x;
+	const int y;
+	
+	const char* dest;
+	const char sanity = '\0'; // i dont trust this program.
 };
 
 class Room {

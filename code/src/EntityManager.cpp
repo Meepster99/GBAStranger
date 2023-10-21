@@ -820,6 +820,16 @@ void EntityManager::updateMap() {
 		}
 	}
 	
+	// critical levels of goofyness
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+		if((*it)->entityType() == EntityType::MonStatue) { 
+			// mon statues werent fucking like, working properly at the end of a tick, i think this fixes that
+			if(canSeePlayer((*it)->p)) {
+				addKill(*it);
+			}
+		}	
+	}
+	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			futureEntityMap[x][y] = entityMap[x][y];

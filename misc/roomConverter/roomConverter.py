@@ -116,6 +116,10 @@ def readCreationCode(p, creationCode):
 	layer = None
 	b_form = None
 	dl_form = None
+	
+	def room_goto(roomNameVal):
+		global roomName
+		roomName = roomNameVal
 
 	def instance_destroy():
 		global destroy
@@ -226,7 +230,7 @@ def readCreationCode(p, creationCode):
 		temp = temp.replace("JESUSFUCKINGCHRIST", "!=")
 		
 		temp = temp.replace("else if", "elif")
-		temp = temp.replace("global.cc_state", "None")
+		temp = temp.replace("global.cc_state", "0")
 		temp = temp.replace("obj_inventory.ds_player_info", "None")
 		temp = temp.replace("obj_inventory.ds_equipment", "None")
 		temp = temp.replace("global.voidrod_get", "1")
@@ -325,6 +329,15 @@ def readCreationCode(p, creationCode):
 	if dl_form:
 		return "dl_form = {:d}".format(dl_form)
 	
+	if "na_secret" in bruh:
+		res = bruh["na_secret"]
+		tempRoom = None
+		if "roomName" in globalBruh:
+			tempRoom = globalBruh["roomName"] 
+			
+	
+		return [res, tempRoom]
+	
 	return None
 	
 	
@@ -386,11 +399,95 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 						i += 1
 					
 				i+=1
-				
-			
-			
 			break
 
+	# im just doing this part manually. im tired
+	# the room order,, in the actual undertalemodtool seems to be a good ref for this
+	
+	tempRoomsToAdd = """
+	
+	rm_secret_001
+	rm_secret_002
+	rm_secret_003
+	rm_secret_004
+	rm_secret_005
+	rm_secret_006
+	rm_secret_007
+	rm_secret_008
+	rm_secret_009
+	
+	rm_bee_001
+	rm_bee_002
+	rm_bee_003
+	rm_bee_004
+	rm_bee_005
+	rm_bee_006
+	rm_bee_007
+	rm_bee_008
+	rm_bee_009
+	rm_bee_010
+	rm_bee_011
+	rm_bee_012
+	rm_bee_013
+	rm_bee_014
+	rm_misc_0002
+	rm_bee_015
+	
+	rm_e_intermission
+	rm_e_001
+	rm_e_023
+	rm_e_004
+	rm_e_002
+	rm_e_006
+	rm_e_007
+	rm_e_018
+	rm_e_009
+	rm_e_005
+	rm_e_010
+	rm_e_026
+	rm_e_012
+	rm_e_019
+	rm_e_011
+	rm_e_013
+	rm_e_017
+	rm_e_014
+	rm_e_024
+	rm_e_015
+	rm_e_022
+	rm_e_025
+	rm_e_020
+	rm_e_016
+	rm_e_008
+	rm_e_003
+	rm_e_021
+	rm_e_027
+	rm_e_000
+	
+	rm_mon_001
+	rm_mon_002
+	rm_mon_003
+	rm_mon_004
+	rm_mon_005
+	rm_mon_006
+	rm_mon_007
+	rm_mon_008
+	rm_mon_009
+	rm_mon_010
+	rm_mon_011
+	rm_mon_012
+	rm_mon_013
+	rm_mon_014
+	rm_mon_015
+	rm_test_0006
+	rm_mon_016
+	
+	
+	"""
+	
+	[ newRoomsList.append(t.strip()) for t in tempRoomsToAdd.split("\n") if len(t.strip()) != 0 ]
+	
+	newRoomsList[newRoomsList.index("rm_u_0001")] = "rm_voidend"
+			
 	successRoomsList = newRoomsList
 
 	successRoomsCount = len(successRoomsList)
@@ -605,6 +702,8 @@ def convertObjects(layerData):
 	
 	floorExport = [ ["Pit" for i in range(9)] for j in range(14)]
 	
+	specialFloorExport = []
+	
 	entityExport = []
 	
 	effectExport = []
@@ -758,6 +857,19 @@ def convertObjects(layerData):
 			ObjectFunctions.obj_spawnpoint(p, creationCode)
 		
 		def obj_na_secret_exit(p, creationCode):
+		
+			# general room switch: gml_GlobalScript_scr_roomselect
+		
+			# contains the,, mapping of secrets to like yea: gml_Object_obj_na_secret_exit_Alarm_5
+			# 
+			# 
+	
+			print(creationCode)
+			
+			
+			# creationcode being none means, just goto next 
+			
+		
 			pass
 			
 		def obj_npc_friend(p, creationCode):
@@ -2026,13 +2138,17 @@ def convertAllRoomsWorker(f, isHardModePass):
 	
 	jsonFiles = [file for file in os.listdir(inputPath) if file.lower().endswith('.json')]
 	
-	# dont need this, but i think it might give me an extra bit for compression
+	# dont need this, but i think it might give me an extra bit for compression'
+	# misc is needed for the,,, bee face room?
+	# test is needed for rm_test_0006
+	# i dont want to cause issues so, ima just manually readd it 
 	removeStrings = ["test", "trailer", "dream", "rm_cc_results", "rm_cif_end", "memories"]
 	
 	for removeStr in removeStrings:
 		# i could, and should one line this
 		jsonFiles = [ file for file in jsonFiles if removeStr not in file ]
 	
+	jsonFiles.append("rm_test_0006.json")
 	
 	#jsonFiles = ["rm_0005.json"]
 	#jsonFiles = ["rm_0027.json"]
@@ -2058,15 +2174,20 @@ def convertAllRoomsWorker(f, isHardModePass):
 	global isHardMode
 	isHardMode = isHardModePass
 	
-	pool = PoolQueue(convertRoomWorker, cpuPercent = 0.75)
+	#pool = PoolQueue(convertRoomWorker, cpuPercent = 0.75)
+	#pool = PoolQueue(convertRoomWorker, cpuPercent = 0.05)
 	
-	pool.start()
+	#pool.start()
+	
+	resData = {}
 	
 	for data in allData:
-		pool.send([data, isHardModePass])
-			
+		#pool.send([data, isHardModePass])
+		print("doing room " + data["name"])
+		temp = convertRoom(data, isHardModePass)
+		resData[data["name"]] = temp
 		
-	resData = pool.join()
+	#resData = pool.join()
 	
 	for roomName, roomData in resData.items():
 		

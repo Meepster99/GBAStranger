@@ -276,6 +276,9 @@ void Game::run() {
 	
 	state = GameState::Normal;
 	
+	// make sure the mod file or whatever only has a max of 16 tracks,
+	//bn::music_items::bruh_moment.play();
+	
 	//bn::sound_items::msc_013.play(1);
 	//bn::music_items::cyberrid.play(0.5);
 	BN_LOG("starting main gameloop");
