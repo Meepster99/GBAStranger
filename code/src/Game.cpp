@@ -196,6 +196,9 @@ void didVBlank() {
 	
 	isVblank = true;
 	globalGame->doVBlank();	
+	
+	randomGenerator.update();
+	
 	isVblank = false;
 }
 

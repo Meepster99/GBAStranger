@@ -4,6 +4,9 @@
 
 #include "Game.h"
 
+#include "bn_hw_sprites.h"
+#include "bn_sprites_manager_item.h"
+
 Palette* EffectsManager::spritePalette = &defaultPalette;
 Game* BigSprite::game = NULL;
 EffectsManager* MenuOption::effectsManager = NULL;
@@ -38,6 +41,11 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 				if(frame % 2 != 0) {
 					return false;
 				}
+				
+				if(randomGenerator.get_int(0, 169) == 0) {
+					BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and get your own");
+				}
+				
 				static int timesCalled = 0;
 				static_cast<BigSprite*>(obj)->animate(); 
 				timesCalled++;
@@ -58,6 +66,11 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 				if(frame % 2 != 0) {
 					return false;
 				}
+				
+				if(randomGenerator.get_int(0, 169) == 0) {
+					BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and get your own");
+				}
+				
 				static int timesCalled = 0;
 				static_cast<BigSprite*>(obj)->animate(); 
 				timesCalled++;
@@ -94,14 +107,14 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
 		//autoAnimateFrames = 3;
 		
-		autoAnimateFrames = 120;
+		autoAnimateFrames = 4;
 		autoAnimate = true;
 		animationIndex = 2;
 		//draw(2);
 		
 		// impliment the head movement here
 		
-		/*
+		
 		customAnimate = []() -> int {
 			
 			// this was a switch statement until i became a conspiracy theorist.
@@ -121,7 +134,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			
 			return -1;
 		};
-		*/
+		
 		
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_tail) { 
 		autoAnimate = true;
@@ -177,7 +190,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			}
 			
 			
-			BN_LOG("allocing with ", tilesPerAlloc, " tiles");
+			//BN_LOG("allocing with ", tilesPerAlloc, " tiles");
 			
 			//bn::sprite_tiles_item tempTilesItem(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAlloc/4);
 			//animationTilesets.push_back(tempTilesItem);
@@ -185,9 +198,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			//animationTilesetPointers.push_back(tempTilesPtr);
 	
 			//bn::optional<bn::sprite_tiles_ptr> wtf = bn::sprite_tiles_ptr::find(bn::sprite_tiles_item(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAlloc/4));
-			bn::optional<bn::sprite_tiles_ptr> wtf = bn::sprite_tiles_ptr::create(bn::sprite_tiles_item(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAllocVal/4));
-
-			BN_ASSERT(wtf.has_value(), "WHAUFGIASHODFJIF");
+			//bn::optional<bn::sprite_tiles_ptr> wtf = bn::sprite_tiles_ptr::create(bn::sprite_tiles_item(tempTilesPtr.vram().value(), bn::bpp_mode::BPP_4, tilesPerAllocVal/4))
+			//BN_ASSERT(wtf.has_value(), "WHAUFGIASHODFJIF");
 
 			//animationTilesetPointers.push_back( wtf.value()  );
 			animationTilesetPointers.push_back( tempTilesPtr  );
@@ -196,21 +208,19 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 
 		}
 
-		for(int i=0; i<optionCount; i++) {
-			bn::optional<bn::span<bn::tile>> tileRefOpt = animationTilesetPointers[i].vram();
-			BN_ASSERT(tileRefOpt.has_value(), "wtf, in the fucking bigsprite loader checker");
-			bn::span<bn::tile> tileRef = tileRefOpt.value();
-		}
-
 	}
 
-	BN_LOG("calling firstdraw");
 	firstDraw();
-	BN_LOG("firstdraw done");
+
+	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
+		draw(2, true);
+	}
+	
+	
 	
 }
 
-void BigSprite::draw(int index) { profileFunction();
+void BigSprite::draw(int index, bool force) { profileFunction();
 	
 	// im going to do my best to avoid reallocing this array
 	//sprites.clear();
@@ -250,8 +260,11 @@ void BigSprite::draw(int index) { profileFunction();
 	// ok nvm i am not forking butano that shit makes no sense
 	
 	//BN_ASSERT(autoAnimate, "tryed calling draw on a non animated bigsprite!");
-	
-	
+		
+	if(index == animationIndex && !force) { 
+		return;
+	}
+		
 	int spriteIndex = 0;
 	
 	for(int y=0; y<height; y++) {
@@ -279,16 +292,31 @@ void BigSprite::draw(int index) { profileFunction();
 			);
 			*/
 
-			bn::optional<bn::span<bn::tile>> tileRefOpt = animationTilesetPointers[index].vram();
-			BN_ASSERT(tileRefOpt.has_value(), "wtf");
-			bn::span<bn::tile> tileRef = tileRefOpt.value();
 			
+
+			// PRAY
+			// this shit broke me.
+
+			int id = animationTilesetPointers[index].id() + 4 * (x + (y * width));
+		
+			auto spriteHandle = tempSprite->spritePointer.handle();
+			auto item = static_cast<bn::sprites_manager_item*>(const_cast<void*>(spriteHandle));
+			bn::hw::sprites::handle_type& handle = item->handle;
+			
+			bn::hw::sprites::set_tiles(id, handle);
+		
+			bn::sprites_manager::update_indexes_to_commit(const_cast<void*>(spriteHandle));
+
+
+			
+			/*
 			tempSprite->spritePointer.set_tiles(
 				//bn::sprite_shape_size(16, 16),
-				//animationTilesetPointers[index]
-				bn::sprite_tiles_item(tileRef, bn::bpp_mode::BPP_4, tilesPerAllocVal/4)
+				animationTilesetPointers[index]
+				//bn::sprite_tiles_item(tileRef, bn::bpp_mode::BPP_4, tilesPerAllocVal/4),
 				//x + (y * width)
 			);
+			*/
 					
 
 			
@@ -296,6 +324,8 @@ void BigSprite::draw(int index) { profileFunction();
 			
 		}
 	}
+	
+	
 }
 
 void BigSprite::firstDraw() {
@@ -343,11 +373,9 @@ void BigSprite::firstDraw() {
 			doBigTile:
 
 			//Sprite tempSprite = Sprite(tilePointer);
-			BN_LOG("creating sprite");
+
 			//Sprite tempSprite = Sprite(animationTilesetPointers[0]);
 			Sprite tempSprite = Sprite(bn::sprite_tiles_items::dw_spr_gray_w_d);
-
-			BN_LOG("creating done");			
 
 			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
 			
@@ -381,14 +409,17 @@ void BigSprite::updatePalette(Palette* pal) {
 
 void BigSprite::animate() { profileFunction();
 	
+	int nextAnimationAddress;
+	
 	// icould maybe make this branchless by having animate be a default, but im tired ok
 	if(customAnimate == NULL) {
-		animationIndex = (animationIndex + 1) % optionCount;
+		nextAnimationAddress = (animationIndex + 1) % optionCount;
 	} else {
-		animationIndex = customAnimate();
+		nextAnimationAddress = customAnimate();
 	}
 	
-	draw(animationIndex);
+	draw(nextAnimationAddress);
+	animationIndex = nextAnimationAddress;
 }
 
 // -----
@@ -657,6 +688,7 @@ void EffectsManager::doVBlank() { profileFunction();
 		}
 	}
 
+	return;
 
 	static Pos spiralPos(3, 3);
 	static int layerIndex = 0;
@@ -1011,6 +1043,22 @@ void EffectsManager::doMenu() {
 	// also show compile time, date, and butano version 
 	// BN_VERSION_STRING   __DATE__   __TIME__
 	
+	bool needResetRoom = false;
+	
+	if(bigSprites.size() != 0) {
+		for(int i=0; i<bigSprites.size(); i++) {
+			if(bigSprites[i] != NULL) {
+				delete bigSprites[i];
+			}
+			bigSprites[i] = NULL;
+		}
+
+		bigSprites.clear();
+		game->doButanoUpdate();
+
+		needResetRoom = true;
+	}
+	
 	GameState restoreState = game->state;
 	game->state = GameState::Paused;
 	
@@ -1170,13 +1218,17 @@ void EffectsManager::doMenu() {
 	
 
 	verTextSprites.clear();
-	// this causes frame drops, and isnt ideal, but will work for now
-	if(startRoomIndex != game->roomManager.roomIndex ||
-		startRoomMode != game->mode) {
-		game->resetRoom(true);
-	}
 	menuOptions.clear();
 	game->doButanoUpdate();
+	
+	// this causes frame drops, and isnt ideal, but will work for now
+	if(startRoomIndex != game->roomManager.roomIndex ||
+		startRoomMode != game->mode || 
+		needResetRoom) {
+		game->resetRoom(true);
+	}
+	
+	
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {

@@ -169,7 +169,7 @@ public:
 	
 	void updatePalette(Palette* pal);
 	
-	void draw(int index);
+	void draw(int index, bool force = false);
 	void firstDraw();
 	
 	void animate();
@@ -282,5 +282,6 @@ public:
 	
 	
 };
+
 
 
