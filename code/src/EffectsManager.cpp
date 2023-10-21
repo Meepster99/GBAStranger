@@ -160,7 +160,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			bn::sprite_tiles_ptr tempTilesPtr = bn::sprite_tiles_ptr::allocate(tilesPerAlloc, bn::bpp_mode::BPP_4);
 			
 			bn::optional<bn::span<bn::tile>> tileRefOpt = tempTilesPtr.vram();
-			BN_ASSERT(tileRefOpt.has_value(), "wtf");
+			BN_ASSERT(tileRefOpt.has_value(), "wtf, in the fucking bigsprite loader");
 			bn::span<bn::tile> tileRef = tileRefOpt.value();
 			
 			int copyOffset = i * (tiles->tiles_ref().size() / 4);
@@ -189,10 +189,19 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 
 			BN_ASSERT(wtf.has_value(), "WHAUFGIASHODFJIF");
 
-			animationTilesetPointers.push_back( wtf.value()  );
+			//animationTilesetPointers.push_back( wtf.value()  );
+			animationTilesetPointers.push_back( tempTilesPtr  );
+
 
 
 		}
+
+		for(int i=0; i<optionCount; i++) {
+			bn::optional<bn::span<bn::tile>> tileRefOpt = animationTilesetPointers[i].vram();
+			BN_ASSERT(tileRefOpt.has_value(), "wtf, in the fucking bigsprite loader checker");
+			bn::span<bn::tile> tileRef = tileRefOpt.value();
+		}
+
 	}
 
 	BN_LOG("calling firstdraw");
@@ -270,17 +279,17 @@ void BigSprite::draw(int index) { profileFunction();
 			);
 			*/
 
-			//bn::optional<bn::span<bn::tile>> tileRefOpt = animationTilesetPointers[index].vram();
-			//BN_ASSERT(tileRefOpt.has_value(), "wtf");
-			//bn::span<bn::tile> tileRef = tileRefOpt.value();
+			bn::optional<bn::span<bn::tile>> tileRefOpt = animationTilesetPointers[index].vram();
+			BN_ASSERT(tileRefOpt.has_value(), "wtf");
+			bn::span<bn::tile> tileRef = tileRefOpt.value();
 			
 			tempSprite->spritePointer.set_tiles(
-				//bn::sprite_tiles_item(tileRef, bn::bpp_mode::BPP_4, tilesPerAllocVal/4),
+				//bn::sprite_shape_size(16, 16),
+				//animationTilesetPointers[index]
+				bn::sprite_tiles_item(tileRef, bn::bpp_mode::BPP_4, tilesPerAllocVal/4)
 				//x + (y * width)
-				animationTilesetPointers[index]
 			);
-
-			
+					
 
 			
 			spriteIndex++;
@@ -335,7 +344,9 @@ void BigSprite::firstDraw() {
 
 			//Sprite tempSprite = Sprite(tilePointer);
 			BN_LOG("creating sprite");
-			Sprite tempSprite = Sprite(animationTilesetPointers[0]);
+			//Sprite tempSprite = Sprite(animationTilesetPointers[0]);
+			Sprite tempSprite = Sprite(bn::sprite_tiles_items::dw_spr_gray_w_d);
+
 			BN_LOG("creating done");			
 
 			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
@@ -351,7 +362,7 @@ void BigSprite::firstDraw() {
 			tempSprite.spritePointer.set_bg_priority(priority);
 			
 			tempSprite.spritePointer.set_tiles(
-				//animationTilesetPointers[0],
+				//animationTilesetPointers[0]
 				// WHY TF CANT I JUST FUCKING SET A GRAPHICS INDEX WITH A POINTER???
 				*tiles,
 				x + (y * width)
@@ -737,6 +748,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		effects++;
 	}
 	
+	//BN_LOG("exiting loadEffects");
 	
 }
 

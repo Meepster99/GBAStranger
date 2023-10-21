@@ -137,7 +137,7 @@ void Game::loadLevel(bool debug) {
 	effectsManager.loadEffects(effectsPointer, effectsCount);
 	
 	
-	
+	BN_LOG("exiting loadlevel call");
 }
 
 void Game::fullDraw() {
@@ -261,6 +261,7 @@ void Game::run() {
 	state = GameState::Loading;
 	
 	loadLevel();
+	BN_LOG("initial level loaded");
 	fullDraw();
 	
 	state = GameState::Normal;
