@@ -71,6 +71,10 @@ void RoomManager::setMode(int mode) {
 
 void RoomManager::gotoRoom(const char* roomName) {
 	
+	if(roomName == NULL) {
+		nextRoom();
+		return;
+	}
 	
 	
 	char buffer[32];
@@ -78,13 +82,13 @@ void RoomManager::gotoRoom(const char* roomName) {
 	
 	// if we are in hard mode we want to search for a hard mode room thingy.
 	if(modeTracker != 0) {
-		roomNameBuffer = strcpy(roomNameBuffer, "hard_");
+		strcpy(roomNameBuffer, "hard_");
+		roomNameBuffer += WTF(roomNameBuffer);
 	}
 	
 	strcpy(roomNameBuffer, roomName);
 	
 	BN_LOG("bruh ", buffer);
-	
 	
 	// shit time complexity, but im tired.
 	for(int i=0; i<(int)(sizeof(rooms)/sizeof(rooms[0])); i++) {

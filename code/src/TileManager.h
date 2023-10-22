@@ -91,9 +91,7 @@ public:
 	}
 	
 	const char* exitDestination = NULL;
-	
-	Pos secretPos = Pos(0, 0);
-	const char* secretDestination = NULL;
+	bn::vector<bn::pair<const char*, Pos>, 8> secretDestinations;
 
 	void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount);
 		

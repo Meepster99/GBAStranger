@@ -132,9 +132,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	
 	
 	exitDestination = NULL;
-	secretDestination = NULL;
-	
-	int tempSecretCount = 0;
+	secretDestinations.clear();
 	
 	secretsCount--;
 	secrets++;
@@ -147,10 +145,10 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 			BN_ASSERT(secrets->dest != NULL, "an exit destination was passed in with a NULL dest? this would just bring you down a floor normally! why!");
 			exitDestination = secrets->dest;
 		} else {
-			BN_ASSERT(tempSecretCount == 0, "a second secret dest tried loading in, you only support one, be better.");
-			secretDestination = secrets->dest;
-			secretPos = tempSecretPos;
-			tempSecretCount++;
+			//BN_ASSERT(tempSecretCount == 0, "a second secret dest tried loading in, you only support one, be better.");
+			
+			bn::pair<const char*, Pos> tempPair(secrets->dest, tempSecretPos);
+			secretDestinations.push_back(tempPair);
 		}
 		
 		secrets++;
