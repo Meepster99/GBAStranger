@@ -1273,6 +1273,11 @@ def convertObjects(layerData):
 			pass
 
 		def obj_stinklines(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+		
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_stinklines,{:d},{:d},1,1".format(x, y))
+			
 			pass
 
 		def obj_spawnpoint__dream(p, creationCode):

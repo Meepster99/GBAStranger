@@ -92,7 +92,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 				return false;
 			}
 			
-			if(boobaCount > 8 && randomGenerator.get_int(0, 200 - boobaCount) == 0) {
+			if(boobaCount > 8 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
 				BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
 			}
 			
@@ -217,7 +217,6 @@ void BigSprite::draw(int index) { profileFunction();
 			);
 			
 			spriteIndex++;
-			
 		}
 	}
 }
@@ -287,7 +286,9 @@ void BigSprite::firstDraw() {
 				x + (y * width) + (animationIndex * width * height)
 			);
 			
+			BN_LOG("attempting push");
 			sprites.push_back(tempSprite);
+			BN_LOG("push success");
 		}
 	}
 }
@@ -664,7 +665,22 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	effects++;
 	
 	for(int i=0; i<effectsCount; i++) {
-		bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
+		if(effects->width == 1 && effects->height == 1) { // a smallsprite should be summoned as an effect
+			if(effects->tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
+				
+				BN_LOG("kys", effects->x, " ", effects->y);
+				
+				// minus 1 to play infinitely?
+				// nvm, gods idek what im doing 
+				EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_stinklines, 9999999)};
+				createEffect(Pos(effects->x / 16, effects->y / 16), EffectTypeCast(questionMark));
+				
+			} else {
+				BN_ERROR("you are a idiot(not you, but me)");
+			}
+		} else {
+			bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
+		}
 		effects++;
 	}
 	

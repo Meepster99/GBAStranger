@@ -64,7 +64,9 @@ void Bomb::stepOn() {
 }
 
 void Death::stepOn() {
-	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+	
+	// this needs to call updatemap as well. gods
+	/*SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
 	
 	for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
 		if((*it)->entityType() == EntityType::Player) {
@@ -74,7 +76,7 @@ void Death::stepOn() {
 			entityManager->killEntity(*it);
 		}
 	}
-	
+	*/
 }
 
 void Switch::stepOn() {

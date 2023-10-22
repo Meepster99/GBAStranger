@@ -947,6 +947,12 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 		
 		if(cifReset) {
 			// todo, in the future, put a special anim here
+			BN_ASSERT(player != NULL, "player was null during cif reset");
+			
+			player->locustCount = 0;
+			player->isVoided = false;
+
+			//game->save(); // extranious call for sanity
 			game->roomManager.cifReset();
 		} else {
 			if(tileManager->exitDestination == NULL) {

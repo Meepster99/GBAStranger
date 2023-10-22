@@ -95,6 +95,8 @@ void Game::resetRoom(bool debug) {
 void Game::loadLevel(bool debug) {
 	
 	BN_LOG("entered loadlevel with debug=", debug);
+	
+	//load();
 
 	Room idek = roomManager.loadRoom();
 	
@@ -379,6 +381,8 @@ uint64_t Game::getSaveHash() {
 
 void Game::save() {
 	BN_LOG("saving save");
+	
+	BN_ASSERT(entityManager.player != NULL, "when saving save, the player was null!");
 	
 	saveData.locustCount = entityManager.player->locustCount;
 	saveData.isVoided = entityManager.player->isVoided;
