@@ -563,10 +563,6 @@ void EffectsManager::doVBlank() { profileFunction();
 		}
 	}
 	
-	if(frame % 4 != 0) {
-		return;
-	}
-	
 	for(auto it = effectList.begin(); it != effectList.end(); ) {
 		
 		bool res = (*it)->animate();
@@ -580,6 +576,11 @@ void EffectsManager::doVBlank() { profileFunction();
 		}
 	}
 
+	
+	if(frame % 4 != 0) {
+		return;
+	}
+	
 	return;
 
 	static Pos spiralPos(3, 3);
@@ -1140,8 +1141,7 @@ void EffectsManager::glassBreak(Pos p) {
 	// i really should of just made fucking,, i should of just made graphicsIndex a static var 
 	// i am assuming i will need more static vars in the future when im not even rlly sure, ugh idk
 	
-	int graphicsIndex = 0;
-	
+
 	createEffect(
 	[p](Effect* obj) mutable -> void {
 		obj->sprite.spritePointer.set_tiles(
@@ -1152,14 +1152,14 @@ void EffectsManager::glassBreak(Pos p) {
 		obj->y = p.y * 16;
 		obj->sprite.updateRawPosition(obj->x, obj->y);
 	},
-	[graphicsIndex](Effect* obj) mutable -> bool {
-		(graphicsIndex)++;
-		if(graphicsIndex == 6) {
+	[](Effect* obj) mutable -> bool {
+		obj->graphicsIndex++;
+		if(obj->graphicsIndex == 6) {
 			return true;
 		}
 		obj->sprite.spritePointer.set_tiles(
 			bn::sprite_tiles_items::dw_spr_glassfloor,
-			graphicsIndex
+			obj->graphicsIndex
 		);
 		return false;
 	}
@@ -1167,9 +1167,16 @@ void EffectsManager::glassBreak(Pos p) {
 }
 
 void EffectsManager::voidRod(Pos p, Direction dir) {
+
+	/* 
+	swipe is:
+	to the left when facing up
+	to the right when facing down
+	and to the down when facing left and right
 	
-	int graphicsIndex = 0;
+	*/
 	
+	// swipe
 	createEffect(
 	[p, dir](Effect* obj) mutable -> void {
 		
@@ -1179,24 +1186,109 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 			bn::sprite_tiles_items::dw_spr_player_swipe,
 			0
 		);
+		
+		p.moveInvert(dir, true, true);
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
+		obj->y += 8;
+		obj->x -= 8;
+		
+		// to tired to cast to int
+		if(dir == Direction::Up) {
+			obj->sprite.spritePointer.set_rotation_angle(180);			
+			obj->y -= 16;
+		} else if(dir == Direction::Down) {
+			obj->x += 16;
+		} else { // left or right
+			obj->sprite.spritePointer.set_rotation_angle(270);			
+			if(dir == Direction::Right) {
+				obj->sprite.spritePointer.set_vertical_flip(true);
+				obj->x += 16;
+			}
+		}
+		
 		obj->sprite.updateRawPosition(obj->x, obj->y);
+		obj->sprite.spritePointer.set_z_order(-2);
 	},
-	[graphicsIndex](Effect* obj) mutable -> bool {
-		(graphicsIndex)++;
-		if(graphicsIndex == 6) {
+	[](Effect* obj) mutable -> bool {
+		obj->graphicsIndex++;
+		if(obj->graphicsIndex == 10) {
 			return true;
 		}
 		obj->sprite.spritePointer.set_tiles(
 			bn::sprite_tiles_items::dw_spr_player_swipe,
-			graphicsIndex
+			obj->graphicsIndex
 		);
 		return false;
 	}
 	);
 		
+	// gods i really should of just had a class var wtf is wrong with me
+	// im going to change it now, but tbh like, im going to still keep std::functional in, since its helpful for stuff like p and dir
+	
+	// sparkle
+	createEffect(
+	[p, dir](Effect* obj) mutable -> void {
 		
+		obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_sparkle);
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_sparkle,
+			0
+		);
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		obj->sprite.spritePointer.set_z_order(-3);
+	},
+	[](Effect* obj) mutable -> bool {
+		obj->graphicsIndex++;
+		if(obj->graphicsIndex == 8) {
+			return true;
+		}
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_sparkle,
+			obj->graphicsIndex
+		);
+		return false;
+	}
+	);
+	
+	
+	// rod
+	createEffect(
+	[p, dir](Effect* obj) mutable -> void {
+		
+		obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_void_rod);
+		
+		// U D L R
+		// R U L D
+		
+		constexpr int dirConverter[4] = {1, 3, 2, 0};
+		
+		obj->graphicsIndex = dirConverter[static_cast<int>(dir)];
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_void_rod,
+			obj->graphicsIndex
+		);
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		//obj->sprite.spritePointer.set_z_order(-2);
+	},
+	[](Effect* obj) mutable -> bool {
+		obj->tempCounter++;
+		if(obj->tempCounter == 12) {
+			return true;
+		}
+		return false;
+	}
+	);
 		
 		
 }

@@ -19,6 +19,17 @@ import queue
 import time 
 from threading import Thread
 
+from colorama import init, Fore, Back, Style
+
+init(convert=True)
+
+RED = Fore.RED 
+GREEN = Fore.GREEN 
+CYAN = Fore.CYAN
+WHITE = Fore.WHITE
+
+RESET = Style.RESET_ALL
+
 palette = {
 	(0, 255, 255)	: 0,
 	(0, 0, 0)		: 1,
@@ -1141,10 +1152,13 @@ def generateIncludes(folders):
 				# this should rlly be checking the hashes of the images tbh,, 
 				# i wonder/worry that is to expensive tho
 
+				graphicName = os.path.basename(file).split(".")[0]
+				
 				imageFileName = os.path.basename(file).split(".")[0] + ".bmp"
 				jsonFileName = os.path.basename(file).split(".")[0] + ".json"
 				
 				if imageFileName not in graphicsFiles:
+					print(CYAN + "copying over {:s}".format(graphicName) + RESET)
 					shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
 					shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
 				else:
@@ -1157,6 +1171,8 @@ def generateIncludes(folders):
 					thisGraphicsFileHash = hashlib.md5(open(thisGraphicsFile,'rb').read()).hexdigest()
 					
 					if graphicsFileHash != thisGraphicsFileHash:
+						print(CYAN + "copying over {:s}".format(graphicName) + RESET)
+					
 						shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
 						shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
 					else:
@@ -1164,6 +1180,7 @@ def generateIncludes(folders):
 						thisGraphicsJsonHash = hashlib.md5(open(os.path.join(folder, jsonFileName),'rb').read()).hexdigest()
 						
 						if graphicsJsonHash != thisGraphicsJsonHash:
+							print(CYAN + "copying over {:s}".format(graphicName) + RESET)
 							#shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
 							shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
 					
@@ -1217,7 +1234,7 @@ def generateIncludes(folders):
 	otherHash = hashlib.md5(open(os.path.join(codeFolder, "dataWinIncludes.h"),'rb').read()).hexdigest()
 	
 	if otherHash != currentHash:
-		print("includes were changed, copying")
+		print(CYAN + "includes were changed, copying" + RESET)
 		shutil.copy("dataWinIncludes.h", "../../code/src/")
 	
 	print("done generating include file")
@@ -1266,6 +1283,8 @@ def main():
 	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
 
 
+	# keeping this remove here as a sanitary measue
+	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	
 	print("copying over files. this may take a little bit")
 	
@@ -1274,8 +1293,9 @@ def main():
 	#shutil.copy("dataWinIncludes.h", "../../code/src/")
 	shutil.copy("fontData.h", "../../code/src/")
 	
+	
+	
 	"""
-	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/graphics/", f)) for f in os.listdir(copyFrom) if f.endswith(".bmp") or f.endswith(".json") ]
 	
 	copyFunc("./formattedOutput/fonts/")

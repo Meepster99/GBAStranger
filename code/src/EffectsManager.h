@@ -115,6 +115,11 @@ public:
 
 	int animationFrequency = 1;
 	
+	int graphicsIndex = 0;
+	
+	// having one of these is ok, but if it gets excessive i should switch back over to passing them inside the [] of the lambdas
+	int tempCounter = 0;
+	
 	Effect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency_ = 1) : 
 	sprite(bn::sprite_tiles_items::dw_spr_gray_w_d), createFunc(create_), animateFunc(animate_), animationFrequency(animationFrequency_)
 	{ 
