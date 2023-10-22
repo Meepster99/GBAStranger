@@ -35,6 +35,32 @@ palette = {
 
 validChars = '_.%s%s' % (string.ascii_lowercase, string.digits)
 
+def getNeededSprites():
+	
+	codeFolder = "../../code/src/"
+	
+	codeFiles = [f for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
+	
+	codeFiles.remove("dataWinIncludes.h")
+	
+	pattern = r'dw_\w+'
+	matching_references = set()
+	
+	for file in codeFiles:
+			file_path = os.path.join(codeFolder, file)
+			with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+				content = f.read()
+				matches = re.findall(pattern, content)
+				matching_references.update(matches)
+	
+	matching_references_noheaders = set([ s[3:] for s in list(matching_references) ])
+	
+	return matching_references, matching_references_noheaders
+	
+# multiprocessing might run this every time, but tbh, im tired, how about that!
+# not actually doing this, since we will have all sprites preconverted, but only copy them over to the code area if needed
+#neededSprites, neededSpritesNoHeaders = getNeededSprites()
+
 def createFolder(folderPath):
 	if not os.path.exists(folderPath):
 		os.mkdir(folderPath)
@@ -239,10 +265,6 @@ def preformatSprites():
 		
 		for file in filenames:
 			shutil.copyfile(os.path.join(currentFolder, file), os.path.join(destFolder, file))
-		
-		
-		
-	
 
 	print("done preformatting")
 
@@ -273,7 +295,6 @@ validSizes = set([
 (32, 16),
 (16, 32),
 ])
-
 
 def convertSprites(spritePath, outputPath):
 	
@@ -1090,21 +1111,8 @@ def generateIncludes(folders):
 
 	graphicsFiles = set([f for f in os.listdir(graphicsFolder) if f.lower().endswith('.bmp') ])
 	
-	codeFiles = [f for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
-	
-	codeFiles.remove("dataWinIncludes.h")
-	
-	pattern = r'dw_\w+'
-	matching_references = set()
-	
-	for file in codeFiles:
-			file_path = os.path.join(codeFolder, file)
-			with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-				content = f.read()
-				matches = re.findall(pattern, content)
-				matching_references.update(matches)
+	matching_references, neededSpritesNoHeaders  = getNeededSprites()
 
-	
 	output = []
 	
 	# this option is slower than just using if statements, but is still like, 
@@ -1248,6 +1256,7 @@ def main():
 	createFolder("./formattedOutput/bigSprites/")
 
 	convertAllSprite("./formattedOutput/sprites/")
+	
 	convertAllBigSprite("./formattedOutput/bigSprites/")
 	convertTiles("./formattedOutput/tiles/")
 	convertFonts("./formattedOutput/fonts/")
