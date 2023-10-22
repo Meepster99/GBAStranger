@@ -8,6 +8,7 @@ import string
 import shutil
 import re
 import time
+import hashlib
 #from ..EasyPoolProcessing/poolQueue import PoolQueue
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
@@ -1085,7 +1086,10 @@ def generateIncludes(folders):
 	# looking through 
 	
 	codeFolder = "../../code/src/"
+	graphicsFolder = "../../code/graphics/"
 
+	graphicsFiles = set([f for f in os.listdir(graphicsFolder) if f.lower().endswith('.bmp') ])
+	
 	codeFiles = [f for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
 	
 	codeFiles.remove("dataWinIncludes.h")
@@ -1113,9 +1117,7 @@ def generateIncludes(folders):
 		jsonFiles = [f for f in os.listdir(folder) if f.lower().endswith('.json')]
 		
 		for file in jsonFiles:
-			#print(jsonFiles)
-			# i dont rlly need to open each json here, but im being safe.
-			
+		
 			if os.path.basename(file).split(".")[0] not in matching_references:
 				continue
 			
@@ -1123,54 +1125,41 @@ def generateIncludes(folders):
 				idk = json.load(f)
 			
 				line = "#include \"bn_{:s}_items_{:s}.h\"".format(idk["type"], os.path.basename(file).split(".")[0])
-			
-				"""
-				refType = "sprite_tiles"
-				if "dw_customfloortiles" in file:
-					refType = "regular_bg_tiles"
-				if "dw_customeffecttiles" in file:
-					refType = "regular_bg_tiles"
-				elif "spr" in file and "bg" in file:
-					refType = "sprite_tiles"
-				elif "bg" in file or "_tile_" in file:
-					refType = "regular_bg_tiles"
-				elif "fnt" in file:
-					refType = "sprite"
-				elif "spr" in file:
-					refType = "sprite_tiles"
-			
-				if idk["type"] != refType:
-					print(file)
-					print(idk["type"], refType)
-					exit(1)
-				"""
 				
 				output.append(line)
-	
-	"""
-	for reference in matching_references:
-		
-		# this is a MASSIVE assumption based on type, but it will save time 
-		
-		refType = "sprite_tiles"
-		if "dw_customfloortiles" in file:
-			refType = "regular_bg_tiles"
-		if "dw_customeffecttiles" in file:
-			refType = "regular_bg_tiles"
-		elif "spr" in file and "bg" in file:
-			refType = "sprite_tiles"
-		elif "bg" in file or "_tile_" in file:
-			refType = "regular_bg_tiles"
-		elif "fnt" in file:
-			refType = "sprite"
-		elif "spr" in file:
-			refType = "sprite_tiles"
-		
-		line = "#include \"bn_{:s}_items_{:s}.h\"".format(refType, reference)
-			
-		output.append(line)
-	"""
-	
+				
+				# i could(and maybe should?) do something where i read the previous datawin file, but i just like, ima do this and pray
+				# this might not like, properly move all changes, but i can always just do a clean run if needed
+				# this should rlly be checking the hashes of the images tbh,, 
+				# i wonder/worry that is to expensive tho
+
+				imageFileName = os.path.basename(file).split(".")[0] + ".bmp"
+				jsonFileName = os.path.basename(file).split(".")[0] + ".json"
+				
+				if imageFileName not in graphicsFiles:
+					shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
+					shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
+				else:
+					# check hash
+					
+					graphicsFile = os.path.join(graphicsFolder, imageFileName)
+					graphicsFileHash = hashlib.md5(open(graphicsFile,'rb').read()).hexdigest()
+					
+					thisGraphicsFile = os.path.join(folder, imageFileName)
+					thisGraphicsFileHash = hashlib.md5(open(thisGraphicsFile,'rb').read()).hexdigest()
+					
+					if graphicsFileHash != thisGraphicsFileHash:
+						shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
+						shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
+					else:
+						graphicsJsonHash = hashlib.md5(open(os.path.join(graphicsFolder, jsonFileName),'rb').read()).hexdigest()
+						thisGraphicsJsonHash = hashlib.md5(open(os.path.join(folder, jsonFileName),'rb').read()).hexdigest()
+						
+						if graphicsJsonHash != thisGraphicsJsonHash:
+							#shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
+							shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
+					
+					
 	f = open("dataWinIncludes.h", "w")
 	f.write("#pragma once\n")
 	f.write("""
@@ -1216,8 +1205,13 @@ def generateIncludes(folders):
 		f.write(line + "\n")
 	f.close()
 			
-			
-	shutil.copy("dataWinIncludes.h", "../../code/src/")
+	currentHash = hashlib.md5(open("dataWinIncludes.h",'rb').read()).hexdigest()
+	otherHash = hashlib.md5(open(os.path.join(codeFolder, "dataWinIncludes.h"),'rb').read()).hexdigest()
+	
+	if otherHash != currentHash:
+		print("includes were changed, copying")
+		shutil.copy("dataWinIncludes.h", "../../code/src/")
+	
 	print("done generating include file")
 	
 	pass
@@ -1228,14 +1222,11 @@ def generateAllIncludes():
 	
 def main():
 
+	if len(sys.argv) != 1:
+		generateAllIncludes()
+		exit(0)
+
 	os.chdir(os.path.dirname(__file__))
-	
-	start = time.time()
-	generateAllIncludes()
-	end = time.time()
-	print("gening includes took {:6.2f}".format(end - start))
-	
-	exit(1)
 	
 	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
 	#return 
@@ -1265,13 +1256,16 @@ def main():
 
 	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
 
-	generateAllIncludes()
+
 	
 	print("copying over files. this may take a little bit")
+	
+	generateAllIncludes()
 	
 	#shutil.copy("dataWinIncludes.h", "../../code/src/")
 	shutil.copy("fontData.h", "../../code/src/")
 	
+	"""
 	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/graphics/", f)) for f in os.listdir(copyFrom) if f.endswith(".bmp") or f.endswith(".json") ]
 	
@@ -1281,7 +1275,7 @@ def main():
 	copyFunc("./formattedOutput/sprites/")
 	copyFunc("./formattedOutput/tiles/")
 	copyFunc("./formattedOutput/bigSprites/")
-	
+	"""
 	
 	pass
 	
