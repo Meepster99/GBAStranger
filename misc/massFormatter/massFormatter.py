@@ -6,6 +6,8 @@ import numpy as np
 import json 
 import string 
 import shutil
+import re
+import time
 #from ..EasyPoolProcessing/poolQueue import PoolQueue
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
@@ -204,6 +206,9 @@ def writeBitmap(inputImageDontTouchLol, dest):
 
 def preformatSprites():
 	
+	# this func rlly needs a rework
+	# also gods putting it onan ssd rlly made it faster, but still, it feels unacceptable.
+	
 	print("preformatting sprites to fit the goofy ahh format from when i first got them")
 
 	currentFolder = "../ExportData/Export_Textures_Padded/"
@@ -228,8 +233,6 @@ def preformatSprites():
 	shutil.rmtree(outputFolder)
 	
 	for folder, filenames in data.items():
-		
-		
 		destFolder = os.path.join(outputFolder, folder)
 		os.makedirs(destFolder)
 		
@@ -261,8 +264,13 @@ validSizes = set([
 ])
 """
 
+# some statues are 64 by 64, and we want those as bigsprites, not as sprite sprites 
+# but some things (like spr_playerswipe) are 32 by 16, and would be quite nice to have in just one sprite, so this 
+# will no longer be just 16 by 16 sprites
 validSizes = set([
 (16, 16),
+(32, 16),
+(16, 32),
 ])
 
 
@@ -285,8 +293,7 @@ def convertSprites(spritePath, outputPath):
 		currentFolder = os.path.join(spritePath, folder)
 	
 		testIfFile = os.path.join(outputPath, "dw_" + folder.lower() + ".json")
-		
-	
+
 		if os.path.isfile(testIfFile):
 			print("skipping {:s}, already done padded".format(testIfFile))
 			continue
@@ -300,6 +307,8 @@ def convertSprites(spritePath, outputPath):
 		total_height = 0
 		max_height = 0 
 		
+		pngFileImages = []
+		
 		# Determine the maximum width and calculate the total height
 		for png_file in png_files:
 			image = Image.open(os.path.join(currentFolder, png_file))
@@ -307,6 +316,7 @@ def convertSprites(spritePath, outputPath):
 			max_width = max(max_width, width)
 			total_height += height
 			max_height = max(max_height, height)
+			pngFileImages.append(image)
 		
 		if (max_width, max_height) not in validSizes:
 			print("skipping, lets just hope that it wasnt needed <3")
@@ -319,8 +329,9 @@ def convertSprites(spritePath, outputPath):
 		
 		# Paste each PNG file onto the stacked image
 		y_offset = 0
-		for png_file in png_files:
-			image = Image.open(os.path.join(currentFolder, png_file))
+		#for png_file in png_files:
+			#image = Image.open(os.path.join(currentFolder, png_file))
+		for image in pngFileImages:
 			width, height = image.size
 			image = image.convert("RGBA")
 			stacked_image.paste(image, (0, y_offset))
@@ -1064,8 +1075,39 @@ def generateIncludes(folders):
 
 	print("generating include file")
 	
+	# i could drastically speed up compilation time by only including used sprites in here.
+	# i could also,,, maybe,,,, have it,, 
+	# i planned on having the makefile call generateAllIncludes
+	# issue is, if a file is in the graphics folder in code, it will be compiled even if its not included.
+	# meaning,,,, ill need dynamic copying???
+	# this will speed up first time compilation, and build times after a reconvert, but like 
+	# is it worth the work?
+	# looking through 
+	
+	codeFolder = "../../code/src/"
+
+	codeFiles = [f for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
+	
+	codeFiles.remove("dataWinIncludes.h")
+	
+	pattern = r'dw_\w+'
+	matching_references = set()
+	
+	for file in codeFiles:
+			file_path = os.path.join(codeFolder, file)
+			with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+				content = f.read()
+				matches = re.findall(pattern, content)
+				matching_references.update(matches)
+
+	
 	output = []
 	
+	# this option is slower than just using if statements, but is still like, 
+	# ugh but is it only fast since im on an ssd? 
+	# ugh 
+	# i rlly shouldnt of switched, but eh, ill live my life
+	# actually, once i implimented skipping it was hella fast(still on ssd tho)
 	for folder in folders:
 		
 		jsonFiles = [f for f in os.listdir(folder) if f.lower().endswith('.json')]
@@ -1074,14 +1116,61 @@ def generateIncludes(folders):
 			#print(jsonFiles)
 			# i dont rlly need to open each json here, but im being safe.
 			
+			if os.path.basename(file).split(".")[0] not in matching_references:
+				continue
+			
 			with open(os.path.join(folder, file)) as f:
 				idk = json.load(f)
 			
 				line = "#include \"bn_{:s}_items_{:s}.h\"".format(idk["type"], os.path.basename(file).split(".")[0])
 			
+				"""
+				refType = "sprite_tiles"
+				if "dw_customfloortiles" in file:
+					refType = "regular_bg_tiles"
+				if "dw_customeffecttiles" in file:
+					refType = "regular_bg_tiles"
+				elif "spr" in file and "bg" in file:
+					refType = "sprite_tiles"
+				elif "bg" in file or "_tile_" in file:
+					refType = "regular_bg_tiles"
+				elif "fnt" in file:
+					refType = "sprite"
+				elif "spr" in file:
+					refType = "sprite_tiles"
+			
+				if idk["type"] != refType:
+					print(file)
+					print(idk["type"], refType)
+					exit(1)
+				"""
+				
 				output.append(line)
 	
-
+	"""
+	for reference in matching_references:
+		
+		# this is a MASSIVE assumption based on type, but it will save time 
+		
+		refType = "sprite_tiles"
+		if "dw_customfloortiles" in file:
+			refType = "regular_bg_tiles"
+		if "dw_customeffecttiles" in file:
+			refType = "regular_bg_tiles"
+		elif "spr" in file and "bg" in file:
+			refType = "sprite_tiles"
+		elif "bg" in file or "_tile_" in file:
+			refType = "regular_bg_tiles"
+		elif "fnt" in file:
+			refType = "sprite"
+		elif "spr" in file:
+			refType = "sprite_tiles"
+		
+		line = "#include \"bn_{:s}_items_{:s}.h\"".format(refType, reference)
+			
+		output.append(line)
+	"""
+	
 	f = open("dataWinIncludes.h", "w")
 	f.write("#pragma once\n")
 	f.write("""
@@ -1127,13 +1216,26 @@ def generateIncludes(folders):
 		f.write(line + "\n")
 	f.close()
 			
+			
+	shutil.copy("dataWinIncludes.h", "../../code/src/")
 	print("done generating include file")
 	
 	pass
 	
+def generateAllIncludes():
+	os.chdir(os.path.dirname(__file__))
+	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/bigSprites/"])
+	
 def main():
 
 	os.chdir(os.path.dirname(__file__))
+	
+	start = time.time()
+	generateAllIncludes()
+	end = time.time()
+	print("gening includes took {:6.2f}".format(end - start))
+	
+	exit(1)
 	
 	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
 	#return 
@@ -1163,11 +1265,11 @@ def main():
 
 	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
 
-	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/bigSprites/"])
+	generateAllIncludes()
 	
 	print("copying over files. this may take a little bit")
 	
-	shutil.copy("dataWinIncludes.h", "../../code/src/")
+	#shutil.copy("dataWinIncludes.h", "../../code/src/")
 	shutil.copy("fontData.h", "../../code/src/")
 	
 	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]

@@ -208,7 +208,7 @@ void didVBlank() {
 	/*if(frame > 600000) {
 		frame = 0;
 	}*/
-	// i save a branch?
+	// i save a branch? (yes)
 	frame = frame & 0b1111111111111111;
 	
 	isVblank = true;

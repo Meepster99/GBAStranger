@@ -41,12 +41,16 @@ ROMTITLE    :=  GBAStranger
 ROMCODE     :=  GBST
 # SAVE ME O3
 # https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
-USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
+USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra 
 USERASFLAGS :=  
-USERLDFLAGS :=  -flto=auto
+USERLDFLAGS :=  -flto=auto 
 USERLIBDIRS :=  
 USERLIBS    :=  
-DEFAULTLIBS :=  
+# this is here to link to std::functional, which i need for only one very stupid use case 
+# as for if this thing actually links to the standard lib(as in runs this comp flag) or if it 
+# just includes defaultlib, bc its not empty, i do not know 
+# maybe this will fix my previous issues with the WTF strlen func
+DEFAULTLIBS :=  -static-libstdc++
 USERBUILD   :=  
 EXTTOOL     :=  
 

@@ -19,7 +19,8 @@ int LevStatue::totalLev = 0;
 
 // Player
 
-EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_question_black, 9)};
+//EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_question_black, 9)};
+
 
 bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	
@@ -35,12 +36,12 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		bool moveRes = tilePos.move(currentDir);
 		
 		if(!moveRes) {
-			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
 
 		if(entityManager->hasCollision(tilePos)) {
-			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -59,7 +60,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		// if there is a entity in this tile, this is an invalid move.
 		
 		if(entityManager->hasEntity(tilePos)) {
-			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -68,10 +69,10 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
 		
 		if(tile == NULL && rod == NULL) { 
-			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		} else if (tile != NULL && rod != NULL) {
-			effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		} else if(tile == NULL && rod != NULL) {
 			// put tile down 
@@ -82,6 +83,9 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			entityManager->rodUse();
 			tileManager->updateTile(tilePos);
 			tileManager->updateRod();
+			
+			effectsManager->voidRod(tilePos, currentDir);
+			
 		} else if(tile != NULL && rod == NULL) {
 			// pick tile up
 			bn::sound_items::snd_voidrod_store.play();
@@ -90,6 +94,9 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			entityManager->rodUse();
 			tileManager->updateTile(tilePos);
 			tileManager->updateRod();
+			
+			effectsManager->voidRod(tilePos, currentDir);
+			
 		}
 
 		nextMove = bn::optional<Direction>();

@@ -12,6 +12,9 @@ EntityManager* BigSprite::entityManager = NULL;
 TileManager* BigSprite::tileManager = NULL;
 EffectsManager* BigSprite::effectsManager = NULL;
 
+
+// ----- 
+
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
 	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
 	
@@ -312,7 +315,7 @@ void BigSprite::animate() { profileFunction();
 }
 
 // -----
-
+	
 EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font) {
 		
 	// may not be the best idea?
@@ -672,8 +675,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 				
 				// minus 1 to play infinitely?
 				// nvm, gods idek what im doing 
-				EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_stinklines, 9999999)};
-				createEffect(Pos(effects->x / 16, effects->y / 16), EffectTypeCast(questionMark));
+				//EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_stinklines, 9999999)};
+				//createEffect(Pos(effects->x / 16, effects->y / 16), EffectTypeCast(questionMark));
 				
 			} else {
 				BN_ERROR("you are a idiot(not you, but me)");
@@ -697,7 +700,7 @@ void EffectsManager::hideForDialogueBox(bool vis) {
 		if((*it) == NULL) {
 			continue;
 		}
-		if((*it)->p.y >= 6) {
+		if((*it)->getPos().y >= 6) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
@@ -1126,5 +1129,78 @@ void EffectsManager::doMenu() {
 
 	
 }
+
+// -----
+
+void EffectsManager::glassBreak(Pos p) {
+	
+	// we cannot use static vars in this joint, so static "vars" will have to be,,, alloced in real time. i think?
+	// or i can just use the canerious std::functional
+	// gods this is absolutely horrid.
+	// i really should of just made fucking,, i should of just made graphicsIndex a static var 
+	// i am assuming i will need more static vars in the future when im not even rlly sure, ugh idk
+	
+	int graphicsIndex = 0;
+	
+	createEffect(
+	[p](Effect* obj) mutable -> void {
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_glassfloor,
+			0
+		);
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+	},
+	[graphicsIndex](Effect* obj) mutable -> bool {
+		(graphicsIndex)++;
+		if(graphicsIndex == 6) {
+			return true;
+		}
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_glassfloor,
+			graphicsIndex
+		);
+		return false;
+	}
+	);
+}
+
+void EffectsManager::voidRod(Pos p, Direction dir) {
+	
+	int graphicsIndex = 0;
+	
+	createEffect(
+	[p, dir](Effect* obj) mutable -> void {
+		
+		obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_player_swipe, bn::sprite_tiles_items::dw_spr_player_swipe_shape_size);
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_player_swipe,
+			0
+		);
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+	},
+	[graphicsIndex](Effect* obj) mutable -> bool {
+		(graphicsIndex)++;
+		if(graphicsIndex == 6) {
+			return true;
+		}
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_player_swipe,
+			graphicsIndex
+		);
+		return false;
+	}
+	);
+		
+		
+		
+		
+}
+
+
 
 

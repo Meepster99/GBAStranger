@@ -5,6 +5,10 @@
 #include "Entity.h"
 #include "EntityManager.h"
 
+// i really, REALLY do not like the possibility of using this
+// but in order to pass lambda funcs with captures as func pointers, its needed.
+#include <functional>
+
 class Game;
 class EntityManager;
 class TileManager;
@@ -79,49 +83,70 @@ public:
 class Effect {
 public:
 	
-	Pos p;
+	// gods this is going to be complex 
+	// https://www.youtube.com/live/8Gt8BlNLckA?si=ajVBIlBz-OMMvdZC&t=446
+	// remember that , and . can go frame by frame'
+	// this class desperately needs a rewrite, but im not exactly sure how  
+	// i could,, always do a custom lambda for the animation func tbh?
+	// honestly probs will, i have rlly liked doing that
+	// ill try my best to keep the restriction of only having one sprite tho 
+	// ill have a create lambda func, and a animate func, and if the animate func returns true we destroy this thing.
+	// additional variables can be kept as static vars inside the lambda func aswell 
+	// will i need to pass this to the lambda func?
+	
+	// for the void rod:
+	// spr_void_rod
+	// spr_sparkle	
+	
+	// for the
+	
+	//Pos p;
+	// using raw coords would be better now bc some effects arent aligned
+	// are these cords going to have origin at center or at top left? im going to go with top left.
+	int x; 
+	int y;
 	Sprite sprite;
 	
-	bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> effectData;
+	//void (*createFunc)(Effect*);
+	//bool (*animateFunc)(Effect*);
 	
-	Effect(Pos p_) : p(p_), sprite(bn::sprite_tiles_items::dw_spr_gray_w_d)
+	std::function<void(Effect*)> createFunc;
+	std::function<bool(Effect*)> animateFunc;
+
+	int animationFrequency = 1;
+	
+	Effect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency_ = 1) : 
+	sprite(bn::sprite_tiles_items::dw_spr_gray_w_d), createFunc(create_), animateFunc(animate_), animationFrequency(animationFrequency_)
 	{ 
 		sprite.setVisible(false);
-		sprite.updatePosition(p);
 	}
 	
 	bool firstRun = true;
 	
-	
 	bool animate() {
-		// return true once animation done
+		
+		if(frame % animationFrequency != 0) {
+			return false;
+		}
 		
 		if(firstRun) {
-			sprite.spritePointer.set_tiles(
-				effectData[0].first,
-				abs(effectData[0].first.graphics_count() - effectData[0].second) % effectData[0].first.graphics_count()
-			);
-			sprite.setVisible(true);
 			firstRun = false;
+			createFunc(this);
+			sprite.setVisible(true);
+			return false;
 		}
-	
-		if(effectData.size() == 0) {
+		
+		bool res = animateFunc(this);
+		if(res) {
 			sprite.setVisible(false);
-			return true;
 		}
 
-		sprite.spritePointer.set_tiles(
-			effectData[0].first,
-			abs(effectData[0].first.graphics_count() - effectData[0].second) % effectData[0].first.graphics_count()
-		);
-		
-		effectData[0].second--;
-		
-		if(effectData[0].second == 0) {
-			effectData.erase(effectData.begin());
-		}
-		
-		return false;
+		return res;
+	}
+	
+	// used to just see where the pos of this effect is, for the purpose of hiding it for dialogue
+	Pos getPos() {
+		return Pos( (x + 8) / 16, (y + 8) / 16 );
 	}
 	
 };
@@ -170,9 +195,9 @@ public:
 };
 
 // these are defines instead of typedefs bc typedef doesnt allow for constexpr
-#define EffectTypeArray constexpr bn::pair<const bn::sprite_tiles_item, int> 
-#define EffectType bn::pair<const bn::sprite_tiles_item, int> 
-#define EffectTypeCast bn::span<const bn::pair<const bn::sprite_tiles_item, int>>
+//#define EffectTypeArray constexpr bn::pair<const bn::sprite_tiles_item, int> 
+//#define EffectType bn::pair<const bn::sprite_tiles_item, int> 
+//#define EffectTypeCast bn::span<const bn::pair<const bn::sprite_tiles_item, int>>
 
 class MenuOption {
 public:
@@ -238,17 +263,18 @@ public:
 
 	EffectsManager(Game* game_);
 
-	void createEffect(Pos p, const bn::span<const bn::pair<const bn::sprite_tiles_item, int>>& inputData) {
-		// i think using a span here is a good idea,,, but, ugh should i vector?
-		// i still cant initialize the type with braces either way bc butanos fucking weird with it
-		Effect* e = new Effect(p);
-		
-		for(int i=0; i<inputData.size(); i++) {
-			e->effectData.push_back(inputData[i]);
-		}
-		
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency = 1) {
+		Effect* e = new Effect(create_, animate_, animationFrequency);
 		effectList.push_back(e);
-	} 
+	}
+	
+	// this is going to be where i define my effects, as static vars, to be called with EffectManager::effectname()
+	// these things should be static,, but i need them to access the effectList,,, so like, ugh
+	// this should maybe have been a namespace, but idk
+	
+	void glassBreak(Pos p);
+	
+	void voidRod(Pos p, Direction dir);
 	
 	void updatePalette(Palette* pal);
 	
