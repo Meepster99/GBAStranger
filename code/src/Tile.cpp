@@ -65,18 +65,19 @@ void Bomb::stepOn() {
 
 void Death::stepOn() {
 	
-	// this needs to call updatemap as well. gods
-	/*SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+	// this needs to call updatemap as well. gods(maybe?)
+	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
 	
-	for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+	for(auto it = tempMap.begin(); it != tempMap.end(); ) {
 		if((*it)->entityType() == EntityType::Player) {
 			// how can i make it play a death anim?
 			entityManager->addKill(*it);
+			++it;
 		} else {
-			entityManager->killEntity(*it);
+			it = entityManager->killEntity(*it);
 		}
 	}
-	*/
+	
 }
 
 void Switch::stepOn() {
