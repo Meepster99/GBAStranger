@@ -13,7 +13,7 @@ use `cargo run --release`.
 
 ## Instructions to build C++ code.
 
-install [devkitpro](https://devkitpro.org/)
+install [devkitpro](https://devkitpro.org/) and [python](https://www.python.org/downloads/) >= 3.11
 
 clone the repo, and do `git submodule update --init --recursive`
 
