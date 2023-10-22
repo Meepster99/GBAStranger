@@ -1090,6 +1090,10 @@ def convertObjects(layerData):
 		def obj_npc_gor(p, creationCode):
 			x, y = p.rawX, p.rawY 
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_gor,{:d},{:d},3,4,false".format(x, y))
+			
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_gor_hair,{:d},{:d},7,4,false".format(x, y))
+			
 			pass
 
 		def obj_npc_failure_006(p, creationCode):

@@ -88,11 +88,19 @@ void RoomManager::gotoRoom(const char* roomName) {
 	
 	strcpy(roomNameBuffer, roomName);
 	
-	BN_LOG("bruh ", buffer);
+	BN_LOG("attempting to go to ", buffer);
 	
 	// shit time complexity, but im tired.
 	for(int i=0; i<(int)(sizeof(rooms)/sizeof(rooms[0])); i++) {
+		
+		if(WTF(buffer) != WTF(roomNameArray[i].str)) {
+			continue;
+		}
+		
 		if(strcmp(buffer, roomNameArray[i].str) == 0) {
+			
+			BN_LOG("found match ", roomNameArray[i].str);
+			
 			roomIndex = i;
 			return;
 		}

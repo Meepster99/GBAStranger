@@ -363,6 +363,9 @@ void Chest::interact() {
 		tileManager->updateLocust();
 		// this isnt counted as a successful move, but we should still update locusts
 		tileManager->floorLayer.reloadCells();
+		
+		entityManager->player->currentDir = Direction::Down;
+		
 	}
 	
 }

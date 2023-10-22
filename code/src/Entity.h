@@ -837,8 +837,8 @@ public:
 	
 	EntityType entityType() const override { return EntityType::Interactable; }
 	
-	void interact() override { return interactFunc(interactFuncParams); }
-	bool kicked() override { return kickFunc(kickFuncParams); }
+	void interact() override { bumpDirections.clear(); return interactFunc(interactFuncParams); }
+	bool kicked() override { bumpDirections.clear(); return kickFunc(kickFuncParams); }
 	
 	bn::optional<Direction> getNextMove() { 
 		bumpDirections.clear();

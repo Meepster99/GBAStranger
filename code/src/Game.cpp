@@ -410,5 +410,6 @@ void Game::load() {
 	roomManager.roomIndex = saveData.roomIndex;
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
+	roomManager.setMode(mode);
 }
 
