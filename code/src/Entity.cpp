@@ -21,6 +21,54 @@ int LevStatue::totalLev = 0;
 
 //EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_question_black, 9)};
 
+void Player::pushRod(Pos tilePos) { 
+	
+	// pick tile up
+	
+	rod.push_back(tileManager->floorMap[tilePos.x][tilePos.y]);
+	
+	tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
+	
+	entityManager->rodUse();
+	tileManager->updateTile(tilePos);
+	tileManager->updateRod();
+	
+	bn::sound_items::snd_voidrod_store.play();
+	effectsManager->voidRod(tilePos, currentDir);
+	
+}
+
+void Player::popRod(Pos tilePos) {
+	
+	// put tile down 
+	
+	FloorTile* tempTile = rod.back();
+	rod.pop_back();
+	
+	tempTile->tilePos = tilePos;
+	tileManager->floorMap[tilePos.x][tilePos.y] = tempTile;
+
+	entityManager->rodUse();
+	tileManager->updateTile(tilePos);
+	tileManager->updateRod();
+
+	bn::sound_items::snd_voidrod_place.play();
+	effectsManager->voidRod(tilePos, currentDir);
+}
+
+bool Player::inRod(FloorTile* tile) {
+	// trashCode
+	
+	BN_ASSERT(tile != NULL, "you should never be calling inRod with a null tile");
+	
+	for(int i=0; i<rod.size(); i++) {
+		if(tile == rod[i]) {
+			return true;
+		}
+	}
+	
+	return false;
+}
 
 bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	
@@ -57,9 +105,23 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			return {false, bn::optional<Direction>()};
 		}
 		
-		// if there is a entity in this tile, this is an invalid move.
+		// if there is a entity in this tile, this is an invalid move(unless sword!).
 		
 		if(entityManager->hasEntity(tilePos)) {
+			if(hasSword && !inRod(tileManager->swordTile)) {
+				BN_ASSERT(entityManager->getMap(tilePos).size() == 1, "when killing an entity, there were multiple entitys in the tilepos??");
+				
+				Entity* tempEntity = *(entityManager->getMap(tilePos).begin());
+				if(tempEntity->entityType() != EntityType::Shadow) {
+					entityManager->killEntity(tempEntity);
+					
+					entityManager->futureEntityMap[tilePos.x][tilePos.y] = entityManager->entityMap[tilePos.x][tilePos.y];
+					
+					return {true, bn::optional<Direction>()};
+				}
+			}
+			
+			
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			return {false, bn::optional<Direction>()};
 		}
@@ -68,36 +130,21 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
 		
-		if(tile == NULL && rod == NULL) { 
-			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			return {false, bn::optional<Direction>()};
-		} else if (tile != NULL && rod != NULL) {
-			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			return {false, bn::optional<Direction>()};
-		} else if(tile == NULL && rod != NULL) {
+		BN_LOG("fhdjlf ", hasSuperRod);
+		
+		if(tile == NULL && rod.size() != 0) {
 			// put tile down 
-			bn::sound_items::snd_voidrod_place.play();
-			rod->tilePos = tilePos;
-			tileManager->floorMap[tilePos.x][tilePos.y] = rod;
-			rod = NULL;
-			entityManager->rodUse();
-			tileManager->updateTile(tilePos);
-			tileManager->updateRod();
-			
-			effectsManager->voidRod(tilePos, currentDir);
-			
-		} else if(tile != NULL && rod == NULL) {
+			popRod(tilePos);
+		} else if(tile != NULL && (rod.size() == 0 || hasSuperRod)) {
 			// pick tile up
-			bn::sound_items::snd_voidrod_store.play();
-			rod = tileManager->floorMap[tilePos.x][tilePos.y];
-			tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
-			entityManager->rodUse();
-			tileManager->updateTile(tilePos);
-			tileManager->updateRod();
-			
-			effectsManager->voidRod(tilePos, currentDir);
-			
-		}
+			pushRod(tilePos);
+		} else if(tile == NULL && rod.size() == 0) { 
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			return {false, bn::optional<Direction>()};
+		} else if (tile != NULL && rod.size() != 0) {
+			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			return {false, bn::optional<Direction>()};
+		} 
 
 		nextMove = bn::optional<Direction>();
 		

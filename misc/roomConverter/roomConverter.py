@@ -923,6 +923,7 @@ def convertObjects(layerData):
 			# 
 	
 			if creationCode is None:
+				specialFloorExport.append("{:d},{:d},NULL".format(p.x, p.y))
 				return
 			
 			#i could get the room to goto dynamically, but im tired ok

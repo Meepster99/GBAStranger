@@ -975,16 +975,33 @@ def generateCustomFloorBackground(outputPath):
 	#print(temp.shape, stackedTiles.shape)
 	#stackedTiles = np.vstack((stackedTiles, temp))
 	
-	# tiles for rod 
-	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_voidrod_icon.bmp"))
-	temp[temp == 0] = 2
-	tiles.append(temp)
-	
 	# tiles for locust 
 	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_locust_idol_menu.bmp"))
 	temp[temp == 0] = 2
 	tiles.append(temp)
 	
+	# tiles for rod 
+	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_voidrod_icon.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp)
+	
+	# tiles for super rod 
+	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_voidrod_icon2.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp)
+	
+	# tiles for items
+	temp = np.array(Image.open("./formattedOutput/bigSprites/dw_spr_items.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp[16:32, 0:16])
+	tiles.append(temp[32:48, 0:16])
+	tiles.append(temp[48:64, 0:16])
+	
+	temp = np.array(Image.open("./formattedOutput/bigSprites/dw_spr_items_cif.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp[16:32, 0:16])
+	tiles.append(temp[32:48, 0:16])
+	tiles.append(temp[48:64, 0:16])
 	
 	
 	stackedTiles = np.vstack(tiles).tolist()
@@ -1272,13 +1289,12 @@ def main():
 	createFolder("./formattedOutput/customEffects/")
 	createFolder("./formattedOutput/bigSprites/")
 
-	convertAllSprite("./formattedOutput/sprites/")
-	
-	convertAllBigSprite("./formattedOutput/bigSprites/")
-	convertTiles("./formattedOutput/tiles/")
-	convertFonts("./formattedOutput/fonts/")
+	#convertAllSprite("./formattedOutput/sprites/")
+	#convertAllBigSprite("./formattedOutput/bigSprites/")
+	#convertTiles("./formattedOutput/tiles/")
+	#convertFonts("./formattedOutput/fonts/")
 	generateCustomFloorBackground("./formattedOutput/customFloor/")	
-	generateEffectsTiles("./formattedOutput/customEffects/")
+	#generateEffectsTiles("./formattedOutput/customEffects/")
 
 	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
 

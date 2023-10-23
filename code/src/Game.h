@@ -40,6 +40,10 @@ struct GameSave {
 	int roomIndex = 1;
 	int paletteIndex = 0;
 	int mode = 0;
+	bool hasMemory = false;
+	bool hasWings = false;
+	bool hasSword = false;
+	bool hasSuperRod = false;
 	
 	uint64_t hash = 0;
 };

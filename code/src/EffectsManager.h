@@ -221,6 +221,7 @@ public:
 	const char* (*getOption)() = NULL;
 	void (*changeOption)(int) = NULL;
 	int yDraw = 0;
+	int xDraw = 0;
 	
 	// why can this buffer only be static when in a function??
 	char buffer[64];
@@ -232,7 +233,7 @@ public:
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
 	
 	
-	MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int));
+	MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int), int xVal = -1);
 	void fullDraw(bool isActive);
 	void draw(bool isActive);
 	void draw();
@@ -280,6 +281,8 @@ public:
 	void glassBreak(Pos p);
 	
 	void voidRod(Pos p, Direction dir);
+	
+	void wings(Pos p, Direction dir);
 	
 	void updatePalette(Palette* pal);
 	

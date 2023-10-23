@@ -50,7 +50,7 @@ public:
 	void moveEnemies();
 	void moveObstacles();
 	
-	
+	unsigned playerMoveCount = 0;
 	void doMoves();
 
 	void manageShadows(bn::optional<Direction> playerDir);	

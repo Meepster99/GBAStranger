@@ -14,6 +14,7 @@ unsigned boobaCount = 0;
 bn::random randomGenerator = bn::random();
 
 void Game::doButanoUpdate() {
+	
 	bn::core::update();
 	
 	int temp = bn::core::last_missed_frames();
@@ -58,6 +59,7 @@ void Game::uncompressData(u8 res[126], u8* input) {
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
+	BN_LOG("reseting to room ", roomManager.currentRoomName());
 
 	if(!debug) {
 		state = GameState::Exiting;
@@ -227,9 +229,13 @@ void Game::doVBlank() { profileFunction();
 	switch(state) {
 		default:
 		case GameState::Normal:
+			//BN_LOG("entityManager.doVBlank();");
 			entityManager.doVBlank();
+			//BN_LOG("effectsManager.doVBlank();");
 			effectsManager.doVBlank();
+			//BN_LOG("tileManager.doVBlank();");
 			tileManager.doVBlank();
+			//BN_LOG("done");
 			break;
 		case GameState::Exiting:
 			if(!a) { a = entityManager.exitRoom(); }
@@ -350,6 +356,7 @@ void Game::run() {
 			BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
 		}
 		
+		
 		doButanoUpdate();
 	}
 }
@@ -375,27 +382,43 @@ uint64_t Game::getSaveHash() {
 	
 	hash ^= saveData.mode;
 	rotateHash(sizeof(saveData.mode) * 8);
-
+	
+	hash ^= saveData.hasMemory;
+	rotateHash(sizeof(saveData.mode) * 8);
+	
+	hash ^= saveData.hasWings;
+	rotateHash(sizeof(saveData.mode) * 8);
+	
+	hash ^= saveData.hasSword;
+	rotateHash(sizeof(saveData.mode) * 8);
+	
 	return hash;
 }
 
 void Game::save() {
-	BN_LOG("saving save");
+	//BN_LOG("saving save");
 	
 	BN_ASSERT(entityManager.player != NULL, "when saving save, the player was null!");
 	
 	saveData.locustCount = entityManager.player->locustCount;
 	saveData.isVoided = entityManager.player->isVoided;
+	
+	saveData.hasMemory = entityManager.player->hasMemory;
+	saveData.hasWings = entityManager.player->hasWings;
+	saveData.hasSword = entityManager.player->hasSword;
+	
 	saveData.roomIndex = roomManager.roomIndex;
 	saveData.paletteIndex = paletteIndex;
 	saveData.mode = mode;
 	
+	saveData.hasSuperRod = entityManager.player->hasSuperRod;
+	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);
 	
-	BN_LOG("locust: ", saveData.locustCount);
-	BN_LOG("void: ", saveData.isVoided);
-	BN_LOG("room: ", saveData.roomIndex);
+	//BN_LOG("locust: ", saveData.locustCount);
+	//BN_LOG("void: ", saveData.isVoided);
+	//BN_LOG("room: ", saveData.roomIndex);
 }
 
 void Game::load() {

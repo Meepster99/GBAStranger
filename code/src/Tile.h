@@ -227,7 +227,7 @@ public:
 class RodTile : public FloorTile { // tile displays rod state 
 public:
 
-	RodTile(Pos p) : FloorTile(p, 124, 10) {}
+	RodTile(Pos p) : FloorTile(p, 126, 10) {}
 	
 	bool drawDropOff() const override { return true; }
 
@@ -240,13 +240,30 @@ public:
 class LocustTile : public FloorTile {
 public:
 
-	LocustTile(Pos p) : FloorTile(p, 135, 2) {}
+	LocustTile(Pos p) : FloorTile(p, 124, 2) {}
 	
 	bool drawDropOff() const override { return true; }
 
 	TileType tileType() const override { return TileType::LocustTile; }
 
 	int getTileValue() const override;
+	
+};
+
+class SpriteTile : public FloorTile {
+public:
+
+	int (*tileFunc)(void);
+
+	SpriteTile(Pos p, int (*tileFunc_)(void)) : FloorTile(p, 126 + 10 + 11, 2), tileFunc(tileFunc_) {}
+	
+	bool drawDropOff() const override { return true; }
+
+	TileType tileType() const override { return TileType::SpriteTile; }
+	
+	int getTileValue() const override {
+		return tileFunc();
+	}
 	
 };
 

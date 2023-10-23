@@ -213,10 +213,25 @@ public:
 	EntityType entityType() const override { return EntityType::Player; }
 	
 	bool hasRod = true;
-	FloorTile* rod = NULL;
+	bool hasSuperRod = false;
+	//FloorTile* rod = NULL;
+	// ik i should be useing a queue, but your honor, im fucking tired, and my tummy hurt
+	bn::vector<FloorTile*, 128> rod; 
+	
+	void pushRod(Pos tilePos);
+	void popRod(Pos tilePos);
+	bool inRod(FloorTile* tile);
 	
 	int locustCount = 0;
 	bool isVoided = false;
+	
+	bool hasMemory = false;
+	bool hasWings = false;
+	bool hasSword = false;
+	
+	// jank as fuck
+	int wingsUse = 0;
+	unsigned wingMoveCheck = -1;
 	
 	void startFall() override;
 	

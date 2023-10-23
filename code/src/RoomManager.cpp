@@ -72,9 +72,17 @@ void RoomManager::setMode(int mode) {
 void RoomManager::gotoRoom(const char* roomName) {
 	
 	if(roomName == NULL) {
+		BN_LOG("attempting to go to NULL, meaning nextroom");
+	} else {
+		BN_LOG("attempting to go to ", roomName);
+	}
+	
+	if(roomName == NULL) {
 		nextRoom();
 		return;
 	}
+	
+	
 	
 	
 	char buffer[32];
@@ -88,7 +96,7 @@ void RoomManager::gotoRoom(const char* roomName) {
 	
 	strcpy(roomNameBuffer, roomName);
 	
-	BN_LOG("attempting to go to ", buffer);
+	
 	
 	// shit time complexity, but im tired.
 	for(int i=0; i<(int)(sizeof(rooms)/sizeof(rooms[0])); i++) {

@@ -576,7 +576,6 @@ void EffectsManager::doVBlank() { profileFunction();
 		}
 	}
 
-	
 	if(frame % 4 != 0) {
 		return;
 	}
@@ -894,15 +893,22 @@ void EffectsManager::doDialogue(const char* data) {
 // -----
 
 // jesus fuck
-MenuOption::MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int)) :
+MenuOption::MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int), int xVal) :
 	optionName(optionName_),
 	getOption(getOption_),
 	changeOption(changeOption_),
 	textGenerator(dw_fnt_text_12_sprite_font)
 	{
 		yDraw = yIndex;
-		yIndex += 16;
-}
+		if(xVal == -1) {
+			yIndex += 16;
+		} else if(xVal == -2) {
+			yIndex += 32;
+			yDraw += 16;
+		} else {
+			xDraw = xVal;
+		}
+	}
 
 
 void MenuOption::fullDraw(bool isActive) { // use white color for active, use darkest ver for non active
@@ -913,7 +919,7 @@ void MenuOption::fullDraw(bool isActive) { // use white color for active, use da
 	strcpy(buffer + WTF(optionName), getOption());
 	
 	// why is this so pathetically slow?
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)yDraw, bn::string_view(buffer), textSprites);
+	textGenerator.generate((bn::fixed)-104 + xDraw, (bn::fixed)yDraw, bn::string_view(buffer), textSprites);
 	
 	auto spritePalettePalette = effectsManager->spritePalette->getAlternateSpritePalette();
 	if(isActive) {
@@ -968,9 +974,9 @@ void EffectsManager::doMenu() {
 	const char* vermsgString1 = VERMSG1;
 	
 	#if defined(ENABLEPROFILER)
-		#define VERMSG2 "butano version " BN_VERSION_STRING " with log + prof"
+		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1 prof=1"
 	#elif defined(ENABLELOGGING)
-		#define VERMSG2 "butano version " BN_VERSION_STRING " with logging"
+		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1"
 	#else 
 		#define VERMSG2 "butano version " BN_VERSION_STRING
 	#endif
@@ -1009,7 +1015,9 @@ void EffectsManager::doMenu() {
 		verTextSprites[i].set_visible(true);
 	}
 	
-	MenuOption::yIndex = -60;
+	//MenuOption::yIndex = -60;
+	MenuOption::yIndex = -68;
+	//MenuOption::yIndex = -70;
 	
 	// oh god im getting goofy again
 	menuOptions.push_back(
@@ -1030,6 +1038,79 @@ void EffectsManager::doMenu() {
 		MenuOption("Palette: ", 
 		[]() -> const char* { return paletteNameList[globalGame->paletteIndex]; },
 		[](int val) { return globalGame->changePalette(val); }
+		)
+	);
+	
+	menuOptions.push_back(
+		MenuOption("Memory: ", 
+		[]() -> const char* { 
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			return player->hasMemory ? "yay" : "nay";
+		},
+		[](int val) { 	
+			(void)val;
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			player->hasMemory = !player->hasMemory;
+			globalGame->tileManager.updateBurdenTiles();
+		},
+		80 * 0
+		)
+	);
+	
+	menuOptions.push_back(
+		MenuOption("Wings: ", 
+		[]() -> const char* { 
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			return player->hasWings ? "yay" : "nay";
+		},
+		[](int val) { 
+			(void)val;
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			player->hasWings = !player->hasWings;
+			globalGame->tileManager.updateBurdenTiles();
+		},
+		80 * 1
+		)
+	);
+
+	
+	menuOptions.push_back(
+		MenuOption("Sword: ", 
+		[]() -> const char* { 
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			return player->hasSword ? "yay" : "nay";
+		},
+		[](int val) { 
+			(void)val;
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			player->hasSword = !player->hasSword;
+			globalGame->tileManager.updateBurdenTiles();
+		},
+		80 * 2 - 12
+		)
+	);
+	
+	menuOptions.push_back(
+		MenuOption("Rod: ", 
+		[]() -> const char* { 
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			return player->hasSuperRod ? "super" : "normal";
+		},
+		[](int val) { 
+			(void)val;
+			Player* player = globalGame->entityManager.player;
+			BN_ASSERT(player != NULL, "in a menufunc, player was null");
+			player->hasSuperRod	= !player->hasSuperRod;
+			globalGame->tileManager.updateRod();
+		},
+		-2
 		)
 	);
 	
@@ -1116,6 +1197,7 @@ void EffectsManager::doMenu() {
 		game->resetRoom(true);
 	}
 	menuOptions.clear();
+	tileManager->fullDraw(); // literally only here since for some reason, butden tiles didnt update until a move?
 	game->doButanoUpdate();
 	
 	for(int x=0; x<14; x++) {
@@ -1293,6 +1375,88 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		
 }
 
+void EffectsManager::wings(Pos p, Direction dir) {
+	
+	// spr_void_wings for gray and lily 
+	// spr_void_wings_dissipate for gray and lily (how exactly does this layer work?)
+	
+	// spr_void_wings_cif for cif 
+	// spr_void_wings_dissipate_cif for cif
+	
+	// is precomputing this right here,, ok
+	// ima just decide the sprite item in-func 
+	// why isnt there a fucking func that lets me just change the graphics index without having to also lable the sprite item??
+	
+	// this code is fucking shit.
+	
+	bn::sound_items::snd_wingspawn.play();
+	
 
+	auto goofy = [](Effect* obj, Pos goofyP, Direction goofyDir, int offset) mutable -> void {
+	
+		obj->x = goofyP.x * 16;
+		obj->y = goofyP.y * 16;
+		if(goofyDir == Direction::Right) {
+			obj->sprite.spritePointer.set_horizontal_flip(true);
+			obj->x -= 8;
+		} else if(goofyDir == Direction::Left) {
+			obj->x += 8;
+		}
+	
+		obj->x += offset;
+		
+		if(offset < 0) {
+			obj->sprite.spritePointer.set_horizontal_flip(true);
+		}
+			
+		if(goofyDir == Direction::Up || goofyDir == Direction::Down) {
+			obj->y -= 4;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_void_wings,
+			0
+		);
+	
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		// dont set sprite prio when down bc, behind
+		if(goofyDir == Direction::Down) {
+			obj->sprite.spritePointer.set_z_order(0);
+		} else {
+			obj->sprite.spritePointer.set_z_order(-1);
+		}
+	};
+	
+	auto func2 = [](Effect* obj) mutable -> bool {
+		obj->graphicsIndex++;
+		if(globalGame->entityManager.player->wingsUse == 0) {
+			return true;
+		}
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_void_wings,
+			obj->graphicsIndex % 3
+		);
+		return false;
+	};
+	
+	auto funcLeftRight = [p, dir, goofy](Effect* obj) mutable -> void {	
+		goofy(obj, p, dir, 0);
+	};
+	
+	auto funcUpDown1 = [p, dir, goofy](Effect* obj) mutable -> void {	
+		goofy(obj, p, dir, -8);
+	};
+	
+	auto funcUpDown2 = [p, dir, goofy](Effect* obj) mutable -> void {	
+		goofy(obj, p, dir, 8);
+	};
+	
+	if(dir == Direction::Left || dir == Direction::Right) {
+		createEffect(funcLeftRight, func2);
+	} else {
+		createEffect(funcUpDown1, func2);
+		createEffect(funcUpDown2, func2);
+	}
+}
 
 

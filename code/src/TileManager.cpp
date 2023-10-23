@@ -20,16 +20,23 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	floorSteps.clear();
 	
 	if(entityManager->player != NULL) {
-		if(entityManager->player->rod != NULL) {
-			delete entityManager->player->rod;	
-			entityManager->player->rod = NULL;
+		Player* player = entityManager->player;
+		
+		for(int i=0; i<player->rod.size(); i++) {
+			delete player->rod[i];
+			player->rod[i] = NULL;
 		}
+		player->rod.clear();
+	
 	}
 	
 	exitTile = NULL;
 	rodTile = NULL;
 	locustTile = NULL;
 	locustCounterTile = NULL;
+	memoryTile = NULL;
+	wingsTile  = NULL;
+	swordTile  = NULL;
 	
 	int switchTracker = 0;
 
@@ -111,10 +118,50 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	floorMap[6][8] = new RodTile(Pos(6, 8));
 	rodTile = static_cast<RodTile*>(floorMap[6][8]);
 	
+	
+	
 	floorMap[7][8] = new WordTile(Pos(7, 8));
-	floorMap[8][8] = new WordTile(Pos(8, 8));
-	floorMap[9][8] = new WordTile(Pos(9, 8));
-	floorMap[10][8] = new WordTile(Pos(10, 8));
+	
+	// rodtile, and everything else should maybe(in the future) be replaced with spritetiles with custom lambdas?
+	memoryTile = new SpriteTile(Pos(8, 8), []() -> int {
+		Player* player = globalGame->entityManager.player;
+		
+		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+		
+		if(player->hasMemory) {
+			return 126 + 10 + 11 + 1 + ( globalGame->mode == 2 ? 3 : 0) + 0;
+		}
+		
+		return 124;
+	});
+	floorMap[8][8] = memoryTile;
+	
+	wingsTile = new SpriteTile(Pos(9, 8), []() -> int {
+		Player* player = globalGame->entityManager.player;
+		
+		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+		
+		if(player->hasWings) {
+			return 126 + 10 + 11 + 1 + ( globalGame->mode == 2 ? 3 : 0) + 1;
+		}
+		
+		return 124;
+	});
+	floorMap[9][8] = wingsTile;
+	
+	swordTile = new SpriteTile(Pos(10, 8), []() -> int {
+		Player* player = globalGame->entityManager.player;
+		
+		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+		
+		if(player->hasSword) {
+			return 126 + 10 + 11 + 1 + ( globalGame->mode == 2 ? 3 : 0) + 2;
+		}
+		
+		return 124;
+	});
+	floorMap[10][8] = swordTile;
+	
 	floorMap[11][8] = new WordTile(Pos(11, 8));
 	
 	// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed(or ???)
@@ -308,7 +355,7 @@ void TileManager::updateExit() {
 	if(exitTile == NULL) {
 		return;
 	}
-	if(exitTile == entityManager->player->rod) {
+	if(entityManager->player->inRod(exitTile)) {
 		return;
 	}
 	updateTile(exitTile->tilePos);
@@ -319,7 +366,7 @@ void TileManager::updateRod() {
 	if(rodTile == NULL) {
 		return;
 	}
-	if(rodTile == entityManager->player->rod) {
+	if(entityManager->player->inRod(rodTile)) {
 		return;
 	}
 	
@@ -328,11 +375,11 @@ void TileManager::updateRod() {
 
 void TileManager::updateLocust() {
 
-	if(locustTile != NULL && locustTile != entityManager->player->rod) {
+	if(entityManager->player->inRod(locustTile)) {
 		updateTile(locustTile->tilePos);
 	}
 	
-	if(locustCounterTile != NULL && locustCounterTile != entityManager->player->rod) {
+	if(entityManager->player->inRod(locustCounterTile)) {
 		
 		if(entityManager->player->locustCount != 0) {
 			locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
@@ -348,7 +395,7 @@ void TileManager::updateVoidTiles() {
 	
 	bool isVoided = entityManager->player->isVoided;
 	
-	if(voidTile1 != NULL && voidTile1 != entityManager->player->rod) {
+	if(entityManager->player->inRod(voidTile1)) {
 		
 		voidTile1->first = isVoided ? 'V' : 'H';
 		voidTile1->second = isVoided ? 'O' : 'P';
@@ -356,7 +403,7 @@ void TileManager::updateVoidTiles() {
 		updateTile(voidTile1->tilePos);
 	}
 	
-	if(voidTile2 != NULL && voidTile2 != entityManager->player->rod) {
+	if(entityManager->player->inRod(voidTile2)) {
 		
 		voidTile2->first = isVoided ? 'I' : '0';
 		voidTile2->second = isVoided ? 'D' : '7';
@@ -364,6 +411,22 @@ void TileManager::updateVoidTiles() {
 		updateTile(voidTile2->tilePos);
 	}
 	
+	
+}
+
+void TileManager::updateBurdenTiles() {
+	
+	if(entityManager->player->inRod(memoryTile)) {
+		updateTile(memoryTile->tilePos);
+	}
+	
+	if(entityManager->player->inRod(wingsTile)) {
+		updateTile(wingsTile->tilePos);
+	}
+	
+	if(entityManager->player->inRod(swordTile)) {
+		updateTile(swordTile->tilePos);
+	}
 	
 }
 
@@ -380,6 +443,7 @@ void TileManager::fullDraw() {
 	updateRod();
 	updateLocust();
 	updateVoidTiles();
+	updateBurdenTiles();
 }
 
 bool TileManager::exitRoom() {

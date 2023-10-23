@@ -19,6 +19,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	shadowQueue.clear();
 	
+	kickedList.clear();
+	
 	// saving is jank as fuck, and this is evidence of it
 	//int locustCountBackup = 0;
 	//bool isVoidedBackup = false;
@@ -28,10 +30,11 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		//locustCountBackup = player->locustCount;
 		//isVoidedBackup = player->isVoided;
 		
-		if(player->rod != NULL) {
-			delete player->rod;
-			player->rod = NULL;
+		for(int i=0; i<player->rod.size(); i++) {
+			delete player->rod[i];
+			player->rod[i] = NULL;
 		}
+		player->rod.clear();
 	}
 	
 	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
@@ -89,11 +92,14 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			
 				player = new Player(tempPos);
 				
-				//player->locustCount = locustCountBackup;
-				//player->isVoided = isVoidedBackup;
-				
+				// i do not like that we set these vars here!
 				player->locustCount = game->saveData.locustCount;
 				player->isVoided = game->saveData.isVoided;
+				
+				player->hasMemory = game->saveData.hasMemory;
+				player->hasWings  = game->saveData.hasWings;
+				player->hasSword  = game->saveData.hasSword; 
+				player->hasSuperRod = game->saveData.hasSuperRod; 
 				
 				entityList.insert(player);
 				break;
@@ -416,6 +422,7 @@ void EntityManager::doMoves() {
 	// do player move.
 	Pos playerStart = player->p;
 	bool playerMoved = moveEntity(player);
+	//updateMap(); // now that i dont care abt framedrops, 
 	
 	// telling the difference between if the player failed a move vs is talking to something is gonna be weird
 	// actually, i suppose we have the movefailed func, i can just overload that?
@@ -453,6 +460,11 @@ void EntityManager::doMoves() {
 		}
 	}
 	
+	// the playermoved bool is basically useless 
+	// i think this might mean that you will never die if you,, ugh idek
+	if(!bn::keypad::a_pressed()) {
+		playerMoveCount++;
+	}
 	
 	tileManager->doFloorSteps();
 	
@@ -564,7 +576,7 @@ void EntityManager::doMoves() {
 	sanity();
 	
 	updateScreen();
-
+	
 }
 
 // -----
@@ -754,8 +766,27 @@ void EntityManager::updateMap() {
 					temp = *entityMap[x][y].begin();
 					
 					if(!hasFloor(Pos(x, y))) {
-						if(temp->isPlayer() || temp->entityType() == EntityType::Shadow) {
-							BN_LOG("no floor kill");
+						if(temp->isPlayer()) {
+							
+							
+							if(!player->hasWings || player->inRod(tileManager->wingsTile)) {
+								BN_LOG("no floor kill");
+								addKill(temp);
+							} else {
+								if(player->wingMoveCheck != playerMoveCount) {
+									player->wingMoveCheck = playerMoveCount;
+									
+									player->wingsUse++;
+									if(player->wingsUse == 2) {
+										addKill(temp);
+									} else {
+										// spawn wing anim/sound here
+										effectsManager->wings(player->p, player->currentDir);
+									}
+								}
+							}
+							
+						} else if(temp->entityType() == EntityType::Shadow) {
 							addKill(temp);
 						} else {
 							killEntity(temp);
@@ -806,6 +837,10 @@ void EntityManager::updateMap() {
 					continue;
 			}
 		}
+	}
+	
+	if(hasFloor(player->p)) {
+		player->wingsUse = 0;
 	}
 	
 	// should this loop be here, or in domove

@@ -84,7 +84,9 @@ void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
 	tileManager->updateExit();
-	bn::sound_items::snd_activate.play();
+	if(game->state == GameState::Normal) {
+		bn::sound_items::snd_activate.play();
+	}
 }
 
 void Switch::stepOff() {
@@ -96,14 +98,19 @@ void Switch::stepOff() {
 
 int RodTile::getTileValue() const {
 
-	if(!entityManager->player->hasRod) {
+	int offset = entityManager->player->hasSuperRod ? 11 : 0;
+
+	if(!entityManager->player->hasRod && !entityManager->player->hasSuperRod) {
 		return startIndex;
 	}
 	
-	FloorTile* rodTile = entityManager->player->rod; 
+	FloorTile* rodTile = NULL;
+	if(entityManager->player->rod.size() != 0) {
+		rodTile = entityManager->player->rod.back();
+	}
 	
 	if(rodTile == NULL) {
-		return startIndex + 1;
+		return startIndex + offset + 1;
 	}
 	
 	TileType rodTileType = rodTile->tileType();
@@ -111,29 +118,29 @@ int RodTile::getTileValue() const {
 	// a switch statement with tiletype is what caused dofloorsteps to lag. will this also cause problems?
 	switch(rodTileType) {
 		case TileType::Death:
-			return startIndex + 1 + 1;
+			return startIndex + offset + 1 + 1;
 			break;
 		case TileType::Floor:
-			return startIndex + 1 + 2;
+			return startIndex + offset + 1 + 2;
 			break;
 		case TileType::Glass:
-			return startIndex + 1 + 3;
+			return startIndex + offset + 1 + 3;
 			break;
 		case TileType::Switch:
-			return startIndex + 1 + 4;
+			return startIndex + offset + 1 + 4;
 			break;
 		case TileType::Exit:
-			return startIndex + 1 + 5;
+			return startIndex + offset + 1 + 5;
 			break;
 		case TileType::Copy:
-			return startIndex + 1 + 6;
+			return startIndex + offset + 1 + 6;
 			break;
 		case TileType::Bomb:
 			// program didnt like static casting to a bomb here, so we are doing this
-			return startIndex + 1 + 7 + (rodTile->getTileValue() == rodTile->startIndex);
+			return startIndex + offset + 1 + 7 + (rodTile->getTileValue() == rodTile->startIndex);
 			break;
 		default:
-			return startIndex + 1 + 9;
+			return startIndex + offset + 1 + 9;
 			break;	
 	}
 	

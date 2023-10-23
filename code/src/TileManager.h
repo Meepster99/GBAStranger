@@ -61,7 +61,8 @@ class TileManager {
 public:
 
 	FloorTile* floorMap[14][9];
-
+	
+	// these tiles are getting,, like gods this is just excessive
 	Exit* exitTile = NULL;
 	RodTile* rodTile = NULL;
 	LocustTile* locustTile = NULL;
@@ -69,6 +70,10 @@ public:
 	
 	WordTile* voidTile1 = NULL;
 	WordTile* voidTile2 = NULL;
+	
+	SpriteTile* memoryTile = NULL;
+	SpriteTile* wingsTile = NULL;
+	SpriteTile* swordTile = NULL;
 
 	Game* game = NULL;
 	Floor floorLayer;
@@ -102,6 +107,7 @@ public:
 	void updateRod();
 	void updateLocust();
 	void updateVoidTiles();
+	void updateBurdenTiles();
 	
 	void fullDraw();
 	
