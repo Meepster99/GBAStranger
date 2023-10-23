@@ -46,23 +46,33 @@ palette = {
 
 validChars = '_.%s%s' % (string.ascii_lowercase, string.digits)
 
-def getNeededSprites():
+def getNeededSprites(thisFile = False):
 	
 	codeFolder = "../../code/src/"
 	
-	codeFiles = [f for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
+	codeFiles = [os.path.join(codeFolder, f) for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
 	
-	codeFiles.remove("dataWinIncludes.h")
+	codeFiles.remove("../../code/src/dataWinIncludes.h")
+	# this will also include our own file, for special things needed for customfloortiles 
+	#codeFiles.append(__file__)
+	
+	if thisFile:
+		codeFiles = [__file__]
 	
 	pattern = r'dw_\w+'
 	matching_references = set()
 	
 	for file in codeFiles:
-			file_path = os.path.join(codeFolder, file)
-			with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+			with open(file, 'r', encoding='utf-8', errors='ignore') as f:
 				content = f.read()
 				matches = re.findall(pattern, content)
 				matching_references.update(matches)
+	
+	if thisFile:
+		# remove font stuff, and tile stuff(i think)
+		# i could do this via a filter, but this is safer 
+		matching_references.remove("dw_fnt_text_12")
+		
 	
 	matching_references_noheaders = set([ s[3:] for s in list(matching_references) ])
 	
@@ -242,45 +252,6 @@ def writeBitmap(inputImageDontTouchLol, dest):
 	with open(newDest, "wb") as f:
 		f.write(image.tobytes())
 
-def preformatSprites():
-	
-	# this func rlly needs a rework
-	# also gods putting it onan ssd rlly made it faster, but still, it feels unacceptable.
-	
-	print("preformatting sprites to fit the goofy ahh format from when i first got them")
-
-	currentFolder = "../ExportData/Export_Textures_Padded/"
-	outputFolder = "./Sprites_Padded/"
-	
-	createFolder("./Sprites_Padded/")
-	
-	
-	png_files = [f for f in os.listdir(currentFolder) if f.lower().endswith('.png')]
-	
-	data = {}
-	
-	for filename in png_files:
-	
-		foldername = filename.rsplit("_", 1)[0]
-		
-		if foldername not in data:
-			data[foldername] = []
-			
-		data[foldername].append(filename)
-	
-	shutil.rmtree(outputFolder)
-	
-	for folder, filenames in data.items():
-		destFolder = os.path.join(outputFolder, folder)
-		os.makedirs(destFolder)
-		
-		for file in filenames:
-			shutil.copyfile(os.path.join(currentFolder, file), os.path.join(destFolder, file))
-
-	print("done preformatting")
-
-spriteSuccess = 0
-spriteTotal = 0
 
 """
 validSizes = set([
@@ -307,338 +278,24 @@ validSizes = set([
 (16, 32),
 ])
 
-def convertSprites(spritePath, outputPath):
+def copyIfChanged(inputFile, outputPath):
 	
-	global spriteSuccess
-	global spriteTotal
-	
-	contents = os.listdir(spritePath)
-	folders = [item for item in contents if os.path.isdir(os.path.join(spritePath, item))]
-	
-	totalFolders = len(folders)
-	
-	spriteTotal = totalFolders
+	if not os.path.isfile(os.path.join(outputPath, os.path.basename(inputFile))):
+		shutil.copy(inputFile, outputPath)
+		return True
+	else:
+		thisFileHash = hashlib.md5(open(inputFile, 'rb').read()).hexdigest()
+		otherFileHash = hashlib.md5(open(os.path.join(outputPath, os.path.basename(inputFile)), 'rb').read()).hexdigest()
 
-	for i, folder in enumerate(folders):
+		if thisFileHash != otherFileHash:
+			shutil.copy(inputFile, outputPath)
+			return True
 	
-		print("working on {:50s} {:5d}/{:5d}   {:6.2f}% done".format(folder, i, totalFolders, 100*i/totalFolders))
-	
-		currentFolder = os.path.join(spritePath, folder)
-	
-		testIfFile = os.path.join(outputPath, "dw_" + folder.lower() + ".json")
+	return False
 
-		if os.path.isfile(testIfFile):
-			print("skipping {:s}, already done padded".format(testIfFile))
-			continue
-	
-		png_files = [f for f in os.listdir(currentFolder) if f.lower().endswith('.png')]
-		
-		# THIS MAY BE A BIG MISTAKE
-		png_files = sorted(png_files)
-		
-		max_width = 0
-		total_height = 0
-		max_height = 0 
-		
-		pngFileImages = []
-		
-		# Determine the maximum width and calculate the total height
-		for png_file in png_files:
-			image = Image.open(os.path.join(currentFolder, png_file))
-			width, height = image.size
-			max_width = max(max_width, width)
-			total_height += height
-			max_height = max(max_height, height)
-			pngFileImages.append(image)
-		
-		if (max_width, max_height) not in validSizes:
-			print("skipping, lets just hope that it wasnt needed <3")
-			continue
-		
-		total_height = max_height * len(png_files)
-		
-		# Create a new blank image to stack PNGs vertically
-		stacked_image = Image.new('RGBA', (max_width, total_height))
-		
-		# Paste each PNG file onto the stacked image
-		y_offset = 0
-		#for png_file in png_files:
-			#image = Image.open(os.path.join(currentFolder, png_file))
-		for image in pngFileImages:
-			width, height = image.size
-			image = image.convert("RGBA")
-			stacked_image.paste(image, (0, y_offset))
-			y_offset += max_height
-
-		cyan_background = Image.new("RGBA", (max_width, total_height), (0, 255, 255, 255))
-		cyan_background.paste(stacked_image, (0, 0), stacked_image)
-		
-		cyan_background = cyan_background.convert("RGB")
-
-		tempImage = cyan_background
-		
-		# this rlly needs to become all one func, its so dumb how one appends the dw and another doesnt
-		
-		writeBitmap(tempImage, os.path.join(outputPath, folder + ".bmp"))
-		
-		outputJson = {
-			"type": "sprite_tiles",
-			"height": max_height
-		}
-	
-		spriteSuccess += 1
-	
-		with open(os.path.join(outputPath, "dw_" + folder.lower() + ".json"), "w") as f:
-			json.dump(outputJson, f)
-		
-		pass
-		
-	pass
-
-def convertAllSprite(outputPath):
-	
-	preformatSprites()
-	
-	# remove all sprites in the folder bc later on we are going to be passing on dupes.
-	shutil.rmtree(outputPath)
-
-	os.makedirs(outputPath)
-	
-	convertSprites("./Sprites_Padded/.", outputPath)
-	convertSprites("../ExportData/Export_Textures/Sprites/.", outputPath)
-	
-	global spriteSuccess
-	global spriteTotal
-	
-	print("we converted {:6.2f}% sprites({:d}/{:d}), i hope thats acceptable.".format(100*spriteSuccess/spriteTotal, spriteSuccess, spriteTotal))
-	
-	pass
-
-# goofy 
-# key val is sprite name, sprite path
-bigSpriteData = {}
-
-def generateBigSpritePaths(spritePath):
-
-	# gods looking back on all of the other code i wrote like, the progress bars mean nothing tbh
-	
-	# TODO, THESE IMAGES SHOULD REALLY BE CACHED
-	
-	contents = os.listdir(spritePath)
-	folders = [item for item in contents if os.path.isdir(os.path.join(spritePath, item))]
-
-	for i, folder in enumerate(folders):
-	
-		currentFolder = os.path.join(spritePath, folder)
-
-		png_files = [f for f in os.listdir(currentFolder) if f.lower().endswith('.png')]
-		
-		png_files = sorted(png_files)
-		
-		max_width = 0
-		total_height = 0
-		max_height = 0 
-		
-		for png_file in png_files:
-			image = Image.open(os.path.join(currentFolder, png_file))
-			width, height = image.size
-			max_width = max(max_width, width)
-			total_height += height
-			max_height = max(max_height, height)
-		
-		if (max_width, max_height) in validSizes:
-		
-			bigSpriteData[folder] = None
-		
-			#if folder in bigSpriteData:
-			#	del bigSpriteData[folder]
-		
-			continue
-			
-		if folder in bigSpriteData and bigSpriteData[folder] == None:
-			continue
-		
-		temp = {
-			"spritePath": currentFolder,
-			"maxWidth": max_width,
-			"maxHeight": max_height,
-		}
-		
-		if folder not in bigSpriteData:
-			bigSpriteData[folder] = temp
-		else:
-			# check if our current numbers will fit better 
-			if max_width % 16 == 0 and bigSpriteData[folder]["maxWidth"] % 16 != 0:
-				bigSpriteData[folder] = temp
-			elif max_height % 16 == 0 and bigSpriteData[folder]["maxHeight"] % 16 != 0:
-				bigSpriteData[folder] = temp
-	
-	pass
-
-def convertBigSprite(spriteName, spritePath, outputPath):
-
-	# CONVERTING BIGSPRITE TO 64X64 WILL SAVE SPRITE INDICIES
-
-	# for now, im just going to have all these be 16x16 sprites, simply bc thats what my system works with
-
-	png_files = [f for f in os.listdir(spritePath) if f.lower().endswith('.png')]
-
-	png_files = sorted(png_files)
-
-	max_width = 0
-	total_height = 0
-	max_height = 0 
-	
-	images = []
-	
-	# Determine the maximum width and calculate the total height
-	for png_file in png_files:
-		image = Image.open(os.path.join(spritePath, png_file))
-		width, height = image.size
-		max_width = max(max_width, width)
-		total_height += height
-		max_height = max(max_height, height)
-		
-		images.append(image)
-		
-	total_height = max_height * len(png_files)
-	
-	# Create a new blank image to stack PNGs vertically
-	#stacked_image = Image.new('RGBA', (max_width, total_height))
-	
-	tiles = []
-	
-	# Paste each PNG file onto the stacked image
-	y_offset = 0
-	#for png_file in png_files:
-	for image in images:
-		#image = Image.open(os.path.join(spritePath, png_file))
-		width, height = image.size
-		image = image.convert("RGBA")
-		#stacked_image.paste(image, (0, y_offset))
-		y_offset += max_height
-
-		cyan_background = Image.new("RGBA", (max_width, total_height), (0, 255, 255, 255))
-		cyan_background.paste(image, (0, 0), image)
-	
-		cyan_background = cyan_background.convert("RGB")
-
-		#cyan_background.save("test.png")
-	
-		tempImage = np.array(cyan_background)
-	
-		# gods so many of these funcs could, and should of been standaridized
-		
-
-		
-		for y in range(0, max_height, 16):
-			for x in range(0, max_width, 16):
-			
-				xMax = min(x + 16, max_width)
-				yMax = min(y + 16, max_height)
-				
-				idrk = tempImage[y:yMax, x:xMax]
-				
-				correctSize = np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8)
-				
-				correctSize[0:yMax-y, 0:xMax-x] = idrk
-				
-				# why does this func repeat values, so dumb
-				#idrk = np.resize(idrk, (16, 16, 3))
-				
-				tiles.append(correctSize)
-
-	tempImage = Image.fromarray(np.vstack(tiles))
-	
-	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
-	# the width of the bigsprite 
-	#,, possibly the loading position of the bigsprite? do i have access to that easily?
-	
-	writeBitmap(tempImage, os.path.join(outputPath, spriteName.lower() + ".bmp"))
-	outputJson = {
-		"type": "sprite_tiles",
-		"height": 16,
-	}
-	with open(os.path.join(outputPath, "dw_" + spriteName.lower() + ".json"), "w") as f:
-		json.dump(outputJson, f)
-	
-	return True
-
-def convertBigSpriteWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
-
-	while not shouldStop.is_set():
-			
-			try:
-				data = jobQueue.get(timeout = 0.5)
-			except queue.Empty:
-				time.sleep(0.001)
-				continue
-
-			spriteName, spritePath, outputPath = data
-
-			res = convertBigSprite(spriteName, spritePath, outputPath)
-			
-			returnQueue.put([spriteName, res])
-
-def convertAllBigSprite(outputPath):
-
-	print("converting bigsprites")
-
-	shutil.rmtree(outputPath)
-	os.makedirs(outputPath)
-	
-	
-	# first, calculate how many total bigsprites ther
-	generateBigSpritePaths("./Sprites_Padded/")
-	generateBigSpritePaths("../ExportData/Export_Textures/Sprites/")
-	
-	for k, v in [ [k, v] for k, v in bigSpriteData.items() ]:
-		if bigSpriteData[k] is None:
-			del bigSpriteData[k]
-	
-	# remove nones from the items
-	
-	successCount = 0
-	
-	testData = [  [k, v] for k, v in bigSpriteData.items() ] # does looping through a list here allow python to cache file loads ahead of time?
-	
-	pool = PoolQueue(convertBigSpriteWorker)
-	
-	pool.start()
-	
-	#i = 0
-	#for spriteName, data in bigSpriteData.items():
-	for spriteName, data in testData:
-		#i += 1
-		
-		#print("working on {:50s} {:5d}/{:5d}   {:6.2f}% done".format(spriteName, i, len(bigSpriteData), 100*i/len(bigSpriteData)))
-		
-		#res = convertBigSprite(spriteName, data["spritePath"], outputPath)
-		
-		#if res:
-		#	successCount += 1
-		
-		pool.send([spriteName, data["spritePath"], outputPath])
-	
-		
-	
-	#print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
-	
-	
-	resData = pool.join()
-	for spriteName, res in resData.items():
-		if res:
-			successCount += 1
-	
-	
-	print("we converted {:6.2f}% bigSprites({:d}/{:d}), i hope thats acceptable.".format(100*successCount/len(bigSpriteData), successCount, len(bigSpriteData)))
-	
-	print("done converting bigsprites")
-
-	pass
-	
 def convertTiles(outputPath):
 
+	print("converting tiles")
 
 	inputPath = "../ExportData/Export_Textures/Backgrounds/."
 	
@@ -751,10 +408,12 @@ def convertTiles(outputPath):
 	
 		# gods what is the difference between a sprite tiles and a sprite??
 		
-
+	print("done converting tiles")
 	pass
 
 def convertFonts(outputPath):
+
+	print("converting fonts")
 
 	# https://github.com/krzys-h/UndertaleModTool/blob/7b876ad457eca5cdd69957dc02ef57a569412e5e/UndertaleModTool/Scripts/Resource%20Unpackers/ExportFontData.csx#L4
 	
@@ -763,8 +422,6 @@ def convertFonts(outputPath):
 	inputPath = "../ExportData/Export_Fonts/."
 	
 	fontImageList = [item for item in os.listdir(inputPath) if item.lower().endswith('.png') ]
-	
-	#fontImageList = ["fnt_text_12.png"]
 	
 	for font in fontImageList:
 		
@@ -894,10 +551,187 @@ constexpr bn::sprite_font dw_{:s}_sprite_font(
 		""".format(name, name, name, name, name, name, name, name, name)) # im tired for this.
 			
 	fontDataFile.close()
+	
+	copyIfChanged("fontData.h", "../../code/src/")
 			
+	print("done converting fonts")
 		
 	pass
 
+def getSpriteDimensions(spriteName, padded):
+
+	if getSpriteDimensions.paddedSpriteList is None:
+		getSpriteDimensions.paddedSpriteList = [f for f in os.listdir("../ExportData/Export_Textures_Padded/") if f.lower().endswith('.png')]
+
+	paddedInputPath = "../ExportData/Export_Textures_Padded/"
+	inputPath = "../ExportData/Export_Textures/Sprites/" + spriteName
+	
+	spritePath = paddedInputPath if padded else inputPath
+	
+	png_files = []
+	
+	search_prefix = spriteName
+
+	pattern = re.compile(r'^' + re.escape(search_prefix) + r'_\d+\.png')
+
+	png_files = [filename for filename in getSpriteDimensions.paddedSpriteList if pattern.search(filename)]
+
+	pngFileImages = []
+	
+	max_width = -1
+	max_height = -1
+	
+	#print(png_files)
+	
+	for png_file in png_files:
+		image = Image.open(os.path.join(spritePath, png_file))
+		width, height = image.size
+		max_width = max(max_width, width)
+		max_height = max(max_height, height)
+		pngFileImages.append(image)
+		
+	return [(max_width, max_height), pngFileImages]
+
+getSpriteDimensions.paddedSpriteList = None
+
+def convertSprite(spriteName, spriteImages, dimensions):
+
+	max_width, max_height = dimensions
+
+	total_height = max_height * len(spriteImages)
+	
+	# Create a new blank image to stack PNGs vertically
+	#stacked_image = Image.new('RGBA', (max_width, total_height))
+	
+	tiles = []
+	
+	# Paste each PNG file onto the stacked image
+	y_offset = 0
+	#for png_file in png_files:
+	for image in spriteImages:
+		#image = Image.open(os.path.join(spritePath, png_file))
+		width, height = image.size
+		image = image.convert("RGBA")
+		#stacked_image.paste(image, (0, y_offset))
+		y_offset += max_height
+
+		cyan_background = Image.new("RGBA", (max_width, total_height), (0, 255, 255, 255))
+		cyan_background.paste(image, (0, 0), image)
+	
+		cyan_background = cyan_background.convert("RGB")
+
+		#cyan_background.save("test.png")
+	
+		tempImage = np.array(cyan_background)
+	
+		# gods so many of these funcs could, and should of been standaridized
+		
+
+		
+		for y in range(0, max_height, 16):
+			for x in range(0, max_width, 16):
+			
+				xMax = min(x + 16, max_width)
+				yMax = min(y + 16, max_height)
+				
+				idrk = tempImage[y:yMax, x:xMax]
+				
+				correctSize = np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8)
+				
+				correctSize[0:yMax-y, 0:xMax-x] = idrk
+				
+				# why does this func repeat values, so dumb
+				#idrk = np.resize(idrk, (16, 16, 3))
+				
+				tiles.append(correctSize)
+
+	tempImage = Image.fromarray(np.vstack(tiles))
+	
+	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
+	# the width of the bigsprite 
+	#,, possibly the loading position of the bigsprite? do i have access to that easily?
+	
+	outputPath = "./formattedOutput/allSprites/"
+	
+	writeBitmap(tempImage, os.path.join(outputPath, spriteName.lower() + ".bmp"))
+	outputJson = {
+		"type": "sprite_tiles",
+		"height": 16,
+	}
+	with open(os.path.join(outputPath, "dw_" + spriteName.lower() + ".json"), "w") as f:
+		json.dump(outputJson, f)
+
+	pass
+
+def genSprite(spriteName):
+
+	# generates any fucking sprite i want, on demand
+	
+	# if this sprite is a bg thing,,, dont 
+	
+	paddedInputPath = "../ExportData/Export_Textures_Padded/"
+	inputPath = "../ExportData/Export_Textures/Sprites/"
+	
+	spriteName = spriteName
+	prefixSpriteName = spriteName
+	
+	if spriteName.startswith("dw_"):
+		spriteName = spriteName[3:]
+	else:
+		prefixSpriteName = "dw_" + spriteName
+		
+	if os.path.isfile(os.path.join("./formattedOutput/allSprites/", prefixSpriteName + ".bmp")):
+		return
+	
+	if not os.path.isfile(os.path.join(paddedInputPath, spriteName + "_0.png")):
+		return
+	
+	
+	
+		
+	print("generating " + spriteName)
+	
+	
+	# ok so,,, first try it padded, then unpadded right?
+	# actually first is detecting if its a bigsprite.
+	
+		
+	# this could be sped up by passing the image files to the actual funcs.
+	# but im tired 
+	paddedSpriteSize, paddedSpriteImages = getSpriteDimensions(spriteName, True)
+	spriteSize, spriteImages = getSpriteDimensions(spriteName, False)
+	
+	if paddedSpriteSize in validSizes:
+		# paddedsprite convert 
+		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize)
+	elif spriteSize in validSizes:
+		# normal sprite convert
+		convertSprite(spriteName, spriteImages, spriteSize)
+	else:
+		# bigsprite convert
+		
+		paddedWidthErr = paddedSpriteSize[0] % 16
+		paddedHeightErr = paddedSpriteSize[1] % 16
+		
+		widthErr = spriteSize[0] % 16
+		heightErr = spriteSize[1] % 16
+		
+		paddedErr = paddedWidthErr * paddedHeightErr
+		err = widthErr * heightErr
+		
+		if paddedErr <= err:
+			#convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize)
+			pass
+		else:
+			#convertSprite(spriteName, spriteImages, spriteSize)
+			pass	
+			
+		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize)
+			
+	print("done generating " + spriteName)
+	
+	pass
+	
 def generateCustomFloorBackground(outputPath):
 
 	print("generating custom floor tiles")
@@ -923,7 +757,7 @@ def generateCustomFloorBackground(outputPath):
 	
 	for i, spriteName in enumerate(floorTileSprites):
 		
-		testPath = os.path.join("./formattedOutput/sprites/", spriteName + ".bmp")
+		testPath = os.path.join("./formattedOutput/allSprites/", spriteName + ".bmp")
 		
 		if not os.path.isfile(testPath):
 			print("unable to find {:s}, bruh".format(spriteName))
@@ -971,39 +805,61 @@ def generateCustomFloorBackground(outputPath):
 
 	temp[temp == 2] = 1
 	temp[temp == 0] = 2
-	tiles.append(temp)
+	
+	tiles.append(temp[0:temp.shape[0]-32, 0:16])
+	
+	# change the second to last blank slot in temp to be a mesh of the I and D 
+	# actually, i think the I and D fit in one tile, so only the second to last will be modded
+	# change the last slot to be the remnants of the d 
+	
+	iIndex = 16 * (ord('I') - ord('!'))
+	dIndex = 16 * (ord('D') - ord('!'))
+	iTile = temp[iIndex:iIndex+16, 0:16]
+	dTile = temp[dIndex:dIndex+16, 0:16]
+	
+	iTile[0:16, 4:12] = dTile[0:16, 0:8]
+	tiles.append(iTile)
+	
+	tempNewTile = np.zeros((16, 16), dtype=np.uint8)
+	tempNewTile[0:16, 0:4] = dTile[0:16, 4:8]
+	tempNewTile[tempNewTile == 2] = 1
+	tempNewTile[tempNewTile == 0] = 2
+	tiles.append(tempNewTile)
+
+
+	#tiles.append(temp[temp.shape[0]-16:temp.shape[0], 0:16])
+	
 	#print(temp.shape, stackedTiles.shape)
 	#stackedTiles = np.vstack((stackedTiles, temp))
 	
 	# tiles for locust 
-	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_locust_idol_menu.bmp"))
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_locust_idol_menu.bmp"))
 	temp[temp == 0] = 2
 	tiles.append(temp)
 	
 	# tiles for rod 
-	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_voidrod_icon.bmp"))
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_voidrod_icon.bmp"))
 	temp[temp == 0] = 2
 	tiles.append(temp)
 	
 	# tiles for super rod 
-	temp = np.array(Image.open("./formattedOutput/sprites/dw_spr_voidrod_icon2.bmp"))
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_voidrod_icon2.bmp"))
 	temp[temp == 0] = 2
 	tiles.append(temp)
 	
 	# tiles for items
-	temp = np.array(Image.open("./formattedOutput/bigSprites/dw_spr_items.bmp"))
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_items.bmp"))
 	temp[temp == 0] = 2
 	tiles.append(temp[16:32, 0:16])
 	tiles.append(temp[32:48, 0:16])
 	tiles.append(temp[48:64, 0:16])
 	
-	temp = np.array(Image.open("./formattedOutput/bigSprites/dw_spr_items_cif.bmp"))
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_items_cif.bmp"))
 	temp[temp == 0] = 2
 	tiles.append(temp[16:32, 0:16])
 	tiles.append(temp[32:48, 0:16])
 	tiles.append(temp[48:64, 0:16])
-	
-	
+
 	stackedTiles = np.vstack(tiles).tolist()
 	
 	reversePalette = {
@@ -1139,8 +995,11 @@ def generateIncludes(folders):
 
 	graphicsFiles = set([f for f in os.listdir(graphicsFolder) if f.lower().endswith('.bmp') ])
 	
-	matching_references, neededSpritesNoHeaders  = getNeededSprites()
-
+	matching_references, neededSpritesNoHeaders = getNeededSprites()
+	
+	for spriteName in matching_references:
+		genSprite(spriteName)
+	
 	output = []
 	
 	# this option is slower than just using if statements, but is still like, 
@@ -1169,38 +1028,20 @@ def generateIncludes(folders):
 				# this should rlly be checking the hashes of the images tbh,, 
 				# i wonder/worry that is to expensive tho
 
+				
+				
 				graphicName = os.path.basename(file).split(".")[0]
 				
 				imageFileName = os.path.basename(file).split(".")[0] + ".bmp"
 				jsonFileName = os.path.basename(file).split(".")[0] + ".json"
 				
-				if imageFileName not in graphicsFiles:
+				
+				res = copyIfChanged(os.path.join(folder, imageFileName), graphicsFolder)
+				if res:
 					print(CYAN + "copying over {:s}".format(graphicName) + RESET)
-					shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
-					shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
-				else:
-					# check hash
-					
-					graphicsFile = os.path.join(graphicsFolder, imageFileName)
-					graphicsFileHash = hashlib.md5(open(graphicsFile,'rb').read()).hexdigest()
-					
-					thisGraphicsFile = os.path.join(folder, imageFileName)
-					thisGraphicsFileHash = hashlib.md5(open(thisGraphicsFile,'rb').read()).hexdigest()
-					
-					if graphicsFileHash != thisGraphicsFileHash:
-						print(CYAN + "copying over {:s}".format(graphicName) + RESET)
-					
-						shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
-						shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
-					else:
-						graphicsJsonHash = hashlib.md5(open(os.path.join(graphicsFolder, jsonFileName),'rb').read()).hexdigest()
-						thisGraphicsJsonHash = hashlib.md5(open(os.path.join(folder, jsonFileName),'rb').read()).hexdigest()
-						
-						if graphicsJsonHash != thisGraphicsJsonHash:
-							print(CYAN + "copying over {:s}".format(graphicName) + RESET)
-							#shutil.copy(os.path.join(folder, imageFileName), graphicsFolder)
-							shutil.copy(os.path.join(folder, jsonFileName), graphicsFolder)
-					
+				res = copyIfChanged(os.path.join(folder, jsonFileName), graphicsFolder)
+				
+				
 					
 	f = open("dataWinIncludes.h", "w")
 	f.write("#pragma once\n")
@@ -1246,13 +1087,10 @@ def generateIncludes(folders):
 	for line in output:
 		f.write(line + "\n")
 	f.close()
-			
-	currentHash = hashlib.md5(open("dataWinIncludes.h",'rb').read()).hexdigest()
-	otherHash = hashlib.md5(open(os.path.join(codeFolder, "dataWinIncludes.h"),'rb').read()).hexdigest()
-	
-	if otherHash != currentHash:
+		
+	res = copyIfChanged("dataWinIncludes.h", "../../code/src/")
+	if res:
 		print(CYAN + "includes were changed, copying" + RESET)
-		shutil.copy("dataWinIncludes.h", "../../code/src/")
 	
 	print("done generating include file")
 	
@@ -1260,15 +1098,16 @@ def generateIncludes(folders):
 	
 def generateAllIncludes():
 	os.chdir(os.path.dirname(__file__))
-	generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/bigSprites/"])
+	#generateIncludes(["./formattedOutput/sprites/", "./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/bigSprites/"])
+	generateIncludes(["./formattedOutput/tiles/", "./formattedOutput/fonts/", "./formattedOutput/customFloor/", "./formattedOutput/customEffects/", "./formattedOutput/allSprites/"])
 	
 def main():
 
+	os.chdir(os.path.dirname(__file__))
+	
 	if len(sys.argv) != 1:
 		generateAllIncludes()
 		exit(0)
-
-	os.chdir(os.path.dirname(__file__))
 	
 	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
 	#return 
@@ -1280,47 +1119,42 @@ def main():
 	
 	# run ExportAllFontData, copy that folder to this folder.
 	
+	# these removes are only called on a cleanrun, the makefile just runs genallincludes
+	shutil.rmtree("./formattedOutput/")
+	# keeping this remove here as a sanitary measue
+	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
+	
 	
 	createFolder("./formattedOutput/")
-	createFolder("./formattedOutput/sprites/")
+	#createFolder("./formattedOutput/sprites/")
 	createFolder("./formattedOutput/fonts/")
 	createFolder("./formattedOutput/tiles/")
 	createFolder("./formattedOutput/customFloor/")
 	createFolder("./formattedOutput/customEffects/")
-	createFolder("./formattedOutput/bigSprites/")
+	#createFolder("./formattedOutput/bigSprites/")
+	
+	createFolder("./formattedOutput/allSprites/")
 
+	# i really should make createallincldues dynamically call the sprite converters
+	
 	#convertAllSprite("./formattedOutput/sprites/")
 	#convertAllBigSprite("./formattedOutput/bigSprites/")
-	#convertTiles("./formattedOutput/tiles/")
-	#convertFonts("./formattedOutput/fonts/")
+	
+	matching_references, neededSpritesNoHeaders  = getNeededSprites(True)
+	
+	for spriteName in matching_references:
+		genSprite(spriteName)
+	
+	convertTiles("./formattedOutput/tiles/")
+	convertFonts("./formattedOutput/fonts/")
 	generateCustomFloorBackground("./formattedOutput/customFloor/")	
-	#generateEffectsTiles("./formattedOutput/customEffects/")
+	generateEffectsTiles("./formattedOutput/customEffects/")
 
 	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
-
-
-	# keeping this remove here as a sanitary measue
-	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	
 	print("copying over files. this may take a little bit")
 	
 	generateAllIncludes()
-	
-	#shutil.copy("dataWinIncludes.h", "../../code/src/")
-	shutil.copy("fontData.h", "../../code/src/")
-	
-	
-	
-	"""
-	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/graphics/", f)) for f in os.listdir(copyFrom) if f.endswith(".bmp") or f.endswith(".json") ]
-	
-	copyFunc("./formattedOutput/fonts/")
-	copyFunc("./formattedOutput/customEffects/")
-	copyFunc("./formattedOutput/customFloor/")
-	copyFunc("./formattedOutput/sprites/")
-	copyFunc("./formattedOutput/tiles/")
-	copyFunc("./formattedOutput/bigSprites/")
-	"""
 	
 	pass
 	

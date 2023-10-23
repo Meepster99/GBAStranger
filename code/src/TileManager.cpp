@@ -100,7 +100,9 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	floorMap[0][8] = new WordTile(Pos(0, 8));
 	
 	floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
-	floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
+	//floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
+	// we now have a special tile for the 'ID'
+	floorMap[2][8] = new WordTile(Pos(2, 8), '~' + 1, '~' + 2);
 	
 	voidTile1 = static_cast<WordTile*>(floorMap[1][8]);
 	voidTile2 = static_cast<WordTile*>(floorMap[2][8]);
@@ -375,11 +377,11 @@ void TileManager::updateRod() {
 
 void TileManager::updateLocust() {
 
-	if(entityManager->player->inRod(locustTile)) {
+	if(!entityManager->player->inRod(locustTile)) {
 		updateTile(locustTile->tilePos);
 	}
 	
-	if(entityManager->player->inRod(locustCounterTile)) {
+	if(!entityManager->player->inRod(locustCounterTile)) {
 		
 		if(entityManager->player->locustCount != 0) {
 			locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
