@@ -375,6 +375,54 @@ bn::optional<Direction> Diamond::getNextMove() {
 
 // Obstacle
 
+bn::optional<Direction> Obstacle::getNextMove() {
+	
+	if(bumpDirections.size() == 0) {
+		return bn::optional<Direction>();
+	}
+	
+	int tempX = 0;
+	int tempY = 0;
+	
+	for(int i=0; i<bumpDirections.size(); i++) {
+		switch (bumpDirections[i]) {
+			case Direction::Up:
+				tempY -= 1;
+				break;
+			case Direction::Down:
+				tempY += 1;
+				break;
+			case Direction::Left:
+				tempX -= 1;
+				break;
+			case Direction::Right:
+				tempX += 1;
+				break;
+			default:
+				break;
+		}
+	}
+		
+	BN_ASSERT(!(tempX != 0 && tempY != 0), "a object was pushed in,, >=2 nonparallel directions???");
+	
+	bn::optional<Direction> res;
+	
+	if(tempX > 0) {
+		res = Direction::Right;
+	} else if(tempX < 0) {
+		res = Direction::Left;
+	} else if(tempY > 0) {
+		res = Direction::Down;
+	} else if(tempY < 0) {
+		res = Direction::Up;
+	} else {
+		// push dirs canceled out, do nothing
+	}
+	
+	bumpDirections.clear();
+	return bn::optional<Direction>(res);
+}
+
 Chest::Chest(Pos p_) : Obstacle(p_) {
 	spriteTilesArray.clear();
 	spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_regular);
@@ -464,54 +512,6 @@ void Boulder::interact() {
 	effectsManager->doDialogue(temp);
 }
 
-bn::optional<Direction> Obstacle::getNextMove() {
-	
-	if(bumpDirections.size() == 0) {
-		return bn::optional<Direction>();
-	}
-	
-	int tempX = 0;
-	int tempY = 0;
-	
-	for(int i=0; i<bumpDirections.size(); i++) {
-		switch (bumpDirections[i]) {
-			case Direction::Up:
-				tempY -= 1;
-				break;
-			case Direction::Down:
-				tempY += 1;
-				break;
-			case Direction::Left:
-				tempX -= 1;
-				break;
-			case Direction::Right:
-				tempX += 1;
-				break;
-			default:
-				break;
-		}
-	}
-		
-	BN_ASSERT(!(tempX != 0 && tempY != 0), "a object was pushed in,, >=2 nonparallel directions???");
-	
-	bn::optional<Direction> res;
-	
-	if(tempX > 0) {
-		res = Direction::Right;
-	} else if(tempX < 0) {
-		res = Direction::Left;
-	} else if(tempY > 0) {
-		res = Direction::Down;
-	} else if(tempY < 0) {
-		res = Direction::Up;
-	} else {
-		// push dirs canceled out, do nothing
-	}
-	
-	bumpDirections.clear();
-	return bn::optional<Direction>(res);
-}
-
 void Obstacle::startFall() {
 	
 	// copy over the actual sprite time zone into the falldata,
@@ -558,7 +558,7 @@ bn::optional<Direction> MonStatue::getNextMove() {
 		entityManager->addKill(this);
 	}
 
-	return bn::optional<Direction>();
+	return Obstacle::getNextMove();
 }
 
 void LevStatue::startFall() {

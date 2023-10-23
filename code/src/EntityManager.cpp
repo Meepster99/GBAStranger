@@ -1028,12 +1028,12 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 	// this bool is scuffed af in its reset
 	static bool firstRun = true;
 
-	if(firstRun && killedPlayer.contains(player) && tileManager->secretDestinations.size() != 0) {
+	if(firstRun && tileManager->secretDestinations.size() != 0) {
 		
 		firstRun = false;
 		
 		for(int i=0; i<tileManager->secretDestinations.size(); i++) {
-			if(tileManager->secretDestinations[i].second == player->p) {
+			if(tileManager->secretDestinations[i].second == player->p && !tileManager->hasFloor(player->p)) {
 				game->roomManager.gotoRoom(tileManager->secretDestinations[i].first);
 				break;
 			}

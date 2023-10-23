@@ -1414,7 +1414,7 @@ void EffectsManager::wings(Pos p, Direction dir) {
 		}
 		
 		obj->sprite.spritePointer.set_tiles(
-			bn::sprite_tiles_items::dw_spr_void_wings,
+			globalGame->mode == 2 ? bn::sprite_tiles_items::dw_spr_void_wings_cif : bn::sprite_tiles_items::dw_spr_void_wings,
 			0
 		);
 	
@@ -1433,7 +1433,7 @@ void EffectsManager::wings(Pos p, Direction dir) {
 			return true;
 		}
 		obj->sprite.spritePointer.set_tiles(
-			bn::sprite_tiles_items::dw_spr_void_wings,
+			globalGame->mode == 2 ? bn::sprite_tiles_items::dw_spr_void_wings_cif : bn::sprite_tiles_items::dw_spr_void_wings,
 			obj->graphicsIndex % 3
 		);
 		return false;
