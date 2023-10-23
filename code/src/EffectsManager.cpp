@@ -1275,6 +1275,40 @@ void EffectsManager::glassBreak(Pos p) {
 	);
 }
 
+void EffectsManager::sparkle(Pos p, int sparkleLength) {
+	
+	// sparkle
+	createEffect(
+	[p](Effect* obj) mutable -> void {
+		
+		obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_sparkle);
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_sparkle,
+			0
+		);
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		obj->sprite.spritePointer.set_z_order(-3);
+	},
+	[sparkleLength](Effect* obj) mutable -> bool {
+		obj->graphicsIndex++;
+		if(obj->graphicsIndex == sparkleLength) {
+			return true;
+		}
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_sparkle,
+			obj->graphicsIndex % 8
+		);
+		return false;
+	}
+	);
+	
+}
+
 void EffectsManager::voidRod(Pos p, Direction dir) {
 
 	/* 
@@ -1334,37 +1368,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		
 	// gods i really should of just had a class var wtf is wrong with me
 	// im going to change it now, but tbh like, im going to still keep std::functional in, since its helpful for stuff like p and dir
-	
-	// sparkle
-	createEffect(
-	[p, dir](Effect* obj) mutable -> void {
-		
-		obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_sparkle);
-		
-		obj->sprite.spritePointer.set_tiles(
-			bn::sprite_tiles_items::dw_spr_sparkle,
-			0
-		);
-		
-		obj->x = p.x * 16;
-		obj->y = p.y * 16;
-		
-		obj->sprite.updateRawPosition(obj->x, obj->y);
-		obj->sprite.spritePointer.set_z_order(-3);
-	},
-	[](Effect* obj) mutable -> bool {
-		obj->graphicsIndex++;
-		if(obj->graphicsIndex == 8) {
-			return true;
-		}
-		obj->sprite.spritePointer.set_tiles(
-			bn::sprite_tiles_items::dw_spr_sparkle,
-			obj->graphicsIndex
-		);
-		return false;
-	}
-	);
-	
+	sparkle(p);
 	
 	// rod
 	createEffect(
@@ -1604,7 +1608,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		auto tickFunc = [](Effect* obj) mutable -> bool {
 		
 			obj->tempCounter++;
-			if(obj->tempCounter == 120) {
+			if(obj->tempCounter == 30) {
 				return true;
 			}
 			
@@ -1618,7 +1622,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 			return false;
 		};
 		
-		createEffect(createFunc, tickFunc);
+		createEffect(createFunc, tickFunc, 2);
 	
 		p.move(dir);
 	}
@@ -1645,7 +1649,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	auto shockTickFunc = [](Effect* obj) mutable -> bool {
 		
 		obj->tempCounter++;
-		if(obj->tempCounter == 120) {
+		if(obj->tempCounter == 30) {
 			return true;
 		}
 		
@@ -1659,7 +1663,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		return false;
 	};
 	
-	createEffect(shockCreateFunc, shockTickFunc);
+	createEffect(shockCreateFunc, shockTickFunc, 2);
 	
 	// initing this outside of the lambdas will cause char to not swap if someone pauses while dying 
 	// but tbh actually, they cant pause while dying anyway 
@@ -1684,6 +1688,8 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 			obj->graphicsIndex
 		);
 		
+		globalGame->entityManager.player->sprite.setVisible(false);
+		
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
 		
@@ -1693,7 +1699,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	};
 	
 	
-	auto blinkTickFunc = [useTile](Effect* obj) mutable -> bool {
+	auto blinkTickFunc = [p, useTile](Effect* obj) mutable -> bool {
 		
 		obj->tempCounter++;
 		if(obj->tempCounter >= 60) {
@@ -1703,6 +1709,8 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 					*useTile,
 					4
 				);
+				// this looks ugly, but im tired
+				globalGame->effectsManager.sparkle(p, 24);
 			}
 			
 			return false;

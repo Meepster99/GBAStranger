@@ -309,6 +309,7 @@ public:
 	void explosion(Pos p);
 	void sword(Pos p, Direction dir);
 	void monLightning(Pos p, Direction dir);
+	void sparkle(Pos p, int sparkleLength = 8);
 	
 };
 
