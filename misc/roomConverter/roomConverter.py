@@ -505,7 +505,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 
 	if not isHardMode:
 		f.write("// goofy legacy code\n");
-		f.write("#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount, (void*)&roomName::secrets, roomName::secretsCount, (void*)roomName::collisionTiles, (void*)roomName::detailsTiles)\n")
+		f.write("#define LOADROOMMACRO(roomName) Room((void*)&roomName::collision, (void*)&roomName::floor, (void*)&roomName::details, (void*)&roomName::entities, roomName::entityCount, (void*)&roomName::effects, roomName::effectsCount, (void*)&roomName::secrets, roomName::secretsCount, (void*)roomName::exitDest, (void*)roomName::collisionTiles, (void*)roomName::detailsTiles)\n")
 
 		f.write("""
 // should this be different between normal and hard?? idek
@@ -709,6 +709,7 @@ def convertObjects(layerData):
 	floorExport = [ ["Pit" for i in range(9)] for j in range(14)]
 	
 	specialFloorExport = []
+	floorExitDest = []
 	
 	entityExport = []
 	
@@ -797,7 +798,9 @@ def convertObjects(layerData):
 			
 			
 			if layerData["roomName"] in customExitData:
-				specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, customExitData[layerData["roomName"]]))
+				#specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, customExitData[layerData["roomName"]]))
+				print("custom exit from {:s} to {:s}".format(layerData["roomName"], customExitData[layerData["roomName"]]))
+				floorExitDest.append(customExitData[layerData["roomName"]])
 			
 			floorExport[p.x][p.y] = "Exit"
 			
@@ -2144,7 +2147,7 @@ def convertObjects(layerData):
 	
 	specialFloorExport.insert(0, "-1,-1,NULL")
 	
-	return [floorExport, entityExport, effectExport, specialFloorExport]
+	return [floorExport, entityExport, effectExport, specialFloorExport, floorExitDest]
 	
 def convertRoom(data, isHardModePass):
 
@@ -2178,7 +2181,7 @@ def convertRoom(data, isHardModePass):
 	if objectsExport is None:
 		return None
 		
-	floorExport, instanceExport, effectExport, specialFloorExport = objectsExport
+	floorExport, instanceExport, effectExport, specialFloorExport, floorExitDest = objectsExport
 	
 
 	output = []
@@ -2213,6 +2216,11 @@ def convertRoom(data, isHardModePass):
 	
 	output.append("constexpr static inline int secretsCount = {:d};".format(len(specialFloorExport)))
 	
+	if len(floorExitDest) == 0:
+		output.append("constexpr static inline const char* exitDest = NULL;")
+	else:
+		output.append("constexpr static inline const char* exitDest = \"{:s}\\0\";".format(floorExitDest[0]))
+		
 	
 	if "tileset" not in collision or collision["tileset"] is None:
 		collision["tileset"] = "tile_bg_1"

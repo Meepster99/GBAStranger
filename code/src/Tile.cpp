@@ -84,8 +84,12 @@ void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
 	tileManager->updateExit();
+	static unsigned lastMoveCount = 0;
 	if(game->state == GameState::Normal) {
-		bn::sound_items::snd_activate.play();
+		if(lastMoveCount != playerMoveCount) {
+			lastMoveCount = playerMoveCount;
+			bn::sound_items::snd_activate.play();
+		}
 	}
 }
 
@@ -93,7 +97,12 @@ void Switch::stepOff() {
 	pressedCount--;
 	isSteppedOn = false;
 	tileManager->updateExit();
-	bn::sound_items::snd_activate.play();
+	
+	static unsigned lastMoveCount = 0;
+	if(lastMoveCount != playerMoveCount) {
+		lastMoveCount = playerMoveCount;
+		bn::sound_items::snd_activate.play();
+	}
 }
 
 int RodTile::getTileValue() const {

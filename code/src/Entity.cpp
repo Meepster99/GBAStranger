@@ -130,7 +130,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
 		
-		BN_LOG("fhdjlf ", hasSuperRod);
+		//BN_LOG("fhdjlf ", hasSuperRod);
 		
 		if(tile == NULL && rod.size() != 0) {
 			// put tile down 

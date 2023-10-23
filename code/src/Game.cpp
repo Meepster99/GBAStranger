@@ -10,6 +10,7 @@ Game* globalGame = NULL;
 unsigned int frame = 0;
 bool isVblank = false;
 unsigned boobaCount = 0;
+unsigned playerMoveCount = 0;
 
 bn::random randomGenerator = bn::random();
 
@@ -130,8 +131,9 @@ void Game::loadLevel(bool debug) {
 	
 	SecretHolder* secretsPointer = (SecretHolder*)idek.secrets;
 	int secretsCount = idek.secretsCount;
+	const char* exitDest = (const char*)idek.exitDest;
 	
-	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount);
+	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount, exitDest);
 	
 	if(!debug) {
 		doButanoUpdate();

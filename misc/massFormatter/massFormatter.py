@@ -653,10 +653,16 @@ def convertSprite(spriteName, spriteImages, dimensions):
 	
 	outputPath = "./formattedOutput/allSprites/"
 	
+	
+	
+	outputHeight = 16
+	if dimensions in validSizes:
+		outputHeight = dimensions[1]
+	
 	writeBitmap(tempImage, os.path.join(outputPath, spriteName.lower() + ".bmp"))
 	outputJson = {
 		"type": "sprite_tiles",
-		"height": 16,
+		"height": outputHeight,
 	}
 	with open(os.path.join(outputPath, "dw_" + spriteName.lower() + ".json"), "w") as f:
 		json.dump(outputJson, f)
@@ -822,7 +828,6 @@ def generateCustomFloorBackground(outputPath):
 	
 	tempNewTile = np.zeros((16, 16), dtype=np.uint8)
 	tempNewTile[0:16, 0:4] = dTile[0:16, 4:8]
-	tempNewTile[tempNewTile == 2] = 1
 	tempNewTile[tempNewTile == 0] = 2
 	tiles.append(tempNewTile)
 
@@ -1106,6 +1111,7 @@ def main():
 	os.chdir(os.path.dirname(__file__))
 	
 	if len(sys.argv) != 1:
+		#generateCustomFloorBackground("./formattedOutput/customFloor/")	
 		generateAllIncludes()
 		exit(0)
 	

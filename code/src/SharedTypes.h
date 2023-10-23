@@ -72,6 +72,7 @@ typedef unsigned char u8;
 extern unsigned int frame;
 extern bool isVblank;
 extern unsigned boobaCount;
+extern unsigned playerMoveCount;
 
 extern bn::random randomGenerator;
 	
@@ -623,6 +624,8 @@ public:
 	const void* secrets;
 	const int secretsCount;
 	
+	const void* exitDest;
+	
 	const void* collisionTiles;
 	const void* detailsTiles;
 
@@ -631,12 +634,14 @@ public:
 	const void* entities_, const int entityCount_, 
 	const void* effects_, const int effectsCount_,
 	const void* secrets_, const int secretsCount_,
+	const void* exitDest_,
 	const void* collisionTiles_, const void* detailsTiles_
 	) :
 	collision(collision_), floor(floor_), details(details_), 
 	entities(entities_), entityCount(entityCount_), 
 	effects(effects_), effectsCount(effectsCount_),
 	secrets(secrets_), secretsCount(secretsCount_),
+	exitDest(exitDest_),
 	collisionTiles(collisionTiles_), detailsTiles(detailsTiles_)
 	{ }
 	
