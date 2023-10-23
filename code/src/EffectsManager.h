@@ -278,11 +278,7 @@ public:
 	// these things should be static,, but i need them to access the effectList,,, so like, ugh
 	// this should maybe have been a namespace, but idk
 	
-	void glassBreak(Pos p);
-	
-	void voidRod(Pos p, Direction dir);
-	
-	void wings(Pos p, Direction dir);
+
 	
 	void updatePalette(Palette* pal);
 	
@@ -306,6 +302,13 @@ public:
 	
 	void doMenu();
 	
+	
+	void glassBreak(Pos p);
+	void voidRod(Pos p, Direction dir);
+	void wings(Pos p, Direction dir);
+	void explosion(Pos p);
+	void sword(Pos p, Direction dir);
+	void monLightning(Pos p, Direction dir);
 	
 };
 

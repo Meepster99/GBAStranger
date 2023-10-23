@@ -141,5 +141,9 @@ public:
 		return strangerNames[mode];
 	}
 	
+	
+	// this should maybe be its own file
+	void playSound(const bn::sound_item* sound);
+	
 };
 

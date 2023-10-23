@@ -276,6 +276,7 @@ validSizes = set([
 (16, 16),
 (32, 16),
 (16, 32),
+(32, 32),
 ])
 
 def copyIfChanged(inputFile, outputPath):
@@ -645,6 +646,24 @@ def convertSprite(spriteName, spriteImages, dimensions):
 				
 				tiles.append(correctSize)
 
+	outputHeight = 16
+	if dimensions in validSizes:
+		outputHeight = dimensions[1]
+		
+		if dimensions[0] != 16:
+			hstackCount = dimensions[0] // 16
+			
+			if len(tiles) % hstackCount != 0:
+				print("jesus, this should never happen. pray.")
+				exit(1)
+			
+			newTiles = []
+			
+			for i in range(0, len(tiles), hstackCount):
+				newTiles.append(np.hstack(tiles[i:i+hstackCount]))
+				
+			tiles = newTiles
+	
 	tempImage = Image.fromarray(np.vstack(tiles))
 	
 	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
@@ -655,9 +674,7 @@ def convertSprite(spriteName, spriteImages, dimensions):
 	
 	
 	
-	outputHeight = 16
-	if dimensions in validSizes:
-		outputHeight = dimensions[1]
+	
 	
 	writeBitmap(tempImage, os.path.join(outputPath, spriteName.lower() + ".bmp"))
 	outputJson = {

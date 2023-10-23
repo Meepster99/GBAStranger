@@ -69,11 +69,14 @@ void Game::resetRoom(bool debug) {
 		while(state == GameState::Exiting) { // wait for gamestate to no longer be exiting
 			doButanoUpdate();
 		} 
-	}
+		// this one extra update is here for
+		// the mon lightning effect specifically, i think?
+		doButanoUpdate();
 
+	}
+	
 	state = GameState::Loading;
 	save();
-	
 	
 	loadLevel(debug);
 	if(!debug) {
@@ -299,30 +302,37 @@ void Game::run() {
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
-		if(bn::keypad::l_held() || bn::keypad::r_held()) {
-			
-			int debugIncrement = bn::keypad::select_held() ? 5 : 1;
-			
-			if(bn::keypad::l_held()) {
-				for(int i=0; i<debugIncrement; i++) {
-					roomManager.prevRoom();
+		if(bn::keypad::any_held()) {
+			if(bn::keypad::l_held() || bn::keypad::r_held()) {
+				
+				int debugIncrement = bn::keypad::select_held() ? 5 : 1;
+				
+				if(bn::keypad::l_held()) {
+					for(int i=0; i<debugIncrement; i++) {
+						roomManager.prevRoom();
+					}
+				} else {
+					for(int i=0; i<debugIncrement; i++) {
+						roomManager.nextRoom();
+					}
 				}
-			} else {
-				for(int i=0; i<debugIncrement; i++) {
-					roomManager.nextRoom();
-				}
-			}
-			resetRoom(true);
-			
-			miscTimer.restart();
-			
-			while(miscTimer.elapsed_ticks() < FRAMETICKS * 5) { }
-	
-			doButanoUpdate();
-
-			continue;
-		}
+				resetRoom(true);
+				
+				miscTimer.restart();
+				
+				while(miscTimer.elapsed_ticks() < FRAMETICKS * 5) { }
 		
+				doButanoUpdate();
+
+				continue;
+			}
+			
+			// pokemon style reset 
+			if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::start_held() && bn::keypad::select_held()) {
+				bn::core::reset();
+			}
+		}
+			
 		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
 			
 			inputTimer.restart();
@@ -441,4 +451,37 @@ void Game::load() {
 	mode = saveData.mode;
 	roomManager.setMode(mode);
 }
+
+void Game::playSound(const bn::sound_item* sound) {
+	
+	static unsigned prevFrame = -1;
+	static unsigned soundsThisFrame = 0;
+	
+	// could maybe have a queue to store sounds that could be played on future frames?
+	// but in my case, im going to have a SaneSet for sounds already played on this frame 
+	// or maybe just a vector 
+	// actually, no, SaneSet
+	
+	#define MAXSOUNDS 4
+	
+	static SaneSet<const bn::sound_item*, MAXSOUNDS> playedSounds;
+	
+	if(frame != prevFrame) {
+		prevFrame = frame;
+		soundsThisFrame = 0;
+		playedSounds.clear();
+	}
+	
+	if(state == GameState::Normal || state == GameState::Exiting) {
+		if(soundsThisFrame < MAXSOUNDS && !playedSounds.contains(sound)) {
+			sound->play();
+			soundsThisFrame++;
+			playedSounds.insert(sound);
+		}	
+	}	
+}
+
+
+
+
 

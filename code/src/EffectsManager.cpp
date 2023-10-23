@@ -96,6 +96,12 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			}
 			
 			if(boobaCount > 8 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
+				game->playSound(&bn::sound_items::metal_pipe_falling_sound_effect);
+				int lmao = 0;
+				while(lmao < 60 * 5) {
+					lmao++;
+					game->doButanoUpdate();
+				}
 				BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
 			}
 			
@@ -502,6 +508,27 @@ bool EffectsManager::exitRoom() {
 	// i rlly wish all these static vars were more elegant, but im basically 
 	// trying to be safe by being sure that the only place where true returns 
 	// is the end of the func, right after we reset those vars, or something close to that
+	
+	for(int i=0; i<bigSprites.size(); i++) {
+		if(bigSprites[i]->autoAnimate) {
+			if(frame % bigSprites[i]->autoAnimateFrames == 0) {
+				bigSprites[i]->animate();
+			}
+		}
+	}
+	
+	for(auto it = effectList.begin(); it != effectList.end(); ) {
+		
+		bool res = (*it)->animate();
+		
+		if(res) {
+			delete (*it);
+			(*it) = NULL;
+			it = effectList.erase(it);
+		} else {
+			++it;
+		}
+	}
 	
 	static bool firstRun = true;
 	static unsigned int firstFrame = 0;
@@ -1352,6 +1379,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		
 		obj->graphicsIndex = dirConverter[static_cast<int>(dir)];
 		
+		// todo, make this work with the super rod
 		obj->sprite.spritePointer.set_tiles(
 			bn::sprite_tiles_items::dw_spr_void_rod,
 			obj->graphicsIndex
@@ -1457,6 +1485,245 @@ void EffectsManager::wings(Pos p, Direction dir) {
 		createEffect(funcUpDown1, func2);
 		createEffect(funcUpDown2, func2);
 	}
+}
+
+void EffectsManager::explosion(Pos p)  {
+	
+	// spr_explosion, seems that we need two of them, are their poses randomized?
+	
+	auto goofy = [](Effect* obj, Pos goofyP, int offset) mutable -> void {
+	
+		obj->x = goofyP.x * 16;
+		obj->y = goofyP.y * 16;
+
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_explosion,
+			0
+		);
+	
+		obj->x += offset;
+		obj->y += offset;
+	
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+		obj->sprite.spritePointer.set_z_order(-2);
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+		obj->graphicsIndex++;
+
+		if(obj->graphicsIndex == 7 * 4) {
+			return true;
+		}
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_explosion,
+			obj->graphicsIndex % 7
+		);
+		return false;
+	};
+	
+	auto func1 = [p, goofy](Effect* obj) mutable -> void {	
+		goofy(obj, p, 4);
+	};
+	
+	auto func2 = [p, goofy](Effect* obj) mutable -> void {	
+		goofy(obj, p, -4);
+	};
+	
+	createEffect(func1, tickFunc);
+	createEffect(func2, tickFunc);
+	
+}
+
+void EffectsManager::sword(Pos p, Direction dir) {
+	
+	
+	auto createFunc = [p, dir](Effect* obj) mutable -> void {
+		
+		obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_void_rod);
+		
+		// U D L R
+		// R U L D
+		
+		constexpr int dirConverter[4] = {1, 3, 2, 0};
+		
+		obj->graphicsIndex = dirConverter[static_cast<int>(dir)];
+		
+		obj->sprite.spritePointer.set_tiles(
+			globalGame->mode == 2 ? bn::sprite_tiles_items::dw_spr_void_sword_cif : bn::sprite_tiles_items::dw_spr_void_sword,
+			obj->graphicsIndex
+		);
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+		obj->tempCounter++;
+		if(obj->tempCounter == 12) {
+			return true;
+		}
+		return false;
+	};
+	
+	createEffect(createFunc, tickFunc);
+	
+}
+
+void EffectsManager::monLightning(Pos p, Direction dir) {
+	
+	// spr_mon_shock_small for when it kills you
+	
+	// i dont believe this is the right sound 
+	game->playSound(&bn::sound_items::snd_player_damage);
+	
+	p.move(dir);
+	
+	// wow; wtf
+	while(p != globalGame->entityManager.player->p) {
+		auto createFunc = [p, dir](Effect* obj) mutable -> void {
+			
+			obj->sprite.spritePointer.set_tiles(
+				bn::sprite_tiles_items::dw_spr_mon_shock_small,
+				obj->graphicsIndex
+			);
+			
+			if(dir == Direction::Up || dir == Direction::Down) {
+				obj->sprite.spritePointer.set_rotation_angle(90);
+			}
+			
+			obj->x = p.x * 16;
+			obj->y = p.y * 16;
+			
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+		};
+		
+		auto tickFunc = [](Effect* obj) mutable -> bool {
+		
+			obj->tempCounter++;
+			if(obj->tempCounter == 120) {
+				return true;
+			}
+			
+			obj->graphicsIndex = !obj->graphicsIndex;
+			
+			// this should get destroyed once the new level loads, and it being here means we are dead, so like, its only going to return false
+			obj->sprite.spritePointer.set_tiles(
+				bn::sprite_tiles_items::dw_spr_mon_shock_small,
+				obj->graphicsIndex
+			);
+			return false;
+		};
+		
+		createEffect(createFunc, tickFunc);
+	
+		p.move(dir);
+	}
+	
+	// dw_spr_mon_shock
+	
+	auto shockCreateFunc = [p](Effect* obj) mutable -> void {
+			
+			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_mon_shock, bn::sprite_tiles_items::dw_spr_mon_shock_shape_size);
+			
+			obj->sprite.spritePointer.set_tiles(
+				bn::sprite_tiles_items::dw_spr_mon_shock,
+				obj->graphicsIndex
+			);
+			
+			obj->x = p.x * 16;
+			obj->y = p.y * 16;
+			
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+		};
+	
+	
+	auto shockTickFunc = [](Effect* obj) mutable -> bool {
+		
+		obj->tempCounter++;
+		if(obj->tempCounter == 120) {
+			return true;
+		}
+		
+		obj->graphicsIndex = !obj->graphicsIndex;
+		
+		// this should get destroyed once the new level loads, and it being here means we are dead, so like, its only going to return false
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_mon_shock,
+			obj->graphicsIndex
+		);
+		return false;
+	};
+	
+	createEffect(shockCreateFunc, shockTickFunc);
+	
+	// initing this outside of the lambdas will cause char to not swap if someone pauses while dying 
+	// but tbh actually, they cant pause while dying anyway 
+	
+	// these sprites are the gblink sprites, first 4 are swaped through, last one is the final glass, play the glass noise when you get there 
+	// snd_golden
+	
+	// index with 4*mode + dir, dir is up down left right
+	constexpr const bn::sprite_tiles_item* tiles[12] = {
+		&bn::sprite_tiles_items::dw_spr_player_gblink_u, &bn::sprite_tiles_items::dw_spr_player_gblink_d, &bn::sprite_tiles_items::dw_spr_player_gblink_l, &bn::sprite_tiles_items::dw_spr_player_gblink_r,
+		&bn::sprite_tiles_items::dw_spr_lil_gblink_u, &bn::sprite_tiles_items::dw_spr_lil_gblink_d, &bn::sprite_tiles_items::dw_spr_lil_gblink_l, &bn::sprite_tiles_items::dw_spr_lil_gblink_r,
+		&bn::sprite_tiles_items::dw_spr_cif_gblink_u, &bn::sprite_tiles_items::dw_spr_cif_gblink_d, &bn::sprite_tiles_items::dw_spr_cif_gblink_l, &bn::sprite_tiles_items::dw_spr_cif_gblink_r
+	};
+	
+	
+	const bn::sprite_tiles_item* useTile = tiles[4*game->mode + static_cast<int>(entityManager->player->currentDir)];
+	
+	auto blinkCreateFunc = [p, useTile](Effect* obj) mutable -> void {
+			
+		obj->sprite.spritePointer.set_tiles(
+			*useTile,
+			obj->graphicsIndex
+		);
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		obj->sprite.spritePointer.set_z_order(-2); // this is above the player right?
+		
+	};
+	
+	
+	auto blinkTickFunc = [useTile](Effect* obj) mutable -> bool {
+		
+		obj->tempCounter++;
+		if(obj->tempCounter >= 60) {
+			if(obj->tempCounter == 60) {
+				globalGame->playSound(&bn::sound_items::snd_golden);
+				obj->sprite.spritePointer.set_tiles(
+					*useTile,
+					4
+				);
+			}
+			
+			return false;
+		}
+		
+		obj->graphicsIndex = (obj->graphicsIndex + 1) % 4;
+		
+		// this should get destroyed once the new level loads, and it being here means we are dead, so like, its only going to return false
+		obj->sprite.spritePointer.set_tiles(
+			*useTile,
+			obj->graphicsIndex
+		);
+		return false;
+	};
+	
+	createEffect(blinkCreateFunc, blinkTickFunc);
+	
+	
+	
+	
+	
 }
 
 

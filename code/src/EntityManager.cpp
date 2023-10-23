@@ -476,6 +476,8 @@ void EntityManager::doMoves() {
 	if(player->p == playerStart) {
 		shadowMove.reset();
 	}
+
+	// TODO when you have a shadow, and go from being onto a shadow tile to falling(with wings) it spawns the default gray sprite, fix that
 	manageShadows(shadowMove);
 	updateMap(); // this call may not be needed, but im not rishing it
 	if(hasKills()) {
@@ -604,6 +606,9 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 		tileManager->stepOff(tempPos);
 	}
 	
+	game->playSound(&bn::sound_items::snd_enemy_explosion);
+	effectsManager->explosion(tempPos);
+	
 	return res;
 }
 
@@ -704,6 +709,9 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 		shadowList.push_back(temp); 
 		entityList.insert(temp);
 		
+		// this doupdate call fixes buggy sprites why dying right as a shadow is created
+		temp->doUpdate();
+		
 		// shadows should be able to be added to enemylist,, since their moves will be used earlier?
 		// nvm i dont like that.
 		// do i????
@@ -743,6 +751,8 @@ void EntityManager::updateMap() {
 	// do floor updates.
 	
 	tileManager->doFloorSteps();
+	// i could(and maybe should) do haskills here,,, but,, this causes issues with shadows
+	// ill do haskills, and null in kills?
 	if(hasKills()) {
 		return;
 	}
@@ -859,7 +869,10 @@ void EntityManager::updateMap() {
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		if((*it)->entityType() == EntityType::MonStatue) { 
 			// mon statues werent fucking like, working properly at the end of a tick, i think this fixes that
-			if(canSeePlayer((*it)->p)) {
+			bn::optional<Direction> res = canSeePlayer((*it)->p);
+			if(res.has_value()) {
+				// puttint this mon line after, the *it, is it a useafterfree?
+				effectsManager->monLightning((*it)->p, res.value());
 				addKill(*it);
 			}
 		}	

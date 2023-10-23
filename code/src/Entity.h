@@ -744,8 +744,6 @@ public:
 	EntityType entityType() const override { return EntityType::MonStatue; }
 	
 	bn::optional<Direction> getNextMove() override;
-	
-	// spr_mon_shock_small for when it kills you
 
 };
 

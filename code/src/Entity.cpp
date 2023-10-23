@@ -115,6 +115,8 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				if(tempEntity->entityType() != EntityType::Shadow) {
 					entityManager->killEntity(tempEntity);
 					
+					effectsManager->sword(tilePos, currentDir);
+					
 					entityManager->futureEntityMap[tilePos.x][tilePos.y] = entityManager->entityMap[tilePos.x][tilePos.y];
 					
 					return {true, bn::optional<Direction>()};
@@ -552,10 +554,13 @@ bn::optional<Direction> GorStatue::getNextMove() {
 
 bn::optional<Direction> MonStatue::getNextMove() {
 	
-	if(entityManager->canSeePlayer(p)) {
+	bn::optional<Direction> res = entityManager->canSeePlayer(p);
+	
+	if(res.has_value()) {
 		animationIndex = 1;
 		doUpdate();
 		entityManager->addKill(this);
+		effectsManager->monLightning(p, res.value());
 	}
 
 	return Obstacle::getNextMove();

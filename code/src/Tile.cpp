@@ -32,15 +32,18 @@ void Glass::stepOff() {
 	}
 	isAlive = false;
 	tileManager->updateTile(tilePos);
-	if(game->state == GameState::Normal) {
+	// there just isnt a glass break sound
+	/*if(game->state == GameState::Normal) {
 		bn::sound_items::snd_breakglassfloor.play();
-	}
+	}*/
 }
 
 void Bomb::stepOn() {
 	charge++;
 	if(charge == 2) {
 		isAlive = false;
+	
+		game->playSound(&bn::sound_items::snd_vanish);
 		
 		// this may be bad 
 		// break adjacent bomb tiles,,,, i think?
@@ -84,25 +87,14 @@ void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
 	tileManager->updateExit();
-	static unsigned lastMoveCount = 0;
-	if(game->state == GameState::Normal) {
-		if(lastMoveCount != playerMoveCount) {
-			lastMoveCount = playerMoveCount;
-			bn::sound_items::snd_activate.play();
-		}
-	}
+	game->playSound(&bn::sound_items::snd_activate);
 }
 
 void Switch::stepOff() {
 	pressedCount--;
 	isSteppedOn = false;
 	tileManager->updateExit();
-	
-	static unsigned lastMoveCount = 0;
-	if(lastMoveCount != playerMoveCount) {
-		lastMoveCount = playerMoveCount;
-		bn::sound_items::snd_activate.play();
-	}
+	game->playSound(&bn::sound_items::snd_activate);
 }
 
 int RodTile::getTileValue() const {
