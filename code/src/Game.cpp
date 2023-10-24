@@ -112,8 +112,60 @@ void Game::loadLevel(bool debug) {
 	uncompressData(uncompressedCollision, (u8*)idek.collision);
 	uncompressData(uncompressedDetails, (u8*)idek.details);
 	
-	collision.rawMap.bgPointer.set_tiles(*(const bn::regular_bg_tiles_item*)idek.collisionTiles);
-	details.rawMap.bgPointer.set_tiles(*(const bn::regular_bg_tiles_item*)idek.detailsTiles);
+	
+	const bn::regular_bg_tiles_item* collisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
+	const bn::regular_bg_tiles_item* detailsTiles = (const bn::regular_bg_tiles_item*)idek.detailsTiles;
+	
+	int collisionTileCount = collisionTiles->tiles_ref().size();
+	int detailsTileCount = detailsTiles->tiles_ref().size();
+	
+	//BN_ASSERT(collisionTileCount < 128 * 4, "collisionTileCount, wtf = ", collisionTileCount);
+	//BN_ASSERT(detailsTileCount < 128 * 4, "detailsTileCount, wtf = ", detailsTileCount);
+	
+	// i could maybe avoid realloc each time,, but im not 100% sure 
+	// a tile being 4 subtiles always fucks my math up
+	// also, im no longer going to use a bitwise, im just going to add the number of collision tiles 
+	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
+	
+	bn::optional<bn::span<bn::tile>> tileRefOpt = backgroundTiles.vram();
+	BN_ASSERT(tileRefOpt.has_value(), "wtf");
+	bn::span<bn::tile> tileRef = tileRefOpt.value();
+	
+	details.collisionTileCount = collisionTileCount;
+	
+	
+	for(int i=0; i<collisionTileCount; i++) {
+		
+		BN_ASSERT(i < tileRef.size(), "out of bounds when copying tiles");
+		
+		tileRef[i].data[0] = collisionTiles->tiles_ref()[i].data[0];
+		tileRef[i].data[1] = collisionTiles->tiles_ref()[i].data[1];
+		tileRef[i].data[2] = collisionTiles->tiles_ref()[i].data[2];
+		tileRef[i].data[3] = collisionTiles->tiles_ref()[i].data[3];
+		tileRef[i].data[4] = collisionTiles->tiles_ref()[i].data[4];
+		tileRef[i].data[5] = collisionTiles->tiles_ref()[i].data[5];
+		tileRef[i].data[6] = collisionTiles->tiles_ref()[i].data[6];
+		tileRef[i].data[7] = collisionTiles->tiles_ref()[i].data[7];
+	}
+	
+	
+	for(int i=0; i<detailsTileCount; i++) {
+		
+		
+		BN_ASSERT((i | 0b100000000) < tileRef.size(), "out of bounds when copying tiles");
+		
+		tileRef[i | 0b100000000].data[0] = detailsTiles->tiles_ref()[i].data[0];
+		tileRef[i | 0b100000000].data[1] = detailsTiles->tiles_ref()[i].data[1];
+		tileRef[i | 0b100000000].data[2] = detailsTiles->tiles_ref()[i].data[2];
+		tileRef[i | 0b100000000].data[3] = detailsTiles->tiles_ref()[i].data[3];
+		tileRef[i | 0b100000000].data[4] = detailsTiles->tiles_ref()[i].data[4];
+		tileRef[i | 0b100000000].data[5] = detailsTiles->tiles_ref()[i].data[5];
+		tileRef[i | 0b100000000].data[6] = detailsTiles->tiles_ref()[i].data[6];
+		tileRef[i | 0b100000000].data[7] = detailsTiles->tiles_ref()[i].data[7];
+	}
+	
+	//collision.rawMap.bgPointer.set_tiles(backgroundTiles);
+	
 
 	for(int x=0; x<14; x++) { 
 		for(int y=0; y<9; y++) {
@@ -126,6 +178,10 @@ void Game::loadLevel(bool debug) {
 		
 			if(collisionMap[x][y] == 0) {
 				collisionMap[x][y] = 1;
+			}
+			
+			if(detailsMap[x][y] == 0) {
+				detailsMap[x][y] = 1;
 			}
 		}
 	}
@@ -163,7 +219,7 @@ void Game::fullDraw() {
 	BN_LOG("entering fulldraw");
 	
 	collision.draw(collisionMap);
-	details.draw(detailsMap);
+	details.draw(detailsMap, collisionMap);
 
 	tileManager.fullDraw();
 	
@@ -175,7 +231,7 @@ void Game::fullDraw() {
 
 void Game::fullTileDraw() {
 	collision.draw(collisionMap);
-	details.draw(detailsMap);
+	details.draw(detailsMap, collisionMap);
 	tileManager.fullDraw();
 }
 
@@ -196,7 +252,7 @@ void Game::changePalette(int offset) {
 	effectsManager.updatePalette(paletteList[paletteIndex]);
 	
 	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	

@@ -406,8 +406,6 @@ public:
 		rawMap.reloadCells();
 	}
 	
-	
-	
 	void setTile(int x, int y, int tileIndex) { 
 		rawMap.setTile(x, y, tileIndex); 
 	}

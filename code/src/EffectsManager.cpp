@@ -767,7 +767,7 @@ void EffectsManager::doDialogue(const char* data) {
 	
 	tileManager->floorLayer.rawMap.reloadCells();
 	game->collision.reloadCells();
-	game->details.reloadCells();
+	//game->details.reloadCells();
 	
 	effectsLayer.setBigTile(0, 6, 19);
 	effectsLayer.setBigTile(13, 6, 20);
