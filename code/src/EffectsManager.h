@@ -259,7 +259,8 @@ public:
 	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
 	
 	bn::sprite_text_generator textGenerator;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine1;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine2;
 	
 	bn::sprite_text_generator verTextGenerator;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
@@ -321,4 +322,43 @@ public:
 	
 };
 
+class Dialogue {
+public:
 
+	EffectsManager* effectsManager;
+	const char* originalData;
+
+	const char* data;
+		
+	struct Line {
+		char* line = NULL;
+	};
+	
+	struct Message {
+		bn::vector<Line*, 8> msgs;
+	};
+	
+	bn::vector<Message*, 8> strings;
+	
+		
+	Dialogue(EffectsManager* effectsManager_, const char* data_);
+	
+	~Dialogue();
+	
+	int getNextDialogue(char* res);
+
+private:
+	
+	const char* getNextWord();
+	
+	int getNextLine();
+	
+	bool isWordEnd(char c) {
+		return c == ' ' || c == '\n' || c == '\0' || c == '\r';
+	}
+	
+	bool isLineEnd(char c) {
+		return c == '\n' || c == '\0' || c == '\r';
+	}
+
+};

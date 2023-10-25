@@ -397,9 +397,9 @@ void Game::run() {
 	
 	state = GameState::Normal;
 	
-	
+	effectsManager.doDialogue("Did you know every time you sigh, a little bit of happiness escapes?\0");
 		
-	cutsceneManager.introCutscene(); 
+	//cutsceneManager.introCutscene(); 
 	
 	BN_LOG("starting main gameloop");
 	while(true) {

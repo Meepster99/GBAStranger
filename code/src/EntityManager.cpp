@@ -590,8 +590,16 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	if(e->entityType() == EntityType::Player || e->entityType() == EntityType::Shadow) {
 		BN_ERROR("tried to kill either a player or a shadow. thats not a thing you can do fool.");
 	}
+
 	
 	Pos tempPos = e->p;
+	
+	if(tempPos != player->p) {
+		// IS THIS OK
+		// yes, i think?
+		// one thing though is,, enimies deaths NEED to be made into an effect so they can play during a gameover
+		e->doUpdate();
+	}
 	
 	bn::vector<Entity*, 4>::iterator res = entityMap[tempPos.x][tempPos.y].erase(e);
 	entityList.erase(e);
@@ -606,8 +614,12 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 		tileManager->stepOff(tempPos);
 	}
 	
-	game->playSound(&bn::sound_items::snd_enemy_explosion);
-	effectsManager->explosion(tempPos);
+	if(!hasFloor(tempPos)) {
+		game->playSound(&bn::sound_items::snd_fall);
+	} else {
+		game->playSound(&bn::sound_items::snd_enemy_explosion);
+		effectsManager->explosion(tempPos);
+	}
 	
 	return res;
 }

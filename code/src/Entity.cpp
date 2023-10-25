@@ -475,7 +475,7 @@ void Chest::interact() {
 }
 
 // why doesnt this work??
-//const char* const randomBoulderMessages[] = {"jfdklsafs", "a", "123124", "VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2"};
+//const char* const randomBoulderMessages[] = {"jfdklsafs", "a", "123124", "VOID look heres a bunch of  text wow we even have scrolling\nbruh1\nbruh2"};
 
 // i swear, why cant i do this without a struct? idek if the idek var is needed, but im not going to be changing it.
 // messagestr struct used to be here, now in sharedtypes
@@ -486,17 +486,17 @@ void Chest::interact() {
 
 #define MSGSTR(s) { s }
 const MessageStr randomBoulderMessages[] = { 
-	MSGSTR("i rlly hope this works"), 
-	MSGSTR("Did you know every time you\rsigh, a little bit of happiness\rescapes?"), 
-	MSGSTR("VOID look heres a bunch of \rtext wow\rwe even have scrolling\nbruh1\nbruh2"),
-	MSGSTR("jesus christ i need a job"),
-	MSGSTR("ugh"),
-	MSGSTR("i firmly believe that cif is \rbest lord"),
-	MSGSTR("please if you know anyone\rwho has a job in CS, give them\nmy contact info, i need a job"),
-	MSGSTR("this program was written in\rpart by the following:\nexcessive ADHD medication,\rdepression,\na NEET lifestyle,\rand viewers like you<3"),
-	MSGSTR("you might be able to still open\rthe chest when you arent facing it\ndepending on if ive fixed that yet"), // it would be funny to program in an exception for this chest only
-	MSGSTR("uwu\nuwuuwuwuwuwuwu"),
-	MSGSTR("i am so tired. i always wonder\rwho i am doing this all for.\nis it for me? no. is it for anyone else?\ni dont think so. idk"),
+	MSGSTR("i rlly hope this works\0"), 
+	MSGSTR("Did you know every time you sigh, a little bit of happiness escapes?\0"), 
+	MSGSTR("VOID look heres a bunch of  text wow we even have scrolling\nbruh1\nbruh2\0"),
+	MSGSTR("jesus christ i need a job\0"),
+	MSGSTR("ugh\0"),
+	MSGSTR("i firmly believe that cif is best lord\0"),
+	MSGSTR("please if you know anyone who has a job in CS, give them\nmy contact info, i need a job\0"),
+	MSGSTR("this program was written in part by the following:\nexcessive ADHD medication, depression,\na NEET lifestyle, and viewers like you<3\0"),
+	MSGSTR("you might be able to still open the chest when you arent facing it\ndepending on if ive fixed that yet\0"), // it would be funny to program in an exception for this chest only
+	MSGSTR("uwu\nuwuuwuwuwuwuwu\0"),
+	MSGSTR("i am so tired. i always wonder who i am doing this all for. is it for me? no. is it for anyone else? i dont think so. idk, who knows anythiing anymore. i should really remove that\0"),
 };
 
 void Boulder::interact() {

@@ -106,6 +106,11 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			}
 			
 			static int timesCalled = 0;
+			
+			if(timesCalled == 0) {
+				game->playSound(&bn::sound_items::snd_bounce);
+			}
+			
 			static_cast<BigSprite*>(obj)->animate(); 
 			timesCalled++;
 			if(timesCalled == 4) {
@@ -385,8 +390,12 @@ void EffectsManager::updatePalette(Palette* pal) {
 		effectList[i]->sprite.spritePointer.set_palette(pal->getSpritePalette());
 	}
 	
-	for(int i=0; i<textSprites.size(); i++) {
-		textSprites[i].set_palette(pal->getSpritePalette());
+	for(int i=0; i<textSpritesLine1.size(); i++) {
+		textSpritesLine1[i].set_palette(pal->getSpritePalette());
+	}
+	
+	for(int i=0; i<textSpritesLine2.size(); i++) {
+		textSpritesLine2[i].set_palette(pal->getSpritePalette());
 	}
 	
 	EffectsManager::spritePalette = pal;
@@ -725,6 +734,120 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 
 // -----
 
+Dialogue::Dialogue(EffectsManager* effectsManager_, const char* data_) : effectsManager(effectsManager_), originalData(data_) {
+	
+	
+	// gods should i just make a dialogue class 
+	// honestly, i didnt need it, and this code is fucking trash.
+	// nv, hopefully not anymore, im going to make it less trash 
+	
+	data = data_;
+
+}
+
+Dialogue::~Dialogue() {
+	
+	// this almost certainly leaks memory.
+	
+	
+}
+
+const char* Dialogue::getNextWord() {
+	// return the next WORD, in amount of chars 
+	// this is done so that we properly cut off strings at word breaks.
+	
+	const char* tempData = data;
+	while(!isWordEnd(*tempData)) {
+		tempData++;
+	}
+	
+	return tempData+1; 
+}
+
+int Dialogue::getNextLine() {
+	// return the next line, in amount of chars 
+	
+	char buffer[256];
+	
+	int bufferIndex = 0;
+	
+	while(true) {
+		
+		const char* nextWordPtr = getNextWord();
+	
+		int nextWordCount = nextWordPtr - data - 1;
+	
+		for(int i=0; i<nextWordCount; i++) {
+			buffer[bufferIndex + i] = data[i];
+		}
+		
+		buffer[bufferIndex + nextWordCount] = '\0';
+		
+		int width = effectsManager->textGenerator.width(bn::string_view(buffer));
+		
+		buffer[bufferIndex + nextWordCount] = ' ';
+
+		if(width >= 212) {
+	       	buffer[bufferIndex] = '\0';
+			break;
+		}
+   
+    	data = nextWordPtr;
+		bufferIndex += nextWordCount + 1;
+		
+		if(isLineEnd(*(nextWordPtr-1))) {
+    	    break;
+    	}
+	}
+
+
+	return bufferIndex;
+}
+
+int Dialogue::getNextDialogue(char* res) {
+	
+	// the bool represents if we should scroll or like, not 
+	// now an int, 0 is continue, 1 is newline, 2 is stop 
+	// buffer is/should be 256 chars 
+	
+	if(*data == '\0') {
+	    return 2;
+	}
+	
+	const char* dataStart = data;
+	
+	int charCount = getNextLine();
+	
+	for(int i=0; i<charCount; i++) {
+		res[i] = dataStart[i];
+	}
+	
+	// i swear, it was robs just the online compiler i was using, but i had to do this ok
+	res[charCount-1] = (char)0;
+	
+	
+	char* test = res;
+	
+	while(*test != 0) {
+		if(*test == '\r' || *test == '\n') {
+			BN_ERROR("wtf");
+		}
+		test++;
+	}
+	
+	if(*data == '\0') {
+	    return 2;
+	}
+	
+	if(*(data-1) == '\n') {
+	    return 1;
+	}
+
+	return 0;
+}
+
+// ----
+
 void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	
 	entityManager->hideForDialogueBox(vis, isCutscene);
@@ -803,127 +926,147 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	hideForDialogueBox(false, isCutscene);
 	
-	// idk how long to make this
-	static char buffer[128];
-	for(int i=0; i<128; i++) {
-		buffer[i] = '\0';
-	}
-	
 	// ok heres the plan. 
 	// nullterm is the end of the text 
 	// newline indicates the player should have to press z 
 	// carriage return indicates the that like, to continue this text but on the next line
 	
-	game->doButanoUpdate();
-	bool pressQueued = true;
+	// im rewriting this bs 
+	// gods this whole func ended up being such a circlejerk
 	
-	bool newText = false;
-	bool currentlyScrolling = false;
-	int textShowIndex = 0;
-	while(true) {
+	// allocing this much memory might be,, extremely stupid tbh
+	// ugh
+	
+	// each line contains a line of text 
+	// each message contains multiple lines of text 
+	// the full strings vector contains multiple messages
+	// doing this via some sort of yield would be so much better 
+	
+	// im going to remove the \r stuff, and just have \n. \r will now be done automaticallys
+	
+	// oh shit 
+	// textgenerator has the width( function 
+	// wow. i really like 
+	// so much of this project has been me only finding major features weeks after 
+	
+	// the c standard does not require const chars to be null termed. i didnt know this. im dumb
+	
+	Dialogue dialogue(this, data);
+	textSpritesLine1.clear();
+	textSpritesLine2.clear();
+	
+	char buffer[256];
+	
+	int res = 0;
+	bool pressQueued = true;
+	int textOffset = 0;
+	bool skipScroll = false;
+	
+	
+	auto scrollLine = [](bn::sprite_text_generator& textGeneratorObj, 
+		bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>& textSprites, 
+		char* bufferPtr, 
+		int offset,
+		bool& skipScrollBool) mutable -> void {
+			
+		textGeneratorObj.set_one_sprite_per_character(true);
+		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(bufferPtr), textSprites);
+		for(int i=0; i<textSprites.size(); i++) {
+			textSprites[i].set_bg_priority(0);
+			textSprites[i].set_visible(false);
+			textSprites[i].set_palette(spritePalette->getSpritePalette());
+		}
+		globalGame->doButanoUpdate();
 		
-		if(bn::keypad::a_pressed() || pressQueued) {
-			if(!newText) { // get a whole new thing of text
-				pressQueued = false;
-				game->doButanoUpdate();
-				
-				// this a press will carry over from when the interaction was initiated, meaning that like,,, 
-				// i dont need to have a function which gets the line both inside and outside of this loop
-				
-				textSprites.clear();
-				
-				if(*data == '\n') {
-					data++;
-				} else if(*data == '\0') {
+		for(int i=0; i<textSprites.size(); i++) {
+			
+			if(skipScrollBool) {
+				break;
+			}
+			
+			textSprites[i].set_visible(true);
+	
+			
+			for(int j=0; j<2; j++) {
+				if(bn::keypad::a_pressed()) {
+					skipScrollBool = true;
 					break;
 				}
-				
-				int textOffset = 0; // where to draw this text in terms of verticality
-				
-				drawNextLine:
-				
-				char* bufferPointer = buffer;
-				
-				while(*data != '\n' && *data != '\r' && *data != '\0') {
-					*bufferPointer++ = *data++;
-				}
-				*bufferPointer = '\0';
-				
-				BN_ASSERT(bufferPointer - buffer < 128, "overflowed the dialogue buffer! ", buffer);				
-				
-				textGenerator.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + textOffset*16, bn::string_view(buffer), textSprites);
+				globalGame->doButanoUpdate();
+			}
+		}
+		
+		textSprites.clear();
+		textGeneratorObj.set_one_sprite_per_character(false);
+		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(bufferPtr), textSprites);
+		for(int i=0; i<textSprites.size(); i++) {
+			textSprites[i].set_visible(true);
+			textSprites[i].set_bg_priority(0);
+		}
+		
+		globalGame->doButanoUpdate();
+	};
+	
+	while(true) {
 
+		if(bn::keypad::a_pressed() || pressQueued) {
+			pressQueued = false;
+			
+			skipScroll = false;
+			
+			if(res == 2) {
+				break;
+			}
+			
+			if(res == 1) {
+				// previous res was one, meaning we should clear all sprites
+				textSpritesLine1.clear();
+				textSpritesLine2.clear();
+				textOffset = 0;
+			}
+			
+			if(textSpritesLine1.size() != 0) {
+				
+				textSpritesLine1.clear();
+				textSpritesLine1 = textSpritesLine2;
+				textSpritesLine2.clear();
 
-				// this section of code should MAYBE be below the below check
-				// nope, moving this finally fixed the rare framedrops	
-				for(int i=0; i<textSprites.size(); i++) {
-					textSprites[i].set_bg_priority(0);
-					textSprites[i].set_visible(false);
-					
-					textSprites[i].set_palette(spritePalette->getSpritePalette());
+				for(int i=0; i<textSpritesLine1.size(); i++) {
+					textSpritesLine1[i].set_y(textSpritesLine1[i].y() - 16);
 				}
+				
+				textOffset=1;
+				
 				game->doButanoUpdate();
-
-				if(*data == '\r') {
-					// bad code 
-					data++;
-					textOffset++;
-					goto drawNextLine;
-				}
-
+			}
+			
+			if(textOffset == 0) { 
 				
+				res = dialogue.getNextDialogue(buffer);
+				
+				scrollLine(textGenerator, textSpritesLine1, buffer, textOffset, skipScroll);
+				
+				textOffset++;
+			}
+		
+			if(textOffset == 1 && res == 0) {
+				
+				res = dialogue.getNextDialogue(buffer);
 
-				newText = true;
-				textShowIndex = 0;			
-			} else { // scroll the existing text
-				if(currentlyScrolling) { // we never finished displaying the current text, so do that.
-					game->doButanoUpdate();
-					for(int i=0; i<textSprites.size(); i++) {
-						if(textSprites[i].y() == 40 || textSprites[i].y() == 40+16) {
-							textSprites[i].set_visible(true);
-							textShowIndex = i + 1;
-						}
-					}
-				} else { // we finished the current text, so scroll up.
-					// the amount of pain that scrolling has caused me is simply not worth it 
-					// and theres 0 documentation on gba windows 
-					/*for(int unused=0; unused<16; unused++) {
-						for(int i=0; i<textSprites.size(); i++) {
-							textSprites[i].set_y(textSprites[i].y() - 1);
-						}
-						game->doButanoUpdate();
-					}*/
-					for(int i=0; i<textSprites.size(); i++) {
-						textSprites[i].set_y(textSprites[i].y() - 16);
-						// this is jank af, and wastes sprite slots, but like, im tired 
-						// jesus i need to eat more
-						if(textSprites[i].y() < 40) {
-							textSprites[i].set_visible(false);
-						}
-					}
-					game->doButanoUpdate();
-				}
+				scrollLine(textGenerator, textSpritesLine2, buffer, textOffset, skipScroll);
+				
 			}
+			
+			
 		}
-	
-		// oh my gods. i dont need to rewrite the text sprite generator! i can just use sprite visibility/prio, i am so dumb
-		if(frame % 2 == 0) {
-			if(newText && textShowIndex == textSprites.size()) {
-				newText = false;
-			} else if(newText && textShowIndex < textSprites.size()) {
-				if(textSprites[textShowIndex].y() == 40 || textSprites[textShowIndex].y() == 40+16) {
-					// sprite is in one of the two valid lines, display it.
-					textSprites[textShowIndex].set_visible(true);
-					textShowIndex++;
-					currentlyScrolling = true;
-				} else {
-					currentlyScrolling = false;
-				}
-			}
-		}
-	
+
 		game->doButanoUpdate();
 	}
+	
+	
+	
+	
+	game->doButanoUpdate();
 	
 	game->doButanoUpdate();
 	for(int x=0; x<14; x++) {
@@ -939,8 +1082,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	hideForDialogueBox(true, isCutscene);	
 	game->doButanoUpdate();
 	
+	textSpritesLine1.clear();
+	textSpritesLine2.clear();
 	
-	textSprites.clear();
 	game->state = restoreState;
 	
 

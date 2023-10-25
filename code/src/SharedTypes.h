@@ -23,6 +23,9 @@
 #include "bn_window.h"
 #include "bn_rect_window.h"
 
+
+#include "bn_istring_base.h"
+
 #include "bn_random.h"
 #include "bn_sram.h"
 
