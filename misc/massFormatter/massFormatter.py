@@ -46,6 +46,12 @@ palette = {
 
 validChars = '_.%s%s' % (string.ascii_lowercase, string.digits)
 
+# making this global may be a bad idea, but it will allow me to cache writes to 
+# datawinwhatever
+# at the cost of threading 
+# nvm 
+# output = []
+
 def getNeededSprites(thisFile = False):
 	
 	codeFolder = "../../code/src/"
@@ -59,24 +65,64 @@ def getNeededSprites(thisFile = False):
 	if thisFile:
 		codeFiles = [__file__]
 	
-	pattern = r'dw_\w+'
-	matching_references = set()
+	sprite_matching_references = set()
+	bg_matching_references = set()
+	font_matching_references = set()
 	
-	for file in codeFiles:
+	if thisFile:
+		pattern = r'dw_\w+'
+		
+		for file in codeFiles:
 			with open(file, 'r', encoding='utf-8', errors='ignore') as f:
 				content = f.read()
 				matches = re.findall(pattern, content)
-				matching_references.update(matches)
+				sprite_matching_references.update(matches)
+		
+	else:
+		# gods this is trash
+		pattern1 = r'regular_bg_tiles_items::dw_\w+'		
+		pattern2 = r'sprite_tiles_items::dw_\w+'
+		pattern3 = r'sprite_items::dw_\w+'
+		pattern4 = r'regular_bg_items::dw_\w+'
+		
+		for file in codeFiles:
+			with open(file, 'r', encoding='utf-8', errors='ignore') as f:
+				content = f.read()
+				matches = [ s[len("regular_bg_tiles_items::"):] for s in re.findall(pattern1, content) ]
+				bg_matching_references.update(matches)
+				
+				matches = [ s[len("regular_bg_items::"):] for s in re.findall(pattern4, content) ]
+				bg_matching_references.update(matches)
+				
+				matches = [ s[len("sprite_tiles_items::"):] for s in re.findall(pattern2, content) ]
+				sprite_matching_references.update(matches)
+	
+				matches = [ s[len("sprite_items::"):] for s in re.findall(pattern3, content) ]
+				font_matching_references.update(matches)
+				
+				
+	
+
 	
 	if thisFile:
 		# remove font stuff, and tile stuff(i think)
 		# i could do this via a filter, but this is safer 
-		matching_references.remove("dw_fnt_text_12")
+		sprite_matching_references.remove("dw_fnt_text_12")
 		
+		return sprite_matching_references
+		
+		
+	# this string matches things with index\d in them 
+	pattern = r'dw_\w+[^_]_index\d'
+	cutsceneBGReferences = set()
+	for s in bg_matching_references:
+		matches = re.findall(pattern, s)
+		cutsceneBGReferences.update(matches)
+
+	#matching_references_noheaders = set([ s[3:] for s in list(matching_references) ])
 	
-	matching_references_noheaders = set([ s[3:] for s in list(matching_references) ])
-	
-	return matching_references, matching_references_noheaders
+	# gods this should of just been a dict wtf is wrong with me
+	return [sprite_matching_references, bg_matching_references, font_matching_references, cutsceneBGReferences]
 	
 # multiprocessing might run this every time, but tbh, im tired, how about that!
 # not actually doing this, since we will have all sprites preconverted, but only copy them over to the code area if needed
@@ -408,10 +454,27 @@ def convertTiles(outputPath):
 			json.dump(outputJson, f)
 	
 		# gods what is the difference between a sprite tiles and a sprite??
-		
+	
+	# this thing is bc sometimes like,,, i just have random vram being used by other shit(that was inited as a default) and im never sure if its properly freed 
+	# this is just a small bg tile, for uses of initing things 
+	
+	temp = Image.new("RGBA", (16, 16), (0, 255, 255, 255))
+	
+	writeBitmap(temp, os.path.join(outputPath, "default_bg_tiles" + ".bmp"))
+
+	outputJson = {
+		"type": "regular_bg_tiles",
+		"bpp_mode": "bpp_4"
+	}
+	
+	
+
+	with open(os.path.join(outputPath, "dw_" + "default_bg_tiles" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	
 	print("done converting tiles")
 	pass
-
+	
 def convertFonts(outputPath):
 
 	print("converting fonts")
@@ -564,6 +627,11 @@ def getSpriteDimensions(spriteName, padded):
 	if getSpriteDimensions.paddedSpriteList is None:
 		getSpriteDimensions.paddedSpriteList = [f for f in os.listdir("../ExportData/Export_Textures_Padded/") if f.lower().endswith('.png')]
 
+		
+	if "_index" in spriteName:
+		spriteName = spriteName.rsplit("_index", 1)[0]
+		
+		
 	paddedInputPath = "../ExportData/Export_Textures_Padded/"
 	inputPath = "../ExportData/Export_Textures/Sprites/" + spriteName
 	
@@ -571,12 +639,18 @@ def getSpriteDimensions(spriteName, padded):
 	
 	png_files = []
 	
+	
+	
 	search_prefix = spriteName
 
 	pattern = re.compile(r'^' + re.escape(search_prefix) + r'_\d+\.png')
 
 	png_files = [filename for filename in getSpriteDimensions.paddedSpriteList if pattern.search(filename)]
 
+	if len(png_files) == 0:
+		print("unable to find " + spriteName)
+		exit(1)
+	
 	pngFileImages = []
 	
 	max_width = -1
@@ -595,11 +669,75 @@ def getSpriteDimensions(spriteName, padded):
 
 getSpriteDimensions.paddedSpriteList = None
 
-def convertSprite(spriteName, spriteImages, dimensions):
+def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBackground):
 
 	max_width, max_height = dimensions
 
 	total_height = max_height * len(spriteImages)
+	
+	# if isNormalBackground, we need to compress thiese tiles 
+	# i could also(in the future) do flipping, but for now, just having unique ones will be enough 
+	# we also need to write the data to properly reconstruct it to datawin.h
+	# and hopefully using a set wont make the output different each run 
+	
+	outputPath = "./formattedOutput/allSprites/"
+	
+	if not isNormalBackground:
+	
+		
+	
+		# hmm 
+		# i could maybe,,, leave this to the butano thingy to take care of? 
+		# im assuming/hoping that if i use regular_bg
+		# instead of regular bg tiles that maybe like,,,,,, stuff will happen?
+		# but will i have to name every,, sub-background as its own? 
+		# i could also maybe like,, do it with scaling, 
+		# or actually, ill have it be the spritename_number
+		# but then that will fuck up my code which,, grabs which items are needed
+		# meaning i need ANOTHER one off fix 
+		# it seems that butano has built in compression though. 
+		# i just hope this doesnt fuck shit up with my prexisting classes 
+		# actually,,, it totally will
+		
+		spriteIndex = spriteName.rsplit("index", 1)
+		
+		#print(spriteName, len(spriteImages), spriteIndex)
+		
+		spriteIndex = int(spriteIndex[1])
+		
+		image = spriteImages[spriteIndex]
+
+		image = image.convert("RGBA")
+		
+		# the width/height must be a multiple of 256
+		
+		w, h = image.size
+		
+		if w % 256 != 0:
+			w += 256 - (w % 256)
+		if h % 256 != 0:
+			h += 256 - (h % 256)
+		
+		cyan_background = Image.new("RGBA", (w, h), (0, 255, 255, 255))
+		cyan_background.paste(image, (0, 0), image)
+	
+		cyan_background = cyan_background.convert("RGB")
+		#tempImage = np.array(cyan_background)
+
+		
+		#print("youre gonna have a bad time")
+		
+		writeBitmap(cyan_background, os.path.join(outputPath, spriteName.lower() + ".bmp"))
+		outputJson = {
+			"type": "regular_bg",
+			"bpp_mode": "bpp_4"
+		}
+		with open(os.path.join(outputPath, "dw_" + spriteName.lower() + ".json"), "w") as f:
+			json.dump(outputJson, f)
+		
+		return None
+	
+	outputPath = "./formattedOutput/allSprites/"
 	
 	# Create a new blank image to stack PNGs vertically
 	#stacked_image = Image.new('RGBA', (max_width, total_height))
@@ -664,31 +802,37 @@ def convertSprite(spriteName, spriteImages, dimensions):
 				
 			tiles = newTiles
 	
+
+	
+	
 	tempImage = Image.fromarray(np.vstack(tiles))
 	
 	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
 	# the width of the bigsprite 
 	#,, possibly the loading position of the bigsprite? do i have access to that easily?
 	
-	outputPath = "./formattedOutput/allSprites/"
+
 	
 	
-	
+	dataType = "regular_bg_tiles" if isBackground else "sprite_tiles"
 	
 	
 	writeBitmap(tempImage, os.path.join(outputPath, spriteName.lower() + ".bmp"))
 	outputJson = {
-		"type": "sprite_tiles",
+		"type": dataType,
 		"height": outputHeight,
+		"bpp_mode": "bpp_4"
 	}
 	with open(os.path.join(outputPath, "dw_" + spriteName.lower() + ".json"), "w") as f:
 		json.dump(outputJson, f)
 
 	pass
 
-def genSprite(spriteName):
+def genSprite(spriteName, isBackground = False):
 
 	# generates any fucking sprite i want, on demand
+	
+	
 	
 	# if this sprite is a bg thing,,, dont 
 	
@@ -706,15 +850,33 @@ def genSprite(spriteName):
 	if os.path.isfile(os.path.join("./formattedOutput/allSprites/", prefixSpriteName + ".bmp")):
 		return
 	
-	if not os.path.isfile(os.path.join(paddedInputPath, spriteName + "_0.png")):
-		return
-	
-	
-	
+	isNormalBackground = True
+	if isBackground:
+		# normal background tiles are just like,,, the tiles tiles, 
+		# non normal ones are,, things for cutscenes, like spr_vd_gray
+		# those are going to have to have dupe tiles undone, and then the actual tile index map for how to rebuild them 
+		# included in data.win(most likely)
+		# i hope/think i can overload their namespace?
+		# we detect if a tileset is normal or not based on if its in the Backgrounds folder.
+
+		tempPath = "../ExportData/Export_Textures/Backgrounds/."
+		folders = [item for item in os.listdir(tempPath) if os.path.isdir(os.path.join(tempPath, item))]
 		
+		if spriteName not in folders:
+			isNormalBackground = False
+		else:
+			return # this is a background thing, that we already generated in generateTilse
+	else:
+		if not os.path.isfile(os.path.join(paddedInputPath, spriteName + "_0.png")):
+			return
+	
 	print("generating " + spriteName)
 	
+		
 	
+	
+
+
 	# ok so,,, first try it padded, then unpadded right?
 	# actually first is detecting if its a bigsprite.
 	
@@ -726,10 +888,10 @@ def genSprite(spriteName):
 	
 	if paddedSpriteSize in validSizes:
 		# paddedsprite convert 
-		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize)
+		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize, isBackground, isNormalBackground)
 	elif spriteSize in validSizes:
 		# normal sprite convert
-		convertSprite(spriteName, spriteImages, spriteSize)
+		convertSprite(spriteName, spriteImages, spriteSize, isBackground, isNormalBackground)
 	else:
 		# bigsprite convert
 		
@@ -749,7 +911,7 @@ def genSprite(spriteName):
 			#convertSprite(spriteName, spriteImages, spriteSize)
 			pass	
 			
-		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize)
+		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize, isBackground, isNormalBackground)
 			
 	print("done generating " + spriteName)
 	
@@ -758,6 +920,8 @@ def genSprite(spriteName):
 def generateCustomFloorBackground(outputPath):
 
 	print("generating custom floor tiles")
+	
+	# in the future, a lot of vram could( and should)  be saved here by not having each rod be its own seperate thingy
 
 	# currently, i know of:
 	# FloorTile, Glass, Bomb, Death, Shadow, Exit, Switch
@@ -820,33 +984,6 @@ def generateCustomFloorBackground(outputPath):
 					detail[i][j] = 0
 			
 		tiles.append(detail)
-			
-	# blank white tile for like, yea 
-	tiles.append(np.full((16, 16), 2, dtype=np.uint8))
-	# open and write the text data to here aswell.
-	temp = np.array(Image.open("./formattedOutput/fonts/dw_fnt_text_12.bmp"))
-
-	temp[temp == 2] = 1
-	temp[temp == 0] = 2
-	
-	tiles.append(temp[0:temp.shape[0]-32, 0:16])
-	
-	# change the second to last blank slot in temp to be a mesh of the I and D 
-	# actually, i think the I and D fit in one tile, so only the second to last will be modded
-	# change the last slot to be the remnants of the d 
-	
-	iIndex = 16 * (ord('I') - ord('!'))
-	dIndex = 16 * (ord('D') - ord('!'))
-	iTile = temp[iIndex:iIndex+16, 0:16]
-	dTile = temp[dIndex:dIndex+16, 0:16]
-	
-	iTile[0:16, 4:12] = dTile[0:16, 0:8]
-	tiles.append(iTile)
-	
-	tempNewTile = np.zeros((16, 16), dtype=np.uint8)
-	tempNewTile[0:16, 0:4] = dTile[0:16, 4:8]
-	tempNewTile[tempNewTile == 0] = 2
-	tiles.append(tempNewTile)
 
 
 	#tiles.append(temp[temp.shape[0]-16:temp.shape[0], 0:16])
@@ -882,6 +1019,58 @@ def generateCustomFloorBackground(outputPath):
 	tiles.append(temp[32:48, 0:16])
 	tiles.append(temp[48:64, 0:16])
 
+	# font stuff
+	
+	# blank white tile for like, yea 
+	tiles.append(np.full((16, 16), 2, dtype=np.uint8))
+	# open and write the text data to here aswell.
+	temp = np.array(Image.open("./formattedOutput/fonts/dw_fnt_text_12.bmp"))
+
+	temp[temp == 2] = 1
+	temp[temp == 0] = 2
+	
+	for i in range(0, 10, 2):
+		nextTile = np.full((16, 16), 2, dtype=np.uint8)
+		tempIndex = 16 * (ord(str(i)) - ord('!'))
+		nextTile[0:16, 0:8] = temp[tempIndex:tempIndex+16, 0:8]
+		tempIndex = 16 * (ord(str(i+1)) - ord('!'))
+		nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
+		tiles.append(nextTile)
+	
+	#tiles.append(temp[0:temp.shape[0]-32, 0:16])
+	
+	# change the second to last blank slot in temp to be a mesh of the I and D 
+	# actually, i think the I and D fit in one tile, so only the second to last will be modded
+	# change the last slot to be the remnants of the d 
+	
+	nextTile = np.full((16, 16), 2, dtype=np.uint8)
+	tempIndex = 16 * (ord('V') - ord('!'))
+	nextTile[0:16, 0:8] = temp[tempIndex:tempIndex+16, 0:8]
+	tempIndex = 16 * (ord('O') - ord('!'))
+	nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
+	tiles.append(nextTile)
+	
+	iIndex = 16 * (ord('I') - ord('!'))
+	dIndex = 16 * (ord('D') - ord('!'))
+	iTile = temp[iIndex:iIndex+16, 0:16]
+	dTile = temp[dIndex:dIndex+16, 0:16]
+	
+	iTile[0:16, 4:12] = dTile[0:16, 0:8]
+	tiles.append(iTile)
+	
+	tempNewTile = np.zeros((16, 16), dtype=np.uint8)
+	tempNewTile[0:16, 0:4] = dTile[0:16, 4:8]
+	tempNewTile[tempNewTile == 0] = 2
+	#tiles.append(tempNewTile)
+	
+	nextTile = np.full((16, 16), 2, dtype=np.uint8)
+	
+	tempIndex = 16 * (ord('B') - ord('!'))
+	nextTile[0:16, 0:8] = temp[tempIndex:tempIndex+16, 0:8]
+	tempIndex = 16 * (ord('?') - ord('!'))
+	nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
+	tiles.append(nextTile)
+	
 	stackedTiles = np.vstack(tiles).tolist()
 	
 	reversePalette = {
@@ -1017,10 +1206,22 @@ def generateIncludes(folders):
 
 	graphicsFiles = set([f for f in os.listdir(graphicsFolder) if f.lower().endswith('.bmp') ])
 	
-	matching_references, neededSpritesNoHeaders = getNeededSprites()
+	sprite_matching_references, bg_matching_references, font_matching_references, cutsceneBGReferences = getNeededSprites()
 	
-	for spriteName in matching_references:
-		genSprite(spriteName)
+	allMatches = set()
+	allMatches.update(sprite_matching_references)
+	allMatches.update(bg_matching_references)
+	allMatches.update(font_matching_references)
+	allMatches.update(cutsceneBGReferences)
+	
+	for spriteName in sprite_matching_references:
+		genSprite(spriteName, False)
+	
+	#for spriteName in bg_matching_references:
+	#	genSprite(spriteName, True)
+
+	for spriteName in cutsceneBGReferences:
+		genSprite(spriteName, True)
 	
 	output = []
 	
@@ -1035,8 +1236,9 @@ def generateIncludes(folders):
 		
 		for file in jsonFiles:
 		
-			if os.path.basename(file).split(".")[0] not in matching_references:
+			if os.path.basename(file).split(".")[0] not in allMatches:
 				continue
+			
 			
 			with open(os.path.join(folder, file)) as f:
 				idk = json.load(f)
@@ -1163,7 +1365,13 @@ def main():
 	#convertAllSprite("./formattedOutput/sprites/")
 	#convertAllBigSprite("./formattedOutput/bigSprites/")
 	
-	matching_references, neededSpritesNoHeaders  = getNeededSprites(True)
+	
+	#genSprite("dw_spr_vd_gray_index0", True)
+	#exit(1)
+	
+	
+	
+	matching_references = getNeededSprites(True)
 	
 	for spriteName in matching_references:
 		genSprite(spriteName)
@@ -1172,7 +1380,8 @@ def main():
 	convertFonts("./formattedOutput/fonts/")
 	generateCustomFloorBackground("./formattedOutput/customFloor/")	
 	generateEffectsTiles("./formattedOutput/customEffects/")
-
+	
+	
 	# bigsprites and sprites shouldnt have any overlap,,, but tbh like,,,, it maybe should
 	
 	print("copying over files. this may take a little bit")

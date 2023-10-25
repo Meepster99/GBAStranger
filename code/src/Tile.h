@@ -200,7 +200,7 @@ public:
 	char first = ' ';
 	char second = ' ';
 	
-	WordTile(Pos p, char first_ = ' ', char second_ = ' ') : FloorTile(p, 1+2+7+4+4+1+5, 4),
+	WordTile(Pos p, char first_ = ' ', char second_ = ' ') : FloorTile(p, 58, 4),
 	first(first_), second(second_) {}
 	
 	TileType tileType() const override { return TileType::WordTile; }
@@ -209,25 +209,14 @@ public:
 	
 	int getTileValue() const override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
 
-	void draw() override {
-		u8 x = tilePos.x;
-		u8 y = tilePos.y;
-		int firstTile = 27 + (first - ' ');
-		int secondTile = 27 + (second - ' ');
-		
-		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * firstTile); 
-		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * firstTile + 2); 
-		
-		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * secondTile); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * secondTile + 2); 
-	}
+	void draw() override;
 	
 };
 
 class RodTile : public FloorTile { // tile displays rod state 
 public:
 
-	RodTile(Pos p) : FloorTile(p, 126, 10) {}
+	RodTile(Pos p) : FloorTile(p, 29, 10) {}
 	
 	bool drawDropOff() const override { return true; }
 
@@ -240,7 +229,7 @@ public:
 class LocustTile : public FloorTile {
 public:
 
-	LocustTile(Pos p) : FloorTile(p, 124, 2) {}
+	LocustTile(Pos p) : FloorTile(p, 27, 2) {}
 	
 	bool drawDropOff() const override { return true; }
 
@@ -255,7 +244,7 @@ public:
 
 	int (*tileFunc)(void);
 
-	SpriteTile(Pos p, int (*tileFunc_)(void)) : FloorTile(p, 126 + 10 + 11, 2), tileFunc(tileFunc_) {}
+	SpriteTile(Pos p, int (*tileFunc_)(void)) : FloorTile(p, 51, 2), tileFunc(tileFunc_) {}
 	
 	bool drawDropOff() const override { return true; }
 

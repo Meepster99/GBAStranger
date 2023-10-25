@@ -7,6 +7,7 @@
 #include "RoomManager.h"
 #include "EntityManager.h"
 #include "EffectsManager.h"
+#include "CutsceneManager.h"
 
 extern Game* globalGame;
 
@@ -17,7 +18,7 @@ public:
 
 	// collision uses default everything
 	Collision() :
-	Layer(bn::regular_bg_tiles_items::dw_tile_bg_1, 2) 
+	Layer(bn::regular_bg_tiles_items::dw_default_bg_tiles, 2) 
 	{}
 	
 };
@@ -35,11 +36,11 @@ public:
 	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// flip the highest bit of the tile to get a details tile.
 		// grabbing the size here each call may be expensive. i could set it to a int
-		collisionPointer->setBigTile(x, y, tile | 0b100000000, flipX, flipY);
+		collisionPointer->setBigTile(x, y, tile + collisionTileCount, flipX, flipY);
 	}
 	
 	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
-		collisionPointer->rawMap.setTile(x, y, tileIndex | 0b100000000, flipX, flipY);
+		collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 	}
 	
 	void draw(u8 (&detailsMap)[14][9], u8 (&collisionMap)[14][9]) {
@@ -48,10 +49,12 @@ public:
 			for(int y=0; y<9; y++) {
 				if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
 					u8 tile = detailsMap[x][y];
-					setTile(x * 2 + 1, y * 2 + 1, 4 * tile + 0);
-					setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
-					setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
-					setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);	
+					if(tile != 0) {
+						setTile(x * 2 + 1, y * 2 + 1, 4 * tile + 0);
+						setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
+						setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
+						setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);	
+					}
 				}
 			}
 		}
@@ -98,11 +101,13 @@ public:
 	
 	TileManager tileManager;
 	
+	CutsceneManager cutsceneManager;
+	
 	bn::timer miscTimer;
 	
 	GameState state = GameState::Loading;
 	
-	bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(1, bn::bpp_mode::BPP_4); // gets realloced, this is just a default val
+	bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4); 
 	
 	int mode = 0;
 	const char* strangerNames[3] = {"Gray\0", "Lillie\0", "Cif\0"};
@@ -111,7 +116,8 @@ public:
 	details(&collision),
 	entityManager(this),
 	effectsManager(this),
-	tileManager(this)
+	tileManager(this),
+	cutsceneManager(this)
 	{
 		
 		// goofy
@@ -141,9 +147,10 @@ public:
 		BigSprite::effectsManager = &effectsManager;
 		
 		MenuOption::effectsManager = &effectsManager;
-		
-		backgroundTiles = bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4);
+	
 		collision.rawMap.bgPointer.set_tiles(backgroundTiles);
+	
+		
 	}
 	
 	void run();

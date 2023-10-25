@@ -41,7 +41,8 @@ ROMTITLE    :=  GBAStranger
 ROMCODE     :=  GBST
 # SAVE ME O3
 # https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
-USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra 
+#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
+USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
 USERASFLAGS :=  
 USERLDFLAGS :=  -flto=auto 
 USERLIBDIRS :=  

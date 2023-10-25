@@ -8,6 +8,8 @@
 
 #include "Profiler.h"
 
+#include "bn_bg_tiles.h"
+
 #include "bn_version.h"
 
 #include "bn_music_items.h"
@@ -228,7 +230,7 @@ public:
 
 	bn::regular_bg_map_cell cells[32 * 32];
 	bn::regular_bg_map_item mapItem;
-	bn::regular_bg_item bg_item;
+	//bn::regular_bg_item bg_item;
 	bn::regular_bg_ptr bgPointer;
 	bn::regular_bg_map_ptr bgMap;
 
@@ -236,15 +238,16 @@ public:
 	
 	// bn::bg_palette_item palette
 	// how in tarnation can butano look you in the face, and say "yea do this for a background map"
-	BackgroundMap(bn::regular_bg_tiles_item tileset, int zIndex) :
+	BackgroundMap(bn::regular_bg_tiles_item& tileset, int zIndex) :
 		mapItem(cells[0], bn::size(32, 32)),
 		
-		bg_item(tileset, 
+		// it seems that,, bg_item holds on to whatever previous tileset it was?
+		
+		bgPointer(bn::regular_bg_item(tileset, 
 		
 		backgroundPalette->getBGPalette()
 		
-		,mapItem),
-		bgPointer(bg_item.create_bg(8, 48)),
+		,mapItem).create_bg(8, 48)),
 		bgMap(bgPointer.map())
 		{
 			
@@ -258,21 +261,50 @@ public:
 		}
 	
 	// alternate constructor for when (trying) to use an allocated tileset instead of a normal one(for vram modifications)
-	BackgroundMap(bn::regular_bg_tiles_ptr tilesPointer, int zIndex) :
+	BackgroundMap(bn::regular_bg_tiles_ptr& tilesPointer, int zIndex) :
 		mapItem(cells[0], bn::size(32, 32)),
-		
-		bg_item(
+
+		bgPointer(bn::regular_bg_item(
 			tilesPointer.vram().value(), 
 			backgroundPalette->getColors(),
 			backgroundPalette->getBPP(),
 			*cells,
 			bn::size(32, 32)
-		),
-		bgPointer(bg_item.create_bg(8, 48)),
+		).create_bg(8, 48)),
+		
 		bgMap(bgPointer.map())
 	{
 		init(zIndex);	
 	}
+	
+	BackgroundMap(const bn::regular_bg_item& bgItem, int zIndex = 0) :
+	mapItem(cells[0], bn::size(32, 32)),
+	bgPointer(bgItem.create_bg(8, 48)),
+	bgMap(bgPointer.map())
+	{
+		//init(zIndex);
+		bgPointer.set_priority(zIndex);
+	}
+	
+	
+	void create(const bn::regular_bg_item& bgItem, int zIndex = 0) {
+		bgPointer.set_priority(zIndex);
+		
+		//auto temp = bgItem.create_bg(8, 48);
+		//bgPointer = bgItem.create_bg(8, 48, 0);
+		
+		//bgMap = bgItem.map_item();
+		
+		//bgMap.reload_cells_ref();
+		
+		bgPointer.set_tiles(bgItem.tiles_item());
+		bgPointer.set_map(bgItem.map_item());
+		
+		reloadCells();
+		
+	}
+	
+	
 		
 	void init(int zIndex) {
 		//bgPointer.set_z_order(zIndex);
@@ -375,6 +407,12 @@ public:
 		{
 			init(fillIndex);
 		}
+		
+	Layer(bn::regular_bg_item bgItem, int zIndex = 0) :
+	rawMap(bgItem, zIndex)
+	{
+		rawMap.reloadCells();
+	}
 		
 	void init(int fillIndex) {
 		

@@ -100,9 +100,9 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	floorMap[0][8] = new WordTile(Pos(0, 8));
 	
 	floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
-	//floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
+	floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
 	// we now have a special tile for the 'ID'
-	floorMap[2][8] = new WordTile(Pos(2, 8), '~' + 1, '~' + 2);
+	//floorMap[2][8] = new WordTile(Pos(2, 8), '~' + 1, '~' + 2);
 	
 	voidTile1 = static_cast<WordTile*>(floorMap[1][8]);
 	voidTile2 = static_cast<WordTile*>(floorMap[2][8]);
@@ -131,10 +131,10 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 		
 		if(player->hasMemory) {
-			return 126 + 10 + 11 + 1 + ( globalGame->mode == 2 ? 3 : 0) + 0;
+			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 0;
 		}
 		
-		return 124;
+		return 57;
 	});
 	floorMap[8][8] = memoryTile;
 	
@@ -144,10 +144,10 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 		
 		if(player->hasWings) {
-			return 126 + 10 + 11 + 1 + ( globalGame->mode == 2 ? 3 : 0) + 1;
+			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 1;
 		}
 		
-		return 124;
+		return 57;
 	});
 	floorMap[9][8] = wingsTile;
 	
@@ -157,10 +157,10 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 		
 		if(player->hasSword) {
-			return 126 + 10 + 11 + 1 + ( globalGame->mode == 2 ? 3 : 0) + 2;
+			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
 		}
 		
-		return 124;
+		return 57;
 	});
 	floorMap[10][8] = swordTile;
 	

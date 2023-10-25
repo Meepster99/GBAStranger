@@ -263,11 +263,13 @@ public:
 	// the amount of time spent on this is pathetic.
 	// WHY, when i declared tilesPointer as a member var in effects layer did this not work?? but this does???
 	bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(128, bn::bpp_mode::BPP_4);
-	EffectsLayer effectsLayer = EffectsLayer(tilesPointer);	
+	EffectsLayer effectsLayer;	
+
 
 	bn::vector<MenuOption, 16> menuOptions;
 
 	EffectsManager(Game* game_);
+	
 
 	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency = 1) {
 		Effect* e = new Effect(create_, animate_, animationFrequency);

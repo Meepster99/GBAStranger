@@ -322,7 +322,9 @@ void BigSprite::animate() { profileFunction();
 
 // -----
 	
-EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font) {
+EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font),
+	effectsLayer(tilesPointer)
+	{
 		
 	// may not be the best idea?
 	//textGenerator.set_one_sprite_per_character(true);
@@ -332,8 +334,12 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	BN_ASSERT(tileRefOpt.has_value(), "wtf");
 	bn::span<bn::tile> tileRef = tileRefOpt.value();
 	
+	
 	// now that these tiles can be made in memory, we could/should also change the,,, like, whats in them, but thats for later
 	for(int i=0; i<bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref().size(); i++) {
+		
+		BN_ASSERT(i < tileRef.size(), "size error when loading in customeffecttiles");
+		
 		tileRef[i].data[0] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[0];
 		tileRef[i].data[1] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[1];
 		tileRef[i].data[2] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[2];

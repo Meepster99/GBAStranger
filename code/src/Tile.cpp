@@ -150,8 +150,77 @@ int RodTile::getTileValue() const {
 int LocustTile::getTileValue() const {
 	return startIndex + (entityManager->player->locustCount != 0);	
 }
+
+static int inline getWordTileIndex(const char c) {
 	
+	switch(c) {
+		
+		case ' ':
+			return 0;
+		
+		case '0':
+			return 2;
+		case '1':
+			return 3;
+		case '2':
+			return 4;
+		case '3':
+			return 5;
+		case '4':
+			return 6;
+		case '5':
+			return 7;
+		case '6':
+			return 8;
+		case '7':
+			return 9;
+		case '8':
+			return 10;
+		case '9':
+			return 11;
+		
+		case 'V':
+			return 12;
+		case 'O':
+			return 13;
+		case 'I':
+			return 14;
+		case 'D':
+			return 15;
+			
+		case 'B':
+			return 16;
+		case '?':
+			return 17;
+		
+		default: [[unlikely]]
+			BN_ERROR("unknown char ", c, " passed into getWordTileIndex");
+			break;
+	}
 	
+	return 0;
+}
+
+void WordTile::draw() {
+	
+	u8 x = tilePos.x;
+	u8 y = tilePos.y;
+	
+	int temp;
+	
+	// i hadnt ate this day, and somehow ended up with this. dont ask
+	temp = getWordTileIndex(first);
+	int firstTile = 228 + (((temp >> 1) << 2) | (temp & 1));
+	
+	temp = getWordTileIndex(second);
+	int secondTile = 228 + (((temp >> 1) << 2) | (temp & 1));
+	
+	rawMap->setTile(x * 2 + 1, y * 2 + 1, firstTile); 
+	rawMap->setTile(x * 2 + 1, y * 2 + 2, firstTile + 2); 
+	
+	rawMap->setTile(x * 2 + 2, y * 2 + 1, secondTile); 
+	rawMap->setTile(x * 2 + 2, y * 2 + 2, secondTile + 2); 
+}
 
 
 

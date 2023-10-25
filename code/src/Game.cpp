@@ -95,6 +95,8 @@ void Game::resetRoom(bool debug) {
 	
 	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
 	
+	//bn::bg_tiles::log_status();
+	
 	BN_LOG("reset room done");
 }
 
@@ -112,9 +114,22 @@ void Game::loadLevel(bool debug) {
 	uncompressData(uncompressedCollision, (u8*)idek.collision);
 	uncompressData(uncompressedDetails, (u8*)idek.details);
 	
+	bool needRedraw = false;
 	
-	const bn::regular_bg_tiles_item* collisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
-	const bn::regular_bg_tiles_item* detailsTiles = (const bn::regular_bg_tiles_item*)idek.detailsTiles;
+	static const bn::regular_bg_tiles_item* collisionTiles = NULL;
+	static const bn::regular_bg_tiles_item* detailsTiles = NULL;
+	
+	const bn::regular_bg_tiles_item* newCollisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
+	if(newCollisionTiles != collisionTiles) {
+		needRedraw = true;
+	}
+	collisionTiles = newCollisionTiles;
+
+	const bn::regular_bg_tiles_item* newDetailsTiles = (const bn::regular_bg_tiles_item*)idek.detailsTiles;
+	if(newDetailsTiles != detailsTiles) {
+		needRedraw = true;
+	}
+	detailsTiles = newDetailsTiles;
 	
 	int collisionTileCount = collisionTiles->tiles_ref().size();
 	int detailsTileCount = detailsTiles->tiles_ref().size();
@@ -127,44 +142,71 @@ void Game::loadLevel(bool debug) {
 	// also, im no longer going to use a bitwise, im just going to add the number of collision tiles 
 	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
 	
-	bn::optional<bn::span<bn::tile>> tileRefOpt = backgroundTiles.vram();
-	BN_ASSERT(tileRefOpt.has_value(), "wtf");
-	bn::span<bn::tile> tileRef = tileRefOpt.value();
+
 	
 	details.collisionTileCount = collisionTileCount;
 	
 	
-	for(int i=0; i<collisionTileCount; i++) {
-		
-		BN_ASSERT(i < tileRef.size(), "out of bounds when copying tiles");
-		
-		tileRef[i].data[0] = collisionTiles->tiles_ref()[i].data[0];
-		tileRef[i].data[1] = collisionTiles->tiles_ref()[i].data[1];
-		tileRef[i].data[2] = collisionTiles->tiles_ref()[i].data[2];
-		tileRef[i].data[3] = collisionTiles->tiles_ref()[i].data[3];
-		tileRef[i].data[4] = collisionTiles->tiles_ref()[i].data[4];
-		tileRef[i].data[5] = collisionTiles->tiles_ref()[i].data[5];
-		tileRef[i].data[6] = collisionTiles->tiles_ref()[i].data[6];
-		tileRef[i].data[7] = collisionTiles->tiles_ref()[i].data[7];
-	}
-	
-	
-	for(int i=0; i<detailsTileCount; i++) {
-		
-		
-		BN_ASSERT((i | 0b100000000) < tileRef.size(), "out of bounds when copying tiles");
-		
-		tileRef[i | 0b100000000].data[0] = detailsTiles->tiles_ref()[i].data[0];
-		tileRef[i | 0b100000000].data[1] = detailsTiles->tiles_ref()[i].data[1];
-		tileRef[i | 0b100000000].data[2] = detailsTiles->tiles_ref()[i].data[2];
-		tileRef[i | 0b100000000].data[3] = detailsTiles->tiles_ref()[i].data[3];
-		tileRef[i | 0b100000000].data[4] = detailsTiles->tiles_ref()[i].data[4];
-		tileRef[i | 0b100000000].data[5] = detailsTiles->tiles_ref()[i].data[5];
-		tileRef[i | 0b100000000].data[6] = detailsTiles->tiles_ref()[i].data[6];
-		tileRef[i | 0b100000000].data[7] = detailsTiles->tiles_ref()[i].data[7];
-	}
-	
+	// just in case the destructor isnt automatically called like,, do this
+	// if we dont set the new bg ptr, the mem doesnt get freed
+	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(1, bn::bpp_mode::BPP_4);
 	//collision.rawMap.bgPointer.set_tiles(backgroundTiles);
+	
+	// this call is here to update the ref manager, and properly free the memory
+	// it ispossible to maybe avoid this by calling update in bn_bg_blocks_manager directly
+	//doButanoUpdate(); // these excess frame updates will just slow shit down
+	
+	// i could(and maybe should) realloc this every time 
+	// but im wasting bg tiles on, stuff that i dont even know abt?
+	// im going to try just having it be a const 512 again
+	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
+	//collision.rawMap.bgPointer.set_tiles(backgroundTiles);
+	
+	//doButanoUpdate();
+	
+	if(needRedraw) {
+		
+		bn::optional<bn::span<bn::tile>> tileRefOpt = backgroundTiles.vram();
+		BN_ASSERT(tileRefOpt.has_value(), "wtf");
+		bn::span<bn::tile> tileRef = tileRefOpt.value();
+		
+		// copying to vram(directly) will cause issues when like,,,, going bullshitery relating to 
+		// swapping via debug keys, but thats fine, its debug
+		
+		for(int i=0; i<collisionTileCount; i++) {
+			
+			BN_ASSERT(i < tileRef.size(), "out of bounds when copying tiles");
+			
+			tileRef[i].data[0] = collisionTiles->tiles_ref()[i].data[0];
+			tileRef[i].data[1] = collisionTiles->tiles_ref()[i].data[1];
+			tileRef[i].data[2] = collisionTiles->tiles_ref()[i].data[2];
+			tileRef[i].data[3] = collisionTiles->tiles_ref()[i].data[3];
+			tileRef[i].data[4] = collisionTiles->tiles_ref()[i].data[4];
+			tileRef[i].data[5] = collisionTiles->tiles_ref()[i].data[5];
+			tileRef[i].data[6] = collisionTiles->tiles_ref()[i].data[6];
+			tileRef[i].data[7] = collisionTiles->tiles_ref()[i].data[7];
+		}
+		
+		
+		for(int i=0; i<detailsTileCount; i++) {
+			
+			
+			BN_ASSERT((i + collisionTileCount) < tileRef.size(), "out of bounds when copying tiles");
+			
+			tileRef[i + collisionTileCount].data[0] = detailsTiles->tiles_ref()[i].data[0];
+			tileRef[i + collisionTileCount].data[1] = detailsTiles->tiles_ref()[i].data[1];
+			tileRef[i + collisionTileCount].data[2] = detailsTiles->tiles_ref()[i].data[2];
+			tileRef[i + collisionTileCount].data[3] = detailsTiles->tiles_ref()[i].data[3];
+			tileRef[i + collisionTileCount].data[4] = detailsTiles->tiles_ref()[i].data[4];
+			tileRef[i + collisionTileCount].data[5] = detailsTiles->tiles_ref()[i].data[5];
+			tileRef[i + collisionTileCount].data[6] = detailsTiles->tiles_ref()[i].data[6];
+			tileRef[i + collisionTileCount].data[7] = detailsTiles->tiles_ref()[i].data[7];
+		}
+		
+		details.collisionTileCount = collisionTileCount;
+	}
+	//doButanoUpdate(); // these excess frame updates will just slow shit down
+	
 	
 
 	for(int x=0; x<14; x++) { 
@@ -178,10 +220,6 @@ void Game::loadLevel(bool debug) {
 		
 			if(collisionMap[x][y] == 0) {
 				collisionMap[x][y] = 1;
-			}
-			
-			if(detailsMap[x][y] == 0) {
-				detailsMap[x][y] = 1;
 			}
 		}
 	}
@@ -256,6 +294,7 @@ void Game::changePalette(int offset) {
 	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	
+	cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
@@ -334,10 +373,14 @@ void Game::run() {
 	// wont be much of an issue tho, i suppose
 	//doButanoUpdate(); 
 	
+	globalGame = this;
+	
 	load();
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 	
-	globalGame = this;
+
+	//auto old effectsManager.effectsLayer.rawMap.bgPointer
+
 
 	bn::core::set_vblank_callback(didVBlank);
 	
@@ -345,16 +388,19 @@ void Game::run() {
 	
 	state = GameState::Loading;
 	
+	//while(true) { bn::core::update(); }
+	
 	loadLevel();
 	fullDraw();
 	
 	state = GameState::Normal;
 	
-	// make sure the mod file or whatever only has a max of 16 tracks,
-	//bn::music_items::bruh_moment.play();
 	
-	//bn::sound_items::msc_013.play(1);
-	//bn::music_items::cyberrid.play(0.5);
+		
+	cutsceneManager.testCutscene(); 
+	
+	while(true) { bn::core::update(); }
+	
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
