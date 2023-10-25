@@ -299,8 +299,8 @@ public:
 	
 	// -----
 	
-	void hideForDialogueBox(bool vis);
-	void doDialogue(const char* data);
+	void hideForDialogueBox(bool vis, bool isCutscene);
+	void doDialogue(const char* data, bool isCutscene = false);
 	
 	void doMenu();
 	

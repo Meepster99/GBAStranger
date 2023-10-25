@@ -106,7 +106,7 @@ public:
 	bool playerWon() const { return killedPlayer.contains(NULL); }
 	bool enemyKill() const { return !killedPlayer.contains(player); }
 	
-	void hideForDialogueBox(bool vis);
+	void hideForDialogueBox(bool vis, bool isCutscene);
 	bool exitRoom();
 	bool enterRoom();
 	void doVBlank();

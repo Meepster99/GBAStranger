@@ -40,6 +40,15 @@ public:
 		spritePointer.set_bg_priority(1);
 		}
 		
+	Sprite(const bn::sprite_item& startItem) : 
+		spritePointer(
+			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
+			startItem
+			))
+		{
+		spritePointer.set_bg_priority(1);
+		spritePointer.set_palette(spritePalette->getSpritePalette().create_palette());
+		}
 	
 		
 	void updatePosition(const Pos& p) {

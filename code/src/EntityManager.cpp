@@ -943,13 +943,15 @@ void EntityManager::fullUpdate() {
 
 // -----
 
-void EntityManager::hideForDialogueBox(bool vis) {
+void EntityManager::hideForDialogueBox(bool vis, bool isCutscene) {
+	
+	int compareVal = isCutscene ? 0 : 6;
 	
 	for(auto it = deadList.cbegin(); it != deadList.cend(); ++it) {
 		if((*it) == NULL) {
 			continue;
 		}
-		if((*it)->p.y >= 6) {
+		if((*it)->p.y >= compareVal) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
@@ -958,7 +960,7 @@ void EntityManager::hideForDialogueBox(bool vis) {
 		if((*it) == NULL) {
 			continue;
 		}
-		if((*it)->p.y >= 6) {
+		if((*it)->p.y >= compareVal) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }

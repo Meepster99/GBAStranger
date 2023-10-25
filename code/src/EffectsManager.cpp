@@ -725,21 +725,23 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 
 // -----
 
-void EffectsManager::hideForDialogueBox(bool vis) {
+void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	
-	entityManager->hideForDialogueBox(vis);
+	entityManager->hideForDialogueBox(vis, isCutscene);
+	
+	int compareVal = isCutscene ? 0 : 6;
 	
 	for(auto it = effectList.cbegin(); it != effectList.cend(); ++it) {
 		if((*it) == NULL) {
 			continue;
 		}
-		if((*it)->getPos().y >= 6) {
+		if((*it)->getPos().y >= compareVal) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
 }
 
-void EffectsManager::doDialogue(const char* data) {
+void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	// this function has got to be one of the worst things i have ever written in my life.
 
@@ -790,7 +792,41 @@ void EffectsManager::doDialogue(const char* data) {
 	
 	effectsLayer.update();
 	
-	hideForDialogueBox(false);
+	hideForDialogueBox(false, isCutscene);
+	
+	//bn::rect_window outside_window = bn::rect_window::internal();
+	bn::window outside_window = bn::window::outside();
+	outside_window.set_show_bg(effectsLayer.rawMap.bgPointer, false);
+	//outside_window.set_boundaries(80, 0, 160, 240);
+	outside_window.set_show_sprites(true);
+	
+	// i should probs just disable text scrolling.
+
+	
+	//Sprite temp1(bn::sprite_items::dw_default_sprite_64);
+	//Sprite temp2(bn::sprite_items::dw_default_sprite_64);
+	
+	// HOLY SHIT SPRITE WINDOW 
+	// HOLY SHIT SPRITE WINDOW 
+	// JESUS CHRIST I WISH I KNEW THAT SO LONG AGO OMFG
+	/*
+	temp1.spritePointer.set_window_enabled(true);
+	temp2.spritePointer.set_window_enabled(true);
+	
+	temp1.updateRawPosition(180, 112);
+	temp2.updateRawPosition(56 , 112);
+	
+	temp1.spritePointer.set_horizontal_scale(8);
+	temp2.spritePointer.set_horizontal_scale(8);
+	
+	temp1.spritePointer.set_vertical_scale(0.75);
+	temp2.spritePointer.set_vertical_scale(0.75);
+	
+	temp1.spritePointer.set_bg_priority(2);
+	temp2.spritePointer.set_bg_priority(2);
+	*/
+
+	
 	
 	// idk how long to make this
 	static char buffer[128];
@@ -846,8 +882,9 @@ void EffectsManager::doDialogue(const char* data) {
 				// this section of code should MAYBE be below the below check
 				// nope, moving this finally fixed the rare framedrops	
 				for(int i=0; i<textSprites.size(); i++) {
-					textSprites[i].set_bg_priority(3);
+					textSprites[i].set_bg_priority(2);
 					textSprites[i].set_visible(false);
+					textSprites[i].set_window_enabled(true);
 					textSprites[i].set_palette(spritePalette->getSpritePalette());
 				}
 				game->doButanoUpdate();
@@ -873,6 +910,8 @@ void EffectsManager::doDialogue(const char* data) {
 						}
 					}
 				} else { // we finished the current text, so scroll up.
+					// the amount of pain that scrolling has caused me is simply not worth it 
+					// and theres 0 documentation on gba windows 
 					for(int unused=0; unused<16; unused++) {
 						for(int i=0; i<textSprites.size(); i++) {
 							textSprites[i].set_y(textSprites[i].y() - 1);
@@ -913,7 +952,7 @@ void EffectsManager::doDialogue(const char* data) {
 	// this is trash, and will cause frame drops 
 	game->fullTileDraw();
 
-	hideForDialogueBox(true);	
+	hideForDialogueBox(true, isCutscene);	
 	game->doButanoUpdate();
 	
 	

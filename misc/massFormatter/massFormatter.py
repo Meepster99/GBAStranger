@@ -312,6 +312,7 @@ validSizes = set([
 (8, 32), 
 (16, 32), 
 (32, 64),
+(64, 32),
 ])
 """
 
@@ -466,10 +467,44 @@ def convertTiles(outputPath):
 		"type": "regular_bg_tiles",
 		"bpp_mode": "bpp_4"
 	}
-	
-	
 
 	with open(os.path.join(outputPath, "dw_" + "default_bg_tiles" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+		
+	temp = Image.new("RGBA", (256, 256), (0, 255, 255, 255))
+	
+	writeBitmap(temp, os.path.join(outputPath, "default_bg" + ".bmp"))
+
+	outputJson = {
+		"type": "regular_bg",
+		"bpp_mode": "bpp_4"
+	}
+
+	with open(os.path.join(outputPath, "dw_" + "default_bg" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	
+	temp = Image.new("RGB", (16, 16), (0, 0, 0))
+	
+	writeBitmap(temp, os.path.join(outputPath, "default_sprite_tiles" + ".bmp"))
+
+	outputJson = {
+		"type": "sprite_tiles",
+		"bpp_mode": "bpp_4"
+	}
+
+	with open(os.path.join(outputPath, "dw_" + "default_sprite_tiles" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+		
+	temp = Image.new("RGB", (64, 64), (0, 0, 0))
+	
+	writeBitmap(temp, os.path.join(outputPath, "default_sprite_64" + ".bmp"))
+
+	outputJson = {
+		"type": "sprite",
+		"bpp_mode": "bpp_4"
+	}
+
+	with open(os.path.join(outputPath, "dw_" + "default_sprite_64" + ".json"), "w") as f:
 		json.dump(outputJson, f)
 	
 	print("done converting tiles")
@@ -1135,7 +1170,8 @@ def generateEffectsTiles(outputPath):
 	# generate the tiles for the textbox 
 	image = Image.open("../ExportData/Export_Textures/Sprites/spr_textbox_extra/spr_textbox_extra_4.png")
 	
-	cyan_background = Image.new("RGBA", image.size, (0, 255, 255, 255))
+	#cyan_background = Image.new("RGBA", image.size, (0, 255, 255, 255))
+	cyan_background = Image.new("RGBA", image.size, (128, 255, 255, 255))
 	cyan_background.paste(image, (0, 0), image)
 	cyan_background = cyan_background.convert("RGB")
 	data = np.array(cyan_background)

@@ -19,6 +19,10 @@
 #include "bn_sound_actions.h"
 #include "common_variable_8x8_sprite_font.h"
 
+// it is so fucking dumb that i didnt realize this was a thing until now 
+#include "bn_window.h"
+#include "bn_rect_window.h"
+
 #include "bn_random.h"
 #include "bn_sram.h"
 
@@ -299,6 +303,9 @@ public:
 		
 		bgPointer.set_tiles(bgItem.tiles_item());
 		bgPointer.set_map(bgItem.map_item());
+		
+		bgPointer.set_x(8 + 8);
+		bgPointer.set_y(8 + 48);
 		
 		reloadCells();
 		
