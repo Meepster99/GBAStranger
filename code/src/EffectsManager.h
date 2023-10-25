@@ -196,6 +196,12 @@ public:
 	
 	void animate();
 	
+	void setVis(bool vis) {
+		for(int i=0; i<sprites.size(); i++) {
+			sprites[i].spritePointer.set_visible(vis);
+		}
+	}
+	
 	
 };
 

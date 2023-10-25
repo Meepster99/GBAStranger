@@ -14,6 +14,17 @@ from threading import Thread
 
 from pytube import YouTube
 
+from colorama import init, Fore, Back, Style
+
+init(convert=True)
+
+RED = Fore.RED 
+GREEN = Fore.GREEN 
+CYAN = Fore.CYAN
+WHITE = Fore.WHITE
+
+RESET = Style.RESET_ALL
+
 outputPath = "./formattedOutput/"
 
 def convertAllMusic():
@@ -83,34 +94,45 @@ def convertMisc():
 	# hehe 
 	# https://www.youtube.com/watch?v=tD-2EZCScnk&ab_channel=NudeDrummer
 	
-	link = "https://www.youtube.com/watch?v=tD-2EZCScnk"
+	links = ["https://www.youtube.com/watch?v=tD-2EZCScnk",
+	"https://www.youtube.com/watch?v=bCCJJD1WQBo"]
 	
+	for link in links:
 	
-	fileNames = [ f for f in os.listdir("./") if f.endswith('.mp4')]
+		print(CYAN + "converting " + link + RESET)
 	
-	if len(fileNames) == 0:
+		#fileNames = [ f for f in os.listdir("./") if f.endswith('.mp4')]
+		"""
+		if len(fileNames) == 0:
+			yt=YouTube(link)
+			t=yt.streams.filter(only_audio=True)
+			t[0].download("./")
+			fileNames = [ f for f in os.listdir("./") if f.endswith('.mp4')]
+		"""
+		
 		yt=YouTube(link)
 		t=yt.streams.filter(only_audio=True)
 		t[0].download("./")
 		fileNames = [ f for f in os.listdir("./") if f.endswith('.mp4')]
-	
-	fileName = fileNames[0]
-	
-	subprocess.run([
-    'ffmpeg',
-    "-y", '-i', fileName,
-    fileName.rsplit(".", 1)[0] + ".mp3"
-	])
-	
-	song = AudioSegment.from_mp3(fileName.rsplit(".", 1)[0] + ".mp3")
-	
-	song = song.set_channels(1)
+		
+		fileName = fileNames[0]
+		
+		subprocess.run([
+		'ffmpeg',
+		"-y", '-i', fileName,
+		fileName.rsplit(".", 1)[0] + ".mp3"
+		])
+		
+		song = AudioSegment.from_mp3(fileName.rsplit(".", 1)[0] + ".mp3")
+		
+		song = song.set_channels(1)
 
-	outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
-	song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
+		outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
+		song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
 
-	os.remove(fileName.rsplit(".", 1)[0] + ".mp3")
-	
+		os.remove(fileName.rsplit(".", 1)[0] + ".mp3")
+		os.remove(fileName.rsplit(".", 1)[0] + ".mp4")
+		
 	
 	pass
 

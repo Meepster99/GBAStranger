@@ -1171,7 +1171,8 @@ def generateEffectsTiles(outputPath):
 	image = Image.open("../ExportData/Export_Textures/Sprites/spr_textbox_extra/spr_textbox_extra_4.png")
 	
 	#cyan_background = Image.new("RGBA", image.size, (0, 255, 255, 255))
-	cyan_background = Image.new("RGBA", image.size, (128, 255, 255, 255))
+	#cyan_background = Image.new("RGBA", image.size, (128, 255, 255, 255))
+	cyan_background = Image.new("RGBA", image.size, (0, 0, 0, 255))
 	cyan_background.paste(image, (0, 0), image)
 	cyan_background = cyan_background.convert("RGB")
 	data = np.array(cyan_background)

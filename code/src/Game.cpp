@@ -324,6 +324,8 @@ void Game::doVBlank() { profileFunction();
 	// can vblank occur during the gameloop, or does this only get called after we call a butano update?
 	// if this can get called in the gameloop, then we will have problems once we integrate dialogue, bc during dialogue this needs to be disabled!
 	
+	// cutscenes should be queued to a vector, and executed in here.
+	
 	static bool a, b, c = false;
 	
 	switch(state) {
@@ -397,9 +399,7 @@ void Game::run() {
 	
 	
 		
-	cutsceneManager.testCutscene(); 
-	
-	while(true) { bn::core::update(); }
+	cutsceneManager.introCutscene(); 
 	
 	BN_LOG("starting main gameloop");
 	while(true) {
