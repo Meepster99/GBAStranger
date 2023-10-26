@@ -1027,9 +1027,6 @@ def convertObjects(layerData):
 		def obj_gray_d(p, creationCode):
 			pass
 
-		def obj_sealchest(p, creationCode):
-			pass
-
 		def obj_npc_failure_001(p, creationCode):
 			pass
 
@@ -1209,6 +1206,13 @@ def convertObjects(layerData):
 			pass
 
 		def obj_chest(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
+			pass
+			
+		def obj_sealchest(p, creationCode):
+			x, y = p.rawX, p.rawY 
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
 			pass
 
 		def obj_baal_epilogue2(p, creationCode):

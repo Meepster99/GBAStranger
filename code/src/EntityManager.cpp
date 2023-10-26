@@ -99,6 +99,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				player->hasMemory = game->saveData.hasMemory;
 				player->hasWings  = game->saveData.hasWings;
 				player->hasSword  = game->saveData.hasSword; 
+				
+				player->hasRod = game->saveData.hasRod; 
 				player->hasSuperRod = game->saveData.hasSuperRod; 
 				
 				entityList.insert(player);
@@ -970,6 +972,9 @@ void EntityManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	
 	for(auto it = entityList.cbegin(); it != entityList.cend(); ++it) {
 		if((*it) == NULL) {
+			continue;
+		}
+		if((*it)->entityType() == EntityType::Interactable) {
 			continue;
 		}
 		if((*it)->p.y >= compareVal) {

@@ -29,6 +29,9 @@
 #include "bn_random.h"
 #include "bn_sram.h"
 
+// danger zone, again 
+#include "bn_bg_blocks_manager.h"
+
 #ifdef ENABLELOGGING
 #include "bn_log.h"
 #else 
@@ -53,6 +56,7 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
+
 
 
 typedef unsigned char u8;
@@ -161,6 +165,7 @@ enum class EntityType {
 	CifStatue,
 	
 	Interactable,
+	
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {

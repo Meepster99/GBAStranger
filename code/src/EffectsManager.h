@@ -58,10 +58,14 @@ public:
 	// this is trash and i shouldnt be calling this alloc twice, but it wont work without it
 	//bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(1, bn::bpp_mode::BPP_4);
 
-	bn::regular_bg_tiles_ptr tilesPointer;
+	
+	
+	EffectsLayer(const bn::regular_bg_tiles_item& tilesItem) : Layer(tilesItem, 0, 5) {
+		
+	}
 	
 	// details uses default everything
-	EffectsLayer(bn::regular_bg_tiles_ptr tilesPointer_) : Layer(tilesPointer_, 0, 5), tilesPointer(tilesPointer_)
+	EffectsLayer(bn::regular_bg_tiles_ptr tilesPointer_) : Layer(tilesPointer_, 0, 5)
 	 {
 
 		for(int x=0; x<14; x++) {

@@ -752,8 +752,15 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 			w += 256 - (w % 256)
 		if h % 256 != 0:
 			h += 256 - (h % 256)
+			
+		
 		
 		cyan_background = Image.new("RGBA", (w, h), (0, 255, 255, 255))
+		
+		blackBackgroundNames = set(["spr_vd_bg_index0"])	
+		if spriteName in blackBackgroundNames:
+			cyan_background = Image.new("RGBA", (w, h), (0, 0, 0, 255))
+		
 		cyan_background.paste(image, (0, 0), image)
 	
 		cyan_background = cyan_background.convert("RGB")
@@ -838,15 +845,16 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 			tiles = newTiles
 	
 
-	
-	
-	tempImage = Image.fromarray(np.vstack(tiles))
+	allTiles = np.vstack(tiles)
+
+	tempImage = Image.fromarray(allTiles)
 	
 	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
 	# the width of the bigsprite 
 	#,, possibly the loading position of the bigsprite? do i have access to that easily?
 	
-
+	
+	
 	
 	
 	dataType = "regular_bg_tiles" if isBackground else "sprite_tiles"

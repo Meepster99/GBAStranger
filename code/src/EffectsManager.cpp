@@ -14,7 +14,7 @@ EffectsManager* BigSprite::effectsManager = NULL;
 
 
 // ----- 
-
+	
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
 	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
 	
@@ -31,6 +31,10 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	// i dont like this code, but tbh im not sure of a better way around this.
 	// i also really wish i could use a switch statement here
 	// the decision of if to put the vars in the effectholder struct, or hard coded in here is difficult
+	// gods i REALLY dont like this code 
+	bool doFirstDraw = true;
+	// i now absolutely despise this code. 
+	// the way that a chest(32 x 16 sprite) was exported somehow fucked everything up here
 	
 	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
 		
@@ -47,7 +51,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 				boobaBackup = boobaCount;
 				
 				bigSprite->effectsManager->doDialogue(
-				"please dont touch me\rin that manner.\nyou'll regret it."
+				"please dont touch me\rin that manner.\ryou'll regret it."
 				);
 				
 				return;
@@ -56,8 +60,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			// wtf. irlly need to switch over to namespaces
 			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
 				bigSprite->effectsManager->doDialogue(
-				"i,,, why did you even do that?\rprobably wanted to see if\ri had programed it in\n"
-				"well, i did\rlet me move that out of the way\n"
+				"i,,, why did you even do that? probably wanted to see if i had programed it in\n"
+				"well, i did let me move that out of the way\n"
 				"it might hurt a little bit though"
 				);
 				bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
@@ -68,12 +72,12 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 			static unsigned msgIndex = 0;
 			
 			constexpr MessageStr msgs[] = {
-				{"you wouldnt believe how much the\ridiot who made this remake spent on animating\n"
-			"my boobs, head, and tail.\n"
-			"I would say i appreciate it, but\rto be honest, its just borerlining\ron creepy now.\n"
-			"like, jesus christ. you dont even\rhave music, or shortcuts working\r"
-			"but now you have boobs????\rwhy????????"},
-			{"anyway, you know the drill\rhead down the stairs, good luck"}
+				{"you wouldnt believe how much the idiot who made this remake spent on animating"
+			" my boobs, head, and tail.\r"
+			"I would say i appreciate it, but to be honest, its just borerlining on creepy now.\n"
+			"like, jesus christ. you dont even have music, or shortcuts working\r"
+			"but now you have boobs????\rwhy????????\0"},
+			{"anyway, you know the drill\rhead down the stairs, good luck\0"}
 			};
 			
 			// i rlly need to rewrite the dialogue system to automatically cut words.
@@ -187,12 +191,87 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_tail) { 
 		autoAnimate = true;
 		autoAnimateFrames = 24;
-	} else{
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_chest) {
+		//BN_LOG("hey dumbfuck, load a chest");
+		
+		// this thing quite literaly:
+		// isnt a bigsprite
+		// isnt animated 
+		// what the fuck am i on 
+		
+		// and now that im going back to previously written code, and using it for completely unintended purposes, i am reminded that i am a trash programmer
+		// i hijacked the KICK function to do this random bs????
+		
+		sprites.push_back(Sprite(bn::sprite_tiles_items::dw_spr_chest, bn::sprite_tiles_items::dw_spr_chest_shape_size));
+		
+		bool isSuperRodChest = game->roomManager.roomIndex == 0;
+		
+		if(isSuperRodChest) {
+			sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasSuperRod);
+		} else {
+			sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasRod | entityManager->player->hasSuperRod);
+		}
+		
+		
+		
+		
+		
+		auto func1 = [isSuperRodChest](void* obj) -> void {
+			
+			
+			if(isSuperRodChest && entityManager->player->hasSuperRod) {
+				return;
+			} else if(!isSuperRodChest && globalGame->entityManager.player->hasRod) {
+				return;
+			}
+			
+			
+			globalGame->cutsceneManager.introCutscene();
+		
+			BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+			bigSprite->sprites[0].spritePointer.set_tiles(*(bigSprite->tiles), 1);
+		
+			
+			globalGame->entityManager.player->hasRod = !isSuperRodChest;
+			globalGame->entityManager.player->hasSuperRod = isSuperRodChest;
+			
+			globalGame->tileManager.updateRod();
+			globalGame->tileManager.floorLayer.reloadCells();
+			
+			return;
+		};
+		auto func2 = [](void* obj) -> bool {
+			(void)obj;
+			return true;
+		};
+			
+		Interactable* temp1 = new Interactable(Pos(6, 4),
+			func1,
+			func2,
+			(void*)this,
+			(void*)this
+		);
+		
+		// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
+		Interactable* temp2 = new Interactable(Pos(7, 4),
+			func1,
+			func2,
+			(void*)this,
+			(void*)this
+		);
+		
+		entityManager->addEntity(temp1);
+		entityManager->addEntity(temp2);
+		
+		doFirstDraw = false;
+	} else {
 		
 	}
 	
 	// firstdraw occurs down here to ensure that all animation flags are properly set up.
-	firstDraw();
+	if(doFirstDraw) {
+		firstDraw();	
+	}
 	
 }
 
@@ -280,7 +359,7 @@ void BigSprite::firstDraw() {
 			
 			}
 			doBigTile:
-
+			
 			Sprite tempSprite = Sprite(*tiles);
 			
 			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
@@ -300,9 +379,9 @@ void BigSprite::firstDraw() {
 				x + (y * width) + (animationIndex * width * height)
 			);
 			
-			BN_LOG("attempting push");
+			//BN_LOG("attempting push");
 			sprites.push_back(tempSprite);
-			BN_LOG("push success");
+			//BN_LOG("push success");
 		}
 	}
 }
@@ -328,8 +407,11 @@ void BigSprite::animate() { profileFunction();
 // -----
 	
 EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font),
-	effectsLayer(tilesPointer)
+	effectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles)
 	{
+		
+		
+	
 		
 	// may not be the best idea?
 	textGenerator.set_one_sprite_per_character(true);
@@ -363,6 +445,14 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	tileRef[127].data[0] = 0x23232323;
 	*/
 	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			effectsLayer.setBigTile(x, y, 0);
+		}
+	}
+	
+	effectsLayer.rawMap.bgPointer.set_tiles(tilesPointer);
+	
 	for(int i=0; i<8; i++) {
 		tileRef[126].data[i] = 0x11111111;
 		tileRef[127].data[i] = 0x11111111;
@@ -378,6 +468,8 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 		effectsLayer.rawMap.setTile(29, i, 126, false, true);
 	}
 
+
+	
 	
 	effectsLayer.reloadCells();
 	
@@ -624,6 +716,7 @@ void EffectsManager::doVBlank() { profileFunction();
 	
 	return;
 
+	/*
 	static Pos spiralPos(3, 3);
 	static int layerIndex = 0;
 	static int layer = 1;
@@ -671,7 +764,7 @@ void EffectsManager::doVBlank() { profileFunction();
 		
 		layerIndex++;
 	}
-	
+	*/
 	
 	
 	
@@ -924,7 +1017,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	effectsLayer.update();
 	
-	hideForDialogueBox(false, isCutscene);
+	if(!isCutscene) {
+		hideForDialogueBox(false, isCutscene);
+	}
 	
 	// ok heres the plan. 
 	// nullterm is the end of the text 
@@ -978,6 +1073,14 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		}
 		globalGame->doButanoUpdate();
 		
+		// in the future, this needs to be gotten dynamically
+		const bn::sound_item* sound = &bn::sound_items::snd_voice2;
+		
+		// i may be bsing, but i think a sound plays at the start and and and when a space occurs 
+		// this is actually completley wrong! but im tired ok, and also kinda like it so im leaving it in
+		globalGame->playSound(sound);
+		
+		int bufferIndex = 0;
 		for(int i=0; i<textSprites.size(); i++) {
 			
 			if(skipScrollBool) {
@@ -985,7 +1088,12 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 			}
 			
 			textSprites[i].set_visible(true);
-	
+			if(bufferPtr[bufferIndex] == ' ') {
+				globalGame->playSound(sound);
+				bufferIndex++;
+			}
+			bufferIndex++;
+		
 			
 			for(int j=0; j<2; j++) {
 				if(bn::keypad::a_pressed()) {
@@ -995,6 +1103,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 				globalGame->doButanoUpdate();
 			}
 		}
+		
+		globalGame->playSound(sound);
 		
 		textSprites.clear();
 		textGeneratorObj.set_one_sprite_per_character(false);
@@ -1079,7 +1189,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	// this is trash, and will cause frame drops 
 	game->fullTileDraw();
 
-	hideForDialogueBox(true, isCutscene);	
+	if(!isCutscene) {
+		hideForDialogueBox(true, isCutscene);	
+	}
 	game->doButanoUpdate();
 	
 	textSpritesLine1.clear();
@@ -1301,13 +1413,41 @@ void EffectsManager::doMenu() {
 		[]() -> const char* { 
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
-			return player->hasSuperRod ? "super" : "normal";
+			
+			return player->hasRod || player->hasSuperRod ? ( player->hasSuperRod ? "super" : "normal") : "none";
 		},
 		[](int val) { 
 			(void)val;
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
-			player->hasSuperRod	= !player->hasSuperRod;
+	
+			
+			// trash code 
+			if(player->hasRod) {
+				if(val > 0) {
+					player->hasRod = false;
+					player->hasSuperRod = true;
+				} else {
+					player->hasRod = false;
+					player->hasSuperRod = false;
+				}
+			} else if(player->hasSuperRod) {
+				if(val > 0) {
+					player->hasRod = false;
+					player->hasSuperRod = false;
+				} else {
+					player->hasRod = true;
+					player->hasSuperRod = false;
+				}
+			} else {
+				if(val > 0) {
+					player->hasRod = true;
+				} else {
+					player->hasSuperRod = true;
+				}
+			}
+			
+			//player->hasSuperRod	= !player->hasSuperRod;
 			globalGame->tileManager.updateRod();
 		},
 		-2

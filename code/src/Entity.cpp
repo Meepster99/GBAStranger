@@ -134,19 +134,23 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		//BN_LOG("fhdjlf ", hasSuperRod);
 		
-		if(tile == NULL && rod.size() != 0) {
-			// put tile down 
-			popRod(tilePos);
-		} else if(tile != NULL && (rod.size() == 0 || hasSuperRod)) {
-			// pick tile up
-			pushRod(tilePos);
-		} else if(tile == NULL && rod.size() == 0) { 
+		if(hasRod || hasSuperRod) {
+			if(tile == NULL && rod.size() != 0) {
+				// put tile down 
+				popRod(tilePos);
+			} else if(tile != NULL && (rod.size() == 0 || hasSuperRod)) {
+				// pick tile up
+				pushRod(tilePos);
+			} else if(tile == NULL && rod.size() == 0) { 
+				//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+				return {false, bn::optional<Direction>()};
+			} else if (tile != NULL && rod.size() != 0) {
+				//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+				return {false, bn::optional<Direction>()};
+			}
+		} else {
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			return {false, bn::optional<Direction>()};
-		} else if (tile != NULL && rod.size() != 0) {
-			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			return {false, bn::optional<Direction>()};
-		} 
+		}
 
 		nextMove = bn::optional<Direction>();
 		

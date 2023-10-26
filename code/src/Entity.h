@@ -3,6 +3,8 @@
 #include "SharedTypes.h"
 #include "Tile.h"
 
+#include <functional>
+
 class Game;
 class EntityManager;
 class EffectsManager;
@@ -847,21 +849,22 @@ public:
 	// oh gods. oh. gods.
 	// this,,, this function, this whole class. what am i on
 	// there rlly should be a way to pass the function with the params inside of it, but im tired, and this works
-	void (*interactFunc)(void*);
-	bool (*kickFunc)(void*);
+	std::function<void(void*)> interactFunc;
+	std::function<bool(void*)> kickFunc;
 	
 	void* interactFuncParams;
 	void* kickFuncParams;
 
 	// i dont like this naming convention at all
 	
-	Interactable(Pos p_, void (*interactFunc_)(void*), bool (*kickFunc_)(void*), void* interactFuncParams_, void* kickFuncParams_) : 
+	// now that i have access to functional, i rlly should rewrite this.(if i can?)
+	Interactable(Pos p_, std::function<void(void*)> interactFunc_, std::function<bool(void*)> kickFunc_, void* interactFuncParams_, void* kickFuncParams_) : 
 		Obstacle(p_), 
 		interactFunc(interactFunc_), kickFunc(kickFunc_),
 		interactFuncParams(interactFuncParams_), kickFuncParams(kickFuncParams_)
 		{
 		//sprite.setVisible(true);
-		sprite.setVisible(0);
+		sprite.setVisible(false);
 		sprite.spritePointer.set_bg_priority(0);
 	}
 	
@@ -879,5 +882,7 @@ public:
 	}
 	
 };
+
+
 
 

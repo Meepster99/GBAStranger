@@ -18,7 +18,7 @@ public:
 
 	// collision uses default everything
 	Collision() :
-	Layer(bn::regular_bg_tiles_items::dw_default_bg_tiles, 2) 
+	Layer(bn::regular_bg_tiles_items::dw_default_bg_tiles, 3) 
 	{}
 	
 };
@@ -76,6 +76,8 @@ struct GameSave {
 	bool hasMemory = false;
 	bool hasWings = false;
 	bool hasSword = false;
+	
+	bool hasRod = false;
 	bool hasSuperRod = false;
 	
 	uint64_t hash = 0;
@@ -107,7 +109,7 @@ public:
 	
 	GameState state = GameState::Loading;
 	
-	bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4); 
+	bool needRedraw = false;
 	
 	int mode = 0;
 	const char* strangerNames[3] = {"Gray\0", "Lillie\0", "Cif\0"};
@@ -148,6 +150,8 @@ public:
 		
 		MenuOption::effectsManager = &effectsManager;
 	
+		bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4); 
+		
 		collision.rawMap.bgPointer.set_tiles(backgroundTiles);
 	
 		
@@ -159,6 +163,7 @@ public:
 	void load();
 	uint64_t getSaveHash();
 	
+	void loadTiles();
 	void loadLevel(bool debug = false);
 	void resetRoom(bool debug = false);
 	
