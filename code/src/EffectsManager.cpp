@@ -219,7 +219,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		auto func1 = [isSuperRodChest](void* obj) -> void {
 			
 			
-			if(isSuperRodChest && entityManager->player->hasSuperRod) {
+			if(entityManager->player->hasSuperRod) {
 				return;
 			} else if(!isSuperRodChest && globalGame->entityManager.player->hasRod) {
 				return;
