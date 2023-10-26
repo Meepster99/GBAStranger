@@ -312,6 +312,10 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 		return false;
 	}
 	
+	if(e->isEnemy() && testPos == player->p) {
+		addKill(e);
+	}
+	
 	if(!e->canFall() && !hasFloor(testPos)) {
 		e->moveFailed();
 		return false;
