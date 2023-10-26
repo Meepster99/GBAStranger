@@ -240,6 +240,8 @@ public:
 	bool hasWings = false;
 	bool hasSword = false;
 	
+	bool hasWingsTile = false;
+	
 	// jank as fuck
 	int wingsUse = 0;
 	unsigned wingMoveCheck = -1;

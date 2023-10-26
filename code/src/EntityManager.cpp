@@ -432,7 +432,9 @@ void EntityManager::doMoves() {
 	
 	// telling the difference between if the player failed a move vs is talking to something is gonna be weird
 	// actually, i suppose we have the movefailed func, i can just overload that?
-		
+	
+	
+	
 	/*res = updateMap();
 	if(res) {
 		return res;
@@ -573,7 +575,7 @@ void EntityManager::doMoves() {
 		return;
 	}
 	
-	
+	player->hasWingsTile = player->inRod(tileManager->wingsTile);
 	// DO STATUE CHECKS
 	// THIS STILL AINT DONE
 
@@ -797,7 +799,7 @@ void EntityManager::updateMap() {
 						if(temp->isPlayer()) {
 							
 							
-							if(!player->hasWings || player->inRod(tileManager->wingsTile)) {
+							if(!player->hasWings || player->hasWingsTile) {
 								BN_LOG("no floor kill");
 								addKill(temp);
 							} else {
