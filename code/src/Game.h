@@ -174,6 +174,7 @@ public:
 	
 	int paletteIndex = 0;
 	void changePalette(int offset);
+	Palette* pal = NULL;
 
 	void doButanoUpdate();
 	void uncompressData(u8 res[126], u8* input);

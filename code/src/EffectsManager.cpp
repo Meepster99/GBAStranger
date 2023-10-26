@@ -18,6 +18,8 @@ EffectsManager* BigSprite::effectsManager = NULL;
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
 	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
 	
+	
+	
 	BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
 	
 	optionCount = tiles->tiles_ref().size() / (4 * width * height);
@@ -39,7 +41,6 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
 		
 		BN_LOG("booba detected");
-		
 		
 		auto func1 = [](void* obj) -> void {
 			
@@ -211,11 +212,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		} else {
 			sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasRod | entityManager->player->hasSuperRod);
 		}
-		
-		
-		
-		
-		
+
 		auto func1 = [isSuperRodChest](void* obj) -> void {
 			
 			
@@ -315,8 +312,6 @@ void BigSprite::draw(int index) { profileFunction();
 }
 
 void BigSprite::firstDraw() {
-	
-	
 	
 	int indexOffset = animationIndex * 4 * width * height;
 	
@@ -817,6 +812,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 				BN_ERROR("you are a idiot(not you, but me)");
 			}
 		} else {
+			
+			BN_LOG("loading bigsprite in Room: ", game->roomManager.currentRoomName(), " id index: ", i);
 			bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
 		}
 		effects++;
@@ -981,7 +978,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 
 	GameState restoreState = game->state;
-	game->state = GameState::Paused;
+	game->state = GameState::Dialogue;
 	
 	for(int x=0; x<14; x++) {
 		tileManager->floorLayer.setBigTile(x, 6, 0);
@@ -1310,6 +1307,8 @@ void EffectsManager::doMenu() {
 	
 	verTextSprites.clear();
 	
+	// these sprites are STATIC and should be put into a bg layer(perhaps the cutscene layer?) to keep 
+	// enough sprite slots open such that pausing in tail's room wont crash
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)24, bn::string_view(vermsgString1), verTextSprites);
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view(vermsgString2), verTextSprites);
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view(vermsgString3), verTextSprites);
@@ -1317,10 +1316,7 @@ void EffectsManager::doMenu() {
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view(vermsgString5), verTextSprites);
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString6), verTextSprites);
 
-	
-	
-	
-	
+
 	for(int i=0; i<verTextSprites.size(); i++) {
 		verTextSprites[i].set_palette(spritePalette->getFontSpritePalette());
 		verTextSprites[i].set_bg_priority(0);
@@ -1462,11 +1458,8 @@ void EffectsManager::doMenu() {
 	);
 	
 	game->doButanoUpdate();
-
-	bn::timer tempTimer;
 	
 	for(int i=0; i<menuOptions.size(); i++) {
-		tempTimer.restart();
 		menuOptions[i].fullDraw(i == 0);
 		// this many butanoupdates SHOULD NOT BE NECCESSARY!
 		game->doButanoUpdate();

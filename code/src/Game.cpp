@@ -303,27 +303,68 @@ void Game::changePalette(int offset) {
 	
 	// this is a horrid way of doing it, i should be able to just like,,, access the actual palette table???
 	
+	static bool firstRun = true;
+	
 	const int paletteListSize = (int)(sizeof(paletteList) / sizeof(paletteList[0]));
 	
 	paletteIndex += offset;
 	
 	paletteIndex = ((paletteIndex % paletteListSize) + paletteListSize) % paletteListSize;
 	
-	entityManager.updatePalette(paletteList[paletteIndex]);
-	effectsManager.updatePalette(paletteList[paletteIndex]);
+	pal = paletteList[paletteIndex];
 	
-	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	if(firstRun) {
+		
+		firstRun = false;
+		
+		entityManager.updatePalette(paletteList[paletteIndex]);
+		effectsManager.updatePalette(paletteList[paletteIndex]);
+
+		
+		collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		
+		cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		
+		BackgroundMap::backgroundPalette = paletteList[paletteIndex];
+		
+		// this is a problem, fuck it ima just have palette not cause a save.
+		//save();
+		
+		
+	} else {
 	
-	cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	
-	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
-	
-	// this is a problem, fuck it ima just have palette not cause a save.
-	//save();
-	
+		
+		// oh boy, prepare for fun 
+		// as far as i know, butano doesnt give me direct memory access, nor does it give me direct palette access.
+		// this means that we are about to have a fun time with direct memory shit 
+		// reminds me of the original gb 
+		// going to have to probs go back and fix some of the random areas where i manually am setting a palette 
+		// probs might actually make those funcs private
+		// declare game as a friend class?
+		
+		// bg palette at 0x05000000 + 0x1E0
+		// sprite palette at 0x05000000 + 0x3E0
+		
+		unsigned short* idek = reinterpret_cast<unsigned short*>(0x05000000 + 0x1E0);
+		
+		//BN_ERROR( pal->colorArray[0].red(), " ", pal->colorArray[0].green(), " ", pal->colorArray[0].blue(), " ", *idek);
+		
+		for(int i=0; i<5; i++) {
+			unsigned short temp = 0;
+			
+			temp |= (pal->colorArray[i].blue() << 10);
+			temp |= (pal->colorArray[i].green() << 5);
+			temp |= (pal->colorArray[i].red() << 0);
+		
+			idek[i] = temp;
+		}
+		
+		
+		
+	}
 }
 
 void didVBlank() {
@@ -348,6 +389,9 @@ void Game::doVBlank() { profileFunction();
 	// if this can get called in the gameloop, then we will have problems once we integrate dialogue, bc during dialogue this needs to be disabled!
 	
 	// cutscenes should be queued to a vector, and executed in here.
+	// or maybe not 
+	// also should cutscenes have a vblank call? maybe 
+	// i could have it execute a lambda
 	
 	static bool a, b, c = false;
 	
@@ -382,6 +426,9 @@ void Game::doVBlank() { profileFunction();
 			break;
 		case GameState::Loading:
 		case GameState::Paused:
+			break;
+		case GameState::Dialogue:
+			effectsManager.doVBlank();
 			break;
 	}
 	
@@ -422,7 +469,10 @@ void Game::run() {
 	
 	//effectsManager.doDialogue("Did you know every time you sigh, a little bit of happiness escapes?\0");
 		
-	//cutsceneManager.introCutscene(); 
+		
+	doButanoUpdate();
+	changePalette(1);
+	cutsceneManager.introCutscene(); 
 	
 	//bn::core::update(); 
 
@@ -605,7 +655,7 @@ void Game::playSound(const bn::sound_item* sound) {
 		playedSounds.clear();
 	}
 	
-	if(state == GameState::Normal || state == GameState::Exiting || state == GameState::Paused) {
+	if(state == GameState::Normal || state == GameState::Exiting || state == GameState::Paused || state == GameState::Dialogue) {
 		if(soundsThisFrame < MAXSOUNDS && !playedSounds.contains(sound)) {
 			sound->play();
 			soundsThisFrame++;

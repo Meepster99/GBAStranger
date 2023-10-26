@@ -23,6 +23,7 @@
 #include "bn_window.h"
 #include "bn_rect_window.h"
 
+#include "bn_bg_palette_ptr.h"
 
 #include "bn_istring_base.h"
 
@@ -96,6 +97,7 @@ enum class GameState {
 	Entering, // we just exited the exiting state and are now reloading stuffs. 
 	Loading, // loading in new data, do nothing for now.
 	Paused, // either actually paused(which i havent even thought about making) or in dialogue.
+	Dialogue,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const GameState& e) {

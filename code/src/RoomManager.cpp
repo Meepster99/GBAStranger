@@ -61,6 +61,8 @@ void RoomManager::setMode(int mode) {
 		roomNameArray = hard_roomNames;
 	} else if(mode == 2) {
 		// i rlly need to impliment this
+		roomArray = &rooms[0];
+		roomNameArray = roomNames;
 	} else {
 		BN_ERROR("unknown room mode set, val= ", mode);
 	}

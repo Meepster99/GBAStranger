@@ -394,15 +394,22 @@ void EntityManager::doMoves() {
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
 	
+	
+	player->hasWingsTile = player->inRod(tileManager->wingsTile);
+	bool prevHasWingsTile = player->hasWingsTile;
+	
 	// insert player's move into its func 
 	// IF THE PLAYER CHANGES THE FLOOR, DO IT HERE.
 	bn::pair<bool, bn::optional<Direction>> playerRes = player->doInput();
+	
+	if(prevHasWingsTile && !player->inRod(tileManager->wingsTile)) {
+		player->hasWingsTile = false;
+	}
 	
 	if(!playerRes.first) {
 		return;
 	}
 	
-
 	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
 		
 		// intsert mimics move into its func 	
@@ -478,7 +485,6 @@ void EntityManager::doMoves() {
 	
 	// ----- the above code was a doUpdate replacement
 	
-	
 	// slightly hacky, but works.
 	bn::optional<Direction> shadowMove = playerRes.second;
 	if(player->p == playerStart) {
@@ -539,7 +545,6 @@ void EntityManager::doMoves() {
 			if(mimicResult) {
 				temp->nextMove = tempNextMove;
 			}
-			
 		}
 	}
 	updateMap();
@@ -575,7 +580,7 @@ void EntityManager::doMoves() {
 		return;
 	}
 	
-	player->hasWingsTile = player->inRod(tileManager->wingsTile);
+	//player->hasWingsTile = player->inRod(tileManager->wingsTile);
 	// DO STATUE CHECKS
 	// THIS STILL AINT DONE
 

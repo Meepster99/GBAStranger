@@ -324,6 +324,9 @@ validSizes = set([
 (32, 16),
 (16, 32),
 (32, 32),
+(64, 32),
+(32, 64),
+(64, 64)
 ])
 
 def copyIfChanged(inputFile, outputPath):
@@ -934,6 +937,34 @@ def genSprite(spriteName, isBackground = False):
 	# but im tired 
 	paddedSpriteSize, paddedSpriteImages = getSpriteDimensions(spriteName, True)
 	spriteSize, spriteImages = getSpriteDimensions(spriteName, False)
+	
+	# hacky trash workaround
+	# telling non-bigsprite sprites apart from sprite sprites,, 
+	# ugh tbh i should of only had bigsprites be sprites ABOVE 64x64, programming things this way like, ugh
+	
+	
+	if "tail" not in spriteName.lower() and "birch" not in spriteName.lower() and paddedSpriteSize[0] != 16:
+		if paddedSpriteSize[0] < 64:
+			v = paddedSpriteSize[0]
+			v-=1;
+			v |= v >> 1;
+			v |= v >> 2;
+			v |= v >> 4;
+			v |= v >> 8;
+			v |= v >> 16;
+			v+=1;
+			paddedSpriteSize = (v, paddedSpriteSize[1])
+			
+		if paddedSpriteSize[1] < 64:
+			v = paddedSpriteSize[1]
+			v-=1;
+			v |= v >> 1;
+			v |= v >> 2;
+			v |= v >> 4;
+			v |= v >> 8;
+			v |= v >> 16;
+			v+=1;
+			paddedSpriteSize = (paddedSpriteSize[0], v)
 	
 	if paddedSpriteSize in validSizes:
 		# paddedsprite convert 
