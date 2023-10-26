@@ -380,7 +380,7 @@ def convertTiles(outputPath):
 	
 		width, height = image.size
 		
-		cyan_background = Image.new("RGBA", (width, height), (0, 255, 255, 255))
+		cyan_background = Image.new("RGBA", (width, height), (0, 0, 0, 255))
 		cyan_background.paste(image, (0, 0), image)
 	
 		cyan_background = cyan_background.convert("RGB")
@@ -415,6 +415,8 @@ def convertTiles(outputPath):
 		
 		sections = []
 		
+		count = 0
+		
 		for j in range(0, height, tileSize):
 			for i in range(0, width, tileSize):
 				section = input_array[j:j+tileSize, i:i+tileSize]
@@ -424,6 +426,8 @@ def convertTiles(outputPath):
 				section = section[2:18, 2:18]
 				#print(section.shape)
 				sections.append(section)
+				
+				count += 1
 		
 		tileSize = 16
 		
@@ -438,7 +442,9 @@ def convertTiles(outputPath):
 		
 		# Create a new PIL image from the NumPy array
 		output_image = Image.fromarray(output_array)
-
+	
+		
+		
 		# Save the resulting 16x64 image (replace 'output.png' with your desired output file)
 		#output_image.save("output.png")
 		
