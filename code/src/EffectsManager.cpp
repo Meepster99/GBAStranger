@@ -98,6 +98,36 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	
 	if(tiles == &bn::sprite_tiles_items::dw_spr_chest) {
 		loadChest();
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_birch) {
+		if(game->mode == 2 && strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) { // cif mode 
+			tiles = &bn::sprite_tiles_items::dw_spr_birch_b;
+			sprites[0].spritePointer.set_tiles(*tiles, 0);
+			effectsManager->roomDust();
+			
+			auto func1 = [](void* unused) -> void {
+				(void)unused;
+				globalGame->cutsceneManager.cifDream();
+			};
+			
+			auto func2 = [](void* unused) -> bool {
+				(void)unused;
+				return true;
+			};
+			
+			Interactable* temp1 = new Interactable(Pos(6, 4),
+				func1,
+				func2,
+				NULL,
+				NULL
+			);
+			
+			// shit code
+			//game->collisionMap[6][4] = 2;
+			
+			entityManager->addEntity(temp1);
+			
+			
+		}
 	}
 	
 }
@@ -786,14 +816,15 @@ void EffectsManager::doVBlank() { profileFunction();
 			++it;
 		}
 	}
-
-	if(frame % 4 != 0) {
-		return;
-	}
 	
 	return;
 
 	/*
+	
+	if(frame % 4 != 0) {
+		return;
+	}
+	
 	static Pos spiralPos(3, 3);
 	static int layerIndex = 0;
 	static int layer = 1;
@@ -917,13 +948,6 @@ Dialogue::Dialogue(EffectsManager* effectsManager_, const char* data_) : effects
 
 }
 
-Dialogue::~Dialogue() {
-	
-	// this almost certainly leaks memory.
-	
-	
-}
-
 const char* Dialogue::getNextWord() {
 	// return the next WORD, in amount of chars 
 	// this is done so that we properly cut off strings at word breaks.
@@ -1025,12 +1049,13 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	entityManager->hideForDialogueBox(vis, isCutscene);
 	
 	int compareVal = isCutscene ? 0 : 6;
+	compareVal = (compareVal * 16) - 8;
 	
 	for(auto it = effectList.cbegin(); it != effectList.cend(); ++it) {
 		if((*it) == NULL) {
 			continue;
 		}
-		if((*it)->getPos().y >= compareVal) {
+		if((*it)->getY() >= compareVal) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
@@ -1143,8 +1168,30 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		int offset,
 		bool& skipScrollBool) mutable -> void {
 			
+		// cringe is occuring! this should/could maybe be static, but im fucking scared
+		char filteredBuffer[256];
+		
+		char* originalBufferPtr = bufferPtr;
+		char* filteredBufferPtr = filteredBuffer;
+		while(true) {
+			
+			char c = *originalBufferPtr;
+			if(c == '`') {
+				c = ' ';
+			}
+			
+			*filteredBufferPtr = c;
+			filteredBufferPtr++;
+			originalBufferPtr++;
+			
+			if(c == '\0') {
+				break;
+			}
+		}
+		filteredBufferPtr = filteredBuffer;
+			
 		textGeneratorObj.set_one_sprite_per_character(true);
-		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(bufferPtr), textSprites);
+		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(filteredBufferPtr), textSprites);
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_bg_priority(0);
 			textSprites[i].set_visible(false);
@@ -1165,14 +1212,19 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 			if(skipScrollBool) {
 				break;
 			}
-			
-			textSprites[i].set_visible(true);
-			if(bufferPtr[bufferIndex] == ' ') {
+						
+			if(bufferPtr[bufferIndex] == ' ' || bufferPtr[bufferIndex] == '`') {
 				globalGame->playSound(sound);
+				if(bufferPtr[bufferIndex] == '`') {
+					// delay scroll, this will eat up skipscrolls, but im tired.
+					for(int j=0; j<60; j++) {
+						globalGame->doButanoUpdate();
+					}
+				}
 				bufferIndex++;
 			}
 			bufferIndex++;
-		
+			textSprites[i].set_visible(true);
 			
 			for(int j=0; j<2; j++) {
 				if(bn::keypad::a_pressed()) {
@@ -1187,7 +1239,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		
 		textSprites.clear();
 		textGeneratorObj.set_one_sprite_per_character(false);
-		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(bufferPtr), textSprites);
+		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(filteredBufferPtr), textSprites);
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_visible(true);
 			textSprites[i].set_bg_priority(0);
@@ -1279,6 +1331,103 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	game->state = restoreState;
 	
 
+}
+
+bool EffectsManager::restRequest() {
+	
+	// TODO, THIS TEXT HAS A RDER AROUND IT!!!!
+	//probs,,,, oh gods 
+	// going to have to modify a lot of stuff to fix that 
+	// go with making a border with a palete index of 5, which is transparent most of the time 
+	// but if needed, we like yea 
+	
+	
+	bn::vector<bn::sprite_ptr, 4> restSprites;
+	bn::vector<bn::sprite_ptr, 4> yesSprites;
+	bn::vector<bn::sprite_ptr, 4> noSprites;
+	
+	auto activeTextPalette = spritePalette->getSpritePalette();
+	auto alternateTextPalette = spritePalette->getAlternateSpritePalette();
+	
+	for(int i=0; i<60; i++) {
+		game->doButanoUpdate();
+	}
+	
+	//textGenerator.generate((bn::fixed)-16, (bn::fixed)-30, bn::string_view("Rest?\0"), textSpritesLine1);
+	textGenerator.generate((bn::fixed)-24, (bn::fixed)-64, bn::string_view("Rest?\0"), restSprites);
+	for(int i=0; i<restSprites.size(); i++) {
+		restSprites[i].set_bg_priority(0);
+		restSprites[i].set_palette(activeTextPalette);
+	}
+	
+	for(int i=0; i<60; i++) {
+		game->doButanoUpdate();
+	}
+	
+	textGenerator.generate((bn::fixed)-70, (bn::fixed)-10, bn::string_view("[Yes]\0"), yesSprites);
+	textGenerator.generate((bn::fixed)40, (bn::fixed)-10, bn::string_view("[No]\0"), noSprites);
+	
+	for(int i=0; i<yesSprites.size(); i++) {
+		yesSprites[i].set_bg_priority(0);
+		yesSprites[i].set_palette(alternateTextPalette);
+	}
+	for(int i=0; i<noSprites.size(); i++) {
+		noSprites[i].set_bg_priority(0);
+		noSprites[i].set_palette(alternateTextPalette);
+	}
+	
+	int res = 0;
+	
+	while(true) { 
+	
+		if(res != 0 && bn::keypad::a_pressed()) {
+			break;
+		}
+		
+		if(bn::keypad::left_pressed()) {
+			res = 2;
+			for(int i=0; i<yesSprites.size(); i++) {
+				yesSprites[i].set_bg_priority(0);
+				yesSprites[i].set_palette(activeTextPalette);
+			}
+			for(int i=0; i<noSprites.size(); i++) {
+				noSprites[i].set_bg_priority(0);
+				noSprites[i].set_palette(alternateTextPalette);
+			}			
+		} else if(bn::keypad::right_pressed()) {
+			res = 1;
+			for(int i=0; i<yesSprites.size(); i++) {
+				yesSprites[i].set_bg_priority(0);
+				yesSprites[i].set_palette(alternateTextPalette);
+			}
+			for(int i=0; i<noSprites.size(); i++) {
+				noSprites[i].set_bg_priority(0);
+				noSprites[i].set_palette(activeTextPalette);
+			}
+		}
+		
+		
+		game->doButanoUpdate(); 
+	
+	}
+	
+	restSprites.clear();
+	yesSprites.clear();
+	noSprites.clear();
+	game->doButanoUpdate(); 
+	
+	bool answer = res - 1;
+	
+	if(answer) {
+		// ` marks are used to delay the text
+		doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
+		// PLAY THE EXIT THINGy
+	} else {
+		doDialogue("[You decide to move on]\0", false);
+	}
+	
+	
+	return answer;
 }
 
 // -----
@@ -1629,6 +1778,21 @@ void EffectsManager::doMenu() {
 }
 
 // -----
+
+// yep. its exactly what it looks like.
+
+/*
+
+import math
+
+res = [ round(math.sin(math.radians(i)), 5) for i in range(0, 360) ]
+
+print("bn::fixed sinTable[360] = {{{:s}}};".format(",".join([str(v) for v in res])))
+
+*/
+
+// i hope this doesnt slow compilation?
+bn::fixed sinTable[360] = {0.0,0.01745,0.0349,0.05234,0.06976,0.08716,0.10453,0.12187,0.13917,0.15643,0.17365,0.19081,0.20791,0.22495,0.24192,0.25882,0.27564,0.29237,0.30902,0.32557,0.34202,0.35837,0.37461,0.39073,0.40674,0.42262,0.43837,0.45399,0.46947,0.48481,0.5,0.51504,0.52992,0.54464,0.55919,0.57358,0.58779,0.60182,0.61566,0.62932,0.64279,0.65606,0.66913,0.682,0.69466,0.70711,0.71934,0.73135,0.74314,0.75471,0.76604,0.77715,0.78801,0.79864,0.80902,0.81915,0.82904,0.83867,0.84805,0.85717,0.86603,0.87462,0.88295,0.89101,0.89879,0.90631,0.91355,0.9205,0.92718,0.93358,0.93969,0.94552,0.95106,0.9563,0.96126,0.96593,0.9703,0.97437,0.97815,0.98163,0.98481,0.98769,0.99027,0.99255,0.99452,0.99619,0.99756,0.99863,0.99939,0.99985,1.0,0.99985,0.99939,0.99863,0.99756,0.99619,0.99452,0.99255,0.99027,0.98769,0.98481,0.98163,0.97815,0.97437,0.9703,0.96593,0.96126,0.9563,0.95106,0.94552,0.93969,0.93358,0.92718,0.9205,0.91355,0.90631,0.89879,0.89101,0.88295,0.87462,0.86603,0.85717,0.84805,0.83867,0.82904,0.81915,0.80902,0.79864,0.78801,0.77715,0.76604,0.75471,0.74314,0.73135,0.71934,0.70711,0.69466,0.682,0.66913,0.65606,0.64279,0.62932,0.61566,0.60182,0.58779,0.57358,0.55919,0.54464,0.52992,0.51504,0.5,0.48481,0.46947,0.45399,0.43837,0.42262,0.40674,0.39073,0.37461,0.35837,0.34202,0.32557,0.30902,0.29237,0.27564,0.25882,0.24192,0.22495,0.20791,0.19081,0.17365,0.15643,0.13917,0.12187,0.10453,0.08716,0.06976,0.05234,0.0349,0.01745,0.0,-0.01745,-0.0349,-0.05234,-0.06976,-0.08716,-0.10453,-0.12187,-0.13917,-0.15643,-0.17365,-0.19081,-0.20791,-0.22495,-0.24192,-0.25882,-0.27564,-0.29237,-0.30902,-0.32557,-0.34202,-0.35837,-0.37461,-0.39073,-0.40674,-0.42262,-0.43837,-0.45399,-0.46947,-0.48481,-0.5,-0.51504,-0.52992,-0.54464,-0.55919,-0.57358,-0.58779,-0.60182,-0.61566,-0.62932,-0.64279,-0.65606,-0.66913,-0.682,-0.69466,-0.70711,-0.71934,-0.73135,-0.74314,-0.75471,-0.76604,-0.77715,-0.78801,-0.79864,-0.80902,-0.81915,-0.82904,-0.83867,-0.84805,-0.85717,-0.86603,-0.87462,-0.88295,-0.89101,-0.89879,-0.90631,-0.91355,-0.9205,-0.92718,-0.93358,-0.93969,-0.94552,-0.95106,-0.9563,-0.96126,-0.96593,-0.9703,-0.97437,-0.97815,-0.98163,-0.98481,-0.98769,-0.99027,-0.99255,-0.99452,-0.99619,-0.99756,-0.99863,-0.99939,-0.99985,-1.0,-0.99985,-0.99939,-0.99863,-0.99756,-0.99619,-0.99452,-0.99255,-0.99027,-0.98769,-0.98481,-0.98163,-0.97815,-0.97437,-0.9703,-0.96593,-0.96126,-0.9563,-0.95106,-0.94552,-0.93969,-0.93358,-0.92718,-0.9205,-0.91355,-0.90631,-0.89879,-0.89101,-0.88295,-0.87462,-0.86603,-0.85717,-0.84805,-0.83867,-0.82904,-0.81915,-0.80902,-0.79864,-0.78801,-0.77715,-0.76604,-0.75471,-0.74314,-0.73135,-0.71934,-0.70711,-0.69466,-0.682,-0.66913,-0.65606,-0.64279,-0.62932,-0.61566,-0.60182,-0.58779,-0.57358,-0.55919,-0.54464,-0.52992,-0.51504,-0.5,-0.48481,-0.46947,-0.45399,-0.43837,-0.42262,-0.40674,-0.39073,-0.37461,-0.35837,-0.34202,-0.32557,-0.30902,-0.29237,-0.27564,-0.25882,-0.24192,-0.22495,-0.20791,-0.19081,-0.17365,-0.15643,-0.13917,-0.12187,-0.10453,-0.08716,-0.06976,-0.05234,-0.0349,-0.01745};
 
 void EffectsManager::glassBreak(Pos p) {
 	
@@ -2121,5 +2285,120 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	
 	
 }
+
+void EffectsManager::roomDust() {
+
+	// gml_Object_obj_dustparticle2_Step_0 seems to have the code 
+	
+	for(int unused = 0; unused<16; unused++) {
+	
+		auto createFunc = [](Effect* obj) mutable -> void {
+
+			if(randomGenerator.get() & 1) {
+				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+			} else {
+				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+			}
+		
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				0
+			);
+		
+			obj->x = -32;
+			obj->y = -32;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+		};
+		
+		auto tickFunc = [
+			x = (bn::fixed)-32, 
+			y = (bn::fixed)-32, 
+			image_speed = (bn::fixed)0,
+			y_speedup = randomGenerator.get_int(2, 6 + 1),
+			t = randomGenerator.get_int(0, 180 + 1),
+			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
+			graphicsIndex = (bn::fixed)0,
+			freezeFrames = randomGenerator.get_int(0, 60 + 1)
+			](Effect* obj) mutable -> bool {
+			
+			if(y < -16) {
+				if(randomGenerator.get() & 1) {
+					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+				} else {
+					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+				}
+				x = randomGenerator.get_int(16 * 14);
+				//y = 16*5+randomGenerator.get_int(16);
+				if(y == -32) {
+					y = 16 + randomGenerator.get_int(16 * 5);
+				} else {
+					y = 16*4+randomGenerator.get_int(32);
+				}
+				
+				image_speed = (bn::fixed)0;
+				y_speedup = randomGenerator.get_int(2, 6 + 1);
+				t = randomGenerator.get_int(0, 180 + 1);
+				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
+				graphicsIndex = (bn::fixed)0;
+				freezeFrames = randomGenerator.get_int(0, 60 + 1);
+				
+				randomGenerator.update();
+			}
+			
+			if(image_speed > 9) {
+				
+				freezeFrames = randomGenerator.get_int(0, 60 + 1);
+				
+				
+			}
+			
+
+			image_speed += 0.02;
+			//image_speed += 0.20;
+			
+			//y -= (0.1 * y_speedup);
+			y -= (0.075 * y_speedup);
+			
+			t = ((t + 1) % 360);
+			x = (x + (amplitude * sinTable[t]));
+			
+			if(x > 240) {
+				x -= 240;
+			} else if(x < 0) {
+				x += 240;
+			}
+			
+			
+			
+			BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
+			
+			graphicsIndex += image_speed / 60;
+			
+			// replacing this with freezeFrames > 0
+			// while bugged, also worked quite well
+			if(freezeFrames == 0) {
+				obj->sprite.spritePointer.set_tiles(
+					*obj->tiles,
+					graphicsIndex.integer() % 9
+				);
+			} else {
+				freezeFrames--;
+			}
+		
+			obj->x = x.integer();
+			obj->y = y.integer();
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			return false;
+		};
+
+		createEffect(createFunc, tickFunc);
+		
+	}
+
+}
+
+
+
 
 

@@ -168,7 +168,7 @@ public:
 	
 	virtual void startFall() { return; }
 	 
-	bool fallDeath() {
+	virtual bool fallDeath() {
 		// return true once the animation is over, and kill the sprite.
 		
 		if(!isFalling) {

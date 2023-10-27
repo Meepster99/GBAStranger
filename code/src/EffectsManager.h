@@ -121,8 +121,11 @@ public:
 	
 	int graphicsIndex = 0;
 	
+	const bn::sprite_tiles_item* tiles = NULL;
+	
 	// having one of these is ok, but if it gets excessive i should switch back over to passing them inside the [] of the lambdas
 	int tempCounter = 0;
+	//int tempCounter2 = 0; // now we are excessive
 	
 	Effect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency_ = 1) : 
 	sprite(bn::sprite_tiles_items::dw_spr_gray_w_d), createFunc(create_), animateFunc(animate_), animationFrequency(animationFrequency_)
@@ -154,8 +157,11 @@ public:
 	}
 	
 	// used to just see where the pos of this effect is, for the purpose of hiding it for dialogue
-	Pos getPos() {
+	/*Pos getPos() {
 		return Pos( (x + 8) / 16, (y + 8) / 16 );
+	}*/
+	int getY() {
+		return y;
 	}
 	
 };
@@ -322,6 +328,8 @@ public:
 	
 	void doMenu();
 	
+	bool restRequest();
+	
 	
 	void glassBreak(Pos p);
 	void voidRod(Pos p, Direction dir);
@@ -330,6 +338,7 @@ public:
 	void sword(Pos p, Direction dir);
 	void monLightning(Pos p, Direction dir);
 	void sparkle(Pos p, int sparkleLength = 8);
+	void roomDust();
 	
 };
 
@@ -340,21 +349,8 @@ public:
 	const char* originalData;
 
 	const char* data;
-		
-	struct Line {
-		char* line = NULL;
-	};
 	
-	struct Message {
-		bn::vector<Line*, 8> msgs;
-	};
-	
-	bn::vector<Message*, 8> strings;
-	
-		
 	Dialogue(EffectsManager* effectsManager_, const char* data_);
-	
-	~Dialogue();
 	
 	int getNextDialogue(char* res);
 
@@ -365,7 +361,7 @@ private:
 	int getNextLine();
 	
 	bool isWordEnd(char c) {
-		return c == ' ' || c == '\n' || c == '\0' || c == '\r';
+		return c == ' ' || c == '\n' || c == '\0' || c == '\r' || c == '`';
 	}
 	
 	bool isLineEnd(char c) {
@@ -373,3 +369,5 @@ private:
 	}
 
 };
+
+

@@ -473,13 +473,14 @@ void Game::run() {
 	//doButanoUpdate();
 	//changePalette(1);
 	//cutsceneManager.introCutscene(); 
+	cutsceneManager.cifDream();
 	
 	//bn::core::update(); 
 
 	
 	//cutsceneManager.testCutscene(); 
 	
-	//while(true) { bn::core::update(); }
+	//while(true) { doButanoUpdate(); }
 	
 	BN_LOG("starting main gameloop");
 	while(true) {

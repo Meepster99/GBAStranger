@@ -884,5 +884,3 @@ struct MessageStr {
 	const char idek = '\0'; // sanity
 };
 
-
-

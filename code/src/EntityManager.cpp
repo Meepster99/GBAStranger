@@ -272,8 +272,7 @@ void EntityManager::addEntity(Entity* e) {
 	
 	BN_ASSERT(entityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
 	BN_ASSERT(futureEntityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
-	BN_ASSERT(hasFloor(e->p), "tried adding entity to position without floor");
-	BN_ASSERT(!hasCollision(e->p), "tried adding entity to position without floor");
+	//BN_ASSERT(hasFloor(e->p) || hasCollision(e->p), "tried adding entity to position without floor or collision");
 	
 	entityList.insert(e);
 	if(e->isObstacle()) {
@@ -603,9 +602,13 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	// this func really needs to be rewritten to just work with killing players tbh, also its return value is scuffed af.
 	
 	if(e->entityType() == EntityType::Player || e->entityType() == EntityType::Shadow) {
-		BN_ERROR("tried to kill either a player or a shadow. thats not a thing you can do fool.");
+		BN_ERROR("tried to kill either a player or a shadow or an interactable. thats not a thing you can do fool.");
 	}
-
+	
+	if(e->entityType() == EntityType::Interactable) {
+		// hopefully this doesnt fuck anything up
+		return entityMap[e->p.x][e->p.y].end();
+	}
 	
 	Pos tempPos = e->p;
 	
@@ -802,7 +805,7 @@ void EntityManager::updateMap() {
 					
 					temp = *entityMap[x][y].begin();
 					
-					if(!hasFloor(Pos(x, y))) {
+					if(!hasFloor(Pos(x, y)) && !hasCollision(Pos(x, y))) {
 						if(temp->isPlayer()) {
 							
 							
