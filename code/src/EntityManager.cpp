@@ -255,6 +255,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 void EntityManager::updatePalette(Palette* pal) {
 	
+	
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
 		(*it)->sprite.spritePointer.set_palette(pal->getSpritePalette());
 	}
@@ -264,6 +265,7 @@ void EntityManager::updatePalette(Palette* pal) {
 	}
 	
 	Sprite::spritePalette = pal;
+	
 }
 
 void EntityManager::addEntity(Entity* e) {

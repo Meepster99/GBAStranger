@@ -498,8 +498,7 @@ void EffectsManager::updatePalette(Palette* pal) {
 	
 	for(int i=0; i<verTextSprites.size(); i++) {
 		verTextSprites[i].set_palette(pal->getFontSpritePalette());
-	}
-	
+	} 
 	
 }
 
@@ -1066,7 +1065,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_bg_priority(0);
 			textSprites[i].set_visible(false);
-			textSprites[i].set_palette(spritePalette->getSpritePalette());
+			//textSprites[i].set_palette(spritePalette->getSpritePalette());
 		}
 		globalGame->doButanoUpdate();
 		
@@ -1234,7 +1233,7 @@ void MenuOption::fullDraw(bool isActive) { // use white color for active, use da
 	if(isActive) {
 		spritePalettePalette = effectsManager->spritePalette->getSpritePalette();
 	}
-	
+
 	
 	for(int i=0; i<textSprites.size(); i++) {
 		textSprites[i].set_palette(spritePalettePalette);

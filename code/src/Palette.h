@@ -27,25 +27,6 @@ public:
 	fontColorArray{a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e},
 	tempColorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)}
 	{}
-	
-	
-	const bn::color copyColor(bn::color c) {
-		
-		bn::color res = bn::color(c.red(), c.green(), c.blue());
-		
-		
-		res.set_red(1);
-		res.set_green(1);
-		res.set_blue(1);
-		
-		BN_ASSERT(res.red() == 1, "wtf");
-		
-		//BN_ASSERT(res.red() == c.red(), "wtf red");
-		//BN_ASSERT(res.green() == c.green(), "wtf green");
-		//BN_ASSERT(res.blue() == c.blue(), "wtf blue");
-		
-		return res;
-	}
 
 	const bn::bg_palette_item getBGPalette() {
 		
@@ -82,17 +63,62 @@ public:
 		// is there ever a case where 
 		// actually no, i would have to manually change any sprite i have during a cutscene, thats annoying 
 		
-		tempColorArray[WHITE] = colorArray[BLACK];
+		
+		tempColorArray[BLACK] = colorArray[BLACK];
+		tempColorArray[WHITE] = colorArray[WHITE];
+		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
+		
+		
+		if(index >= 0) {
+			tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
+			tempColorArray[LIGHTGRAY] = colorArray[WHITE];
+		}
+		
+		if(index >= 1) {
+			tempColorArray[BLACK] = colorArray[DARKGRAY];
+		}
+		
+		if(index >= 2) {
+			tempColorArray[DARKGRAY] = colorArray[WHITE];
+			tempColorArray[BLACK] = colorArray[LIGHTGRAY];
+		}
+		
+		if(index >= 3) {
+			tempColorArray[BLACK] = colorArray[WHITE];
+		}
 		
 		bn::span<bn::color> spanthing(tempColorArray);
-			
-		const bn::bg_palette_item res = bn::bg_palette_item(spanthing, bn::bpp_mode::BPP_4);	
-		
-		return res;
+
+		return bn::bg_palette_item(spanthing, bn::bpp_mode::BPP_4);	;
 	}
 	
 	const bn::sprite_palette_item getSpritePaletteFade(int index) {
 		(void)index;
+		
+		tempColorArray[BLACK] = colorArray[BLACK];
+		tempColorArray[WHITE] = colorArray[WHITE];
+		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
+		
+		
+		if(index >= 0) {
+			tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
+			tempColorArray[LIGHTGRAY] = colorArray[WHITE];
+		}
+		
+		if(index >= 1) {
+			tempColorArray[BLACK] = colorArray[DARKGRAY];
+		}
+		
+		if(index >= 2) {
+			tempColorArray[DARKGRAY] = colorArray[WHITE];
+			tempColorArray[BLACK] = colorArray[LIGHTGRAY];
+		}
+		
+		if(index >= 3) {
+			tempColorArray[BLACK] = colorArray[WHITE];
+		}
 		
 		bn::span<bn::color> spanthing(tempColorArray);
 			
