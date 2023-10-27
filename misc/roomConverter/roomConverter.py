@@ -968,7 +968,7 @@ def convertObjects(layerData):
 			
 		def obj_mural(p, creationCode):
 			pass
-			
+				
 		def obj_enemy_nm(p, creationCode):
 			pass
 			
@@ -1014,7 +1014,7 @@ def convertObjects(layerData):
 			elif creationCode == "dl_form = 2":
 				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_lev,{:d},{:d},3,4".format(x, y))
 			elif creationCode == "dl_form = 3":
-				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_cif,{:d},{:d},4,4".format(x, y))
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_cif,{:d},{:d},4,4".format(x - 16, y))
 			else:
 				print("demonlord statue loaded with unknown creation code: " + creationCode)
 				exit(1)
@@ -1032,14 +1032,37 @@ def convertObjects(layerData):
 
 		def obj_npc_nun(p, creationCode):
 			pass
-
+		
+		def _tailCoordinateFunction(x, y, w, h):
+		
+			x += int(w / 2)
+			y += int(h / 2)
+		
+			w = int(math.ceil(w/16))
+			h = int(math.ceil(h/16))
+			
+			# bigsprite's coordinates like, have a seperate system, and since tails can be both normal and bigsprites, this handles the conversion issues
+		
+			if w <= 4 and h <= 4:
+				# small sprite
+				
+				x -= 0
+				y += 16
+				
+				
+		
+		
+			return [x, y, w, h]
+		
+			pass
 		def obj_npc_tail(p, creationCode):
 			x, y = p.rawX, p.rawY 
 			x += 4
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_upperbody,{:d},{:d},3,5,false".format(x, y))
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_upperbody,{:d},{:d},3,5,false,2,true".format(x, y))
 			
 			y += 2 * 16
 			y -= 3
+			y += 8;
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_boobytrap,{:d},{:d},3,3,false,1".format(x, y))
 		
 			pass
@@ -1052,15 +1075,213 @@ def convertObjects(layerData):
 			
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_lowerbody,{:d},{:d},6,3,false".format(x, y))
 			
+			"""
 			x += 16
 			y -= 2 * 16
 			y -= 6
 			x -= 1
 			y -= 1
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_tail,{:d},{:d},4,3,false,1,true".format(x, y))
+			"""
+			
+			x, y = p.rawX, p.rawY 
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, 52, 40)
+			x, y = p.rawX, p.rawY 
+			
+			y -= 28 - 1
+			x += 12 - 1
+			
+
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_tail,{:d},{:d},{:d},{:d},false,1,true".format(x, y, w, h))
 			
 			pass
+		
+		def obj_voidtail_004(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 128, 32
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_004,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
 
+		def obj_voidtail_005(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 176, 56
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_x56,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+		
+			pass
+
+		def obj_voidtail_013(p, creationCode):
+		
+			x, y = p.rawX - 8, p.rawY - 8
+			
+			w, h = 56, 48
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_013,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+		
+		def obj_voidtail_001(p, creationCode):
+			
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 80, 128
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_001,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+
+		def obj_voidtail_014(p, creationCode):
+	
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 112, 128
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_014,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+
+		def obj_voidtail_008(p, creationCode):
+		
+			x, y = p.rawX, p.rawY - 8
+			
+			w, h = 64, 52
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_008,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+			pass
+
+		def obj_voidtail_003(p, creationCode):
+		
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 80, 16
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_003,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+	
+			pass
+
+		def obj_voidtail_009(p, creationCode):
+		
+			# tails are going to cause collision issues, and i rlly should do something abt that, but i wont
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 96, 160
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_009,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+
+		def obj_voidtail_007(p, creationCode):
+		
+			x, y = p.rawX, p.rawY + 6
+	
+			w, h = 64, 148
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_007,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+
+		def obj_voidtail_012(p, creationCode):
+		
+			
+			x, y = p.rawX - 8, p.rawY - 16
+	
+			w, h = 56, 32
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_012,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+
+		def obj_voidtail_011(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 112, 128
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_011,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+
+		
+			pass
+
+		def obj_voidtail_006(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 128, 56
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_006,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+
+		def obj_voidtail_010(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+	
+			w, h = 112, 160
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_010,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+			pass
+		
+		def obj_voidtail_002(p, creationCode):
+		
+			
+			x, y = p.rawX, p.rawY 
+			
+			w, h = 64, 48
+			
+			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
+			
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_002,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
+		
+		
+			pass
+			
+		def obj_chest(p, creationCode):
+			x, y = p.rawX - 8, p.rawY 
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
+			pass
+			
+		def obj_sealchest(p, creationCode):
+			x, y = p.rawX - 8, p.rawY 
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
+			pass
+
+			
 		def obj_npc_failure_002(p, creationCode):
 			pass
 
@@ -1203,16 +1424,6 @@ def convertObjects(layerData):
 			pass
 
 		def obj_npc_failure_007(p, creationCode):
-			pass
-
-		def obj_chest(p, creationCode):
-			x, y = p.rawX, p.rawY 
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
-			pass
-			
-		def obj_sealchest(p, creationCode):
-			x, y = p.rawX, p.rawY 
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
 			pass
 
 		def obj_baal_epilogue2(p, creationCode):
@@ -1570,47 +1781,6 @@ def convertObjects(layerData):
 		def obj_soul_eyecatch(p, creationCode):
 			pass
 
-		def obj_voidtail_004(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-			
-			w, h = 128, 32
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_004,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-			pass
-
-		def obj_voidtail_005(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 176, 56
-			
-			x += int(w / 2)
-			y += int(h / 2) + 4
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_x56,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-		
-			pass
-
-		def obj_voidtail_013(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 56, 48
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_013,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-			pass
-
 		def obj_prin_dreamII(p, creationCode):
 			pass
 
@@ -1638,30 +1808,6 @@ def convertObjects(layerData):
 		def obj_dustemiter_lev(p, creationCode):
 			pass
 
-		def obj_voidtail_001(p, creationCode):
-			
-			x, y = p.rawX, p.rawY 
-			
-			x += int(16 * 5 / 2)
-			y += int(16 * 8 / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_001,{:d},{:d},5,8,false".format(x, y))
-		
-			pass
-
-		def obj_voidtail_014(p, creationCode):
-	
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 112, 128
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_014,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-			pass
-
 		def obj_jguard_dreamIX(p, creationCode):
 			pass
 
@@ -1681,111 +1827,6 @@ def convertObjects(layerData):
 			pass
 
 		def obj_sm_statue(p, creationCode):
-			pass
-
-		def obj_voidtail_008(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-			
-			x += int(4 / 2) * 16 
-			y += int(4 / 2) * 16 
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_008,{:d},{:d},4,4,false".format(x, y))
-			pass
-
-		def obj_voidtail_003(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-			
-			w, h = 80, 16
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_003,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-	
-			pass
-
-		def obj_voidtail_009(p, creationCode):
-		
-			# tails are going to cause collision issues, and i rlly should do something abt that, but i wont
-			x, y = p.rawX, p.rawY 
-			
-			x += int(6 / 2) * 16
-			y += int(10 / 2) * 16
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_009,{:d},{:d},6,10,false".format(x, y))
-		
-			pass
-
-		def obj_voidtail_007(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 64, 148
-			
-			x += int(w / 2) - 2
-			y += int(h / 2) + 4 + 2
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_007,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-			pass
-
-		def obj_voidtail_012(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 56, 32
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_012,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-			pass
-
-		def obj_voidtail_011(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 112, 128
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_011,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-
-		
-			pass
-
-		def obj_voidtail_006(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 128, 56
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_006,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-			pass
-
-		def obj_voidtail_010(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
-			w, h = 112, 160
-			
-			x += int(w / 2)
-			y += int(h / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_010,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
 			pass
 
 		def obj_rando_d(p, creationCode):
@@ -1897,21 +1938,6 @@ def convertObjects(layerData):
 			pass
 
 		def obj_camera(p, creationCode):
-			pass
-
-		def obj_voidtail_002(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-			
-			w, h = 64, 48
-			
-			x += int(16 * (w / 16) / 2)
-			y += int(16 * (h / 16) / 2)
-			
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_002,{:d},{:d},{:d},{:d},false".format(x, y, math.ceil(w/16), math.ceil(h/16)))
-		
-		
 			pass
 
 		def obj_cutscene_dreamIII_wagon(p, creationCode):

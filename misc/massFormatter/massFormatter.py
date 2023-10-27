@@ -941,9 +941,21 @@ def genSprite(spriteName, isBackground = False):
 	# hacky trash workaround
 	# telling non-bigsprite sprites apart from sprite sprites,, 
 	# ugh tbh i should of only had bigsprites be sprites ABOVE 64x64, programming things this way like, ugh
+	# i really dont like this solution, i should just check if somethings getting loaded from allRooms
+	# i really should like, yea 
+	# the whole of the bigsprite class needs to be yoted
 	
+	nameMatch = False
+	"""
+	for name in ["tail", "gor"]:
+		if name in spriteName:
+			nameMatch = True
+			break
+	"""
 	
-	if "tail" not in spriteName.lower() and "birch" not in spriteName.lower() and paddedSpriteSize[0] != 16:
+	originalPaddedSpriteSize = paddedSpriteSize
+	
+	if not nameMatch and paddedSpriteSize[0] != 16:
 		if paddedSpriteSize[0] < 64:
 			v = paddedSpriteSize[0]
 			v-=1;
@@ -966,11 +978,11 @@ def genSprite(spriteName, isBackground = False):
 			v+=1;
 			paddedSpriteSize = (paddedSpriteSize[0], v)
 	
-	if paddedSpriteSize in validSizes:
+	if (paddedSpriteSize in validSizes) and not nameMatch:
 		# paddedsprite convert 
 		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize, isBackground, isNormalBackground)
-	elif spriteSize in validSizes:
-		# normal sprite convert
+	elif (spriteSize in validSizes) and not nameMatch:
+		# normal sprite convert		
 		convertSprite(spriteName, spriteImages, spriteSize, isBackground, isNormalBackground)
 	else:
 		# bigsprite convert
@@ -991,7 +1003,9 @@ def genSprite(spriteName, isBackground = False):
 			#convertSprite(spriteName, spriteImages, spriteSize)
 			pass	
 			
-		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize, isBackground, isNormalBackground)
+		#convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize, isBackground, isNormalBackground)
+		convertSprite(spriteName, paddedSpriteImages, originalPaddedSpriteSize, isBackground, isNormalBackground)
+		
 			
 	print("done generating " + spriteName)
 	

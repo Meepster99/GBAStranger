@@ -186,7 +186,7 @@ public:
 	int autoAnimateFrames = 32;
 	int (*customAnimate)(void) = NULL;
 	
-	
+	bool isBigSprite = false;
 
 	bn::vector<Sprite, 128> sprites;
 
@@ -196,6 +196,7 @@ public:
 	void updatePalette(Palette* pal);
 	
 	void draw(int index);
+	void bigDraw(int index);
 	void firstDraw();
 	
 	void animate();
@@ -205,6 +206,12 @@ public:
 			sprites[i].spritePointer.set_visible(vis);
 		}
 	}
+	
+	// -----
+	
+	void loadBoobTrap();
+	void loadTailHead();
+	void loadChest();
 	
 	
 };

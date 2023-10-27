@@ -14,18 +14,17 @@ EffectsManager* BigSprite::effectsManager = NULL;
 
 
 // ----- 
-	
+
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
 	width(width_), height(height_), tiles(tiles_), xPos(x_), yPos(y_), collide(collide_), priority(priority_), autoAnimate(autoAnimate_) {
 	
+	// this whole class desperately needs a rewrite
 	
-	
-	BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
+	//BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
 	
 	optionCount = tiles->tiles_ref().size() / (4 * width * height);
 	
-	xPos -= (8 * width);
-	yPos -= (8 * height);
+	
 
 	//draw(0);
 	//firstDraw();
@@ -34,245 +33,90 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	// i also really wish i could use a switch statement here
 	// the decision of if to put the vars in the effectholder struct, or hard coded in here is difficult
 	// gods i REALLY dont like this code 
-	bool doFirstDraw = true;
+	//bool doFirstDraw = true;
 	// i now absolutely despise this code. 
 	// the way that a chest(32 x 16 sprite) was exported somehow fucked everything up here
 	
 	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
-		
-		BN_LOG("booba detected");
-		
-		auto func1 = [](void* obj) -> void {
-			
-			BigSprite* bigSprite = static_cast<BigSprite*>(obj);
-			
-			static unsigned boobaBackup = 0;
-			
-			if(boobaCount != boobaBackup) {
-				boobaBackup = boobaCount;
-				
-				bigSprite->effectsManager->doDialogue(
-				"please dont touch me\rin that manner.\ryou'll regret it."
-				);
-				
-				return;
-			}
-			
-			// wtf. irlly need to switch over to namespaces
-			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
-				bigSprite->effectsManager->doDialogue(
-				"i,,, why did you even do that? probably wanted to see if i had programed it in\n"
-				"well, i did let me move that out of the way\n"
-				"it might hurt a little bit though"
-				);
-				bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
-				return;
-			}
-		
-			
-			static unsigned msgIndex = 0;
-			
-			constexpr MessageStr msgs[] = {
-				{"you wouldnt believe how much the idiot who made this remake spent on animating"
-			" my boobs, head, and tail.\r"
-			"I would say i appreciate it, but to be honest, its just borerlining on creepy now.\n"
-			"like, jesus christ. you dont even have music, or shortcuts working\r"
-			"but now you have boobs????\rwhy????????\0"},
-			{"anyway, you know the drill\rhead down the stairs, good luck\0"}
-			};
-			
-			// i rlly need to rewrite the dialogue system to automatically cut words.
-			if(msgIndex < sizeof(msgs)) {
-				
-				bigSprite->effectsManager->doDialogue(msgs[msgIndex].str);
-				
-				if(msgIndex != sizeof(msgs)/sizeof(msgs[0]) - 1) {
-					msgIndex++;
-				}
-			}
-			
-			
-		
-			return;
-		};
-		auto func2 = [](void* obj) -> bool {
-			if(frame % 2 != 0) {
-				return false;
-			}
-			
-			if(boobaCount > 8 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
-				game->playSound(&bn::sound_items::metal_pipe_falling_sound_effect);
-				int lmao = 0;
-				while(lmao < 60 * 5) {
-					lmao++;
-					game->doButanoUpdate();
-				}
-				BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
-			}
-			
-			static int timesCalled = 0;
-			
-			if(timesCalled == 0) {
-				game->playSound(&bn::sound_items::snd_bounce);
-			}
-			
-			static_cast<BigSprite*>(obj)->animate(); 
-			timesCalled++;
-			if(timesCalled == 4) {
-				timesCalled = 0;
-				boobaCount++;
-				return true;
-			} 
-			return false;
-		};
-			
-		Interactable* temp1 = new Interactable(Pos(9, 3),
-			func1,
-			func2,
-			NULL,
-			(void*)this
-		);
-		
-		// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
-		Interactable* temp2 = new Interactable(Pos(10, 3),
-			func1,
-			func2,
-			NULL,
-			(void*)this
-		);
-		
-		entityManager->addEntity(temp1);
-		entityManager->addEntity(temp2);
-		
-		for(int i=3 ; i<=8; i++) {
-			
-			Interactable* temp = new Interactable(Pos(i, 3),
-				[](void* obj) -> void { (void)obj; return; },
-				[](void* obj) -> bool { (void)obj; return true; },
-				NULL,
-				NULL
-			);
-			entityManager->addEntity(temp);
-		}
-		
-		BN_ASSERT(tileManager->floorMap[9][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
-		BN_ASSERT(tileManager->floorMap[10][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
-		
-		tileManager->floorMap[9][4] = new FloorTile(Pos(9,4));
-		tileManager->floorMap[10][4] = new FloorTile(Pos(10,4));
-		
+		loadBoobTrap();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
-		autoAnimateFrames = 3;
-		autoAnimate = true;
-		animationIndex = 2;
-		//draw(2);
-		
-		// impliment the head movement here
-		
-		customAnimate = []() -> int {
-			
-			// this was a switch statement until i became a conspiracy theorist.
-			BN_ASSERT(globalGame->entityManager.player != NULL, "WHAT THE FUCK");
-			int playerX = globalGame->entityManager.player->p.x;
-			if(playerX <= 6) {
-				return 2;
-			} else if(playerX <= 8) {
-				return 1;
-			} else if(playerX <= 10) {
-				return 0;
-			} else if(playerX <= 13) {
-				return 3;
-			} else {
-				
-			}
-			
-			return -1;
-		};
-		
-	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_tail) { 
-		autoAnimate = true;
-		autoAnimateFrames = 24;
-	} else if(tiles == &bn::sprite_tiles_items::dw_spr_chest) {
-		//BN_LOG("hey dumbfuck, load a chest");
-		
-		// this thing quite literaly:
-		// isnt a bigsprite
-		// isnt animated 
-		// what the fuck am i on 
-		
-		// and now that im going back to previously written code, and using it for completely unintended purposes, i am reminded that i am a trash programmer
-		// i hijacked the KICK function to do this random bs????
-		
-		sprites.push_back(Sprite(bn::sprite_tiles_items::dw_spr_chest, bn::sprite_tiles_items::dw_spr_chest_shape_size));
-		
-		bool isSuperRodChest = game->roomManager.roomIndex == 0;
-		
-		if(isSuperRodChest) {
-			sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasSuperRod);
-		} else {
-			sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasRod | entityManager->player->hasSuperRod);
-		}
-
-		auto func1 = [isSuperRodChest](void* obj) -> void {
-			
-			
-			if(entityManager->player->hasSuperRod) {
-				return;
-			} else if(!isSuperRodChest && globalGame->entityManager.player->hasRod) {
-				return;
-			}
-			
-			
-			globalGame->cutsceneManager.introCutscene();
-		
-			BigSprite* bigSprite = static_cast<BigSprite*>(obj);
-			bigSprite->sprites[0].spritePointer.set_tiles(*(bigSprite->tiles), 1);
-		
-			
-			globalGame->entityManager.player->hasRod = !isSuperRodChest;
-			globalGame->entityManager.player->hasSuperRod = isSuperRodChest;
-			
-			globalGame->tileManager.updateRod();
-			globalGame->tileManager.floorLayer.reloadCells();
-			
-			return;
-		};
-		auto func2 = [](void* obj) -> bool {
-			(void)obj;
-			return true;
-		};
-			
-		Interactable* temp1 = new Interactable(Pos(6, 4),
-			func1,
-			func2,
-			(void*)this,
-			(void*)this
-		);
-		
-		// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
-		Interactable* temp2 = new Interactable(Pos(7, 4),
-			func1,
-			func2,
-			(void*)this,
-			(void*)this
-		);
-		
-		entityManager->addEntity(temp1);
-		entityManager->addEntity(temp2);
-		
-		doFirstDraw = false;
-	} else {
-		
+		loadTailHead();
 	}
 	
-	// firstdraw occurs down here to ensure that all animation flags are properly set up.
-	if(doFirstDraw) {
-		firstDraw();	
+	if(width > 4 || height > 4) {
+		
+		xPos -= (8 * width);
+		yPos -= (8 * height);
+		
+		isBigSprite = true;
+		firstDraw();
+		return;
+	}
+
+	
+	int v;
+	v = width * 16;
+	v-=1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v+=1;
+			
+	int newWidth = v;
+	
+	v = height * 16;
+	v-=1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v+=1;
+	
+	int newHeight = v;
+	
+	// this is a stupid bandaid solution.
+	if(tiles->tiles_count_per_graphic() == 64) {
+		newWidth = 64;
+		newHeight = 64;
+	}
+	
+	auto spriteShape = bn::sprite_shape_size(newWidth, newHeight);
+	
+	BN_LOG(newWidth, " ", newHeight);
+	
+	//BN_LOG(tiles->tiles_count(), " ", spriteShape.tiles_count(bn::bpp_mode::BPP_4));
+	
+	Sprite tempSprite(*tiles, spriteShape);
+	//yPos -= ((8 * (4 - height)) + 8);
+	yPos -= 8; // THIS YPOS IS TO OFFSET THE BORDER AROUND THE SCREEN
+	tempSprite.updateRawPosition(xPos, yPos);
+	
+	sprites.push_back(tempSprite);
+	
+	if(tiles == &bn::sprite_tiles_items::dw_spr_chest) {
+		loadChest();
 	}
 	
 }
 
-void BigSprite::draw(int index) { profileFunction();
+void BigSprite::draw(int index) {
+	
+	BN_ASSERT(sprites.size() == 1, "tried to call draw on a bigsprite which was meant to actually just be one sprite, but it wasnt just one sprite. lol");
+	
+	BN_ASSERT(index < tiles->graphics_count(), "bigsprite tried drawing outside its valid graphics counts");
+	
+	sprites[0].spritePointer.set_tiles(
+		*tiles,
+		index
+	);
+
+	
+}
+
+void BigSprite::bigDraw(int index) { profileFunction();
 	
 	// im going to do my best to avoid reallocing this array
 	//sprites.clear();
@@ -299,6 +143,9 @@ void BigSprite::draw(int index) { profileFunction();
 				continue;
 			}
 			
+			BN_ASSERT(spriteIndex < sprites.size(), "tried drawing a bigsprite sprite when that sprite was out of bounds");
+			
+			
 			Sprite* tempSprite = &sprites[spriteIndex];
 		
 			tempSprite->spritePointer.set_tiles(
@@ -313,9 +160,9 @@ void BigSprite::draw(int index) { profileFunction();
 
 void BigSprite::firstDraw() {
 	
-	int indexOffset = animationIndex * 4 * width * height;
+	//int indexOffset = animationIndex * 4 * width * height;
 	
-	for(int y=0; y<height; y++) {
+	for(int y=0; y< height; y++) {
 		for(int x=0; x<width; x++) {
 						
 			int spriteXPos = xPos + x * 16;
@@ -329,6 +176,7 @@ void BigSprite::firstDraw() {
 			}
 			
 			
+			/*
 			if(!autoAnimate) {
 				// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
 				// is this 4, or ithis 8???
@@ -354,18 +202,21 @@ void BigSprite::firstDraw() {
 			
 			}
 			doBigTile:
+			*/
 			
 			Sprite tempSprite = Sprite(*tiles);
 			
 			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
-			
+			/*
 			int tempX = xPos/16 + x;
 			int tempY = yPos/16 + y;
 			
 			// this array doesnt need to be updated each time we do an update draw omg
+			
 			if(collide) {
 				game->collisionMap[tempX][tempY] = 2;
 			}
+			*/
 			
 			tempSprite.spritePointer.set_bg_priority(priority);
 			
@@ -389,15 +240,247 @@ void BigSprite::updatePalette(Palette* pal) {
 
 void BigSprite::animate() { profileFunction();
 	
-	// icould maybe make this branchless by having animate be a default, but im tired ok
-	if(customAnimate == NULL) {
-		animationIndex = (animationIndex + 1) % optionCount;
+	if(isBigSprite) {
+		// icould maybe make this branchless by having animate be a default, but im tired ok
+		if(customAnimate == NULL) {
+			animationIndex = (animationIndex + 1) % optionCount;
+		} else {
+			animationIndex = customAnimate();
+		}
+		bigDraw(animationIndex);
 	} else {
-		animationIndex = customAnimate();
+		
+		animationIndex = (animationIndex + 1) % tiles->graphics_count();
+		
+		draw(animationIndex);
+	}
+}
+
+// -----
+
+void BigSprite::loadBoobTrap() {
+
+	BN_LOG("booba detected");
+		
+	auto func1 = [](void* obj) -> void {
+		
+		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		
+		static unsigned boobaBackup = 0;
+		
+		if(boobaCount != boobaBackup) {
+			boobaBackup = boobaCount;
+			
+			bigSprite->effectsManager->doDialogue(
+			"please dont touch me\rin that manner.\ryou'll regret it."
+			);
+			
+			return;
+		}
+		
+		// wtf. irlly need to switch over to namespaces
+		if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
+			bigSprite->effectsManager->doDialogue(
+			"i,,, why did you even do that? probably wanted to see if i had programed it in\n"
+			"well, i did let me move that out of the way\n"
+			"it might hurt a little bit though"
+			);
+			bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
+			return;
+		}
+	
+		
+		static unsigned msgIndex = 0;
+		
+		constexpr MessageStr msgs[] = {
+			{"you wouldnt believe how much the idiot who made this remake spent on animating"
+		" my boobs, head, and tail.\r"
+		"I would say i appreciate it, but to be honest, its just borerlining on creepy now.\n"
+		"like, jesus christ. you dont even have music, or shortcuts working\r"
+		"but now you have boobs????\rwhy????????\0"},
+		{"anyway, you know the drill\rhead down the stairs, good luck\0"}
+		};
+		
+		// i rlly need to rewrite the dialogue system to automatically cut words.
+		if(msgIndex < sizeof(msgs)) {
+			
+			bigSprite->effectsManager->doDialogue(msgs[msgIndex].str);
+			
+			if(msgIndex != sizeof(msgs)/sizeof(msgs[0]) - 1) {
+				msgIndex++;
+			}
+		}
+		
+		
+	
+		return;
+	};
+	auto func2 = [](void* obj) -> bool {
+		if(frame % 2 != 0) {
+			return false;
+		}
+		
+		if(boobaCount > 8 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
+			game->playSound(&bn::sound_items::metal_pipe_falling_sound_effect);
+			int lmao = 0;
+			while(lmao < 60 * 5) {
+				lmao++;
+				game->doButanoUpdate();
+			}
+			BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
+		}
+		
+		static int timesCalled = 0;
+		
+		if(timesCalled == 0) {
+			game->playSound(&bn::sound_items::snd_bounce);
+		}
+		
+		static_cast<BigSprite*>(obj)->animate(); 
+		timesCalled++;
+		if(timesCalled == 4) {
+			timesCalled = 0;
+			boobaCount++;
+			return true;
+		} 
+		return false;
+	};
+		
+	Interactable* temp1 = new Interactable(Pos(9, 3),
+		func1,
+		func2,
+		NULL,
+		(void*)this
+	);
+	
+	// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
+	Interactable* temp2 = new Interactable(Pos(10, 3),
+		func1,
+		func2,
+		NULL,
+		(void*)this
+	);
+	
+	entityManager->addEntity(temp1);
+	entityManager->addEntity(temp2);
+	
+	for(int i=3 ; i<=8; i++) {
+		
+		Interactable* temp = new Interactable(Pos(i, 3),
+			[](void* obj) -> void { (void)obj; return; },
+			[](void* obj) -> bool { (void)obj; return true; },
+			NULL,
+			NULL
+		);
+		entityManager->addEntity(temp);
 	}
 	
-	draw(animationIndex);
+	BN_ASSERT(tileManager->floorMap[9][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
+	BN_ASSERT(tileManager->floorMap[10][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
+	
+	tileManager->floorMap[9][4] = new FloorTile(Pos(9,4));
+	tileManager->floorMap[10][4] = new FloorTile(Pos(10,4));
 }
+
+void BigSprite::loadTailHead() {
+	
+	animationIndex = 2;
+	autoAnimateFrames = 4;
+	
+	customAnimate = []() -> int {
+		
+		// this was a switch statement until i became a conspiracy theorist.
+		BN_ASSERT(globalGame->entityManager.player != NULL, "WHAT THE FUCK");
+		int playerX = globalGame->entityManager.player->p.x;
+		if(playerX <= 6) {
+			return 2;
+		} else if(playerX <= 8) {
+			return 1;
+		} else if(playerX <= 10) {
+			return 0;
+		} else if(playerX <= 13) {
+			return 3;
+		} else {
+			
+		}
+		
+		return -1;
+	};
+}
+
+void BigSprite::loadChest() {
+	
+	//BN_LOG("hey dumbfuck, load a chest");
+	
+	// this thing quite literaly:
+	// isnt a bigsprite
+	// isnt animated 
+	// what the fuck am i on 
+	
+	// and now that im going back to previously written code, and using it for completely unintended purposes, i am reminded that i am a trash programmer
+	// i hijacked the KICK function to do this random bs????
+	
+	//sprites.push_back(Sprite(bn::sprite_tiles_items::dw_spr_chest, bn::sprite_tiles_items::dw_spr_chest_shape_size));
+	
+	bool isSuperRodChest = game->roomManager.roomIndex == 0;
+	
+	if(isSuperRodChest) {
+		sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasSuperRod);
+	} else {
+		sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasRod | entityManager->player->hasSuperRod);
+	}
+
+	auto func1 = [isSuperRodChest](void* obj) -> void {
+		
+		
+		if(entityManager->player->hasSuperRod) {
+			return;
+		} else if(!isSuperRodChest && globalGame->entityManager.player->hasRod) {
+			return;
+		}
+		
+		
+		globalGame->cutsceneManager.introCutscene();
+	
+		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		bigSprite->sprites[0].spritePointer.set_tiles(*(bigSprite->tiles), 1);
+	
+		
+		globalGame->entityManager.player->hasRod = !isSuperRodChest;
+		globalGame->entityManager.player->hasSuperRod = isSuperRodChest;
+		
+		globalGame->tileManager.updateRod();
+		globalGame->tileManager.floorLayer.reloadCells();
+		
+		return;
+	};
+	auto func2 = [](void* obj) -> bool {
+		(void)obj;
+		return true;
+	};
+	
+	int yIndex = isSuperRodChest ? 3 : 4;
+	
+	Interactable* temp1 = new Interactable(Pos(6, yIndex),
+		func1,
+		func2,
+		(void*)this,
+		(void*)this
+	);
+	
+	// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
+	Interactable* temp2 = new Interactable(Pos(7, yIndex),
+		func1,
+		func2,
+		(void*)this,
+		(void*)this
+	);
+	
+	entityManager->addEntity(temp1);
+	entityManager->addEntity(temp2);
+	
+}
+	
 
 // -----
 	
