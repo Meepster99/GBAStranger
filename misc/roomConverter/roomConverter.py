@@ -522,7 +522,7 @@ struct MessageStrJank {{
 	roomData = formatArray(prepend, ")", successRoomsList)
 	
 	prepend = "MessageStrJank(\"" if not isHardMode else "MessageStrJank(\"hard_"
-	roomNameData = formatArray(prepend, "\")", successRoomsList)
+	roomNameData = formatArray(prepend, "\\0\")", successRoomsList)
 	
 	hardModeString = "hard_" if isHardMode else ""
 	data = data.format(hardModeString, successRoomsCount, roomData, hardModeString, roomNameData)
@@ -1014,7 +1014,7 @@ def convertObjects(layerData):
 			elif creationCode == "dl_form = 2":
 				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_lev,{:d},{:d},3,4".format(x, y))
 			elif creationCode == "dl_form = 3":
-				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_cif,{:d},{:d},4,4".format(x - 16, y))
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_cif,{:d},{:d},4,4".format(x - 8, y))
 			else:
 				print("demonlord statue loaded with unknown creation code: " + creationCode)
 				exit(1)

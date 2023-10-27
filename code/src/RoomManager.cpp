@@ -91,7 +91,7 @@ void RoomManager::gotoRoom(const char* roomName) {
 	char* roomNameBuffer = buffer;
 	
 	// if we are in hard mode we want to search for a hard mode room thingy.
-	if(modeTracker != 0) {
+	if(modeTracker == 1) {
 		strcpy(roomNameBuffer, "hard_");
 		roomNameBuffer += WTF(roomNameBuffer);
 	}
@@ -116,6 +116,6 @@ void RoomManager::gotoRoom(const char* roomName) {
 		}
 	}
 	
-	BN_ERROR("in gotoRoom, we were unable to goto the room, ", roomName);
+	BN_ERROR("in gotoRoom, we were unable to goto the room, ", roomName, "searchstring was ", buffer);
 }
 
