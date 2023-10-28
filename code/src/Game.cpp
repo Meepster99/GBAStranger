@@ -480,7 +480,7 @@ void Game::run() {
 	//doButanoUpdate();
 	//changePalette(1);
 	//cutsceneManager.introCutscene(); 
-	cutsceneManager.cifDream();
+	//cutsceneManager.cifDream();
 	
 	//bn::core::update(); 
 
@@ -663,7 +663,7 @@ void Game::playSound(const bn::sound_item* sound) {
 		playedSounds.clear();
 	}
 	
-	if(state == GameState::Normal || state == GameState::Exiting || state == GameState::Paused || state == GameState::Dialogue) {
+	if(state == GameState::Normal || state == GameState::Exiting || state == GameState::Paused || state == GameState::Dialogue || state == GameState::Cutscene) {
 		if(soundsThisFrame < MAXSOUNDS && !playedSounds.contains(sound)) {
 			sound->play();
 			soundsThisFrame++;

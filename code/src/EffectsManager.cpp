@@ -1911,14 +1911,17 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		if(dir == Direction::Up) {
 			obj->sprite.spritePointer.set_rotation_angle(180);			
 			obj->y -= 16;
+			//obj->x -= 8;
 		} else if(dir == Direction::Down) {
 			obj->x += 16;
+			//obj->x -= 8;
 		} else { // left or right
 			obj->sprite.spritePointer.set_rotation_angle(270);			
 			if(dir == Direction::Right) {
 				obj->sprite.spritePointer.set_vertical_flip(true);
 				obj->x += 16;
 			}
+			//obj->y += 8;
 		}
 		
 		obj->sprite.updateRawPosition(obj->x, obj->y);

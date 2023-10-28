@@ -963,6 +963,17 @@ def genSprite(spriteName, isBackground = False):
 			break
 	"""
 	
+	if (paddedSpriteSize in validSizes) and not nameMatch:
+		# paddedsprite convert 
+		convertSprite(spriteName, paddedSpriteImages, paddedSpriteSize, isBackground, isNormalBackground)
+		print("done generating " + spriteName)
+		return
+	elif (spriteSize in validSizes) and not nameMatch:
+		# normal sprite convert		
+		convertSprite(spriteName, spriteImages, spriteSize, isBackground, isNormalBackground)
+		print("done generating " + spriteName)
+		return
+	
 	originalPaddedSpriteSize = paddedSpriteSize
 	
 	if not nameMatch and paddedSpriteSize[0] != 16:
