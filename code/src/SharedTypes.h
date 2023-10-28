@@ -74,7 +74,7 @@ typedef unsigned char u8;
 //#define MAXEFFECTSPRITES 8
 
 #define MAXTEXTSPRITES 128
-#define MAXEFFECTSPRITES 32
+#define MAXEFFECTSPRITES 64
 
 //#define MAXENTITYSPRITES 12
 #define MAXENTITYSPRITES 64
@@ -98,6 +98,7 @@ enum class GameState {
 	Loading, // loading in new data, do nothing for now.
 	Paused, // either actually paused(which i havent even thought about making) or in dialogue.
 	Dialogue,
+	Cutscene,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const GameState& e) {

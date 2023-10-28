@@ -10,6 +10,8 @@
 #include "CutsceneManager.h"
 
 extern Game* globalGame;
+extern bn::fixed sinTable[360];
+
 
 // collision and details should REALLY be on the same layer. this is just legacy bs
 
@@ -154,6 +156,7 @@ public:
 		
 		collision.rawMap.bgPointer.set_tiles(backgroundTiles);
 	
+		cutsceneManager.effectsManager = &effectsManager;
 		
 	}
 	

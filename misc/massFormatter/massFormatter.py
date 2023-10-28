@@ -469,52 +469,59 @@ def convertTiles(outputPath):
 	# this is just a small bg tile, for uses of initing things 
 	
 	temp = Image.new("RGBA", (16, 16), (0, 255, 255, 255))
-	
 	writeBitmap(temp, os.path.join(outputPath, "default_bg_tiles" + ".bmp"))
-
 	outputJson = {
 		"type": "regular_bg_tiles",
 		"bpp_mode": "bpp_4"
 	}
-
 	with open(os.path.join(outputPath, "dw_" + "default_bg_tiles" + ".json"), "w") as f:
 		json.dump(outputJson, f)
-		
-	temp = Image.new("RGBA", (256, 256), (0, 255, 255, 255))
 	
+	#
+	
+	temp = Image.new("RGBA", (256, 256), (0, 255, 255, 255))
 	writeBitmap(temp, os.path.join(outputPath, "default_bg" + ".bmp"))
-
 	outputJson = {
 		"type": "regular_bg",
 		"bpp_mode": "bpp_4"
 	}
-
 	with open(os.path.join(outputPath, "dw_" + "default_bg" + ".json"), "w") as f:
 		json.dump(outputJson, f)
+		
+	#
+	
+	temp = Image.new("RGB", (256, 256), (0, 0, 0))
+	writeBitmap(temp, os.path.join(outputPath, "default_black_bg" + ".bmp"))
+	outputJson = {
+		"type": "regular_bg",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join(outputPath, "dw_" + "default_black_bg" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	
+	# 
 	
 	temp = Image.new("RGB", (16, 16), (0, 0, 0))
-	
 	writeBitmap(temp, os.path.join(outputPath, "default_sprite_tiles" + ".bmp"))
-
 	outputJson = {
 		"type": "sprite_tiles",
 		"bpp_mode": "bpp_4"
 	}
-
 	with open(os.path.join(outputPath, "dw_" + "default_sprite_tiles" + ".json"), "w") as f:
 		json.dump(outputJson, f)
-		
-	temp = Image.new("RGB", (64, 64), (0, 0, 0))
 	
+	# 
+	
+	temp = Image.new("RGB", (64, 64), (0, 0, 0))
 	writeBitmap(temp, os.path.join(outputPath, "default_sprite_64" + ".bmp"))
-
 	outputJson = {
 		"type": "sprite",
 		"bpp_mode": "bpp_4"
 	}
-
 	with open(os.path.join(outputPath, "dw_" + "default_sprite_64" + ".json"), "w") as f:
 		json.dump(outputJson, f)
+	
+	
 	
 	print("done converting tiles")
 	pass
@@ -766,9 +773,12 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 		
 		cyan_background = Image.new("RGBA", (w, h), (0, 255, 255, 255))
 		
-		blackBackgroundNames = set(["spr_vd_bg_index0"])	
-		if spriteName in blackBackgroundNames:
-			cyan_background = Image.new("RGBA", (w, h), (0, 0, 0, 255))
+		blackBackgroundNames = set(["spr_vd_bg"])	
+		
+		if "_index" in spriteName:
+			tempName = spriteName.rsplit("_index", 1)[0]
+			if tempName in blackBackgroundNames:
+				cyan_background = Image.new("RGBA", (w, h), (0, 0, 0, 255))
 		
 		cyan_background.paste(image, (0, 0), image)
 	
@@ -977,6 +987,13 @@ def genSprite(spriteName, isBackground = False):
 			v |= v >> 16;
 			v+=1;
 			paddedSpriteSize = (paddedSpriteSize[0], v)
+	
+	# shit programming 
+	if paddedSpriteSize[0] == 64 and paddedSpriteSize[1] == 16:
+		paddedSpriteSize = (64, 32)
+		
+	if paddedSpriteSize[0] == 16 and paddedSpriteSize[1] == 32:
+		paddedSpriteSize = (32, 64)
 	
 	if (paddedSpriteSize in validSizes) and not nameMatch:
 		# paddedsprite convert 
@@ -1429,7 +1446,7 @@ def main():
 		#generateCustomFloorBackground("./formattedOutput/customFloor/")	
 		generateAllIncludes()
 		exit(0)
-	
+		
 	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
 	#return 
 	

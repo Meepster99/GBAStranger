@@ -42,6 +42,18 @@ public:
 		spritePointer.set_bg_priority(1);
 		}
 		
+	Sprite(const bn::sprite_tiles_item& startTilesItem, const bn::sprite_shape_size& size, int x, int y) : 
+		spritePointer(
+			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
+			size,
+			startTilesItem.create_tiles(),
+			spritePalette->getSpritePalette().create_palette())
+			)
+		{
+		spritePointer.set_bg_priority(1);
+		updateRawPosition(x + (size.width() / 2), y);
+		}
+		
 	Sprite(const bn::sprite_item& startItem) : 
 		spritePointer(
 			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
@@ -64,6 +76,16 @@ public:
 		screenx = x - 224/2 + 8;
 		screeny = y - 144/2 + 8;
 		spritePointer.set_x(screenx);
+		spritePointer.set_y(screeny);
+	}
+	
+	void setRawX(const bn::fixed x) {
+		screenx = x - 224/2 + 8;
+		spritePointer.set_x(screenx);
+	}
+	
+	void setRawY(const bn::fixed y) {
+		screeny = y - 144/2 + 8;
 		spritePointer.set_y(screeny);
 	}
 	

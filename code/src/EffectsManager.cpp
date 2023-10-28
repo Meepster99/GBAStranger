@@ -138,9 +138,11 @@ void BigSprite::draw(int index) {
 	
 	BN_ASSERT(index < tiles->graphics_count(), "bigsprite tried drawing outside its valid graphics counts");
 	
+	animationIndex = index;
+	
 	sprites[0].spritePointer.set_tiles(
 		*tiles,
-		index
+		animationIndex
 	);
 
 	
@@ -617,7 +619,7 @@ void EffectsManager::updatePalette(Palette* pal) {
 
 // -----
 
-bool EffectsManager::zoomEffect(bool inward) {
+bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	
 	static bool firstRun = true;
 	static int layer = 0;
@@ -626,7 +628,7 @@ bool EffectsManager::zoomEffect(bool inward) {
 		layer = inward ? 13 : 0;
 	}
 	
-	if(frame % 5 != 0) {
+	if(autoSpeed && frame % 5 != 0) {
 		return false;
 	}
 	
@@ -1083,9 +1085,11 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	// will probs need to do some redrawing, with like, a max of 4 lines of sprites actually drawn?
 	// ugh
 	
-
+	
 	GameState restoreState = game->state;
-	game->state = GameState::Dialogue;
+	if(!isCutscene) {
+		game->state = GameState::Dialogue;
+	}
 	
 	for(int x=0; x<14; x++) {
 		tileManager->floorLayer.setBigTile(x, 6, 0);
@@ -1160,13 +1164,24 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	bool pressQueued = true;
 	int textOffset = 0;
 	bool skipScroll = false;
+	bool enableSkipScroll = true; 
 	
+	const char* tempBuffer = data;
+	while(*tempBuffer != '\0') {
+		if(*tempBuffer == '`') {
+			enableSkipScroll = false;
+			break;
+		}
+		tempBuffer++;
+	}
 	
 	auto scrollLine = [](bn::sprite_text_generator& textGeneratorObj, 
 		bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>& textSprites, 
 		char* bufferPtr, 
 		int offset,
-		bool& skipScrollBool) mutable -> void {
+		bool& skipScrollBool,
+		bool enableSkipScrollBool
+		) mutable -> bool {
 			
 		// cringe is occuring! this should/could maybe be static, but im fucking scared
 		char filteredBuffer[256];
@@ -1209,7 +1224,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		int bufferIndex = 0;
 		for(int i=0; i<textSprites.size(); i++) {
 			
-			if(skipScrollBool) {
+			if(skipScrollBool && enableSkipScrollBool) {
 				break;
 			}
 						
@@ -1227,7 +1242,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 			textSprites[i].set_visible(true);
 			
 			for(int j=0; j<2; j++) {
-				if(bn::keypad::a_pressed()) {
+				if(bn::keypad::a_pressed() && enableSkipScrollBool) {
 					skipScrollBool = true;
 					break;
 				}
@@ -1246,6 +1261,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		}
 		
 		globalGame->doButanoUpdate();
+		
+		return skipScrollBool;
 	};
 	
 	while(true) {
@@ -1285,7 +1302,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 				
 				res = dialogue.getNextDialogue(buffer);
 				
-				scrollLine(textGenerator, textSpritesLine1, buffer, textOffset, skipScroll);
+				scrollLine(textGenerator, textSpritesLine1, buffer, textOffset, skipScroll, enableSkipScroll);
 				
 				textOffset++;
 			}
@@ -1294,7 +1311,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 				
 				res = dialogue.getNextDialogue(buffer);
 
-				scrollLine(textGenerator, textSpritesLine2, buffer, textOffset, skipScroll);
+				scrollLine(textGenerator, textSpritesLine2, buffer, textOffset, skipScroll, enableSkipScroll);
 				
 			}
 			
@@ -1341,6 +1358,8 @@ bool EffectsManager::restRequest() {
 	// go with making a border with a palete index of 5, which is transparent most of the time 
 	// but if needed, we like yea 
 	
+	GameState restoreState = game->state;
+	game->state = GameState::Dialogue;
 	
 	bn::vector<bn::sprite_ptr, 4> restSprites;
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
@@ -1418,16 +1437,19 @@ bool EffectsManager::restRequest() {
 	
 	bool answer = res - 1;
 	
-	if(answer) {
-		// ` marks are used to delay the text
-		doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
-		// PLAY THE EXIT THINGy
-	} else {
+	if(!answer) {
 		doDialogue("[You decide to move on]\0", false);
+		game->state = restoreState;
+		return false;
 	}
 	
+	// ` marks are used to delay the text
+	doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
+	// PLAY THE EXIT THINGy
 	
-	return answer;
+	
+	game->state = restoreState;
+	return true;
 }
 
 // -----
@@ -1790,9 +1812,6 @@ res = [ round(math.sin(math.radians(i)), 5) for i in range(0, 360) ]
 print("bn::fixed sinTable[360] = {{{:s}}};".format(",".join([str(v) for v in res])))
 
 */
-
-// i hope this doesnt slow compilation?
-bn::fixed sinTable[360] = {0.0,0.01745,0.0349,0.05234,0.06976,0.08716,0.10453,0.12187,0.13917,0.15643,0.17365,0.19081,0.20791,0.22495,0.24192,0.25882,0.27564,0.29237,0.30902,0.32557,0.34202,0.35837,0.37461,0.39073,0.40674,0.42262,0.43837,0.45399,0.46947,0.48481,0.5,0.51504,0.52992,0.54464,0.55919,0.57358,0.58779,0.60182,0.61566,0.62932,0.64279,0.65606,0.66913,0.682,0.69466,0.70711,0.71934,0.73135,0.74314,0.75471,0.76604,0.77715,0.78801,0.79864,0.80902,0.81915,0.82904,0.83867,0.84805,0.85717,0.86603,0.87462,0.88295,0.89101,0.89879,0.90631,0.91355,0.9205,0.92718,0.93358,0.93969,0.94552,0.95106,0.9563,0.96126,0.96593,0.9703,0.97437,0.97815,0.98163,0.98481,0.98769,0.99027,0.99255,0.99452,0.99619,0.99756,0.99863,0.99939,0.99985,1.0,0.99985,0.99939,0.99863,0.99756,0.99619,0.99452,0.99255,0.99027,0.98769,0.98481,0.98163,0.97815,0.97437,0.9703,0.96593,0.96126,0.9563,0.95106,0.94552,0.93969,0.93358,0.92718,0.9205,0.91355,0.90631,0.89879,0.89101,0.88295,0.87462,0.86603,0.85717,0.84805,0.83867,0.82904,0.81915,0.80902,0.79864,0.78801,0.77715,0.76604,0.75471,0.74314,0.73135,0.71934,0.70711,0.69466,0.682,0.66913,0.65606,0.64279,0.62932,0.61566,0.60182,0.58779,0.57358,0.55919,0.54464,0.52992,0.51504,0.5,0.48481,0.46947,0.45399,0.43837,0.42262,0.40674,0.39073,0.37461,0.35837,0.34202,0.32557,0.30902,0.29237,0.27564,0.25882,0.24192,0.22495,0.20791,0.19081,0.17365,0.15643,0.13917,0.12187,0.10453,0.08716,0.06976,0.05234,0.0349,0.01745,0.0,-0.01745,-0.0349,-0.05234,-0.06976,-0.08716,-0.10453,-0.12187,-0.13917,-0.15643,-0.17365,-0.19081,-0.20791,-0.22495,-0.24192,-0.25882,-0.27564,-0.29237,-0.30902,-0.32557,-0.34202,-0.35837,-0.37461,-0.39073,-0.40674,-0.42262,-0.43837,-0.45399,-0.46947,-0.48481,-0.5,-0.51504,-0.52992,-0.54464,-0.55919,-0.57358,-0.58779,-0.60182,-0.61566,-0.62932,-0.64279,-0.65606,-0.66913,-0.682,-0.69466,-0.70711,-0.71934,-0.73135,-0.74314,-0.75471,-0.76604,-0.77715,-0.78801,-0.79864,-0.80902,-0.81915,-0.82904,-0.83867,-0.84805,-0.85717,-0.86603,-0.87462,-0.88295,-0.89101,-0.89879,-0.90631,-0.91355,-0.9205,-0.92718,-0.93358,-0.93969,-0.94552,-0.95106,-0.9563,-0.96126,-0.96593,-0.9703,-0.97437,-0.97815,-0.98163,-0.98481,-0.98769,-0.99027,-0.99255,-0.99452,-0.99619,-0.99756,-0.99863,-0.99939,-0.99985,-1.0,-0.99985,-0.99939,-0.99863,-0.99756,-0.99619,-0.99452,-0.99255,-0.99027,-0.98769,-0.98481,-0.98163,-0.97815,-0.97437,-0.9703,-0.96593,-0.96126,-0.9563,-0.95106,-0.94552,-0.93969,-0.93358,-0.92718,-0.9205,-0.91355,-0.90631,-0.89879,-0.89101,-0.88295,-0.87462,-0.86603,-0.85717,-0.84805,-0.83867,-0.82904,-0.81915,-0.80902,-0.79864,-0.78801,-0.77715,-0.76604,-0.75471,-0.74314,-0.73135,-0.71934,-0.70711,-0.69466,-0.682,-0.66913,-0.65606,-0.64279,-0.62932,-0.61566,-0.60182,-0.58779,-0.57358,-0.55919,-0.54464,-0.52992,-0.51504,-0.5,-0.48481,-0.46947,-0.45399,-0.43837,-0.42262,-0.40674,-0.39073,-0.37461,-0.35837,-0.34202,-0.32557,-0.30902,-0.29237,-0.27564,-0.25882,-0.24192,-0.22495,-0.20791,-0.19081,-0.17365,-0.15643,-0.13917,-0.12187,-0.10453,-0.08716,-0.06976,-0.05234,-0.0349,-0.01745};
 
 void EffectsManager::glassBreak(Pos p) {
 	

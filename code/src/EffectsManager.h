@@ -80,6 +80,14 @@ public:
 		reloadCells();
 	}
 	
+	void clear() {
+		for(int x=0; x<14; x++) {
+			for(int y=0; y<9; y++) {
+				setBigTile(x, y, 0);
+			}
+		}
+	}
+	
 
 	
 };
@@ -312,7 +320,7 @@ public:
 
 	bool playerWonLastExit = true;
 	
-	bool zoomEffect(bool inward);
+	bool zoomEffect(bool inward, bool autoSpeed = true);
 	bool topDownEffect(bool downward);
 	
 	bool exitRoom();
