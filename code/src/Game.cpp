@@ -38,7 +38,7 @@ void Game::uncompressData(u8 res[126], u8* input) {
 	int val = -1;
 	int count = -1;
 	
-	while(i <= 126) {
+	while(i < 126) {
 		
 		if(*input & 0xC0) {
 			count = (*input & 0xC0) >> 6;
