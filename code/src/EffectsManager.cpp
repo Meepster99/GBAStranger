@@ -1210,7 +1210,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_bg_priority(0);
 			textSprites[i].set_visible(false);
-			//textSprites[i].set_palette(spritePalette->getSpritePalette());
+			textSprites[i].set_palette(spritePalette->getSpritePalette());
 		}
 		globalGame->doButanoUpdate();
 		
@@ -1258,6 +1258,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_visible(true);
 			textSprites[i].set_bg_priority(0);
+			textSprites[i].set_palette(spritePalette->getSpritePalette());
 		}
 		
 		globalGame->doButanoUpdate();
@@ -1324,9 +1325,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	
 	
-	game->doButanoUpdate();
+	//game->doButanoUpdate();
 	
-	game->doButanoUpdate();
+	//game->doButanoUpdate();
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			effectsLayer.setBigTile(x, y, 0);
@@ -1336,14 +1337,16 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	// this is trash, and will cause frame drops 
 	game->fullTileDraw();
-
+	
 	if(!isCutscene) {
 		hideForDialogueBox(true, isCutscene);	
 	}
-	game->doButanoUpdate();
 	
 	textSpritesLine1.clear();
 	textSpritesLine2.clear();
+	
+	game->doButanoUpdate();
+	
 	
 	game->state = restoreState;
 	
@@ -2361,7 +2364,8 @@ void EffectsManager::roomDust() {
 				y_speedup = randomGenerator.get_int(2, 6 + 1);
 				t = randomGenerator.get_int(0, 180 + 1);
 				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
-				graphicsIndex = (bn::fixed)0;
+				//graphicsIndex = (bn::fixed)0;
+				graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 9 + 1);
 				freezeFrames = randomGenerator.get_int(0, 60 + 1);
 				
 				randomGenerator.update();

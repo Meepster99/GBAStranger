@@ -58,6 +58,8 @@ void Game::uncompressData(u8 res[126], u8* input) {
 		
 	}
 	
+	BN_ASSERT(i == 126, "i wasnt equal to 126 after decomp.");
+	
 	
 }
 
@@ -307,6 +309,9 @@ void Game::changePalette(int offset) {
 	
 	// this is a horrid way of doing it, i should be able to just like,,, access the actual palette table???
 	
+	// why the fuck didnt i have a getpalete function in the game class. im going to have to redo so much bs
+	
+	
 	const int paletteListSize = (int)(sizeof(paletteList) / sizeof(paletteList[0]));
 	
 	paletteIndex += offset;
@@ -369,6 +374,62 @@ void Game::changePalette(int offset) {
 	
 	*/
 
+}
+
+void Game::fadePalette(int index) {
+	
+	// if index is 0, backup, and wipe the table 
+	// if a pos integer, we ball.
+	// this currently will only fade from black to white, as for white to blank, idk 
+	// i did the intro cutscenes fade much differently, doing the fade for cif is a massive pain
+	// im also going to assume a limit on the number of palettes but,, gods ugh.
+	// fuck it, we alloc a whole kb of memory.
+	// im going to basically have to do that inthe heap
+	// is new auto allocated in the heap? or do i have to do some weird staticdata bs
+	
+	
+	// first tick is all black, but WHITE=DARKGRAY
+	// second tick, ALL(except black) =DARKGRAY
+	// third tick, WHITE+LIGHTGRAY=LIGHTGRAY
+	// fourth tick, all colors are set
+	
+	// this code is an affront to the gods, and i wonder if it will like,,, work at all 
+	// i should try my best to not use my own memcpy funcs
+	// actually,,,, couldnt i just not be stupid and have a static var in the palete class. 
+	// omfg 
+	// but then i have to update each palette of like everything, every fucking frame. 
+	
+	BN_ASSERT(isVblank, "palette fading should only happen in vblank, or at least i think");
+	
+	static unsigned short* localPaletteTable = NULL;
+	
+	if(localPaletteTable == NULL) {
+		localPaletteTable = new unsigned short[512]();
+		BN_LOG(localPaletteTable, " ", sizeof(unsigned short));
+	}
+	
+	unsigned short* palettePointer = reinterpret_cast<unsigned short*>(0x05000000);
+	
+	if(index == 0) {
+		
+		memcpy(localPaletteTable, palettePointer, sizeof(unsigned short) * 512);
+		
+		return;
+	}
+	
+	for(int i=0; i<512; i++) {
+		
+		palettePointer[i] = localPaletteTable[i];
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 }
 
 void didVBlank() {
@@ -435,6 +496,10 @@ void Game::doVBlank() { profileFunction();
 			effectsManager.doVBlank();
 			break;
 		case GameState::Cutscene:
+			if(fadePaletteIndex != -1) {
+				fadePalette(fadePaletteIndex);
+				fadePaletteIndex = -1;
+			}
 			cutsceneManager.doVBlank();
 			break;
 	}
@@ -480,7 +545,7 @@ void Game::run() {
 	//doButanoUpdate();
 	//changePalette(1);
 	//cutsceneManager.introCutscene(); 
-	//cutsceneManager.cifDream();
+	cutsceneManager.cifDream();
 	
 	//bn::core::update(); 
 
@@ -519,7 +584,8 @@ void Game::run() {
 			
 			// pokemon style reset 
 			if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::start_held() && bn::keypad::select_held()) {
-				bn::core::reset();
+				//THIS IS SHIT, make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
+				//bn::core::reset();
 			}
 		}
 			
@@ -566,7 +632,7 @@ void Game::run() {
 uint64_t Game::getSaveHash() {
 	uint64_t hash = 0;
 	
-	#define rotateHash(n) hash = (hash << n) | (hash >> ((sizeof(hash) * 8) - n))
+	#define rotateHash(n) do { hash++; hash = (hash << n) | (hash >> ((sizeof(hash) * 8) - n)); } while(false)
 	
 	// this is barely even a hash algorithm, but it will work ig
 	
@@ -574,7 +640,7 @@ uint64_t Game::getSaveHash() {
 	rotateHash(sizeof(saveData.locustCount) * 8);
 	
 	hash ^= saveData.isVoided;
-	rotateHash(sizeof(saveData.isVoided) * 8);
+	rotateHash(1);
 	
 	hash ^= saveData.roomIndex;
 	rotateHash(sizeof(saveData.roomIndex) * 8);
@@ -586,13 +652,13 @@ uint64_t Game::getSaveHash() {
 	rotateHash(sizeof(saveData.mode) * 8);
 	
 	hash ^= saveData.hasMemory;
-	rotateHash(sizeof(saveData.mode) * 8);
+	rotateHash(1);
 	
 	hash ^= saveData.hasWings;
-	rotateHash(sizeof(saveData.mode) * 8);
+	rotateHash(1);
 	
 	hash ^= saveData.hasSword;
-	rotateHash(sizeof(saveData.mode) * 8);
+	rotateHash(1);
 	
 	return hash;
 }
@@ -663,7 +729,7 @@ void Game::playSound(const bn::sound_item* sound) {
 		playedSounds.clear();
 	}
 	
-	if(state == GameState::Normal || state == GameState::Exiting || state == GameState::Paused || state == GameState::Dialogue || state == GameState::Cutscene) {
+	if( !(state == GameState::Loading || state == GameState::Entering) ) {
 		if(soundsThisFrame < MAXSOUNDS && !playedSounds.contains(sound)) {
 			sound->play();
 			soundsThisFrame++;
@@ -676,3 +742,4 @@ void Game::playSound(const bn::sound_item* sound) {
 
 
 
+ 

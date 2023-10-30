@@ -213,9 +213,9 @@ void CutsceneManager::cifDream() {
 	
 	//while(EffectsManager::zoomEffect(bool inward) {
 	
-	game->effectsManager.doDialogue("still programming this in its actually pretty close to being finished, but just in case of crashes i commented it out.\0");
+	//game->effectsManager.doDialogue("still programming this in its actually pretty close to being finished, but just in case of crashes i commented it out.\0");
 	
-	return;
+	//return;
 	
 	BN_LOG("cifdream");
 	vBlankFuncs.clear();
@@ -224,33 +224,40 @@ void CutsceneManager::cifDream() {
 		return;
 	}
 	
-	/*
+	GameState restoreState = game->state;
+	
+	goto bruh;
+	
+	
 	game->effectsManager.doDialogue(""
 	"[This Lotus-Eater Machine is still operational]\n"
 	"[Maybe you could take a quick rest?]\n"
 	"\0", false);
 	
-	bool res = game->effectsManager.restRequest();
-	
-	if(!res) {
+	if(!game->effectsManager.restRequest()) {
 		return;
 	}
 	
 	
+	
+	game->state = GameState::Dialogue;
+	
 	delay(60);
-	*/
+	
 	
 	while(!game->effectsManager.zoomEffect(true, false)) {
-		delay(1);
-		//delay(20);
-		BN_LOG("HEY FOOL, CHANGE THIS DELAY BACK TO 20");
+		//delay(1);
+		delay(20);
+		//BN_LOG("HEY FOOL, CHANGE THIS DELAY BACK TO 20");
 	}
 	
-	GameState restoreState = game->state;
+	bruh:
 	game->state = GameState::Cutscene;
 	
 	game->effectsManager.hideForDialogueBox(false, true);
 	backupAllButEffects();
+	goto omfg;
+	
 	
 	/*
 	
@@ -299,9 +306,15 @@ void CutsceneManager::cifDream() {
 	
 	*/
 	
+	
+	delay(60 * 5);
 	game->effectsManager.doDialogue("Wake up.\0", true);
 	
+	omfg:
+	
 	effectsManager->effectsLayer.clear();
+	
+	bn::vector<Effect, 16> effects;
 	
 	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 3);
 	
@@ -311,10 +324,13 @@ void CutsceneManager::cifDream() {
 	Sprite gor(bn::sprite_tiles_items::dw_spr_cdream_gor, bn::sprite_shape_size(64, 32), 148 , 127  );
 	Sprite tan(bn::sprite_tiles_items::dw_spr_cdream_tan, bn::sprite_shape_size(32, 32), 134 , 96   );
 	Sprite lev(bn::sprite_tiles_items::dw_spr_cdream_lev, bn::sprite_shape_size(32, 32), 32  , 92   );
-	Sprite cif(bn::sprite_tiles_items::dw_spr_cdream_cif, bn::sprite_shape_size(16, 16), 119 , 37 - 4   );
+	Sprite cif(bn::sprite_tiles_items::dw_spr_cdream_cif, bn::sprite_shape_size(16, 16), 119 + 2 , 37 - 6   );
 	cif.spritePointer.set_bg_priority(3);
 	
-	//Sprite cifGlow(
+	Sprite cifGlow(bn::sprite_tiles_items::dw_spr_soulglow_big, bn::sprite_shape_size(32, 32), 119 + 2 - 6 - 1, 37 - 2 );
+	cifGlow.spritePointer.set_z_order(1);
+	cifGlow.spritePointer.set_bg_priority(3);
+	
 	
 	// the more that i think of the positions of the lords, the more symbolism i see. its insane. i love this game sm
 	
@@ -322,35 +338,201 @@ void CutsceneManager::cifDream() {
 	maps[0]->bgPointer.set_x(74 + (64 / 2) - 8);
 	maps[0]->bgPointer.set_y(10 + (132 / 2) - 16);
 	
-	vBlankFuncs.push_back([this, cif]() mutable {
+	vBlankFuncs.push_back([this, cif, cifGlow]() mutable {
 		const bn::regular_bg_item* addBackgrounds[4] = {&bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index1, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index2, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index3};
 		static int addBackgroundsIndex = 0;
 		static int x = 74 + (64 / 2) - 8;
 		static bn::fixed y = 10 + (132 / 2) - 16;
 		const static bn::fixed yStart = 10 + (132 / 2) - 16;
-		static int degree = 0;
+		//static int degree = 0;
 		
 		if(frame % 18 == 0) {
 			maps[0]->create(*addBackgrounds[addBackgroundsIndex], 2);
 			addBackgroundsIndex = (addBackgroundsIndex + 1) % 4;
+			maps[0]->bgPointer.set_x(x);
+			maps[0]->bgPointer.set_y(y);
 		}
 		
-		bn::fixed temp = y + 0.15 * sinTable[degree % 360];
+		static int cifGlowIndex = 0; // sprite class should rlly have a thing which lets me access its graphicsindex
+		if(frame % 10 == 0) {
+			cifGlow.spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_soulglow_big, cifGlowIndex % 5);
+			cifGlowIndex++;
+		}
+		
+		// just look at gml_Object_obj_cifdream_eyecatch_Step_0 next time fool
+		
+		static bool floatDir = false;
+		static int freezeFrames = 0;
+		
+		if(freezeFrames) {
+			freezeFrames--;
+			return;
+		}
+		
+		//bn::fixed temp = y + 0.15 * sinTable[degree % 360];
+		
+		bn::fixed temp = y + (floatDir ?  0.1 : -0.1);
 		
 		bn::fixed tempDif = temp - yStart;
-		if(tempDif > -3.0 && tempDif < 3.0) {
+		if(tempDif > -2.0 && tempDif < 2.0) {
 			y = temp;
-			cif.setRawY(37 - 4 + tempDif);
+			cif.setRawY(37 - 6 + tempDif);
+			cifGlow.setRawY(37 - 2 + tempDif);
 		} else {
-			degree+=3;
+			floatDir = !floatDir;
+			freezeFrames = 18;
 		}
 		
-		degree = (degree + 1) % 360;
-		
-		
-		
-		maps[0]->bgPointer.set_x(x);
 		maps[0]->bgPointer.set_y(y);
+		
+		return;
+	});
+	
+	vBlankFuncs.push_back([this, effects]() mutable {
+		
+		auto createEffect = []() -> Effect {
+			
+			auto createFunc = [](Effect* obj) mutable -> void {
+				if(randomGenerator.get() & 1) {
+					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+				} else {
+					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+				}
+			
+				obj->sprite.spritePointer.set_tiles(
+					*obj->tiles,
+					0
+				);
+			
+				obj->x = -32;
+				obj->y = -32;
+				obj->sprite.updateRawPosition(obj->x, obj->y);
+			};
+			
+			auto tickFunc = [
+				x = (bn::fixed)-32, 
+				y = (bn::fixed)-32, 
+				image_speed = (bn::fixed)0,
+				y_speedup = randomGenerator.get_int(2, 6 + 1),
+				t = randomGenerator.get_int(0, 180 + 1),
+				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
+				graphicsIndex = (bn::fixed)0,
+				freezeFrames = randomGenerator.get_int(0, 60 + 1)
+				](Effect* obj) mutable -> bool {
+				
+				if(y < -16) {
+		
+					int tileSelector = randomGenerator.get_int(0, 5);
+					
+					
+					
+					const bn::sprite_tiles_item* spriteTiles[5] = {
+						&bn::sprite_tiles_items::dw_spr_soulglow_big,
+						&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
+						&bn::sprite_tiles_items::dw_spr_soulglow_med,
+						&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
+						&bn::sprite_tiles_items::dw_spr_soulglow_sma,
+					};
+					
+					const bn::sprite_shape_size spriteShapes[5] = {
+						bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
+						bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
+						bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
+						bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
+						bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
+					};
+				
+					obj->tiles = spriteTiles[tileSelector];
+					
+					obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
+				
+					obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 2 : 3);
+					obj->sprite.spritePointer.set_palette(tileSelector == 0 ? globalGame->pal->getSpritePaletteFade(3, false) : globalGame->pal->getSpritePaletteFade(2, false));
+				
+					x = randomGenerator.get_int(16 * 14);
+					//y = 16*5+randomGenerator.get_int(16);
+					if(y == -32) {
+						y = randomGenerator.get_int(16 * 9);
+					} else {
+						y = 16 * 10;
+					}
+					
+					image_speed = (bn::fixed)0;
+					y_speedup = 4 + randomGenerator.get_int(2, 6 + 1);
+					t = randomGenerator.get_int(0, 180 + 1);
+					amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
+					//graphicsIndex = (bn::fixed)0;
+					graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 5 + 1);
+					freezeFrames = randomGenerator.get_int(0, 60 + 1);
+					
+					randomGenerator.update();
+				}
+				
+				if(image_speed > 9) {
+					freezeFrames = randomGenerator.get_int(0, 60 + 1);		
+				}
+				
+
+				image_speed += 0.02;
+				//image_speed += 0.20;
+				
+				//y -= (0.1 * y_speedup);
+				y -= (0.095 * y_speedup);
+				
+				t = ((t + 1) % 360);
+				x = (x + (amplitude * sinTable[t]));
+				
+				if(x > 240) {
+					x -= 240;
+				} else if(x < 0) {
+					x += 240;
+				}
+			
+				BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
+				
+				graphicsIndex += image_speed / 60;
+				if(freezeFrames == 0) {
+					obj->sprite.spritePointer.set_tiles(
+						*obj->tiles,
+						graphicsIndex.integer() % 5
+					);
+				} else {
+					freezeFrames--;
+				}
+			
+				obj->x = x.integer();
+				obj->y = y.integer();
+				obj->sprite.updateRawPosition(obj->x, obj->y);
+				
+				return false;
+			};
+			
+			return Effect(createFunc, tickFunc);
+		};
+		
+		
+		
+		static bool firstRun = true;
+		
+		if(firstRun) {
+			
+			firstRun = false;
+			
+			while(effects.size() != effects.max_size()) {
+				effects.push_back(createEffect());
+			}
+			
+			for(int i=0; i<effects.size(); i++) {
+				effects[i].animate();
+			}
+		
+			return;
+		}
+		
+		
+		for(int i=0; i<effects.size(); i++) {
+			effects[i].animate();
+		}
 		
 		
 		return;
@@ -358,13 +540,71 @@ void CutsceneManager::cifDream() {
 	
 	
 	// fade should be done here, i believe
+	// ugh.
+	// ok so, currently palette stuff in general is so circlejerkish, and spread all over the place .
+	// i tried replacing it with another option, but like, ugh 
+	// so,,, heres an idea 
+	// i take a even stupider hybrid approach.
+	// i backup the palette table, and then fade into it afterword.
 	
-
+	// i rlly should of just made a class
 	
+	// in order for us to backup the palette table, butano update has to push it to actual ram 
+	// this lets us to a frame update, without flashing shit
+	// ok nvm, this just aint going to work. 
+	// ugh 
+	// 
+	maps[1]->bgPointer.set_priority(0);
+	// THIS IS SHIT PROGRAMMING
+	game->doButanoUpdate();
+	game->fadePaletteIndex = 0; // backup
+	maps[1]->bgPointer.set_priority(3);
+	delay(60);
+	game->fadePaletteIndex = 1; // blackout 
 	
-	while(true) {
-		delay(60*5);
+	delay(60 * 5);
+	
+	for(int i=1; i<=4; i++) {
+		game->fadePaletteIndex = i;
+		
+		delay(60 * 1);
 	}
+	
+	
+	
+	game->effectsManager.doDialogue(""
+	"What a little miracle you are.\n"
+	"But no matter how hard I try...\n"
+	"This is as close as I can get.\n"
+	"The rest is up to you.\n"
+	"Soon you'll grow up...\n"
+	"You must keep working diligently and take good care of your sisters...\n"
+	"Even when you argue and make mistakes.\n"
+	"Even if I...\0"
+	"", true);
+	
+	
+	// delay for 4 seconds 
+	delay(60 * 4);
+	
+	
+	game->effectsManager.doDialogue(""
+	"You're my little lightbringer.\n"
+	"You're my pride.\n"
+	"And your name shall be...\0"
+	, true);
+	
+	// hide VRAM bulshittery.
+	maps[1]->bgPointer.set_priority(0);
+	game->doButanoUpdate();
+	
+	// CUT, kill the tree
+	
+	// or maybe, INA, as a nice refrence to me
+	
+	/*while(true) {
+		delay(60*5);
+	}*/
 
 	/*
 	maps[1]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index1, 3);
@@ -374,6 +614,9 @@ void CutsceneManager::cifDream() {
 	*/
 	
 	// 
+	
+	vBlankFuncs.clear();
+	
 	game->effectsManager.bigSprites[0]->animate();
 	
 	game->effectsManager.hideForDialogueBox(true, true);

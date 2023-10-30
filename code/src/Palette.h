@@ -21,6 +21,8 @@ public:
 	bn::color fontColorArray[16];
 	bn::color tempColorArray[16];
 	
+	//static int fadePalette = 0;
+	
 	constexpr Palette(bn::color a, bn::color b, bn::color c, bn::color d, bn::color e = bn::color(0, 0, 0)) :
 	colorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
 	alternateColorArray{a, b, e, d, c, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
@@ -43,8 +45,66 @@ public:
 	}
 	
 
+	void modifyTempColors(int index, bool toWhite) {
+		
+		tempColorArray[BLACK] = colorArray[BLACK];
+		tempColorArray[WHITE] = colorArray[WHITE];
+		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
+		
+		
+		if(toWhite) {
+			if(index >= 0) {
+				tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
+				tempColorArray[LIGHTGRAY] = colorArray[WHITE];
+			}
+			
+			if(index >= 1) {
+				tempColorArray[BLACK] = colorArray[DARKGRAY];
+			}
+			
+			if(index >= 2) {
+				tempColorArray[DARKGRAY] = colorArray[WHITE];
+				tempColorArray[BLACK] = colorArray[LIGHTGRAY];
+			}
+			
+			if(index >= 3) {
+				tempColorArray[BLACK] = colorArray[WHITE];
+			}
+		} else {
+			
+			// 0 clue 
+			if(index == 0) {
+				tempColorArray[BLACK] = colorArray[BLACK];
+				tempColorArray[DARKGRAY] = colorArray[BLACK];
+				tempColorArray[LIGHTGRAY] = colorArray[BLACK];
+				tempColorArray[WHITE] = colorArray[BLACK];
+			}
+			
+			if(index == 1) {
+				tempColorArray[BLACK] = colorArray[BLACK];
+				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+				tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
+				tempColorArray[WHITE] = colorArray[DARKGRAY];
+			}
+			
+			if(index == 2) {
+				tempColorArray[BLACK] = colorArray[BLACK];
+				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+				tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
+				tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+			}
+			
+			if(index == 3) {
+				tempColorArray[BLACK] = colorArray[BLACK];
+				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+				tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
+				tempColorArray[WHITE] = colorArray[WHITE];
+			}
+		}
+	}
 	
-	const bn::bg_palette_item getBGPaletteFade(int index) {
+	const bn::bg_palette_item getBGPaletteFade(int index, bool toWhite = true) {
 		(void)index;
 
 		// ok something is fucked with the color array 
@@ -63,66 +123,21 @@ public:
 		// is there ever a case where 
 		// actually no, i would have to manually change any sprite i have during a cutscene, thats annoying 
 		
-		
-		tempColorArray[BLACK] = colorArray[BLACK];
-		tempColorArray[WHITE] = colorArray[WHITE];
-		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
-		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
-		
-		
-		if(index >= 0) {
-			tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
-			tempColorArray[LIGHTGRAY] = colorArray[WHITE];
-		}
-		
-		if(index >= 1) {
-			tempColorArray[BLACK] = colorArray[DARKGRAY];
-		}
-		
-		if(index >= 2) {
-			tempColorArray[DARKGRAY] = colorArray[WHITE];
-			tempColorArray[BLACK] = colorArray[LIGHTGRAY];
-		}
-		
-		if(index >= 3) {
-			tempColorArray[BLACK] = colorArray[WHITE];
-		}
+		modifyTempColors(index, toWhite);
 		
 		bn::span<bn::color> spanthing(tempColorArray);
 
-		return bn::bg_palette_item(spanthing, bn::bpp_mode::BPP_4);	;
+		return bn::bg_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
-	const bn::sprite_palette_item getSpritePaletteFade(int index) {
+	const bn::sprite_palette_item getSpritePaletteFade(int index, bool toWhite = true) {
 		(void)index;
 		
-		tempColorArray[BLACK] = colorArray[BLACK];
-		tempColorArray[WHITE] = colorArray[WHITE];
-		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
-		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
-		
-		
-		if(index >= 0) {
-			tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
-			tempColorArray[LIGHTGRAY] = colorArray[WHITE];
-		}
-		
-		if(index >= 1) {
-			tempColorArray[BLACK] = colorArray[DARKGRAY];
-		}
-		
-		if(index >= 2) {
-			tempColorArray[DARKGRAY] = colorArray[WHITE];
-			tempColorArray[BLACK] = colorArray[LIGHTGRAY];
-		}
-		
-		if(index >= 3) {
-			tempColorArray[BLACK] = colorArray[WHITE];
-		}
+		modifyTempColors(index, toWhite);
 		
 		bn::span<bn::color> spanthing(tempColorArray);
-			
-		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);	;
 	}
 	
 	const bn::sprite_palette_item getAlternateSpritePalette() {
