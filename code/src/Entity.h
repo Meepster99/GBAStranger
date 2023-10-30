@@ -29,6 +29,7 @@ public:
 			)
 		{
 		spritePointer.set_bg_priority(1);
+		spritePointer.set_blending_enabled(false);
 		}
 		
 	Sprite(const bn::sprite_tiles_item& startTilesItem, const bn::sprite_shape_size& size) : 
@@ -40,6 +41,7 @@ public:
 			)
 		{
 		spritePointer.set_bg_priority(1);
+		spritePointer.set_blending_enabled(false);
 		}
 		
 	Sprite(const bn::sprite_tiles_item& startTilesItem, const bn::sprite_shape_size& size, int x, int y) : 
@@ -52,6 +54,7 @@ public:
 		{
 		spritePointer.set_bg_priority(1);
 		updateRawPosition(x + (size.width() / 2), y);
+		spritePointer.set_blending_enabled(false);
 		}
 		
 	Sprite(const bn::sprite_item& startItem) : 
@@ -62,6 +65,7 @@ public:
 		{
 		spritePointer.set_bg_priority(1);
 		spritePointer.set_palette(spritePalette->getSpritePalette().create_palette());
+		spritePointer.set_blending_enabled(false);
 		}
 	
 		

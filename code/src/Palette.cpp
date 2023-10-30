@@ -13,6 +13,10 @@
 	
 #define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
 
+// I SHOULD JUST HAVE A PALETTEMANAGER CLASS OMFG, OR INTEGRATE IT INTO GAME 
+//int Palette::fadePalette = -1;
+//bool Palette::toWhite = true;
+
 Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));
 
 //Palette defaultPalette = PALETTEGEN(0, 8421504, 12632256, 16777215);

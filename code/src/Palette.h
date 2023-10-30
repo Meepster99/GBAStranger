@@ -21,8 +21,6 @@ public:
 	bn::color fontColorArray[16];
 	bn::color tempColorArray[16];
 	
-	//static int fadePalette = 0;
-	
 	constexpr Palette(bn::color a, bn::color b, bn::color c, bn::color d, bn::color e = bn::color(0, 0, 0)) :
 	colorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
 	alternateColorArray{a, b, e, d, c, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
@@ -46,7 +44,6 @@ public:
 	
 
 	void modifyTempColors(int index, bool toWhite) {
-		
 		tempColorArray[BLACK] = colorArray[BLACK];
 		tempColorArray[WHITE] = colorArray[WHITE];
 		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
@@ -54,6 +51,7 @@ public:
 		
 		
 		if(toWhite) {
+			
 			if(index >= 0) {
 				tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
 				tempColorArray[LIGHTGRAY] = colorArray[WHITE];
@@ -71,6 +69,7 @@ public:
 			if(index >= 3) {
 				tempColorArray[BLACK] = colorArray[WHITE];
 			}
+
 		} else {
 			
 			// 0 clue 
@@ -83,8 +82,8 @@ public:
 			
 			if(index == 1) {
 				tempColorArray[BLACK] = colorArray[BLACK];
-				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
-				tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
+				tempColorArray[DARKGRAY] = colorArray[BLACK];
+				tempColorArray[LIGHTGRAY] = colorArray[BLACK];
 				tempColorArray[WHITE] = colorArray[DARKGRAY];
 			}
 			
@@ -92,10 +91,17 @@ public:
 				tempColorArray[BLACK] = colorArray[BLACK];
 				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
 				tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
-				tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+				tempColorArray[WHITE] = colorArray[DARKGRAY];
 			}
 			
 			if(index == 3) {
+				tempColorArray[BLACK] = colorArray[BLACK];
+				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+				tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
+				tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+			}
+			
+			if(index == 4) {
 				tempColorArray[BLACK] = colorArray[BLACK];
 				tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
 				tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
@@ -104,7 +110,7 @@ public:
 		}
 	}
 	
-	const bn::bg_palette_item getBGPaletteFade(int index, bool toWhite = true) {
+	const bn::bg_palette_item getBGPaletteFade(int index = -1, bool toWhite = true) {
 		(void)index;
 
 		// ok something is fucked with the color array 

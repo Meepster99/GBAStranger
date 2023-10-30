@@ -376,6 +376,93 @@ void Game::changePalette(int offset) {
 
 }
 
+void Game::fadePalette(const int index) {
+	
+	// if index is 0, backup, and wipe the table 
+	// if a pos integer, we ball.
+	// this currently will only fade from black to white, as for white to blank, idk 
+	// i did the intro cutscenes fade much differently, doing the fade for cif is a massive pain
+	// im also going to assume a limit on the number of palettes but,, gods ugh.
+	// fuck it, we alloc a whole kb of memory.
+	// im going to basically have to do that inthe heap
+	// is new auto allocated in the heap? or do i have to do some weird staticdata bs
+	
+	
+	// first tick is all black, but WHITE=DARKGRAY
+	// second tick, ALL(except black) =DARKGRAY
+	// third tick, WHITE+LIGHTGRAY=LIGHTGRAY
+	// fourth tick, all colors are set
+	
+	// this code is an affront to the gods, and i wonder if it will like,,, work at all 
+	// i should try my best to not use my own memcpy funcs
+	// actually,,,, couldnt i just not be stupid and have a static var in the palete class. 
+	// omfg 
+	// but then i have to update each palette of like everything, every fucking frame. 
+	
+	//BN_ASSERT(isVblank, "palette fading should only happen in vblank, or at least i think");
+	
+	static unsigned short* localPaletteTable = NULL;
+	
+	if(localPaletteTable == NULL) {
+		localPaletteTable = new unsigned short[512]();
+		BN_LOG(localPaletteTable, " ", sizeof(unsigned short));
+	}
+	
+	unsigned short* palettePointer = reinterpret_cast<unsigned short*>(0x05000000);
+	
+	if(index == 0) {
+		
+		memcpy(localPaletteTable, palettePointer, sizeof(unsigned short) * 512);
+		
+		return;
+	}
+	
+	// this code was written during a walter white fugue state. i dont get it either fam
+	
+	for(unsigned i=0; i<512; i++) {
+		if(index == 1) {
+			switch(i % 16) {
+				case 2:
+					palettePointer[i] = localPaletteTable[i + 2];
+					break;
+				case 3:
+					palettePointer[i] = localPaletteTable[i - 2];
+					break;
+				case 4:
+					palettePointer[i] = localPaletteTable[i - 3];
+					break;
+				default:
+					palettePointer[i] = localPaletteTable[i];
+					break;
+			}
+		} else if(index == 2) {
+			switch(i % 16) {
+				case 2:
+					palettePointer[i] = localPaletteTable[i + 2];
+					break;
+				case 3:
+					palettePointer[i] = localPaletteTable[i + 1];
+					break;
+				default:
+					palettePointer[i] = localPaletteTable[i];
+					break;
+			}
+		} else if(index == 3) {
+			switch(i % 16) {
+				case 2:
+					palettePointer[i] = localPaletteTable[i + 1];
+					break;
+				default:
+					palettePointer[i] = localPaletteTable[i];
+					break;
+			}
+		} else if(index == 4) {
+			palettePointer[i] = localPaletteTable[i];
+		}
+	}
+	
+}
+
 void didVBlank() {
 	
 	//frame = (frame + 1) % 600000;
@@ -485,7 +572,7 @@ void Game::run() {
 	//doButanoUpdate();
 	//changePalette(1);
 	//cutsceneManager.introCutscene(); 
-	cutsceneManager.cifDream();
+	//cutsceneManager.cifDream();
 	
 	//bn::core::update(); 
 

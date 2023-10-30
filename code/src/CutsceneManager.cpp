@@ -152,6 +152,15 @@ void CutsceneManager::introCutscene() {
 	
 	for(int i=0; i<=3; i++) {
 	
+		/*
+		maps[0]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
+		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
+		maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
+		
+		face.spritePointer.set_palette(game->pal->getSpritePaletteFade(i));
+		*/
+		
+		
 		maps[0]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
 		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
 		maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
@@ -221,12 +230,13 @@ void CutsceneManager::cifDream() {
 	vBlankFuncs.clear();
 	
 	if(game->effectsManager.bigSprites[0]->animationIndex != 0) {
+		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[In the bark's reflection, you dont seem to be either]\n[Better move on]\0", false);
+		// in the glistening of the bark, you seem drained as well
+		
 		return;
 	}
 	
 	GameState restoreState = game->state;
-	
-	goto bruh;
 	
 	
 	game->effectsManager.doDialogue(""
@@ -251,12 +261,11 @@ void CutsceneManager::cifDream() {
 		//BN_LOG("HEY FOOL, CHANGE THIS DELAY BACK TO 20");
 	}
 	
-	bruh:
 	game->state = GameState::Cutscene;
 	
 	game->effectsManager.hideForDialogueBox(false, true);
 	backupAllButEffects();
-	goto omfg;
+
 	
 	
 	/*
@@ -308,15 +317,15 @@ void CutsceneManager::cifDream() {
 	
 	
 	delay(60 * 5);
+	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 1);
 	game->effectsManager.doDialogue("Wake up.\0", true);
-	
-	omfg:
 	
 	effectsManager->effectsLayer.clear();
 	
 	bn::vector<Effect, 16> effects;
 	
-	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 3);
+	
+	//maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 0);
 	
 	// gml_Object_obj_cifdream_eyecatch_Create_0 contains the spawn indexes. (what is their origin?)
 	Sprite mon(bn::sprite_tiles_items::dw_spr_cdream_mon, bn::sprite_shape_size(64, 32), 37  , 107  );
@@ -334,11 +343,22 @@ void CutsceneManager::cifDream() {
 	
 	// the more that i think of the positions of the lords, the more symbolism i see. its insane. i love this game sm
 	
-	maps[0]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, 2);
+	maps[0]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, 1);
 	maps[0]->bgPointer.set_x(74 + (64 / 2) - 8);
 	maps[0]->bgPointer.set_y(10 + (132 / 2) - 16);
 	
-	vBlankFuncs.push_back([this, cif, cifGlow]() mutable {
+	// ugh.
+	// the fade in with cif having 2 light levels is, an inconvience. i should just make a palete class, but i would have to rewrite the sprite class as well 
+	// and chnge a ton of shit. this is the best i can do
+	bn::blending::set_transparency_alpha(0.75);
+	
+	auto bgPalette = globalGame->pal->getBGPalette();
+	auto spritePalette = globalGame->pal->getSpritePalette();
+	
+	maps[0]->bgPointer.set_palette(bgPalette.create_palette());
+	cif.spritePointer.set_palette(spritePalette.create_palette());
+	
+	vBlankFuncs.push_back([this, cif, cifGlow, bgPalette]() mutable {
 		const bn::regular_bg_item* addBackgrounds[4] = {&bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index1, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index2, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index3};
 		static int addBackgroundsIndex = 0;
 		static int x = 74 + (64 / 2) - 8;
@@ -347,7 +367,7 @@ void CutsceneManager::cifDream() {
 		//static int degree = 0;
 		
 		if(frame % 18 == 0) {
-			maps[0]->create(*addBackgrounds[addBackgroundsIndex], 2);
+			maps[0]->create(*addBackgrounds[addBackgroundsIndex], 1);
 			addBackgroundsIndex = (addBackgroundsIndex + 1) % 4;
 			maps[0]->bgPointer.set_x(x);
 			maps[0]->bgPointer.set_y(y);
@@ -388,9 +408,19 @@ void CutsceneManager::cifDream() {
 		return;
 	});
 	
-	vBlankFuncs.push_back([this, effects]() mutable {
+	// FADE OCCURS HERE TO DELAY THE GLOW FROM PASSING THROUGH IT
+	game->doButanoUpdate();
+	game->fadePalette(0);
+	maps[1]->bgPointer.set_priority(3);
+	
+	// we only do 1-2 here, do 3-4 after the fuckin fuzz spawns
+	game->fadePalette(1);
+	delay(5);
+	game->fadePalette(2);
+	
+	vBlankFuncs.push_back([this, effects, spritePalette]() mutable {
 		
-		auto createEffect = []() -> Effect {
+		auto createEffect = [spritePalette]() -> Effect {
 			
 			auto createFunc = [](Effect* obj) mutable -> void {
 				if(randomGenerator.get() & 1) {
@@ -417,14 +447,14 @@ void CutsceneManager::cifDream() {
 				t = randomGenerator.get_int(0, 180 + 1),
 				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
 				graphicsIndex = (bn::fixed)0,
-				freezeFrames = randomGenerator.get_int(0, 60 + 1)
+				freezeFrames = randomGenerator.get_int(0, 60 + 1),
+				tileSelector = -1,
+				spritePalette
 				](Effect* obj) mutable -> bool {
 				
 				if(y < -16) {
 		
-					int tileSelector = randomGenerator.get_int(0, 5);
-					
-					
+					tileSelector = randomGenerator.get_int(0, 5);
 					
 					const bn::sprite_tiles_item* spriteTiles[5] = {
 						&bn::sprite_tiles_items::dw_spr_soulglow_big,
@@ -446,9 +476,14 @@ void CutsceneManager::cifDream() {
 					
 					obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
 				
-					obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 2 : 3);
-					obj->sprite.spritePointer.set_palette(tileSelector == 0 ? globalGame->pal->getSpritePaletteFade(3, false) : globalGame->pal->getSpritePaletteFade(2, false));
+					obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 1 : 3);
+					//obj->sprite.spritePointer.set_palette(tileSelector == 0 ? globalGame->pal->getSpritePaletteFade(3, false) : globalGame->pal->getSpritePaletteFade(2, false));
+					obj->sprite.spritePointer.set_palette(spritePalette);
 				
+					obj->sprite.spritePointer.set_blending_enabled(tileSelector != 0);
+						
+					
+					
 					x = randomGenerator.get_int(16 * 14);
 					//y = 16*5+randomGenerator.get_int(16);
 					if(y == -32) {
@@ -522,10 +557,6 @@ void CutsceneManager::cifDream() {
 				effects.push_back(createEffect());
 			}
 			
-			for(int i=0; i<effects.size(); i++) {
-				effects[i].animate();
-			}
-		
 			return;
 		}
 		
@@ -554,28 +585,23 @@ void CutsceneManager::cifDream() {
 	// ok nvm, this just aint going to work. 
 	// ugh 
 	// 
-	maps[1]->bgPointer.set_priority(0);
-	// THIS IS SHIT PROGRAMMING
-	game->doButanoUpdate();
-	game->fadePaletteIndex = 0; // backup
-	maps[1]->bgPointer.set_priority(3);
-	delay(60);
-	game->fadePaletteIndex = 1; // blackout 
 	
+	delay(5);
+	game->fadePalette(3);
+	delay(5);
+	game->fadePalette(4);
+	delay(5);
+
+
 	delay(60 * 5);
 	
-	for(int i=1; i<=4; i++) {
-		game->fadePaletteIndex = i;
-		
-		delay(60 * 1);
-	}
 	
 	
 	
 	game->effectsManager.doDialogue(""
 	"What a little miracle you are.\n"
 	"But no matter how hard I try...\n"
-	"This is as close as I can get.\n"
+	"This is as close as I can get.\n" // regretably.
 	"The rest is up to you.\n"
 	"Soon you'll grow up...\n"
 	"You must keep working diligently and take good care of your sisters...\n"
@@ -596,6 +622,18 @@ void CutsceneManager::cifDream() {
 	
 	// hide VRAM bulshittery.
 	maps[1]->bgPointer.set_priority(0);
+	bn::sprite_text_generator textGenerator(dw_fnt_text_12_sprite_font);
+	textGenerator.set_center_alignment();
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> tempSprites;
+	textGenerator.generate((bn::fixed)0, (bn::fixed)0, bn::string_view("INA"), tempSprites);
+	textGenerator.generate((bn::fixed)0, (bn::fixed)48, bn::string_view("THANK YOU FOR PLAYING<3"), tempSprites);
+	bn::blending::set_transparency_alpha(0.25);
+	for(int i=0; i<tempSprites.size(); i++) {
+		tempSprites[i].set_palette(spritePalette);
+		tempSprites[i].set_bg_priority(0);
+		tempSprites[i].set_visible(true);
+		tempSprites[i].set_blending_enabled(true);
+	}
 	game->doButanoUpdate();
 	
 	// CUT, kill the tree
@@ -615,7 +653,9 @@ void CutsceneManager::cifDream() {
 	
 	// 
 	
+	tempSprites.clear();
 	vBlankFuncs.clear();
+	effects.clear();
 	
 	game->effectsManager.bigSprites[0]->animate();
 	

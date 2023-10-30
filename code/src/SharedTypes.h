@@ -19,6 +19,8 @@
 #include "bn_sound_actions.h"
 #include "common_variable_8x8_sprite_font.h"
 
+#include "bn_blending.h"
+
 // it is so fucking dumb that i didnt realize this was a thing until now 
 #include "bn_window.h"
 #include "bn_rect_window.h"
@@ -318,6 +320,7 @@ public:
 		bgPointer.set_x(8 + 8);
 		bgPointer.set_y(8 + 48);
 		
+		// does this do a vblank? if so i mean ill just cover it with another bg ig
 		reloadCells();
 		
 	}
