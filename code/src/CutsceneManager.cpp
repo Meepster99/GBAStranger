@@ -229,8 +229,10 @@ void CutsceneManager::cifDream() {
 	BN_LOG("cifdream");
 	vBlankFuncs.clear();
 	
+	
+
 	if(game->effectsManager.bigSprites[0]->animationIndex != 0) {
-		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[In the bark's reflection, you dont seem to be either]\n[Better move on]\0", false);
+		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better move on]\0", false);
 		// in the glistening of the bark, you seem drained as well
 		
 		return;
