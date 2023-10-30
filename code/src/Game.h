@@ -178,9 +178,7 @@ public:
 	int paletteIndex = 0;
 	void changePalette(int offset);
 	Palette* pal = NULL;
-	void fadePalette(int index);
-	int fadePaletteIndex = -1;
-
+	
 	void doButanoUpdate();
 	void uncompressData(u8 res[126], u8* input);
 	
