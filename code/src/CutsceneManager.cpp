@@ -315,6 +315,9 @@ void CutsceneManager::cifDream() {
 	
 	*/
 	
+	delay(60 * 5);
+	
+	bn::music_items::cifdream.play();
 	
 	delay(60 * 5);
 	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 1);
@@ -619,6 +622,8 @@ void CutsceneManager::cifDream() {
 	"You're my pride.\n"
 	"And your name shall be...\0"
 	, true);
+	
+	bn::music::stop();
 	
 	// hide VRAM bulshittery.
 	maps[1]->bgPointer.set_priority(0);

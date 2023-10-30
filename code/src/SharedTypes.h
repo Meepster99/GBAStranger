@@ -12,9 +12,11 @@
 
 #include "bn_version.h"
 
-//#include "bn_music_items.h"
+#include "bn_music_items.h"
 //#include "bn_music_actions.h"
 
+#include "bn_music.h"
+#include "bn_sound.h"
 #include "bn_sound_items.h"
 #include "bn_sound_actions.h"
 #include "common_variable_8x8_sprite_font.h"
