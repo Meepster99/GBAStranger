@@ -167,6 +167,7 @@ public:
 	uint64_t getSaveHash();
 	
 	void loadTiles();
+	void findNextRoom();
 	void loadLevel(bool debug = false);
 	void resetRoom(bool debug = false);
 	

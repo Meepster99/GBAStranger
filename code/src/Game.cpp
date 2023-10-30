@@ -63,11 +63,91 @@ void Game::uncompressData(u8 res[126], u8* input) {
 	
 }
 
+void Game::findNextRoom() {
+	
+	if(entityManager.playerWon()) {
+		entityManager.updateScreen(); // is this ok?	
+
+		// check for cif statue
+		bool cifReset = false;
+		Pos testPos = entityManager.player->p;
+		if(testPos.move(Direction::Up)) {
+			
+			SaneSet<Entity*, 4> tempMap = entityManager.getMap(testPos);
+			
+			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+				if((*it)->entityType() == EntityType::CifStatue) {
+					cifReset = true;
+					break;
+				}	
+			}
+		}
+		
+		if(cifReset) {
+			// todo, in the future, put a special anim here
+			BN_ASSERT(entityManager.player != NULL, "player was null during cif reset");
+			
+			entityManager.player->locustCount = 0;
+			entityManager.player->isVoided = false;
+
+			//game->save(); // extranious call for sanity
+			roomManager.cifReset();
+		} else {
+			if(tileManager.exitDestination == NULL) {
+				roomManager.nextRoom();
+			} else {
+				roomManager.gotoRoom(tileManager.exitDestination);
+			}
+		}
+		
+		bn::sound_items::snd_stairs.play();
+		return;
+	} 
+	
+	// do a check for if we are doing a bee statue shortcut (or in the future, a shortcut shortcut)((or in the future future, brands???))
+	// because of the goofy ahh way this is written, this is going to get called every time until the falling anim finishes?, i dont like that tbh, but i cannot do anything
+	// i can at least like,,, do a check to not duplicate inc room via just setting locusts to 0
+	if(entityManager.fallKill() && entityManager.player->locustCount != 0) {
+		bool beeReset = false;
+		Pos testPos = entityManager.player->p;
+		if(testPos.move(Direction::Up)) {
+			SaneSet<Entity*, 4> tempMap = entityManager.getMap(testPos);
+			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+				if((*it)->entityType() == EntityType::BeeStatue) {
+						beeReset = true;
+						break;
+				}
+			}
+			
+			if(beeReset) {
+				roomManager.changeFloor(entityManager.player->locustCount);
+				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this shit
+				// but does this update the save file?
+			}
+			
+		}
+	}
+
+	if(tileManager.secretDestinations.size() != 0) {
+		for(int i=0; i<tileManager.secretDestinations.size(); i++) {
+			if(tileManager.secretDestinations[i].second == entityManager.player->p && !tileManager.hasFloor(entityManager.player->p)) {
+				roomManager.gotoRoom(tileManager.secretDestinations[i].first);
+				break;
+			}
+		}
+	}
+}
+
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
-	BN_LOG("reseting to room ", roomManager.currentRoomName());
+	
 
+	// decide what room to goto next 
+	findNextRoom();
+	
+	BN_LOG("reseting to room ", roomManager.currentRoomName());
+	
 	if(!debug) {
 		state = GameState::Exiting;
 		
@@ -80,7 +160,7 @@ void Game::resetRoom(bool debug) {
 		doButanoUpdate();
 
 	}
-	
+
 	state = GameState::Loading;
 	save();
 	

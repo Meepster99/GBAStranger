@@ -1109,7 +1109,7 @@ def convertObjects(layerData):
 
 		def obj_voidtail_005(p, creationCode):
 		
-			x, y = p.rawX, p.rawY 
+			x, y = p.rawX, p.rawY + 4
 	
 			w, h = 176, 56
 			
@@ -1158,7 +1158,7 @@ def convertObjects(layerData):
 
 		def obj_voidtail_008(p, creationCode):
 		
-			x, y = p.rawX, p.rawY - 8
+			x, y = p.rawX, p.rawY - 12
 			
 			w, h = 64, 52
 			

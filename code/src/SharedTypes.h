@@ -6,7 +6,11 @@
 #include "bn_unordered_map.h"
 #include "bn_regular_bg_tiles_ptr.h"
 
+
+
 #include "Profiler.h"
+
+//#include <cstring>
 
 #include "bn_bg_tiles.h"
 
@@ -33,6 +37,8 @@
 
 #include "bn_random.h"
 #include "bn_sram.h"
+
+
 
 // danger zone, again 
 #include "bn_bg_blocks_manager.h"
@@ -844,6 +850,21 @@ public:
 		return maxVecSize;
 	}
 	
+	
+	
+};
+
+template <typename T, int maxVecSize>
+class SaneVector : public bn::vector<T, maxVecSize> { // war crime
+public:
+	
+	SaneVector(std::initializer_list<T> l) {
+		
+		for(auto it = l.begin(); it != l.end(); ++it) {
+			this->push_back(*it);
+		}
+		
+	}
 	
 	
 };

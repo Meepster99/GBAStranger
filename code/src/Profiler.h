@@ -32,6 +32,8 @@ inline int WTF(const char* str) {
 	// to just sub that in, only for strlen to not exist for some unknown ungodly reasons
 	// this is horrid.
 	
+	// does this,,, work now???
+	
 	int length = 0;
 	
 	while (*str != '\0') {

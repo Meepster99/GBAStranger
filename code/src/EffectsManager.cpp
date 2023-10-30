@@ -352,7 +352,7 @@ void BigSprite::loadBoobTrap() {
 			return false;
 		}
 		
-		if(boobaCount > 8 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
+		if(boobaCount > 16 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
 			game->playSound(&bn::sound_items::metal_pipe_falling_sound_effect);
 			int lmao = 0;
 			while(lmao < 60 * 5) {
@@ -2314,10 +2314,6 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	
 	createEffect(blinkCreateFunc, blinkTickFunc);
 	
-	
-	
-	
-	
 }
 
 void EffectsManager::roomDust() {
@@ -2433,7 +2429,133 @@ void EffectsManager::roomDust() {
 
 }
 
+void EffectsManager::entityFall(Entity* entity) {
 
+	struct fallFrame {
+		const bn::sprite_tiles_item* spriteTiles = NULL;
+		int frameCount = 0;
+	};
+	
+	EntityType t = entity->entityType();
+	Pos p = entity->p;
+	
+	auto createFallEffect = [p](SaneVector<fallFrame, 8> fallData) -> Effect* {
+		
+		return new Effect(
+		[fallData, p](Effect* e) -> void {
+			
+			e->graphicsIndex = 0;
+			e->tempCounter = 0;
+			
+			e->x = p.x * 16;
+			e->y = p.y * 16;
+			e->sprite.updateRawPosition(e->x, e->y);
+			
+			e->sprite.spritePointer.set_tiles(
+				*fallData[e->tempCounter].spriteTiles,
+				e->graphicsIndex
+			);
+			
+			
+		},
+		[fallData](Effect* e) -> bool {
+		
+			if(frame % 8 != 0) {
+				return false;
+			}
+			
+			e->graphicsIndex++;
+			if(e->graphicsIndex == fallData[e->tempCounter].frameCount) {
+				e->graphicsIndex = 0;
+				e->tempCounter++;
+				if(e->tempCounter == fallData.size()) {
+					return true;
+				}
+			}
+			
+			
+			e->sprite.spritePointer.set_tiles(
+				*fallData[e->tempCounter].spriteTiles,
+				e->graphicsIndex % fallData[e->tempCounter].spriteTiles->graphics_count()
+			);
+			
+			return false;
+		}
+		);
+	};
+	
+	
+	
+	if(t == EntityType::Player) {
+		game->playSound(&bn::sound_items::snd_player_fall);
+	} else {
+		game->playSound(&bn::sound_items::snd_fall);
+	}
+	
+
+	entity->sprite.setVisible(false);
+	
+	switch(t) {
+		case EntityType::Player     :
+			switch(game->mode) {
+				default:
+				case 0:
+						effectList.push_back(createFallEffect({ {&bn::sprite_tiles_items::dw_spr_player_fall, 6} }));
+						break;
+				case 1:
+						effectList.push_back(createFallEffect({ {&bn::sprite_tiles_items::dw_spr_lil_fall, 6} }));
+						break;
+					case 2:
+						effectList.push_back(createFallEffect({ {&bn::sprite_tiles_items::dw_spr_cif_fall, 6} }));
+						break;
+			}
+			break;
+		case EntityType::Leech      :
+			effectList.push_back(createFallEffect({ {&bn::sprite_tiles_items::dw_spr_cl_falling, 6} }));
+			break;
+		case EntityType::Maggot     :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cc_falling, 6}}));
+			break;
+		case EntityType::Eye        :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_ch_falling, 6}}));
+			break;
+		case EntityType::Bull       :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cg_falling, 6}}));
+			break;
+		case EntityType::Chester    :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cs_fall, 8}, {&bn::sprite_tiles_items::dw_spr_cs_falling, 6}}));
+			break;
+		case EntityType::WhiteMimic :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cm_falling, 6}}));	
+			break;
+		case EntityType::GrayMimic  :	
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cm_falling1, 6}}));	
+			break;
+		case EntityType::BlackMimic :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cm_falling2, 6}}));	
+			break;
+		case EntityType::Diamond    :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_co_fall, 2}, {&bn::sprite_tiles_items::dw_spr_co_falling, 6}}));
+			break;
+		case EntityType::Shadow     :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_co_falling, 6}}));		
+			break;
+		case EntityType::Boulder    :
+		case EntityType::AddStatue  :
+		case EntityType::EusStatue  :
+		case EntityType::BeeStatue  :
+		case EntityType::MonStatue  :
+		case EntityType::TanStatue  :
+		case EntityType::GorStatue  :
+		case EntityType::LevStatue  :
+		case EntityType::CifStatue  :
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_fall, 6}}));
+			break;
+		default:
+			BN_ERROR("unknown entitytype passed into entityFall, wtf");
+			break;
+	}
+}
 
 
 

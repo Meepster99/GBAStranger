@@ -187,6 +187,7 @@ bn::optional<Direction> Player::getNextMove() {
 	return temp; 
 }
 
+/*
 void Player::startFall() {
 	
 	BN_LOG("playerfal");
@@ -241,6 +242,7 @@ void Player::startFall() {
 	}
 	
 }
+*/
 
 void Player::updateTileIndex() {
 	
@@ -518,21 +520,11 @@ void Boulder::interact() {
 	effectsManager->doDialogue(temp);
 }
 
-void Obstacle::startFall() {
-	
-	// copy over the actual sprite time zone into the falldata,
-	// just so i dont have to go bs a bunch of code
-	// but tbh, i rlly should.
-				
-	//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[0], 9));
-	
-}
-
 void Obstacle::moveSucceded() {
 	bn::sound_items::snd_push.play();
 }
 
-void EusStatue::startFall() {
+void EusStatue::isDead() {
 
 	BN_ASSERT(tileManager->floorMap[p.x][p.y] == NULL, "with a eus statue, you tried pushing it onto an area that i hadnt nulled yet(a glass that just broke, or something). im to lazy rn to fix this, but if you see it msg me");
 
@@ -541,7 +533,7 @@ void EusStatue::startFall() {
 	// this is trash, please make tilemanager update based on tile
 	tileManager->fullDraw();
 	
-	Obstacle::startFall();
+	//Obstacle::startFall();
 }
 
 bn::optional<Direction> GorStatue::getNextMove() {
@@ -570,15 +562,18 @@ bn::optional<Direction> MonStatue::getNextMove() {
 	return Obstacle::getNextMove();
 }
 
-void LevStatue::startFall() {
+void LevStatue::isDead() {
 	totalLev--;
 	if(isActive) {
 		rodUses--;
 		entityManager->rodUse();
 	}
+	
+
 	if(rodUses != 0 && rodUses >= totalLev) {
-		entityManager->addKill(entityManager->player); // ADDING THIS TO A KILL RIGHT HERE MIGHT BE A horrid idea, putting player to be safe
+		entityManager->levKill = this;
 	}
+	
 }
 
 

@@ -12,6 +12,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 	LevStatue::rodUses = 0;
 	LevStatue::totalLev = 0;
+	
+	levKill = NULL;
 
 	// delete old data 
 	// conspiricy time, NULL EVERYTHING.
@@ -37,12 +39,14 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		player->rod.clear();
 	}
 	
+	/*
 	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
 		if(*it != NULL) { // sanity check
 			delete *it;
 		}
 		*it = NULL;
 	}
+	*/
 	
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
 		if(*it != NULL) { // sanity check
@@ -62,7 +66,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	enemyList.clear();
 	obstacleList.clear();
 	shadowList.clear();
-	deadList.clear();
+	//deadList.clear();
 	
 	
 	player = NULL;
@@ -260,9 +264,11 @@ void EntityManager::updatePalette(Palette* pal) {
 		(*it)->sprite.spritePointer.set_palette(pal->getSpritePalette());
 	}
 	
+	/*
 	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
 		(*it)->sprite.spritePointer.set_palette(pal->getSpritePalette());
 	}
+	*/
 	
 	Sprite::spritePalette = pal;
 	
@@ -612,19 +618,26 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	
 	Pos tempPos = e->p;
 	
+	/*
 	if(tempPos != player->p) {
 		// IS THIS OK
 		// yes, i think?
 		// one thing though is,, enimies deaths NEED to be made into an effect so they can play during a gameover
 		e->doUpdate();
 	}
+	*/
+	
+	
 	
 	bn::vector<Entity*, 4>::iterator res = entityMap[tempPos.x][tempPos.y].erase(e);
 	entityList.erase(e);
 	obstacleList.erase(e);
 	enemyList.erase(e);		
 
-	deadList.insert(e);
+	e->isDead();
+	
+	//deadList.insert(e);
+	
 	
 	// this initially called on all entities, should it?
 	// if two entities collide on a tile, the tile should collapse
@@ -633,9 +646,10 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	}
 	
 	if(!hasFloor(tempPos)) {
-		game->playSound(&bn::sound_items::snd_fall);
+		effectsManager->entityFall(e);
 	} else {
 		game->playSound(&bn::sound_items::snd_enemy_explosion);
+		e->sprite.setVisible(false);
 		effectsManager->explosion(tempPos);
 	}
 	
@@ -895,6 +909,7 @@ void EntityManager::updateMap() {
 		}
 	}
 	
+	bool hasLevStatue = false;
 	// critical levels of goofyness
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		if((*it)->entityType() == EntityType::MonStatue) { 
@@ -905,7 +920,18 @@ void EntityManager::updateMap() {
 				effectsManager->monLightning((*it)->p, res.value());
 				addKill(*it);
 			}
-		}	
+		} else if((*it)->entityType() == EntityType::LevStatue) { 
+			hasLevStatue = true;
+		}
+	}
+	
+	if(levKill != NULL) {
+		BN_LOG("levkill");
+		if(hasLevStatue) {
+			addKill(levKill);
+		} else {
+			levKill = NULL;
+		}
 	}
 	
 	for(int x=0; x<14; x++) {
@@ -922,6 +948,7 @@ void EntityManager::updateMap() {
 
 void EntityManager::doDeaths() {
 	
+	/*
 	if(deadList.size() == 0) {
 		return;
 	}
@@ -943,7 +970,7 @@ void EntityManager::doDeaths() {
 		
 	}
 	
-	
+	*/
 	
 }
 
@@ -977,6 +1004,7 @@ void EntityManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	
 	int compareVal = isCutscene ? 0 : 6;
 	
+	/*
 	for(auto it = deadList.cbegin(); it != deadList.cend(); ++it) {
 		if((*it) == NULL) {
 			continue;
@@ -985,6 +1013,7 @@ void EntityManager::hideForDialogueBox(bool vis, bool isCutscene) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
+	*/
 	
 	for(auto it = entityList.cbegin(); it != entityList.cend(); ++it) {
 		if((*it) == NULL) {
@@ -1004,127 +1033,24 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 	
 	// return true when done
 	
+	// dying entities (including the player) should really all be converted to being effects
+	
 	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
-
-
-	if(killedPlayer.contains(NULL)) {
-		//player->doUpdate();
-		updateScreen(); // is this ok?	
-		//game->debugText.updateText();
-		//bn::core::update();
-		
-		// check for cif statue
-		bool cifReset = false;
-		Pos testPos = player->p;
-		if(testPos.move(Direction::Up)) {
-			
-			SaneSet<Entity*, 4> tempMap = getMap(testPos);
-			
-			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
-				if((*it)->entityType() == EntityType::CifStatue) {
-					cifReset = true;
-					break;
-				}	
-			}
-		}
-		
-		if(cifReset) {
-			// todo, in the future, put a special anim here
-			BN_ASSERT(player != NULL, "player was null during cif reset");
-			
-			player->locustCount = 0;
-			player->isVoided = false;
-
-			//game->save(); // extranious call for sanity
-			game->roomManager.cifReset();
-		} else {
-			if(tileManager->exitDestination == NULL) {
-				game->roomManager.nextRoom();
-			} else {
-				game->roomManager.gotoRoom(tileManager->exitDestination);
-			}
-		}
-		
-		bn::sound_items::snd_stairs.play();
-		return true;
-	} 
 	
-	// do a check for if we are doing a bee statue shortcut (or in the future, a shortcut shortcut)((or in the future future, brands???))
-	// because of the goofy ahh way this is written, this is going to get called every time until the falling anim finishes?, i dont like that tbh, but i cannot do anything
-	// i can at least like,,, do a check to not duplicate inc room via just setting locusts to 0
-	if(killedPlayer.contains(player) && player->locustCount != 0) {
-		bool beeReset = false;
-		Pos testPos = player->p;
-		if(testPos.move(Direction::Up)) {
-			SaneSet<Entity*, 4> tempMap = getMap(testPos);
-			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
-				if((*it)->entityType() == EntityType::BeeStatue) {
-						beeReset = true;
-						break;
-				}
-			}
-			
-			if(beeReset) {
-				game->roomManager.changeFloor(player->locustCount);
-				player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this shit
-				// but does this update the save file?
-			}
-			
-		}
-	}
+	// should this,,, 
 	
-	// this bool is scuffed af in its reset
-	static bool firstRun = true;
-
-	if(firstRun && tileManager->secretDestinations.size() != 0) {
+	if(playerWon()) {
+	
+	} else if(enemyKill()) {
 		
-		firstRun = false;
-		
-		for(int i=0; i<tileManager->secretDestinations.size(); i++) {
-			if(tileManager->secretDestinations[i].second == player->p && !tileManager->hasFloor(player->p)) {
-				game->roomManager.gotoRoom(tileManager->secretDestinations[i].first);
-				break;
-			}
-		}
+	} else if(fallKill()) {
+		effectsManager->entityFall(player);
 	}
 	
 	
-	//update the pos of entities that DONT collide with the player.
-	// wee woo wee woo horrid code.
-	// also, its now even worse since this will be getting called every frame?
-	bool updatePlayer = true;
-	for(auto it = entityList.begin(); it != entityList.end(); it++) {
-		if((*it)->entityType() == EntityType::Player) {
-			continue;
-		}
-		
-		BN_ASSERT((*it) != player, "if you see this, something is super fucked");
-		
-		if((*it)->p == player->p) {
-			updatePlayer = false;
-		} else {
-			(*it)->updatePosition();
-		}
-	}
-
-	if(updatePlayer) {
-		player->updatePosition();
-	}
 	
-	if(killedPlayer.contains(player) && frame % 8 == 0) {
-		firstRun = player->fallDeath();
-		return firstRun;
-	} else {
-		if(frame % 8 == 0) {
-			for(auto it = killedPlayer.begin(); it != killedPlayer.end(); ++it) {
-				(*it)->doTick();
-			}
-			firstRun = player->fallDeath();
-			return firstRun;
-		}
-	}
-	
-	return false;
+	// is this ok? should this be false
+	return true;
 }
 
 bool EntityManager::enterRoom() {
@@ -1419,13 +1345,18 @@ void EntityManager::rodUse() {
 		}
 	}
 	
+	BN_LOG(!foundLevStatue, " ", temp != NULL);
+	BN_LOG(LevStatue::rodUses, " ", LevStatue::totalLev, " ", LevStatue::rodUses != 0);
 	if(!foundLevStatue && temp != NULL) {
-		addKill(temp);
+		//addKill(temp);
+		levKill = temp;
 	}
 	
 	// THIS COULD BE VERY BAD IF SOMEONE PUSHES OFF A LEV STATUE WITH ONLY ONE ON SCREEN
+	
+	
 	if(LevStatue::rodUses >= LevStatue::totalLev && LevStatue::rodUses != 0) {
-		addKill(player);
+		levKill = temp;
 	}
 	
 }

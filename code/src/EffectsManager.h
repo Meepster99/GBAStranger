@@ -347,6 +347,7 @@ public:
 	void monLightning(Pos p, Direction dir);
 	void sparkle(Pos p, int sparkleLength = 8);
 	void roomDust();
+	void entityFall(Entity* e);
 	
 };
 

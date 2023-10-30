@@ -25,7 +25,7 @@ public:
 	// i rlly should impliment dynamic resizing for these vecs.
 	bn::vector<Pos, 64> shadowQueue;
 	
-	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
+	//SaneSet<Entity*, MAXENTITYSPRITES> deadList;
 	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
 
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
@@ -88,6 +88,8 @@ public:
 	bn::optional<Direction> canPathToPlayer(const Pos& p) const;
 	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStart);
 	
+	LevStatue* levKill = NULL;
+	
 	void rodUse();
 	
 	void sanity() const;
@@ -105,6 +107,7 @@ public:
 	// should i just make killedplayer public? idek anymore
 	bool playerWon() const { return killedPlayer.contains(NULL); }
 	bool enemyKill() const { return !killedPlayer.contains(player); }
+	bool fallKill() const { return killedPlayer.contains(player); }
 	
 	void hideForDialogueBox(bool vis, bool isCutscene);
 	bool exitRoom();

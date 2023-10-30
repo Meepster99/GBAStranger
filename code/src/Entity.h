@@ -116,7 +116,7 @@ public:
 	static TileManager* tileManager;
 	static Game* game;
 	
-	bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> fallData;
+	//bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> fallData;
 	
 	int animationIndex = 0;
 	int tileIndex = 0;
@@ -192,8 +192,9 @@ public:
 	}
 	
 	
-	virtual void startFall() { return; }
-	 
+	virtual void isDead() { return; } // needed for,,, lev statue falls?
+	
+	/*
 	virtual bool fallDeath() {
 		// return true once the animation is over, and kill the sprite.
 		
@@ -222,9 +223,12 @@ public:
 		
 		return false;
 	}
+	*/
 	
-	
-	virtual void killedPlayer() { // this func will be called if this entity kills a player, and do all the animations and such
+	virtual void killedPlayer() { 
+		// this func will be called if this entity kills a player, and do all the animations and suc
+		// should this be depracated??
+		
 		doTick();
 	}
 	
@@ -272,7 +276,7 @@ public:
 	int wingsUse = 0;
 	unsigned wingMoveCheck = -1;
 	
-	void startFall() override;
+	//void startFall() override;
 	
 	bn::optional<Direction> nextMove;
 	
@@ -333,14 +337,12 @@ public:
 	
 	void doTick() override {}
 	
-	void startFall() override;
+	//void startFall() override;
 	
 	virtual void interact() { return; }
 	
 	virtual bool kicked() { return true; }
-	
 
-	
 };
 
 // -----
@@ -359,7 +361,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cl_left);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cl_right);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cl_falling, 6));
+		
 		
 	}
 
@@ -393,7 +395,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cc_falling, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cc_falling, 6));
 	}
 
 	Maggot* clone() const override { return new Maggot(*this); }
@@ -425,7 +427,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_ch_falling, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_ch_falling, 6));
 	}
 
 	Eye* clone() const override { return new Eye(*this); }
@@ -454,7 +456,7 @@ public:
 		// idle 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cg_idle);	
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cg_falling, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cg_falling, 6));
 
 	}
 	
@@ -494,8 +496,8 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cs_left);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cs_right);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_fall, 8));
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_falling, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_fall, 8));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_falling, 6));
 		
 	}
 
@@ -550,7 +552,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_left);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_right);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling, 6));	
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling, 6));	
 	}
 
 	WhiteMimic* clone() const override { return new WhiteMimic(*this); }
@@ -574,7 +576,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_left1);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_right1);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling1, 6));	
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling1, 6));	
 		
 	}
 
@@ -599,7 +601,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_left2);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cm_right2);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling2, 6));	
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cm_falling2, 6));	
 		
 	}
 
@@ -625,8 +627,8 @@ public:
 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_co_idle);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_fall, 2));		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_falling, 6));		
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_fall, 2));		
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_falling, 6));		
 	}
 	
 	bn::optional<Direction> nextMove;
@@ -664,7 +666,7 @@ public:
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cr_right);
 		
 		// here as a temporary measure
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_falling, 6));		
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_co_falling, 6));		
 		
 	}
 
@@ -693,7 +695,7 @@ public:
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_boulder);
 		
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	Boulder* clone() const override { return new Boulder(*this); }
@@ -728,7 +730,7 @@ public:
 	AddStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_voider);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	AddStatue* clone() const override { return new AddStatue(*this); }
@@ -743,14 +745,14 @@ public:
 	EusStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lover);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	EusStatue* clone() const override { return new EusStatue(*this); }
 
 	EntityType entityType() const override { return EntityType::EusStatue; }
 	
-	void startFall() override;
+	void isDead() override;
 
 };
 	
@@ -760,7 +762,7 @@ public:
 	BeeStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_smiler);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	BeeStatue* clone() const override { return new BeeStatue(*this); }
@@ -775,7 +777,7 @@ public:
 	MonStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_greeder);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	MonStatue* clone() const override { return new MonStatue(*this); }
@@ -792,7 +794,7 @@ public:
 	TanStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_killer);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	TanStatue* clone() const override { return new TanStatue(*this); }
@@ -810,7 +812,7 @@ public:
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower_stop);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	GorStatue* clone() const override { return new GorStatue(*this); }
@@ -832,12 +834,12 @@ public:
 	LevStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_watcher);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 		
 		totalLev++;
 	}
 	
-	void startFall() override;
+	void isDead() override;
 	
 	bool isActive = false;
 	void activate() {
@@ -859,7 +861,7 @@ public:
 	CifStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_atoner);
-		fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
+		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	CifStatue* clone() const override { return new CifStatue(*this); }
