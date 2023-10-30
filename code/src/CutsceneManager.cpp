@@ -423,7 +423,10 @@ void CutsceneManager::cifDream() {
 	delay(5);
 	game->fadePalette(2);
 	
-	vBlankFuncs.push_back([this, effects, spritePalette]() mutable {
+	// static vars, declared inside the lambda, dont reset on a second func call?? that is quite weird
+	bool firstRun = true;
+	
+	vBlankFuncs.push_back([this, effects, spritePalette, firstRun]() mutable {
 		
 		auto createEffect = [spritePalette]() -> Effect {
 			
@@ -552,11 +555,13 @@ void CutsceneManager::cifDream() {
 		
 		
 		
-		static bool firstRun = true;
+		//static bool firstRun = true;
 		
 		if(firstRun) {
 			
 			firstRun = false;
+			
+			BN_LOG("bruh, ", effects.size(), " ", effects.max_size());
 			
 			while(effects.size() != effects.max_size()) {
 				effects.push_back(createEffect());
@@ -600,7 +605,7 @@ void CutsceneManager::cifDream() {
 
 	delay(60 * 5);
 	
-	
+	delay(60 * 1);
 	
 	
 	game->effectsManager.doDialogue(""

@@ -471,10 +471,19 @@ void BigSprite::loadChest() {
 			return;
 		}
 		
+		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		
+		Pos testChestPos( (bigSprite->xPos) / 16, (bigSprite->yPos) / 16 );
+		
+		if(entityManager->player->p.y != testChestPos.y + 1) {
+			return;
+		}
+		
+		
 		
 		globalGame->cutsceneManager.introCutscene();
 	
-		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		
 		bigSprite->sprites[0].spritePointer.set_tiles(*(bigSprite->tiles), 1);
 	
 		
