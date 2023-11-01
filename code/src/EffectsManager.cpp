@@ -1095,6 +1095,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	// ugh
 	
 	
+	// TODO, FOR TEXT OUTLINE, RENDER THE TEXT 4 TIMES ON EACH DIR WITH BLACK TO GEN THE OUTLINE
+	
+	
 	GameState restoreState = game->state;
 	if(!isCutscene) {
 		game->state = GameState::Dialogue;
@@ -2334,6 +2337,8 @@ void EffectsManager::roomDust() {
 				*obj->tiles,
 				0
 			);
+		
+			obj->sprite.spritePointer.set_z_order(1);
 		
 			obj->x = -32;
 			obj->y = -32;

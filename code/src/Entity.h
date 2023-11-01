@@ -720,6 +720,7 @@ public:
 		return bn::optional<Direction>(); 
 	}
 	
+	int interactCount = 0;
 	void interact() override; // spr_textbox_extra
 
 };

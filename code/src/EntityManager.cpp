@@ -12,8 +12,6 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 	LevStatue::rodUses = 0;
 	LevStatue::totalLev = 0;
-	
-	levKill = NULL;
 
 	// delete old data 
 	// conspiricy time, NULL EVERYTHING.
@@ -39,14 +37,13 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		player->rod.clear();
 	}
 	
-	/*
+	
 	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
 		if(*it != NULL) { // sanity check
 			delete *it;
 		}
 		*it = NULL;
 	}
-	*/
 	
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
 		if(*it != NULL) { // sanity check
@@ -66,7 +63,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	enemyList.clear();
 	obstacleList.clear();
 	shadowList.clear();
-	//deadList.clear();
+	deadList.clear();
 	
 	
 	player = NULL;
@@ -634,9 +631,9 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	obstacleList.erase(e);
 	enemyList.erase(e);		
 
-	e->isDead();
-	
-	//deadList.insert(e);
+	// this was legacy, but is now here just to make sure i dont leak memory in rlly stupid ways
+	// and also for EUS STATUES, NOT MODIFYING THE FUCKIN BS IN THE MIDDLE OF A GAMEUPDATE
+	deadList.insert(e);
 	
 	
 	// this initially called on all entities, should it?
@@ -909,7 +906,7 @@ void EntityManager::updateMap() {
 		}
 	}
 	
-	bool hasLevStatue = false;
+	LevStatue* hasLevStatue = NULL;
 	// critical levels of goofyness
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		if((*it)->entityType() == EntityType::MonStatue) { 
@@ -921,17 +918,16 @@ void EntityManager::updateMap() {
 				addKill(*it);
 			}
 		} else if((*it)->entityType() == EntityType::LevStatue) { 
-			hasLevStatue = true;
+			hasLevStatue = static_cast<LevStatue*>(*it);
 		}
 	}
 	
-	if(levKill != NULL) {
+	if(levKill) {
 		BN_LOG("levkill");
-		if(hasLevStatue) {
-			addKill(levKill);
-		} else {
-			levKill = NULL;
+		if(hasLevStatue != NULL) {
+			addKill(hasLevStatue);
 		}
+		levKill = false;
 	}
 	
 	for(int x=0; x<14; x++) {
@@ -948,29 +944,23 @@ void EntityManager::updateMap() {
 
 void EntityManager::doDeaths() {
 	
-	/*
+	
 	if(deadList.size() == 0) {
 		return;
 	}
 	
 	for(auto it = deadList.begin(); it != deadList.end(); ) {
-		(*it)->updatePosition();
-		bool res = (*it)->fallDeath();
 		
-		if(res) {
+		BN_ASSERT(*it != NULL, "a entity in deadlist was null, this should never happen!");
+		
+		(*it)->isDead();
+		
+		Entity* temp = *it;
 			
-			Entity* temp = *it;
-			it = deadList.erase(it);
-			delete temp;
-			
-			continue;
-		}
+		delete temp;
 		
-		++it;
-		
+		it = deadList.erase(it);
 	}
-	
-	*/
 	
 }
 
@@ -1349,14 +1339,14 @@ void EntityManager::rodUse() {
 	BN_LOG(LevStatue::rodUses, " ", LevStatue::totalLev, " ", LevStatue::rodUses != 0);
 	if(!foundLevStatue && temp != NULL) {
 		//addKill(temp);
-		levKill = temp;
+		levKill = true;
 	}
 	
 	// THIS COULD BE VERY BAD IF SOMEONE PUSHES OFF A LEV STATUE WITH ONLY ONE ON SCREEN
 	
 	
 	if(LevStatue::rodUses >= LevStatue::totalLev && LevStatue::rodUses != 0) {
-		levKill = temp;
+		levKill = true;
 	}
 	
 }

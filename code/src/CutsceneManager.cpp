@@ -229,7 +229,8 @@ void CutsceneManager::cifDream() {
 	BN_LOG("cifdream");
 	vBlankFuncs.clear();
 	
-	
+	GameState restoreState = game->state;
+
 
 	if(game->effectsManager.bigSprites[0]->animationIndex != 0) {
 		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better move on]\0", false);
@@ -238,7 +239,7 @@ void CutsceneManager::cifDream() {
 		return;
 	}
 	
-	GameState restoreState = game->state;
+	
 	
 	
 	game->effectsManager.doDialogue(""
@@ -325,6 +326,7 @@ void CutsceneManager::cifDream() {
 	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 1);
 	game->effectsManager.doDialogue("Wake up.\0", true);
 	
+	maps[1]->bgPointer.set_priority(0);
 	effectsManager->effectsLayer.clear();
 	
 	bn::vector<Effect, 16> effects;
@@ -334,33 +336,41 @@ void CutsceneManager::cifDream() {
 	
 	// gml_Object_obj_cifdream_eyecatch_Create_0 contains the spawn indexes. (what is their origin?)
 	Sprite mon(bn::sprite_tiles_items::dw_spr_cdream_mon, bn::sprite_shape_size(64, 32), 37  , 107  );
+	mon.spritePointer.set_bg_priority(2);
 	Sprite bee(bn::sprite_tiles_items::dw_spr_cdream_bee, bn::sprite_shape_size(16, 16), 140 , 32 - 8  );
+	bee.spritePointer.set_bg_priority(2);
 	Sprite gor(bn::sprite_tiles_items::dw_spr_cdream_gor, bn::sprite_shape_size(64, 32), 148 , 127  );
+	gor.spritePointer.set_bg_priority(2);
 	Sprite tan(bn::sprite_tiles_items::dw_spr_cdream_tan, bn::sprite_shape_size(32, 32), 134 , 96   );
+	tan.spritePointer.set_bg_priority(2);
 	Sprite lev(bn::sprite_tiles_items::dw_spr_cdream_lev, bn::sprite_shape_size(32, 32), 32  , 92   );
+	lev.spritePointer.set_bg_priority(2);
 	Sprite cif(bn::sprite_tiles_items::dw_spr_cdream_cif, bn::sprite_shape_size(16, 16), 119 + 2 , 37 - 6   );
-	cif.spritePointer.set_bg_priority(3);
+	cif.spritePointer.set_bg_priority(2);
 	
 	Sprite cifGlow(bn::sprite_tiles_items::dw_spr_soulglow_big, bn::sprite_shape_size(32, 32), 119 + 2 - 6 - 1, 37 - 2 );
 	cifGlow.spritePointer.set_z_order(1);
-	cifGlow.spritePointer.set_bg_priority(3);
+	cifGlow.spritePointer.set_bg_priority(2);
 	
 	
 	// the more that i think of the positions of the lords, the more symbolism i see. its insane. i love this game sm
 	
-	maps[0]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, 1);
+	maps[0]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, 2);
 	maps[0]->bgPointer.set_x(74 + (64 / 2) - 8);
 	maps[0]->bgPointer.set_y(10 + (132 / 2) - 16);
 	
 	// ugh.
 	// the fade in with cif having 2 light levels is, an inconvience. i should just make a palete class, but i would have to rewrite the sprite class as well 
 	// and chnge a ton of shit. this is the best i can do
-	bn::blending::set_transparency_alpha(0.75);
+	//bn::blending::set_transparency_alpha(0.75);
 	
 	auto bgPalette = globalGame->pal->getBGPalette();
 	auto spritePalette = globalGame->pal->getSpritePalette();
+	auto darkSpritePalette = globalGame->pal->getDarkSpritePalette();
 	
 	maps[0]->bgPointer.set_palette(bgPalette.create_palette());
+	cif.spritePointer.set_palette(darkSpritePalette.create_palette());
+	game->doButanoUpdate();
 	cif.spritePointer.set_palette(spritePalette.create_palette());
 	
 	vBlankFuncs.push_back([this, cif, cifGlow, bgPalette]() mutable {
@@ -371,7 +381,10 @@ void CutsceneManager::cifDream() {
 		const static bn::fixed yStart = 10 + (132 / 2) - 16;
 		//static int degree = 0;
 		
-		if(frame % 18 == 0) {
+		// should it be 18 or 11 here?
+		// actually, that vid was 30fps i think,,,,,,,soooo,,
+		
+		if(frame % 20 == 0) {
 			maps[0]->create(*addBackgrounds[addBackgroundsIndex], 1);
 			addBackgroundsIndex = (addBackgroundsIndex + 1) % 4;
 			maps[0]->bgPointer.set_x(x);
@@ -405,7 +418,7 @@ void CutsceneManager::cifDream() {
 			cifGlow.setRawY(37 - 2 + tempDif);
 		} else {
 			floatDir = !floatDir;
-			freezeFrames = 18;
+			freezeFrames = 26; // setting the alarm to 16 seems to be like,, yea
 		}
 		
 		maps[0]->bgPointer.set_y(y);
@@ -413,163 +426,149 @@ void CutsceneManager::cifDream() {
 		return;
 	});
 	
-	// FADE OCCURS HERE TO DELAY THE GLOW FROM PASSING THROUGH IT
-	game->doButanoUpdate();
-	game->fadePalette(0);
-	maps[1]->bgPointer.set_priority(3);
-	
-	// we only do 1-2 here, do 3-4 after the fuckin fuzz spawns
-	game->fadePalette(1);
-	delay(5);
-	game->fadePalette(2);
-	
 	// static vars, declared inside the lambda, dont reset on a second func call?? that is quite weird
-	bool firstRun = true;
-	
-	vBlankFuncs.push_back([this, effects, spritePalette, firstRun]() mutable {
-		
-		auto createEffect = [spritePalette]() -> Effect {
-			
-			auto createFunc = [](Effect* obj) mutable -> void {
-				if(randomGenerator.get() & 1) {
-					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
-				} else {
-					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
-				}
-			
-				obj->sprite.spritePointer.set_tiles(
-					*obj->tiles,
-					0
-				);
-			
-				obj->x = -32;
-				obj->y = -32;
-				obj->sprite.updateRawPosition(obj->x, obj->y);
-			};
-			
-			auto tickFunc = [
-				x = (bn::fixed)-32, 
-				y = (bn::fixed)-32, 
-				image_speed = (bn::fixed)0,
-				y_speedup = randomGenerator.get_int(2, 6 + 1),
-				t = randomGenerator.get_int(0, 180 + 1),
-				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
-				graphicsIndex = (bn::fixed)0,
-				freezeFrames = randomGenerator.get_int(0, 60 + 1),
-				tileSelector = -1,
-				spritePalette
-				](Effect* obj) mutable -> bool {
-				
-				if(y < -16) {
-		
-					tileSelector = randomGenerator.get_int(0, 5);
-					
-					const bn::sprite_tiles_item* spriteTiles[5] = {
-						&bn::sprite_tiles_items::dw_spr_soulglow_big,
-						&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
-						&bn::sprite_tiles_items::dw_spr_soulglow_med,
-						&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
-						&bn::sprite_tiles_items::dw_spr_soulglow_sma,
-					};
-					
-					const bn::sprite_shape_size spriteShapes[5] = {
-						bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
-						bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
-						bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
-						bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
-						bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
-					};
-				
-					obj->tiles = spriteTiles[tileSelector];
-					
-					obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
-				
-					obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 1 : 3);
-					//obj->sprite.spritePointer.set_palette(tileSelector == 0 ? globalGame->pal->getSpritePaletteFade(3, false) : globalGame->pal->getSpritePaletteFade(2, false));
-					obj->sprite.spritePointer.set_palette(spritePalette);
-				
-					obj->sprite.spritePointer.set_blending_enabled(tileSelector != 0);
-						
-					
-					
-					x = randomGenerator.get_int(16 * 14);
-					//y = 16*5+randomGenerator.get_int(16);
-					if(y == -32) {
-						y = randomGenerator.get_int(16 * 9);
-					} else {
-						y = 16 * 10;
-					}
-					
-					image_speed = (bn::fixed)0;
-					y_speedup = 4 + randomGenerator.get_int(2, 6 + 1);
-					t = randomGenerator.get_int(0, 180 + 1);
-					amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
-					//graphicsIndex = (bn::fixed)0;
-					graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 5 + 1);
-					freezeFrames = randomGenerator.get_int(0, 60 + 1);
-					
-					randomGenerator.update();
-				}
-				
-				if(image_speed > 9) {
-					freezeFrames = randomGenerator.get_int(0, 60 + 1);		
-				}
-				
 
-				image_speed += 0.02;
-				//image_speed += 0.20;
-				
-				//y -= (0.1 * y_speedup);
-				y -= (0.095 * y_speedup);
-				
-				t = ((t + 1) % 360);
-				x = (x + (amplitude * sinTable[t]));
-				
-				if(x > 240) {
-					x -= 240;
-				} else if(x < 0) {
-					x += 240;
-				}
+	auto createEffect = [spritePalette, darkSpritePalette]() -> Effect {
+		
+		auto createFunc = [spritePalette, darkSpritePalette](Effect* obj) mutable -> void {
+			if(randomGenerator.get() & 1) {
+				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+				obj->sprite.spritePointer.set_palette(darkSpritePalette);
+			} else {
+				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+				obj->sprite.spritePointer.set_palette(spritePalette);
+			}
+		
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				0
+			);
+		
+			obj->x = -32;
+			obj->y = -32;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
 			
-				BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
-				
-				graphicsIndex += image_speed / 60;
-				if(freezeFrames == 0) {
-					obj->sprite.spritePointer.set_tiles(
-						*obj->tiles,
-						graphicsIndex.integer() % 5
-					);
-				} else {
-					freezeFrames--;
-				}
-			
-				obj->x = x.integer();
-				obj->y = y.integer();
-				obj->sprite.updateRawPosition(obj->x, obj->y);
-				
-				return false;
-			};
-			
-			return Effect(createFunc, tickFunc);
 		};
 		
-		
-		
-		//static bool firstRun = true;
-		
-		if(firstRun) {
+		auto tickFunc = [
+			x = (bn::fixed)-32, 
+			y = (bn::fixed)-32, 
+			image_speed = (bn::fixed)0,
+			y_speedup = randomGenerator.get_int(2, 6 + 1),
+			t = randomGenerator.get_int(0, 180 + 1),
+			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
+			graphicsIndex = (bn::fixed)0,
+			freezeFrames = randomGenerator.get_int(0, 60 + 1),
+			tileSelector = -1,
+			spritePalette,
+			darkSpritePalette
+			](Effect* obj) mutable -> bool {
 			
-			firstRun = false;
+			if(y < -16) {
+	
+				tileSelector = randomGenerator.get_int(0, 5);
+				
+				const bn::sprite_tiles_item* spriteTiles[5] = {
+					&bn::sprite_tiles_items::dw_spr_soulglow_big,
+					&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
+					&bn::sprite_tiles_items::dw_spr_soulglow_med,
+					&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
+					&bn::sprite_tiles_items::dw_spr_soulglow_sma,
+				};
+				
+				const bn::sprite_shape_size spriteShapes[5] = {
+					bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
+				};
 			
-			BN_LOG("bruh, ", effects.size(), " ", effects.max_size());
+				obj->tiles = spriteTiles[tileSelector];
+				
+				obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
 			
-			while(effects.size() != effects.max_size()) {
-				effects.push_back(createEffect());
+				obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 1 : 3);
+				//obj->sprite.spritePointer.set_palette(tileSelector == 0 ? globalGame->pal->getSpritePaletteFade(3, false) : globalGame->pal->getSpritePaletteFade(2, false));
+				//obj->sprite.spritePointer.set_palette(spritePalette);
+			
+				obj->sprite.spritePointer.set_palette(tileSelector != 0 ? darkSpritePalette : spritePalette);
+			
+				//obj->sprite.spritePointer.set_blending_enabled(tileSelector != 0);
+					
+				
+				
+				x = randomGenerator.get_int(16 * 14);
+				//y = 16*5+randomGenerator.get_int(16);
+				if(y == -32) {
+					y = randomGenerator.get_int(16 * 9);
+				} else {
+					y = 16 * 10;
+				}
+				
+				image_speed = (bn::fixed)0;
+				y_speedup = 4 + randomGenerator.get_int(2, 6 + 1);
+				t = randomGenerator.get_int(0, 180 + 1);
+				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
+				//graphicsIndex = (bn::fixed)0;
+				graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 5 + 1);
+				freezeFrames = randomGenerator.get_int(0, 60 + 1);
+				
+				randomGenerator.update();
 			}
 			
-			return;
-		}
+			if(image_speed > 9) {
+				freezeFrames = randomGenerator.get_int(0, 60 + 1);		
+			}
+			
+
+			image_speed += 0.02;
+			//image_speed += 0.20;
+			
+			//y -= (0.1 * y_speedup);
+			y -= (0.095 * y_speedup);
+			
+			t = ((t + 1) % 360);
+			x = (x + (amplitude * sinTable[t]));
+			
+			if(x > 240) {
+				x -= 240;
+			} else if(x < 0) {
+				x += 240;
+			}
 		
+			BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
+			
+			graphicsIndex += image_speed / 60;
+			if(freezeFrames == 0) {
+				obj->sprite.spritePointer.set_tiles(
+					*obj->tiles,
+					graphicsIndex.integer() % 5
+				);
+			} else {
+				freezeFrames--;
+			}
+		
+			obj->x = x.integer();
+			obj->y = y.integer();
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			return false;
+		};
+		
+		return Effect(createFunc, tickFunc);
+	};
+	
+	while(effects.size() != effects.max_size()) {
+		effects.push_back(createEffect());
+	}
+	
+	// init all the effects such that the palete table wont be moving
+	for(int i=0; i<effects.size(); i++) {
+		effects[i].animate();
+	}
+			
+	vBlankFuncs.push_back([this, effects, spritePalette, darkSpritePalette]() mutable {
 		
 		for(int i=0; i<effects.size(); i++) {
 			effects[i].animate();
@@ -596,6 +595,15 @@ void CutsceneManager::cifDream() {
 	// ugh 
 	// 
 	
+	// FADE OCCURS HERE TO DELAY THE GLOW FROM PASSING THROUGH IT
+	game->doButanoUpdate();
+	game->fadePalette(0);
+	game->doButanoUpdate();
+	game->fadePalette(1);
+	game->doButanoUpdate();
+	maps[1]->bgPointer.set_priority(3);
+	delay(5);
+	game->fadePalette(2);
 	delay(5);
 	game->fadePalette(3);
 	delay(5);

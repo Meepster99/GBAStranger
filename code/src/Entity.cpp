@@ -462,6 +462,31 @@ void Chest::interact() {
 		}
 	}
 	
+	interactCount++;
+	
+	if(game->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+		// shortcut chest;
+		
+		switch(interactCount) {
+			case 1:
+				effectsManager->doDialogue("It's empty\0");
+				break;
+			case 2:
+				effectsManager->doDialogue("It's empty\0");
+				break;
+			case 3:
+				effectsManager->doDialogue("It's empty\0");
+				break;
+			default:
+				effectsManager->doDialogue("?? ??? ?\0");
+				entityManager->addKill(NULL);
+				tileManager->exitDestination = "rm_mon_shortcut_003\0";
+				break;
+		}
+		
+		return;
+	}
+	
 	if(animationIndex == 0) {
 		animationIndex = 1;
 	
@@ -508,7 +533,11 @@ const MessageStr randomBoulderMessages[] = {
 void Boulder::interact() {
 	
 	static int lastIndex = -1;
+	
 	int index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
+	if(game->roomManager.roomIndex  == 3 && lastIndex == -1) {
+		index = 8;
+	}
 	
 	while(lastIndex == index) {
 		index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
@@ -571,7 +600,7 @@ void LevStatue::isDead() {
 	
 
 	if(rodUses != 0 && rodUses >= totalLev) {
-		entityManager->levKill = this;
+		entityManager->levKill = true;
 	}
 	
 }

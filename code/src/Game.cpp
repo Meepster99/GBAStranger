@@ -124,8 +124,26 @@ void Game::findNextRoom() {
 				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this shit
 				// but does this update the save file?
 			}
-			
 		}
+		
+		
+		if(roomManager.roomIndex == 131) {
+			// check for the goofy ahh no glass shortcut
+			bool foundGlass = false;
+			for(int x=0; x<14; x++) {
+				for(int y=0; y<9; y++) {
+					if(tileManager.hasFloor(x, y) == TileType::Glass) {
+						foundGlass = true;
+						break;
+					}
+				}
+			}
+			
+			if(!foundGlass) {
+				roomManager.gotoRoom("rm_mon_shortcut_004");
+			}
+		}
+		
 	}
 
 	if(tileManager.secretDestinations.size() != 0) {

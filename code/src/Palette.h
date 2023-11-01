@@ -110,6 +110,18 @@ public:
 		}
 	}
 	
+	const bn::sprite_palette_item getDarkSpritePalette() {
+		
+		tempColorArray[BLACK] = colorArray[BLACK];
+		tempColorArray[DARKGRAY] = colorArray[BLACK];
+		tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
+		tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
+
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+	}
+	
 	const bn::bg_palette_item getBGPaletteFade(int index = -1, bool toWhite = true) {
 		(void)index;
 
