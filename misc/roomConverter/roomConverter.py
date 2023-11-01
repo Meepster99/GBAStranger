@@ -2299,6 +2299,7 @@ def convertAllRoomsWorker(f, isHardModePass):
 		jsonFiles = [ file for file in jsonFiles if removeStr not in file ]
 	
 	jsonFiles.append("rm_test_0006.json")
+	jsonFiles.append("rm_rm4.json")
 	
 	#jsonFiles = ["rm_0005.json"]
 	#jsonFiles = ["rm_0027.json"]

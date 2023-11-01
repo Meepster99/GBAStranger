@@ -127,6 +127,7 @@ public:
 		// goofy
 		tileManager.entityManager = &entityManager;
 		tileManager.effectsManager = &effectsManager;
+		tileManager.cutsceneManager = &cutsceneManager;
 		
 		Entity::entityManager = &entityManager;
 		Entity::effectsManager = &effectsManager;

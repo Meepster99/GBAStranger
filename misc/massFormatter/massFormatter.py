@@ -780,11 +780,23 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 			if tempName in blackBackgroundNames:
 				cyan_background = Image.new("RGBA", (w, h), (0, 0, 0, 255))
 		
+		
+			
+		# these are a special case, need to be flipped
+		if "spr_lordborders" in spriteName:
+			
+			mirrored_image = Image.new("RGBA", cyan_background.size)
+			mirrored_image.paste(image, (0, 0))
+			mirrored_image.paste(image.transpose(Image.FLIP_LEFT_RIGHT), (224-max_width, 0))
+		
+			image = mirrored_image
+		
 		cyan_background.paste(image, (0, 0), image)
 	
 		cyan_background = cyan_background.convert("RGB")
 		#tempImage = np.array(cyan_background)
 
+		
 		
 		#print("youre gonna have a bad time")
 		
@@ -1490,7 +1502,7 @@ def main():
 	#convertAllBigSprite("./formattedOutput/bigSprites/")
 	
 	
-	#genSprite("dw_spr_vd_gray_index0", True)
+	#genSprite("dw_spr_lordborders_index0", True)
 	#exit(1)
 	
 	

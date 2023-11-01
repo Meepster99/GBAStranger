@@ -6,6 +6,7 @@
 class Game;
 class EffectsManager;
 class EntityManager;
+class CutsceneManager;
 
 class Floor : public Layer {
 public: 
@@ -80,6 +81,7 @@ public:
 	
 	EntityManager* entityManager;
 	EffectsManager* effectsManager;
+	CutsceneManager* cutsceneManager;
 	
 	// goofy, but will work
 	// should i instead pass the entity* into here so that death tiles can properly kill?
@@ -116,6 +118,8 @@ public:
 	
 	void stepOff(Pos p);
 	void stepOn(Pos p);
+	
+	const char* checkBrand();
 	
 	bool hasCollision(const Pos& p);
 	

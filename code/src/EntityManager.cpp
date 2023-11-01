@@ -1335,8 +1335,8 @@ void EntityManager::rodUse() {
 		}
 	}
 	
-	BN_LOG(!foundLevStatue, " ", temp != NULL);
-	BN_LOG(LevStatue::rodUses, " ", LevStatue::totalLev, " ", LevStatue::rodUses != 0);
+	//BN_LOG(!foundLevStatue, " ", temp != NULL);
+	//BN_LOG(LevStatue::rodUses, " ", LevStatue::totalLev, " ", LevStatue::rodUses != 0);
 	if(!foundLevStatue && temp != NULL) {
 		//addKill(temp);
 		levKill = true;

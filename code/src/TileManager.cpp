@@ -198,6 +198,118 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	
 }
 
+const char* TileManager::checkBrand() {
+	
+	switch(game->roomManager.roomIndex) {
+		case 23: 
+		case 53: 
+		case 67:
+		case 89:
+		case 137:
+		case 157:
+		case 179:
+		case 223:
+		case 227:
+		
+			break;
+		default:
+			return NULL;
+			break;
+	}
+	
+	if(!entityManager->player->inRod(exitTile)) {
+		// if the player doesnt have the exit tile, return
+		cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+		return NULL;
+	}
+	
+	
+	// should this variable be kept update whenever updatetile is called as to not be expensive?
+	// what datatype is the least expensive for this?
+	unsigned roomState[6] = {0, 0, 0, 0, 0, 0};
+	
+	
+	for(int y=1; y<=6; y++) {
+		unsigned temp = 0;
+		for(int x=4; x<=9; x++) {
+			temp = ((temp << 1) | !!hasFloor(x, y));
+		}
+		roomState[y-1] = temp;
+	}
+	
+	// doing this equality check in the above for loop would save computation
+	constexpr unsigned addBrand[6] = {0b100001, 0b000110, 0b011111, 0b111110, 0b011000, 0b100001};
+	constexpr unsigned eusBrand[6] = {0b110011, 0b001100, 0b110001, 0b111011, 0b110111, 0b110011};
+	constexpr unsigned beeBrand[6] = {0b000001, 0b001100, 0b111001, 0b100111, 0b110011, 0b111001};
+	constexpr unsigned monBrand[6] = {0b100011, 0b011101, 0b110011, 0b011101, 0b100011, 0b111000};
+	constexpr unsigned tanBrand[6] = {0b101101, 0b001100, 0b101101, 0b110011, 0b101101, 0b110011};
+	constexpr unsigned gorBrand[6] = {0b001100, 0b001100, 0b100100, 0b110001, 0b111100, 0b111100};
+	constexpr unsigned levBrand[6] = {0b100011, 0b001111, 0b100100, 0b001100, 0b000001, 0b110011};
+	constexpr unsigned cifBrand[6] = {0b110001, 0b010101, 0b010010, 0b101000, 0b100100, 0b110001};
+	
+	constexpr unsigned disBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
+	
+	// load from save in future, also display this brand in the pause menu
+	// rm_rm4
+	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
+	
+	
+	const unsigned* allBrands[10] = {addBrand, eusBrand, beeBrand, monBrand, tanBrand, gorBrand, levBrand, cifBrand, disBrand, playerBrand};
+	
+	const char* destinations[] = {"rm_secret_001", "rm_secret_002", "rm_secret_003", "rm_secret_004", "rm_secret_005", "rm_secret_006", "rm_secret_007", "rm_secret_008", "rm_e_intermission", "rm_rm4"};
+	unsigned matches[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	// spr_lordborders
+	
+	for(unsigned i=0; i<sizeof(allBrands) / sizeof(allBrands[0]); i++) {
+		for(int j=0; j<6; j++) {
+			if(roomState[j] == allBrands[i][j]) {
+				matches[i]++;
+			}
+		}
+	}
+	
+	//BN_LOG(matches[0], matches[1], matches[2], matches[3], matches[4], matches[5], matches[6], matches[7], matches[8], matches[9]);
+	
+	int matchIndex = -1;
+	for(unsigned i=0; i<sizeof(matches) / sizeof(matches[0]); i++) {
+		if(matches[i] == 6) {
+			matchIndex = i;
+			break;
+		}
+	}
+	
+	
+	
+	const bn::regular_bg_item* lordBackgrounds[8] = {
+	&bn::regular_bg_items::dw_spr_lordborders_index0,
+	&bn::regular_bg_items::dw_spr_lordborders_index1,
+	&bn::regular_bg_items::dw_spr_lordborders_index2,
+	&bn::regular_bg_items::dw_spr_lordborders_index3,
+	&bn::regular_bg_items::dw_spr_lordborders_index4,
+	&bn::regular_bg_items::dw_spr_lordborders_index5,
+	&bn::regular_bg_items::dw_spr_lordborders_index6,
+	&bn::regular_bg_items::dw_spr_lordborders_index7
+	};
+	
+	if(matchIndex != -1) {
+	
+		if(matchIndex < 8) {
+			cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex]);
+		} else {
+			cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+		}
+	
+		
+		
+		
+	
+		return destinations[matchIndex];
+	}
+	cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	
+	return NULL;
+}
+
 // ----- 
 
 void TileManager::doFloorSteps() { 
@@ -266,39 +378,6 @@ void TileManager::doFloorSteps() {
 	stepOffs.clear();
 	floorSteps.clear();
 	
-
-	// this code is not efficient
-	// TODO:refactor it so that tiles can kill entities!
-	// for now, im just going to have death tiles not work, as im on a trail lol
-	/*
-	// this code was causing HORRID slowdown.
-	// but why?
-	
-	=// it would be ideal for me to pass the entity to the tile step func tbh, to do kills
-	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			if(!hasFloor(Pos(x, y))) {
-				continue;
-			}
-	
-			switch(hasFloor(Pos(x, y)).value()) {
-				case TileType::Death:
-					for(auto it = entityManager->getMap(Pos(x, y)).begin(); it != entityManager->getMap(Pos(x, y)).end(); ) {
-						if((*it)->entityType() == EntityType::Player) {
-							entityManager->addKill(*it); 
-							++it;
-						} else {
-							it = entityManager->killEntity(*it);
-						}
-					}
-					break;
-				default:
-					break;
-			}
-		}
-	}
-	*/
-	
 	if(hasFloor(entityManager->player->p) == TileType::Exit && Switch::pressedCount == Switch::totalCount) {
 		entityManager->addKill(NULL);
 	}
@@ -306,7 +385,11 @@ void TileManager::doFloorSteps() {
 	
 	// this does not need to be called every time
 	// if it causes slowdown, fix it
+	// this rlly should just call,,,, updatetile,, i think?
 	floorLayer.reloadCells();
+	
+	// calling this here may be excessive!
+	checkBrand();
 }
 
 void TileManager::updateTile(const Pos& p) { 

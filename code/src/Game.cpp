@@ -126,25 +126,46 @@ void Game::findNextRoom() {
 			}
 		}
 		
-		
-		if(roomManager.roomIndex == 131) {
-			// check for the goofy ahh no glass shortcut
-			bool foundGlass = false;
-			for(int x=0; x<14; x++) {
-				for(int y=0; y<9; y++) {
-					if(tileManager.hasFloor(x, y) == TileType::Glass) {
-						foundGlass = true;
-						break;
+		bool foundGlass = false;
+		const char* res = NULL;
+		switch(roomManager.roomIndex) {
+			case 131: // glass break room
+				// check for the goofy ahh no glass shortcut
+				
+				for(int x=0; x<14; x++) {
+					for(int y=0; y<9; y++) {
+						if(tileManager.hasFloor(x, y) == TileType::Glass) {
+							foundGlass = true;
+							break;
+						}
 					}
 				}
-			}
-			
-			if(!foundGlass) {
-				roomManager.gotoRoom("rm_mon_shortcut_004");
-			}
+				
+				if(!foundGlass) {
+					roomManager.gotoRoom("rm_mon_shortcut_004");
+				}
+				break;
+			case 23: 
+			case 53: 
+			case 67:
+			case 89:
+			case 137:
+			case 157:
+			case 179:
+			case 223:
+			case 227:
+				res = tileManager.checkBrand();
+				
+				if(res != NULL) {
+					roomManager.gotoRoom(res);
+				}
+				
+				break;
+			default:
+				break;
 		}
-		
 	}
+	
 
 	if(tileManager.secretDestinations.size() != 0) {
 		for(int i=0; i<tileManager.secretDestinations.size(); i++) {
@@ -181,6 +202,9 @@ void Game::resetRoom(bool debug) {
 
 	state = GameState::Loading;
 	save();
+	
+	// this hopefully wont slow down debug moving much
+	cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 	
 	loadLevel(debug);
 	if(!debug) {

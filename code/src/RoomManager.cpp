@@ -27,7 +27,7 @@ const char* RoomManager::currentRoomName() {
 }
 
 void RoomManager::nextRoom() {
-	if(roomIndex + 1 < (int)(sizeof(rooms)/sizeof(rooms[0]))) {
+	if(roomIndex + 1 < (int)(sizeof(rooms)/sizeof(rooms[0])) - 1) {
 		roomIndex++;
 		BN_LOG("roomIndex incremented to ", roomIndex);
 	}
