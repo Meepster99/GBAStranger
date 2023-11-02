@@ -53,6 +53,8 @@ public:
 	
 	void cifDream();
 	
+	void brandInput();
+	
 	
 private:
 	

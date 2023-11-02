@@ -671,20 +671,31 @@ void Game::run() {
 	load();
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 	
-
-	//auto old effectsManager.effectsLayer.rawMap.bgPointer
-
-
 	bn::core::set_vblank_callback(didVBlank);
 	
 	bn::timer inputTimer;
 	
 	state = GameState::Loading;
 	
+	
+	bool brandBlank = true;
+	for(int i=0; i<6; i++) {
+		if(tileManager.playerBrand[i] != 0) {
+			brandBlank = false;
+			break;
+		}
+	}
+	
+	if(brandBlank) {
+		cutsceneManager.brandInput();
+	}
+	
 	//while(true) { bn::core::update(); }
 	
 	loadLevel();
 	fullDraw();
+	
+	save();
 	
 	state = GameState::Normal;
 	
@@ -809,6 +820,11 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.hasSword;
 	rotateHash(1);
 	
+	for(int i=0; i<6; i++) {
+		hash ^= saveData.playerBrand[i];
+		rotateHash(sizeof(saveData.playerBrand[i]) * 8);
+	}
+	
 	return hash;
 }
 
@@ -830,6 +846,10 @@ void Game::save() {
 	
 	saveData.hasRod = entityManager.player->hasRod;
 	saveData.hasSuperRod = entityManager.player->hasSuperRod;
+	
+	for(int i=0; i<6; i++) {
+		saveData.playerBrand[i] = tileManager.playerBrand[i];
+	}
 	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);
@@ -856,6 +876,11 @@ void Game::load() {
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
 	roomManager.setMode(mode);
+	
+	for(int i=0; i<6; i++) {
+		tileManager.playerBrand[i] = saveData.playerBrand[i];
+	}
+	
 }
 
 void Game::playSound(const bn::sound_item* sound) {

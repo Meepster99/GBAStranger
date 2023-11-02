@@ -334,6 +334,7 @@ public:
 	void hideForDialogueBox(bool vis, bool isCutscene);
 	void doDialogue(const char* data, bool isCutscene = false);
 	
+	void setBrandColor(int x, int y, bool isTile);
 	void doMenu();
 	
 	bool restRequest();
@@ -346,6 +347,7 @@ public:
 	void sword(Pos p, Direction dir);
 	void monLightning(Pos p, Direction dir);
 	void sparkle(Pos p, int sparkleLength = 8);
+	Effect* getRoomDustEffect(bool isCutscene = false);
 	void roomDust();
 	void entityFall(Entity* e);
 	

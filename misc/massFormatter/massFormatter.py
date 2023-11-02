@@ -520,8 +520,7 @@ def convertTiles(outputPath):
 	}
 	with open(os.path.join(outputPath, "dw_" + "default_sprite_64" + ".json"), "w") as f:
 		json.dump(outputJson, f)
-	
-	
+
 	
 	print("done converting tiles")
 	pass
@@ -790,6 +789,16 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 			mirrored_image.paste(image.transpose(Image.FLIP_LEFT_RIGHT), (224-max_width, 0))
 		
 			image = mirrored_image
+			
+		if "spr_puumerkki_bigframe" in spriteName:
+		
+			#tempArray = np.array(image.resize((128+8, 128+8)))
+			#tempImage = Image.fromarray(tempArray, Image.NEAREST)
+		
+			#image = image.resize((128+8, 128+8), Image.NEAREST)
+			
+			pass
+			
 		
 		cyan_background.paste(image, (0, 0), image)
 	
@@ -1502,7 +1511,7 @@ def main():
 	#convertAllBigSprite("./formattedOutput/bigSprites/")
 	
 	
-	#genSprite("dw_spr_lordborders_index0", True)
+	#genSprite("dw_spr_puumerkki_bigframe_index0", True)
 	#exit(1)
 	
 	

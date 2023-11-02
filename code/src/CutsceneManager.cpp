@@ -686,6 +686,304 @@ void CutsceneManager::cifDream() {
 	
 }
 
+void CutsceneManager::brandInput() {
+	
+	vBlankFuncs.clear();
+	
+	GameState restoreState = game->state;
+	game->state = GameState::Cutscene;
+
+	maps[2]->bgPointer.set_priority(3);
+	
+	backupAllButEffects();
+	
+	Sprite* brandState[6][6];
+	
+    for(int i=0; i<6; i++) {
+        for (int j=0; j<6; j++) {
+            brandState[i][j] = NULL;
+        }
+    }
+	
+	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 3);
+	
+	// this bg is scaled up ingame. 
+	// i should/would/could, use an affine bg, but id rather die than go an interact with more of 
+	// the butano backend at this point. 
+	// probs just going to scale it up in the formatter.
+	// sprites can already scale, so that wont be a problem
+	maps[3]->create(bn::regular_bg_items::dw_spr_puumerkki_bigframe_index0, 2);
+	// why does setting x to 0 actually set the offset to 8 ingame?
+	maps[3]->bgPointer.set_x((bn::fixed)(128/2));
+	maps[3]->bgPointer.set_y((bn::fixed)(3*16) + 8);
+	
+	// lots of assets seem to be under "puumerkki"
+	
+	Sprite cursor(bn::sprite_tiles_items::dw_spr_puumerkki_kursori, bn::sprite_shape_size(32, 32));
+	
+	Pos cursorPos(4, 1);
+	cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
+	cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
+	cursor.spritePointer.set_bg_priority(0);
+	
+	//Sprite allDoneSprite(bn::sprite_tiles_items::dw_spr_puumerkki);
+	//allDoneSprite.spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_puumerkki, 1);
+	Sprite allDoneSprite(bn::sprite_items::dw_default_sprite_64);
+	Sprite allDoneSpriteLeft(bn::sprite_items::dw_default_sprite_64);
+	Sprite allDoneSpriteRight(bn::sprite_items::dw_default_sprite_64);
+	
+	// i did not know i could inline shit like this
+	// annoying i couldnt do it with refs tho
+	for(Sprite* sprite : {&allDoneSprite, &allDoneSpriteLeft, &allDoneSpriteRight}) {
+		sprite->spritePointer.set_palette(game->pal->getLightGraySpritePalette());
+		sprite->spritePointer.set_bg_priority(1);
+		sprite->spritePointer.set_y(64);
+		sprite->spritePointer.set_vertical_scale((bn::fixed)0.25);
+		sprite->setVisible(false);
+	}
+	
+	allDoneSpriteLeft.spritePointer.set_horizontal_scale(2);
+	allDoneSpriteRight.spritePointer.set_horizontal_scale(2);
+	
+	//allDoneSprite.spritePointer.set_mosaic_enabled(true);
+	
+	int allDoneSpriteWidth = 0;
+	
+	bn::vector<Effect*, 16> effects;
+	while(effects.size() != effects.max_size()) {
+		effects.push_back(effectsManager->getRoomDustEffect(true));
+	}
+	
+	// init all the effects such that the palete table wont be moving
+	for(int i=0; i<effects.size(); i++) {
+		effects[i]->animate();
+	}
+			
+	vBlankFuncs.push_back([this, effects]() mutable {
+		
+		for(int i=0; i<effects.size(); i++) {
+			effects[i]->animate();
+		}
+
+		return;
+	});
+	
+	bn::sprite_text_generator textGenerator(dw_fnt_text_12_sprite_font);
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
+	textGenerator.set_center_alignment();
+	textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("Engrave your brand.\0"), textSprites);
+	for(int i=0; i<textSprites.size(); i++) {
+		textSprites[i].set_palette(game->pal->getSpritePalette());
+		textSprites[i].set_bg_priority(0);
+	}
+	
+	bn::timer inputTimer;
+	
+	// yandere dev ass code
+	
+	retryBrand:
+	
+	allDoneSprite.setVisible(false);
+	allDoneSpriteLeft.setVisible(false);
+	allDoneSpriteRight.setVisible(false);
+	allDoneSpriteWidth = 0;
+	cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
+	cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
+	cursor.setVisible(true);
+	
+	bool allDone = false;
+	while(true) {
+		
+		if(allDone && bn::keypad::a_held()) {
+			allDoneSpriteWidth++;
+		} else if(allDoneSpriteWidth > 0) {
+			allDoneSpriteWidth--;
+		}
+			
+		if(allDoneSpriteWidth > 0) {
+			allDoneSprite.setVisible(true);
+			if(allDoneSpriteWidth >= 20) {
+				allDoneSpriteLeft.setVisible(true);
+				allDoneSpriteRight.setVisible(true);
+				int val = 2 *(allDoneSpriteWidth-20);
+				allDoneSpriteRight.spritePointer.set_x(val);
+				allDoneSpriteLeft.spritePointer.set_x(-val);
+			} else {
+				allDoneSpriteLeft.setVisible(false);
+				allDoneSpriteRight.setVisible(false);
+			}
+			allDoneSprite.spritePointer.set_horizontal_scale((bn::fixed)allDoneSpriteWidth / 10);		
+		} else {
+			allDoneSprite.setVisible(false);
+			allDoneSpriteLeft.setVisible(false);
+			allDoneSpriteRight.setVisible(false);
+		}
+		
+		if(allDoneSpriteWidth >= 50) {
+			// kachow;
+			break;
+		}
+			
+		
+		
+		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
+			inputTimer.restart();
+			if(allDone) {
+		
+				if(bn::keypad::up_pressed()) {
+					cursorPos.move(Direction::Up);
+					cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
+					cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
+					allDone = false;
+					
+					textSprites.clear();
+					textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("Engrave your brand.\0"), textSprites);
+					for(int i=0; i<textSprites.size(); i++) {
+						textSprites[i].set_palette(game->pal->getSpritePalette());
+						textSprites[i].set_bg_priority(0);
+					}
+					cursor.setVisible(true);
+				}
+			} else {
+
+				if(bn::keypad::up_pressed()) {
+					cursorPos.move(Direction::Up);
+				} else if(bn::keypad::down_pressed()) {
+					cursorPos.move(Direction::Down);
+				} else if(bn::keypad::left_pressed()) {
+					cursorPos.move(Direction::Left);
+				} else if(bn::keypad::right_pressed()) {
+					cursorPos.move(Direction::Right);
+				}
+				
+				if(cursorPos.y == 1+6) {
+				
+					allDone = true;
+					
+					textSprites.clear();
+					textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("All done?\0"), textSprites);
+					for(int i=0; i<textSprites.size(); i++) {
+						textSprites[i].set_palette(game->pal->getSpritePalette());
+						textSprites[i].set_bg_priority(0);
+					}
+					
+					cursor.setVisible(false);
+					
+					continue;
+				}
+				
+				//cursorPos.x = CLAMP(cursorPos.x, 4, 4+6-1);
+				//cursorPos.y = CLAMP(cursorPos.y, 1, 1+6-1);
+				if(cursorPos.x < 4) {
+					cursorPos.x = 4+6-1;
+				} else if(cursorPos.x > 4+6-1) {
+					cursorPos.x = 4;
+				}
+				
+				if(cursorPos.y < 1) {
+					cursorPos.y = 1+6-1;
+				} else if(cursorPos.y > 1+6-1) {
+					cursorPos.y = 1;
+				}
+				
+				
+				if(bn::keypad::a_pressed()) {
+					
+					int xIndex = cursorPos.x - 4;
+					int yIndex = cursorPos.y - 1;
+					
+					if(brandState[xIndex][yIndex] != NULL) {
+						brandState[xIndex][yIndex]->setVisible(false);
+						delete brandState[xIndex][yIndex];
+						brandState[xIndex][yIndex] = NULL;
+					} else {
+						brandState[xIndex][yIndex] = new Sprite(bn::sprite_tiles_items::dw_spr_puumerkki);
+						brandState[xIndex][yIndex]->spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_puumerkki, 1);
+						//brandState[xIndex][yIndex]->updatePosition(cursorPos);
+						brandState[xIndex][yIndex]->spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16);
+						brandState[xIndex][yIndex]->spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16);
+						brandState[xIndex][yIndex]->setVisible(true);
+					}
+				}
+				
+				cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
+				cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
+				
+			}
+		}
+		
+		game->doButanoUpdate();
+	}
+	
+	unsigned tempBrand[6] = {0, 0, 0, 0, 0, 0};
+	
+	for (int j=0; j<6; j++) {
+		unsigned temp = 0;
+		for(int i=0; i<6; i++) {
+			temp = ((temp << 1) | !!(brandState[i][j] != NULL));
+		}
+		tempBrand[j] = temp;
+	}
+	
+	if(game->tileManager.checkBrandIndex(tempBrand) != -1) {
+		cursorPos.move(Direction::Up);
+		goto retryBrand;
+	}
+	
+	textSprites.clear();
+	textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("So be it!\0"), textSprites);
+	for(int i=0; i<textSprites.size(); i++) {
+		textSprites[i].set_palette(game->pal->getSpritePalette());
+		textSprites[i].set_bg_priority(0);
+	}
+	
+	
+	const bn::sprite_palette_ptr tempPalettes[3] = {
+	game->pal->getWhiteSpritePalette().create_palette(),
+	game->pal->getBlackSpritePalette().create_palette(),
+	game->pal->getDarkGraySpritePalette().create_palette()};
+	
+	
+	for(int i=0; i<30; i++) {		
+
+		for(int j=0; j<textSprites.size(); j++) {
+			textSprites[j].set_palette(tempPalettes[i % 3]);
+		}
+		
+		for(int j=0; j<2; j++) {
+			game->doButanoUpdate();
+		}
+	}
+	
+	for(int i=0; i<6; i++) {
+		game->tileManager.playerBrand[i] = tempBrand[i];
+	}
+	
+	for(int i=0; i<6; i++) {
+		for (int j=0; j<6; j++) {
+			if(brandState[i][j] != NULL) {
+				delete brandState[i][j];
+				brandState[i][j] = NULL;
+			}
+		}
+	}
+	
+	for(int i=0; i<effects.size(); i++) {
+		delete effects[i];
+	}
+
+	cursor.setVisible(false);
+	
+	//allDoneSprite.spritePointer.set_mosaic_enabled(false); // almost 100% def not actually needed, but this project has driven me insane
+	// if this flag isnt cleared and then would cause issues in the future like, yea 
+	// and i would prefer to not have to reset this flag on every sprite init(altho that wouldnt be to expensive)
+	
+	restoreAllButEffects();
+	maps[2]->bgPointer.set_priority(0);
+
+	game->state = restoreState;
+}
+
 // -----
 
 void CutsceneManager::freeLayer(int i) {

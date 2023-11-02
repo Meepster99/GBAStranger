@@ -41,7 +41,6 @@ public:
 			
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
-	
 
 	void modifyTempColors(int index, bool toWhite) {
 		tempColorArray[BLACK] = colorArray[BLACK];
@@ -116,6 +115,54 @@ public:
 		tempColorArray[DARKGRAY] = colorArray[BLACK];
 		tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
 		tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
+
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+	}
+	
+	const bn::sprite_palette_item getLightGraySpritePalette() {
+		
+		tempColorArray[BLACK] = colorArray[LIGHTGRAY];
+		tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
+		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
+		tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
+
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+	}
+	
+	const bn::sprite_palette_item getWhiteSpritePalette() {
+		
+		tempColorArray[BLACK] = colorArray[WHITE];
+		tempColorArray[DARKGRAY] = colorArray[WHITE];
+		tempColorArray[LIGHTGRAY] = colorArray[WHITE];
+		tempColorArray[WHITE] = colorArray[WHITE];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
+
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+	}
+	
+	const bn::sprite_palette_item getDarkGraySpritePalette() {
+		
+		tempColorArray[BLACK] = colorArray[DARKGRAY];
+		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
+		tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
+		tempColorArray[WHITE] = colorArray[DARKGRAY];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
+
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+	}
+	
+	const bn::sprite_palette_item getBlackSpritePalette() {
+		
+		tempColorArray[BLACK] = colorArray[BLACK];
+		tempColorArray[DARKGRAY] = colorArray[BLACK];
+		tempColorArray[LIGHTGRAY] = colorArray[BLACK];
+		tempColorArray[WHITE] = colorArray[BLACK];
 		
 		bn::span<bn::color> spanthing(tempColorArray);
 

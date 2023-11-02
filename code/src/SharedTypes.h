@@ -38,6 +38,7 @@
 #include "bn_random.h"
 #include "bn_sram.h"
 
+#include "bn_sprites_mosaic.h"
 
 
 // danger zone, again 
@@ -68,7 +69,7 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
-
+#define CLAMP(value, min_val, max_val) MAX(MIN((value), (max_val)), (min_val))
 
 typedef unsigned char u8;
 

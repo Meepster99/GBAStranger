@@ -198,6 +198,32 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	
 }
 
+int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
+	
+	int matchIndex = -1;
+	
+	unsigned matches[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	// spr_lordborders
+	
+	// doing this equality check in the above for loop would save computation
+	for(unsigned i=0; i<sizeof(allBrands) / sizeof(allBrands[0]); i++) {
+		for(int j=0; j<6; j++) {
+			if(testBrand[j] == allBrands[i][j]) {
+				matches[i]++;
+			}
+		}
+	}
+	
+	for(unsigned i=0; i<sizeof(matches) / sizeof(matches[0]); i++) {
+		if(matches[i] == 6) {
+			matchIndex = i;
+			break;
+		}
+	}
+
+	return matchIndex;
+}
+
 const char* TileManager::checkBrand() {
 	
 	switch(game->roomManager.roomIndex) {
@@ -237,46 +263,12 @@ const char* TileManager::checkBrand() {
 		roomState[y-1] = temp;
 	}
 	
-	// doing this equality check in the above for loop would save computation
-	constexpr unsigned addBrand[6] = {0b100001, 0b000110, 0b011111, 0b111110, 0b011000, 0b100001};
-	constexpr unsigned eusBrand[6] = {0b110011, 0b001100, 0b110001, 0b111011, 0b110111, 0b110011};
-	constexpr unsigned beeBrand[6] = {0b000001, 0b001100, 0b111001, 0b100111, 0b110011, 0b111001};
-	constexpr unsigned monBrand[6] = {0b100011, 0b011101, 0b110011, 0b011101, 0b100011, 0b111000};
-	constexpr unsigned tanBrand[6] = {0b101101, 0b001100, 0b101101, 0b110011, 0b101101, 0b110011};
-	constexpr unsigned gorBrand[6] = {0b001100, 0b001100, 0b100100, 0b110001, 0b111100, 0b111100};
-	constexpr unsigned levBrand[6] = {0b100011, 0b001111, 0b100100, 0b001100, 0b000001, 0b110011};
-	constexpr unsigned cifBrand[6] = {0b110001, 0b010101, 0b010010, 0b101000, 0b100100, 0b110001};
+
 	
-	constexpr unsigned disBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
-	
-	// load from save in future, also display this brand in the pause menu
-	// rm_rm4
-	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
-	
-	
-	const unsigned* allBrands[10] = {addBrand, eusBrand, beeBrand, monBrand, tanBrand, gorBrand, levBrand, cifBrand, disBrand, playerBrand};
-	
-	const char* destinations[] = {"rm_secret_001", "rm_secret_002", "rm_secret_003", "rm_secret_004", "rm_secret_005", "rm_secret_006", "rm_secret_007", "rm_secret_008", "rm_e_intermission", "rm_rm4"};
-	unsigned matches[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	// spr_lordborders
-	
-	for(unsigned i=0; i<sizeof(allBrands) / sizeof(allBrands[0]); i++) {
-		for(int j=0; j<6; j++) {
-			if(roomState[j] == allBrands[i][j]) {
-				matches[i]++;
-			}
-		}
-	}
-	
+
 	//BN_LOG(matches[0], matches[1], matches[2], matches[3], matches[4], matches[5], matches[6], matches[7], matches[8], matches[9]);
 	
-	int matchIndex = -1;
-	for(unsigned i=0; i<sizeof(matches) / sizeof(matches[0]); i++) {
-		if(matches[i] == 6) {
-			matchIndex = i;
-			break;
-		}
-	}
+	int matchIndex = checkBrandIndex(roomState);
 	
 	
 	

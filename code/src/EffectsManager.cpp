@@ -573,6 +573,11 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	effectsLayer.rawMap.bgPointer.set_tiles(tilesPointer);
 	
 	for(int i=0; i<8; i++) {
+		tileRef[122].data[i] = 0x11111111;
+		tileRef[123].data[i] = 0x11111111;
+		tileRef[124].data[i] = 0x11111111;
+		tileRef[125].data[i] = 0x11111111;
+		
 		tileRef[126].data[i] = 0x11111111;
 		tileRef[127].data[i] = 0x11111111;
 	}
@@ -586,10 +591,7 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 		effectsLayer.rawMap.setTile(0, i, 126, true, false);
 		effectsLayer.rawMap.setTile(29, i, 126, false, true);
 	}
-
-
-	
-	
+		
 	effectsLayer.reloadCells();
 	
 }
@@ -1526,6 +1528,53 @@ void MenuOption::draw(bool isActive) {
 
 void MenuOption::draw() {
 	draw(isActiveState);
+}	
+
+void EffectsManager::setBrandColor(int x, int y, bool isTile) {
+	
+	// this whole func took me a pathetically long length of time due to not eating
+	
+	bn::optional<bn::span<bn::tile>> tileRefOpt = tilesPointer.vram();
+	BN_ASSERT(tileRefOpt.has_value(), "wtf");
+	bn::span<bn::tile> tileRef = tileRefOpt.value();
+	
+	int quadrant = -1;
+	
+	if(x < 3 && y < 3) {
+		quadrant = 0;
+	} else if(x >= 3 && y < 3) {
+		quadrant = 1;
+	} else if(x < 3 && y >= 3) {
+		quadrant = 2;
+	} else {
+		quadrant = 3;
+	}
+	
+	// goofy ah
+	
+	int xIndex = quadrant % 2 == 0 ? 2+(2*x) : (x-3)*2;
+	int yIndex = quadrant < 2 ? 2+(2*y) : (y-3)*2;
+	
+	//BN_LOG(x, " ", y, " ", xIndex, " ", yIndex, " ", quadrant);
+	
+	for(int xOffset=0; xOffset<=1; xOffset++) {
+		for(int yOffset=0; yOffset<=1; yOffset++) {
+			uint32_t tile = tileRef[122 + quadrant].data[yIndex + yOffset];
+			
+			tile &= ~(0xF << ((xIndex + xOffset) * 4));
+			if(isTile) {
+				tile |= (0x2 << ((xIndex + xOffset) * 4));
+			} else {
+				tile |= (0x4 << ((xIndex + xOffset) * 4));
+			}
+		
+			if(quadrant == 3){ 
+				BN_LOG(tile);
+			}
+		
+			tileRef[122 + quadrant].data[yIndex + yOffset] = tile;
+		}
+	}
 }
 
 void EffectsManager::doMenu() {
@@ -1542,6 +1591,50 @@ void EffectsManager::doMenu() {
 			effectsLayer.setBigTile(x, y, 1);
 		}
 	}
+	
+	
+	
+	/*
+	
+	bn::optional<bn::span<bn::tile>> tileRefOpt = tilesPointer.vram();
+	BN_ASSERT(tileRefOpt.has_value(), "wtf");
+	bn::span<bn::tile> tileRef = tileRefOpt.value();
+	
+	for(int i=0; i<6; i++) {
+		unsigned output = 0;
+		unsigned temp = tileManager->playerBrand[i];
+		for(int j=0; j<6; j++) {
+			if(temp & 1) {
+				output = (output << 4) | 0x2;
+			} else {
+				output = (output << 4) | 0x4;
+			}
+			temp >>=1;
+		}
+		tileRef[125].data[i] = output | 0x11000000;
+	}
+	tileRef[125].data[6] = 0x11111111;
+	tileRef[125].data[7] = 0x11111111;
+	
+	effectsLayer.rawMap.setTile(28, 1, 125);
+	*/
+	
+	
+	for(int i=0; i<6; i++) {
+		unsigned temp = tileManager->playerBrand[i];
+		for(int j=0; j<6; j++) {
+			setBrandColor(j, i, temp & 1);
+			temp >>=1;
+		}
+	}
+	
+	
+	effectsLayer.rawMap.setTile(27, 1, 122);
+	effectsLayer.rawMap.setTile(28, 1, 123);
+	effectsLayer.rawMap.setTile(27, 2, 124);
+	effectsLayer.rawMap.setTile(28, 2, 125);
+	
+	
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
 	
@@ -2319,117 +2412,133 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	
 }
 
+Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
+	
+	auto createFunc = [](Effect* obj) mutable -> void {
+
+		if(randomGenerator.get() & 1) {
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+		} else {
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+		}
+	
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			0
+		);
+	
+		obj->sprite.spritePointer.set_z_order(1);
+	
+		obj->x = -32;
+		obj->y = -32;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+	};
+	
+	auto tickFunc = [
+		x = (bn::fixed)-32, 
+		y = (bn::fixed)-32, 
+		image_speed = (bn::fixed)0,
+		y_speedup = randomGenerator.get_int(2, 6 + 1),
+		t = randomGenerator.get_int(0, 180 + 1),
+		amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
+		graphicsIndex = (bn::fixed)0,
+		freezeFrames = randomGenerator.get_int(0, 60 + 1),
+		isCutscene
+		](Effect* obj) mutable -> bool {
+		
+		if(y < -16) {
+			if(randomGenerator.get() & 1) {
+				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+			} else {
+				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+			}
+			x = randomGenerator.get_int(16 * 14);
+			//y = 16*5+randomGenerator.get_int(16);
+			if(y == -32) {
+				if(isCutscene) {
+					y = 16 + randomGenerator.get_int(16 * 9);
+				} else {
+					y = 16 + randomGenerator.get_int(16 * 5);
+				}
+			} else if(isCutscene) {
+				y = 160 + randomGenerator.get_int(32);
+			} else {
+				y = 16*4+randomGenerator.get_int(32);
+			}
+			
+			
+			
+			image_speed = (bn::fixed)0;
+			y_speedup = randomGenerator.get_int(2, 6 + 1);
+			t = randomGenerator.get_int(0, 180 + 1);
+			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
+			//graphicsIndex = (bn::fixed)0;
+			graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 9 + 1);
+			freezeFrames = randomGenerator.get_int(0, 60 + 1);
+			
+			randomGenerator.update();
+		}
+		
+		if(image_speed > 9) {
+			
+			freezeFrames = randomGenerator.get_int(0, 60 + 1);
+			
+			
+		}
+		
+
+		image_speed += 0.02;
+		//image_speed += 0.20;
+		
+		//y -= (0.1 * y_speedup);
+		y -= (0.075 * y_speedup);
+		
+		t = ((t + 1) % 360);
+		x = (x + (amplitude * sinTable[t]));
+		
+		if(x > 240) {
+			x -= 240;
+		} else if(x < 0) {
+			x += 240;
+		}
+		
+		
+		
+		BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
+		
+		graphicsIndex += image_speed / 60;
+		
+		// replacing this with freezeFrames > 0
+		// while bugged, also worked quite well
+		if(freezeFrames == 0) {
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				graphicsIndex.integer() % 9
+			);
+		} else {
+			freezeFrames--;
+		}
+	
+		obj->x = x.integer();
+		obj->y = y.integer();
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+		return false;
+	};
+	
+	Effect* e = new Effect(createFunc, tickFunc);
+	
+	return e;
+}
+
 void EffectsManager::roomDust() {
 
 	// gml_Object_obj_dustparticle2_Step_0 seems to have the code 
 	
 	for(int unused = 0; unused<16; unused++) {
 	
-		auto createFunc = [](Effect* obj) mutable -> void {
-
-			if(randomGenerator.get() & 1) {
-				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
-			} else {
-				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
-			}
-		
-			obj->sprite.spritePointer.set_tiles(
-				*obj->tiles,
-				0
-			);
-		
-			obj->sprite.spritePointer.set_z_order(1);
-		
-			obj->x = -32;
-			obj->y = -32;
-			obj->sprite.updateRawPosition(obj->x, obj->y);
-		};
-		
-		auto tickFunc = [
-			x = (bn::fixed)-32, 
-			y = (bn::fixed)-32, 
-			image_speed = (bn::fixed)0,
-			y_speedup = randomGenerator.get_int(2, 6 + 1),
-			t = randomGenerator.get_int(0, 180 + 1),
-			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
-			graphicsIndex = (bn::fixed)0,
-			freezeFrames = randomGenerator.get_int(0, 60 + 1)
-			](Effect* obj) mutable -> bool {
-			
-			if(y < -16) {
-				if(randomGenerator.get() & 1) {
-					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
-				} else {
-					obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
-				}
-				x = randomGenerator.get_int(16 * 14);
-				//y = 16*5+randomGenerator.get_int(16);
-				if(y == -32) {
-					y = 16 + randomGenerator.get_int(16 * 5);
-				} else {
-					y = 16*4+randomGenerator.get_int(32);
-				}
-				
-				image_speed = (bn::fixed)0;
-				y_speedup = randomGenerator.get_int(2, 6 + 1);
-				t = randomGenerator.get_int(0, 180 + 1);
-				amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
-				//graphicsIndex = (bn::fixed)0;
-				graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 9 + 1);
-				freezeFrames = randomGenerator.get_int(0, 60 + 1);
-				
-				randomGenerator.update();
-			}
-			
-			if(image_speed > 9) {
-				
-				freezeFrames = randomGenerator.get_int(0, 60 + 1);
-				
-				
-			}
-			
-
-			image_speed += 0.02;
-			//image_speed += 0.20;
-			
-			//y -= (0.1 * y_speedup);
-			y -= (0.075 * y_speedup);
-			
-			t = ((t + 1) % 360);
-			x = (x + (amplitude * sinTable[t]));
-			
-			if(x > 240) {
-				x -= 240;
-			} else if(x < 0) {
-				x += 240;
-			}
-			
-			
-			
-			BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
-			
-			graphicsIndex += image_speed / 60;
-			
-			// replacing this with freezeFrames > 0
-			// while bugged, also worked quite well
-			if(freezeFrames == 0) {
-				obj->sprite.spritePointer.set_tiles(
-					*obj->tiles,
-					graphicsIndex.integer() % 9
-				);
-			} else {
-				freezeFrames--;
-			}
-		
-			obj->x = x.integer();
-			obj->y = y.integer();
-			obj->sprite.updateRawPosition(obj->x, obj->y);
-			
-			return false;
-		};
-
-		createEffect(createFunc, tickFunc);
-		
+		Effect* e = getRoomDustEffect();
+		effectList.push_back(e);	
 	}
 
 }

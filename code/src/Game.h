@@ -82,6 +82,8 @@ struct GameSave {
 	bool hasRod = false;
 	bool hasSuperRod = false;
 	
+	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
+	
 	uint64_t hash = 0;
 };
 
