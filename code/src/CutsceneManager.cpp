@@ -985,8 +985,7 @@ void CutsceneManager::brandInput() {
 }
 
 void CutsceneManager::createPlayerBrandRoom() {
-	
-	
+
 	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
 	cutsceneLayer.rawMap.bgPointer.set_x(16);
 	cutsceneLayer.rawMap.bgPointer.set_y(64-8);
@@ -1031,18 +1030,33 @@ void CutsceneManager::createPlayerBrandRoom() {
 		static int count = 0;
 		count++;
 		if(count == 24) {
+			globalGame->state = GameState::Paused;
+			for(int i=0; i<game->effectsManager.effectList.size(); i++) {
+				game->effectsManager.effectList[i]->sprite.setVisible(false);
+			}
+			restoreAllButEffects();
+			game->doButanoUpdate();
+			backupAllButEffects();
+			game->doButanoUpdate();
+			
+			
 			
 			game->effectsManager.hideForDialogueBox(false, true);
-			globalGame->state = GameState::Paused;
+			
 			
 			maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 3);
 			//maps[2]->create(bn::regular_bg_items::dw_default_black_bg, 2);
 			maps[1]->create(bn::regular_bg_items::dw_spr_un_stare_index0, 0);
+			maps[1]->bgPointer.set_y(48 + 16);
 			
 			restoreLayer(0);
 			
 			globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			globalGame->collision.rawMap.bgPointer.set_priority(1);
+			
+			maps[2]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
+			maps[2]->bgPointer.set_priority(1);
+			
 			
 			int n = globalGame->collision.rawMap.bgPointer.tiles().tiles_count();
 			
@@ -1051,6 +1065,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 			for(int x=0; x<32; x++) {
 				for(int y=0; y<32; y++) {
 					globalGame->collision.rawMap.setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
+					maps[2]->setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
 				}
 			}
 		
