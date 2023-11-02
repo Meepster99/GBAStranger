@@ -220,6 +220,8 @@ int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
 			break;
 		}
 	}
+	
+	BN_LOG("checkbrand returned ", matchIndex);
 
 	return matchIndex;
 }
@@ -286,15 +288,12 @@ const char* TileManager::checkBrand() {
 	if(matchIndex != -1) {
 	
 		if(matchIndex < 8) {
-			cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex]);
+			cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
 		} else {
 			cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 		}
 	
 		
-		
-		
-	
 		return destinations[matchIndex];
 	}
 	cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);

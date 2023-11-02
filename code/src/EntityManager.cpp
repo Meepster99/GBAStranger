@@ -332,7 +332,9 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) {
 		
 		BN_ASSERT(tempMap.size() == 1, "in dodirectionmove, tried to push when there were,,, multiple objects???");
 		
-		Obstacle* toPush = static_cast<Obstacle*>(*(tempMap.begin()));
+		Entity* tempE = *(tempMap.begin());
+		BN_ASSERT(tempE->isObstacle(), "something was pushed that wasnt an obstacle. wtf");
+		Obstacle* toPush = static_cast<Obstacle*>(tempE);
 		
 		e->currentDir = move;
 		
@@ -1051,15 +1053,14 @@ void EntityManager::doVBlank() { profileFunction();
 	
 	// is modulo expensive???
 	
+	
 	if(frame % 33 == 0) { // ticks should occur at roughly 110bpm
+		//BN_LOG("TICKS");
 		doTicks();
-	}
-
-	if(frame % 8 == 0) {
-		doDeaths();
 	}
 	
 	if(frame % 2 == 0) {
+		//BN_LOG("PUSH");
 		if(player->pushAnimation) {
 			player->pushAnimation++;
 			if(player->pushAnimation == 8) {
@@ -1070,8 +1071,17 @@ void EntityManager::doVBlank() { profileFunction();
 	}
 	
 	if(kickedList.size() != 0) {
+		//BN_LOG("KICK");
 		for(auto it = kickedList.begin(); it != kickedList.end(); ) {
-			bool res = (*it)->kicked();
+			
+			Obstacle* o = (*it);
+			
+			// this appears to somehow be a load bearing assert. not having it here causes crashes?
+			BN_ASSERT(o != NULL, "an obstacle which was kicked was somehow null. i have no clue how this occurs");
+			
+			//BN_LOG("doing kick");
+			bool res = o->kicked();888
+			//BN_LOG("kick done");
 			if(res) {
 				it = kickedList.erase(it);
 			} else {
@@ -1079,6 +1089,21 @@ void EntityManager::doVBlank() { profileFunction();
 			}
 		}
 	}
+	
+	// deaths is done last bc in case something is both dead, and kicked, we dont want a use after free.
+	// this is a MASSIVE bug, how did i only just catch it now 
+	// hell, under what circumstances do i want something to like,,, not be removed from the kicklist on the same tick its added?
+	// im going to change that
+	// actually no, its needed for tails boobs 
+	// i knew i should of made tails boobs an effect
+	// additionally, now that doDeaths is no longer animating death sequences,, 
+	// it doesnt need to only be called once every 8 frames
+	//if(frame % 8 == 0) {
+	//BN_LOG("DEATHS");
+	doDeaths();
+	//}
+	
+	//BN_LOG("DONE ENTITYMANAGER VBLANK");
 	
 }
 

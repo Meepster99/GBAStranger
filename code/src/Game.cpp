@@ -125,7 +125,9 @@ void Game::findNextRoom() {
 				// but does this update the save file?
 			}
 		}
-		
+	}
+	
+	if(entityManager.fallKill()) {
 		bool foundGlass = false;
 		const char* res = NULL;
 		switch(roomManager.roomIndex) {
@@ -154,6 +156,7 @@ void Game::findNextRoom() {
 			case 179:
 			case 223:
 			case 227:
+
 				res = tileManager.checkBrand();
 				
 				if(res != NULL) {
