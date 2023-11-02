@@ -1080,7 +1080,7 @@ void EntityManager::doVBlank() { profileFunction();
 			BN_ASSERT(o != NULL, "an obstacle which was kicked was somehow null. i have no clue how this occurs");
 			
 			//BN_LOG("doing kick");
-			bool res = o->kicked();888
+			bool res = o->kicked();
 			//BN_LOG("kick done");
 			if(res) {
 				it = kickedList.erase(it);
@@ -1101,7 +1101,7 @@ void EntityManager::doVBlank() { profileFunction();
 	//if(frame % 8 == 0) {
 	//BN_LOG("DEATHS");
 	doDeaths();
-	//}
+	
 	
 	//BN_LOG("DONE ENTITYMANAGER VBLANK");
 	

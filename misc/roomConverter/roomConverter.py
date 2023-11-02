@@ -487,7 +487,11 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_mon_shortcut_004
 	rm_mon_shortcut_005
 	
+	
+	rm_rm4
 	"""
+	
+	# rm_rm4 MUST be the last one
 	
 	[ newRoomsList.append(t.strip()) for t in tempRoomsToAdd.split("\n") if len(t.strip()) != 0 ]
 	

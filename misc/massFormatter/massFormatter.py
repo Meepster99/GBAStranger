@@ -520,7 +520,50 @@ def convertTiles(outputPath):
 	}
 	with open(os.path.join(outputPath, "dw_" + "default_sprite_64" + ".json"), "w") as f:
 		json.dump(outputJson, f)
+		
+	# 
+	
+	temp = Image.new("RGB", (64, 32), (0, 0, 0))
+	writeBitmap(temp, os.path.join(outputPath, "default_sprite_64_32" + ".bmp"))
+	outputJson = {
+		"type": "sprite",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join(outputPath, "dw_" + "default_sprite_64_32" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+		
+	# 
 
+	temp = Image.new("RGB", (32, 64), (0, 0, 0))
+	writeBitmap(temp, os.path.join(outputPath, "default_sprite_32_64" + ".bmp"))
+	outputJson = {
+		"type": "sprite",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join(outputPath, "dw_" + "default_sprite_32_64" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+		
+	# 
+
+	temp = Image.new("RGB", (32, 32), (0, 0, 0))
+	writeBitmap(temp, os.path.join(outputPath, "default_sprite_32_32" + ".bmp"))
+	outputJson = {
+		"type": "sprite",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join(outputPath, "dw_" + "default_sprite_32_32" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+
+	# 
+	
+	temp = Image.open("../ExportData/Export_Textures_Padded/spr_glitchedsprites_0.png")
+	writeBitmap(temp, os.path.join("./formattedOutput/allSprites/", "spr_glitchedsprites" + ".bmp"))
+	outputJson = {
+		"type": "regular_bg_tiles",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join("./formattedOutput/allSprites/", "dw_" + "spr_glitchedsprites" + ".json"), "w") as f:
+		json.dump(outputJson, f)
 	
 	print("done converting tiles")
 	pass

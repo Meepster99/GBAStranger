@@ -133,7 +133,7 @@ public:
 	
 	// having one of these is ok, but if it gets excessive i should switch back over to passing them inside the [] of the lambdas
 	int tempCounter = 0;
-	//int tempCounter2 = 0; // now we are excessive
+	int tempCounter2 = 0; // now we are excessive
 	
 	Effect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency_ = 1) : 
 	sprite(bn::sprite_tiles_items::dw_spr_gray_w_d), createFunc(create_), animateFunc(animate_), animationFrequency(animationFrequency_)
@@ -159,6 +159,7 @@ public:
 		bool res = animateFunc(this);
 		if(res) {
 			sprite.setVisible(false);
+			//sprite.spritePointer.set_z_order(0);
 		}
 
 		return res;
@@ -350,7 +351,7 @@ public:
 	Effect* getRoomDustEffect(bool isCutscene = false);
 	void roomDust();
 	void entityFall(Entity* e);
-	
+	void playerBrandRoomBackground();
 };
 
 class Dialogue {

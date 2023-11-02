@@ -984,6 +984,115 @@ void CutsceneManager::brandInput() {
 	game->state = restoreState;
 }
 
+void CutsceneManager::createPlayerBrandRoom() {
+	
+	
+	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
+	cutsceneLayer.rawMap.bgPointer.set_x(16);
+	cutsceneLayer.rawMap.bgPointer.set_y(64-8);
+
+	game->collision.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index1, 2);
+	game->collision.rawMap.bgPointer.set_y(64-8-16);
+
+	//collision.rawMap.bgPointer.set_visible(false);
+	// this seems to bump the prio up even with equal prios?
+	game->tileManager.floorLayer.rawMap.bgPointer.set_priority(1);
+
+	auto func1 = [this](void* obj) -> void {
+		(void)obj;
+		
+		effectsManager->doDialogue(""
+		"i was going to try writing something meaningful here, but im a bit too tired to do so. "
+		"i really should of ate today, or slept, or took care of myself in any form, "
+		"but the moment i stop working on this project, the thoughts just come flooding back. "
+		"and so i dont stop working.\n"
+		
+		"i have to wonder, where in my life did i go wrong. I can do all this, program whatever i want, but i cant take basic care of myself.\n"
+		"but, regardless of all that. thanks for playing this. i put a lot of effort into it. ik its just an objectively worse version of the actual game, but still, thank you\n"
+		"With love,`Inana <3\n"
+		"\0");
+
+		return;
+	};
+	
+	// holy shit. 
+	// gml_Object_obj_confinement_Step_0, has scr_errormessage(40)
+	// in gml_Object_obj_errormessages_Create_0, it says:
+	// str_error40 = ">THIS DESECRATION CAN NOT CONTINUE\n"
+	// but you never get to see that bc of the popup 
+	// that,,, that explains both so much, and nothing 
+	// is it grays womb, or add's womb??
+	
+	// gml_Object_obj_errormessages_Draw_0 for draw code
+	
+	auto func2 = [this](void* obj) -> bool {
+		(void)obj;
+		
+		static int count = 0;
+		count++;
+		if(count == 24) {
+			
+			game->effectsManager.hideForDialogueBox(false, true);
+			globalGame->state = GameState::Paused;
+			
+			maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 3);
+			//maps[2]->create(bn::regular_bg_items::dw_default_black_bg, 2);
+			maps[1]->create(bn::regular_bg_items::dw_spr_un_stare_index0, 0);
+			
+			restoreLayer(0);
+			
+			globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
+			globalGame->collision.rawMap.bgPointer.set_priority(1);
+			
+			int n = globalGame->collision.rawMap.bgPointer.tiles().tiles_count();
+			
+			bn::sound::stop_all();
+			
+			for(int x=0; x<32; x++) {
+				for(int y=0; y<32; y++) {
+					globalGame->collision.rawMap.setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
+				}
+			}
+		
+		
+			while(true) {
+				//globalGame->playSound(&bn::sound_items::snd_ex_heartbeat_b);
+				globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
+				
+				for(int i=0; i<20; i++) {
+					globalGame->doButanoUpdate();
+				}
+			}
+		}
+		
+		globalGame->playSound(&bn::sound_items::snd_ex_heartbeat_b);
+		globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
+		
+		effectsManager->playerBrandRoomBackground();
+		
+		return true;
+	};
+
+	Interactable* temp1 = new Interactable(Pos(6, 4),
+		func1,
+		func2,
+		NULL,
+		NULL
+	);
+	
+	Interactable* temp2 = new Interactable(Pos(7, 4),
+		func1,
+		func2,
+		NULL,
+		NULL
+	);
+	
+	game->entityManager.addEntity(temp1);
+	game->entityManager.addEntity(temp2);
+	
+	
+}
+
 // -----
 
 void CutsceneManager::freeLayer(int i) {
@@ -1011,30 +1120,7 @@ void CutsceneManager::backupLayer(int i) {
 
 void CutsceneManager::restoreLayer(int i) {
 	// weirdly enough, the map MUST be set before the tiles here, why?
-	
-	//maps[i]->bgPointer.set_tiles(tilesBackup[i]);
-	
-	/*
-	game->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_bg_tiles);
-	//bn::core::update();
-	
-	
-	game->needRedraw = true;
-	
-	int i = 0;
-	
-	maps[i]->bgPointer.set_map(mapBackup[i]);
-	game->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4));
-	
-	maps[i]->bgPointer.set_z_order(zIndexBackup[i]);
-	maps[i]->bgPointer.set_priority(priorityBackup[i]);
-	
-	maps[i]->bgPointer.set_x(xPosBackup[i]);
-	maps[i]->bgPointer.set_y(yPosBackup[i]);
-	
-	maps[i]->reloadCells();
-	*/
-	
+
 	if(i == 0) {
 		globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4));
 		globalGame->loadTiles();
@@ -1071,6 +1157,20 @@ void CutsceneManager::restoreAllButEffects() {
 	restoreLayer(3);
 
 }
+
+void CutsceneManager::backupAllButEffectsAndFloor() {
+	backupLayer(0);
+	backupLayer(3);
+}
+
+void CutsceneManager::restoreAllButEffectsAndFloor() {
+	freeLayer(0);
+	freeLayer(3);
+	
+	restoreLayer(0);
+	restoreLayer(3);
+}
+
 
 void CutsceneManager::delay(int delayFrameCount) {
 	// this function should of been made WAYYYY earlier

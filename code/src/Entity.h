@@ -28,6 +28,7 @@ public:
 			spritePalette->getSpritePalette().create_palette())
 			)
 		{
+		spritePointer.set_z_order(0);
 		spritePointer.set_bg_priority(1);
 		spritePointer.set_blending_enabled(false);
 		}
@@ -40,6 +41,7 @@ public:
 			spritePalette->getSpritePalette().create_palette())
 			)
 		{
+		spritePointer.set_z_order(0);
 		spritePointer.set_bg_priority(1);
 		spritePointer.set_blending_enabled(false);
 		}
@@ -52,6 +54,7 @@ public:
 			spritePalette->getSpritePalette().create_palette())
 			)
 		{
+		spritePointer.set_z_order(0);
 		spritePointer.set_bg_priority(1);
 		updateRawPosition(x + (size.width() / 2), y);
 		spritePointer.set_blending_enabled(false);
@@ -63,6 +66,7 @@ public:
 			startItem
 			))
 		{
+		spritePointer.set_z_order(0);
 		spritePointer.set_bg_priority(1);
 		spritePointer.set_palette(spritePalette->getSpritePalette().create_palette());
 		spritePointer.set_blending_enabled(false);

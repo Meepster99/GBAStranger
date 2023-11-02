@@ -927,7 +927,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		if(effects->width == 1 && effects->height == 1) { // a smallsprite should be summoned as an effect
 			if(effects->tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
 				
-				BN_LOG("kys", effects->x, " ", effects->y);
+				//BN_LOG("kys", effects->x, " ", effects->y);
 				
 				// minus 1 to play infinitely?
 				// nvm, gods idek what im doing 
@@ -1568,10 +1568,6 @@ void EffectsManager::setBrandColor(int x, int y, bool isTile) {
 				tile |= (0x4 << ((xIndex + xOffset) * 4));
 			}
 		
-			if(quadrant == 3){ 
-				BN_LOG(tile);
-			}
-		
 			tileRef[122 + quadrant].data[yIndex + yOffset] = tile;
 		}
 	}
@@ -1623,7 +1619,7 @@ void EffectsManager::doMenu() {
 	for(int i=0; i<6; i++) {
 		unsigned temp = tileManager->playerBrand[i];
 		for(int j=0; j<6; j++) {
-			setBrandColor(j, i, temp & 1);
+			setBrandColor(5-j, i, temp & 1);
 			temp >>=1;
 		}
 	}
@@ -2671,5 +2667,78 @@ void EffectsManager::entityFall(Entity* entity) {
 	}
 }
 
-
+void EffectsManager::playerBrandRoomBackground() {
+	
+	const bn::sprite_palette_ptr tempPalettes[3] = {
+	game->pal->getWhiteSpritePalette().create_palette(),
+	game->pal->getDarkGraySpritePalette().create_palette(),
+	game->pal->getLightGraySpritePalette().create_palette()};
+	
+	for(int unused=0; unused<16; unused++) {
+		
+		auto createFunc = [tempPalettes](Effect* obj) mutable -> void {
+	
+			int randIndex = randomGenerator.get_int(0, 4);
+	
+			if(randIndex == 0) {
+				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_32_32);
+			} else if(randIndex == 1) {
+				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_64_32);
+			} else if(randIndex == 2) {
+				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_32_64);
+			} else {
+				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_64);
+			}
+		
+			obj->sprite.spritePointer.set_palette(tempPalettes[randomGenerator.get_int(0, 3)]);
+	
+			//bn::fixed horizontalScale = 0.1 + randomGenerator.get_fixed(1.9);
+			//bn::fixed verticalScale = 0.1 + randomGenerator.get_fixed(1.9);
+	
+			// smaller the overall size of the sprite, the lower z order
+			//int res = (((horizontalScale * 64) * (verticalScale * 64)).integer()) / ((2 * 64 * 2 * 64) / 8);
+			//obj->sprite.spritePointer.set_z_order(res);
+			
+			// this causes crashes when talking during the movement of the bg??
+			//obj->sprite.spritePointer.set_z_order(randIndex);
+	
+			//obj->sprite.spritePointer.set_horizontal_scale(horizontalScale);
+			//obj->sprite.spritePointer.set_vertical_scale(verticalScale);
+	
+			obj->sprite.spritePointer.set_bg_priority(3);
+		
+			obj->tempCounter = randomGenerator.get_int(1, 8);
+			obj->tempCounter2 = randomGenerator.get_int(1, 8);
+		
+			obj->tempCounter = randomGenerator.get_int(0, 2) == 0 ? obj->tempCounter : -obj->tempCounter;
+			obj->tempCounter2 = randomGenerator.get_int(0, 2) ==0 ? obj->tempCounter2 : -obj->tempCounter2;
+			
+		
+			obj->x = randomGenerator.get_int(-32, 32);
+			obj->y = randomGenerator.get_int(-32, 32);
+			
+			obj->sprite.spritePointer.set_position(obj->x, obj->y);
+		};
+		
+		auto tickFunc = [](Effect* obj) mutable -> bool {
+			
+			obj->x += obj->tempCounter;
+			obj->y += obj->tempCounter2;
+			obj->sprite.spritePointer.set_position(obj->x, obj->y);
+			
+			const int cutOff = 32;
+			if(obj->x > 240/2 + cutOff || obj->y > 160/2 + cutOff ||
+			obj->x < -(240/2+cutOff) || obj->y < -(160/2+cutOff)) {
+				return true;
+			}
+			
+			return false;
+		};
+		
+		createEffect(createFunc, tickFunc);
+		
+	}
+	
+	
+}
 

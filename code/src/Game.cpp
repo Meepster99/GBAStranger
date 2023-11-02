@@ -213,6 +213,7 @@ void Game::resetRoom(bool debug) {
 	if(!debug) {
 		doButanoUpdate();
 	}
+	
 	fullDraw();
 	
 	state = GameState::Normal;
@@ -332,6 +333,13 @@ void Game::loadLevel(bool debug) {
 	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
 	
 
+	static bool needRestore = false;
+	
+	if(needRestore) {
+		cutsceneManager.restoreAllButEffectsAndFloor();
+		tileManager.floorLayer.rawMap.bgPointer.set_priority(2);
+		needRestore = false;
+	}
 	
 	loadTiles();
 	
@@ -402,6 +410,18 @@ void Game::loadLevel(bool debug) {
 	
 	effectsManager.loadEffects(effectsPointer, effectsCount);
 	
+	
+	// this code actually rlly should of been in effects, omfg
+	if(strcmp(roomManager.currentRoomName(), "rm_rm4\0") == 0 || strcmp(roomManager.currentRoomName(), "hard_rm_rm4\0") == 0) {
+		needRestore = true;
+		cutsceneManager.backupAllButEffectsAndFloor();
+		
+		cutsceneManager.createPlayerBrandRoom();
+		
+		// this should of been programmed in as a bigsprite, but now that i know that i shouldnt use those, its going as a bg
+		// the floor rlly should be combined onto the same layer as collision
+
+	}
 	
 	BN_LOG("loadlevel completed");
 }

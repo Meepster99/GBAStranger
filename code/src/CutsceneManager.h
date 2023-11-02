@@ -55,18 +55,25 @@ public:
 	
 	void brandInput();
 	
+	void createPlayerBrandRoom();
 	
-private:
-	
-	void freeLayer(int i);
+	// -----
 	
 	void backupLayer(int i);
 
 	void restoreLayer(int i);
 	
+//private:
+	
+	void freeLayer(int i);
+
 	void backupAllButEffects();
 	
 	void restoreAllButEffects();
+	
+	void backupAllButEffectsAndFloor();
+	
+	void restoreAllButEffectsAndFloor();
 	
 	void delay(int delayFrameCount);
 
