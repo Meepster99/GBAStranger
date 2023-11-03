@@ -236,6 +236,8 @@ def readCreationCode(p, creationCode):
 		temp = temp.replace("global.voidrod_get", "1")
 		temp = temp.replace("var ", "")
 		
+		temp = temp.replace("spr_n_up", "0")
+		
 		for s in removeStrings:
 			if s in temp:
 				temp = "pass"
@@ -2070,6 +2072,9 @@ def convertObjects(layerData):
 		def obj_voidshatter(p, creationCode):
 			pass
 
+		def obj_npc_mimic(p, creationCode):
+			# new 1.0.6 content?
+			pass
 
 
 
