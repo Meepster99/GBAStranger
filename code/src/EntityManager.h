@@ -112,6 +112,16 @@ public:
 	bool playerWon() const { return killedPlayer.contains(NULL); }
 	bool enemyKill() const { return !killedPlayer.contains(player); }
 	bool fallKill() const { return killedPlayer.contains(player); }
+	bool obstacleKill() const { 
+		bool customKill = false;
+		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+			if((*it)->isObstacle()) {
+				customKill = true;
+				break;
+			}
+		}
+		return customKill;
+	}
 	
 	void hideForDialogueBox(bool vis, bool isCutscene);
 	bool exitRoom();

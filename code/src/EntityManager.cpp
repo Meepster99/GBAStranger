@@ -523,7 +523,7 @@ void EntityManager::doMoves() {
 	
 	player->pushAnimation = player->p == playerStart;
 	if(player->p != playerStart) {
-		player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
+		//player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
 	} else {
 		//,, this will play at the same time as a boulder push,,, but im tired ok
 		if(playerRes.second.has_value()) {
@@ -553,6 +553,9 @@ void EntityManager::doMoves() {
 	if(hasKills()) {
 		return;
 	}
+	
+	// should this be happening here, or on the if(player->p != playerStart) {
+	player->doUpdate();
 
 	// check if player has moved into enemy, if so, die.
 	// DO STATUE CHECKS
@@ -1080,32 +1083,6 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
 	
 	// should this,,, 
-	
-	Pos playerPos = player->p;
-	if(playerPos != playerStart && enemyKill()) {
-		// this case means a enemy killed the player and the player moved, so we use the player start pos
-		playerPos = playerStart;
-		player->p = playerPos;
-	}
-	
-	
-	// i could use the enemykill/fallkill thigns, but tbh like 
-	// in certain cases, where an enemey kills you above a floor like, yea 
-	
-	if(playerWon()) {
-	
-	} else if(hasFloor(playerPos)) {
-		BN_LOG("killing player via enemy");
-		effectsManager->entityKill(player);
-	} else {
-		BN_LOG("killing player via fall");
-		effectsManager->entityFall(player);
-	}
-	
-	for(auto it = killedPlayer.begin(); it != killedPlayer.end(); ++it) {
-		effectsManager->entityKill(*it);
-	}
-	
 	
 	
 	// is this ok? should this be false

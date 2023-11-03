@@ -74,8 +74,59 @@ void Game::uncompressData(u8 res[126], u8* input) {
 	
 }
 
+void Game::createExitEffects() {
+	
+	// this func was originally in entityManager->exit, but was moved.
+	// tbh, it kinda shouldnt of been 
+	// bc in the future, getting timings of what death animations to stay on screen 
+	// before starting the transition will be, lets say spiritually taxing
+	// tbh, that will require so much rewriting/jank i probs just wont
+	
+	Pos playerPos = entityManager.player->p;
+	
+	// determines if something(like a mon or lev statue) has killed the player
+	// may cause issues if the player dies to multiple things at once??
+	bool customKill = entityManager.obstacleKill();
+	
+	// if a custom kill handler(like for mon or tan statues)
+	// but tbh, instead of calling those effects inside the domoves func, they really should be called here.
+	if(customKill) {
+		return;
+	}
+	
+	
+	// tbh this if statement is legacy now that im having death effects get drawn
+	// at sprite's screen poses, instead of their game coords, but im leaving it here bc im scaredas
+	if(playerPos != entityManager.playerStart && entityManager.enemyKill()) {
+		
+		// this case means a enemy killed the player and the player moved, so we use the player start pos
+		
+		playerPos = entityManager.playerStart;
+		entityManager.player->p = playerPos;
+		
+	}
+	
+	
+	// i could use the enemykill/fallkill thigns, but tbh like 
+	// in certain cases, where an enemey kills you above a floor like, yea 
+	
+	if(entityManager.playerWon()) {
+	
+	} else if(entityManager.hasFloor(playerPos)) {
+		BN_LOG("killing player via enemy");
+		// unsure if this is a good idea, but it will make other calls to fallKill work
+		entityManager.addKill(entityManager.player);
+		effectsManager.entityKill(entityManager.player);
+	} else {
+		BN_LOG("killing player via fall");
+		effectsManager.entityFall(entityManager.player);
+	}
+	
+}
+
 void Game::findNextRoom() {
 	
+
 	if(entityManager.playerWon()) {
 		entityManager.updateScreen(); // is this ok?	
 
@@ -179,7 +230,6 @@ void Game::findNextRoom() {
 				break;
 		}
 	}
-	
 
 	if(tileManager.secretDestinations.size() != 0) {
 		for(int i=0; i<tileManager.secretDestinations.size(); i++) {
@@ -194,7 +244,11 @@ void Game::findNextRoom() {
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
-	
+
+	// summon all room exiting effects
+	if(!debug) {
+		createExitEffects();
+	}
 
 	// decide what room to goto next 
 	findNextRoom();

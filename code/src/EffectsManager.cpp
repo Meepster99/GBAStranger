@@ -2551,8 +2551,11 @@ void EffectsManager::entityKill(Entity* entity) {
 	entity->sprite.setVisible(false);
 	
 	EntityType t = entity->entityType();
-	Pos p = entity->p;
+	//Pos p = entity->p;
 	
+	// using these such as to get the past poses of the entities, where they should be/are currently
+	bn::fixed entityX = entity->sprite.screenx;
+	bn::fixed entityY = entity->sprite.screeny;
 	
 	
 	if(t == EntityType::Player) {
@@ -2575,17 +2578,16 @@ void EffectsManager::entityKill(Entity* entity) {
 		}
 		
 		
-		auto createFunc = [p, tiles](Effect* obj) mutable -> void {
+		auto createFunc = [entityX, entityY, tiles](Effect* obj) mutable -> void {
 			obj->sprite.spritePointer.set_tiles(
 				*tiles,
 				0
 			);
-			obj->x = p.x * 16;
-			obj->y = p.y * 16;
-			obj->sprite.updateRawPosition(obj->x - 1, obj->y);
+			obj->sprite.spritePointer.set_x(entityX-1);
+			obj->sprite.spritePointer.set_y(entityY);
 		};
 		
-		auto tickFunc = [tiles](Effect* obj) mutable -> bool {
+		auto tickFunc = [entityX, entityY, tiles](Effect* obj) mutable -> bool {
 			
 			if(frame % 6 != 0) {
 				return false;
@@ -2597,9 +2599,9 @@ void EffectsManager::entityKill(Entity* entity) {
 			);
 			
 			if(obj->tempCounter == 0) {
-				obj->sprite.updateRawPosition(obj->x + 1, obj->y);
+				obj->sprite.spritePointer.set_x(entityX+1);
 			} else {
-				obj->sprite.updateRawPosition(obj->x - 1, obj->y);
+				obj->sprite.spritePointer.set_x(entityX-1);
 			}
 			
 			obj->tempCounter = !obj->tempCounter;
@@ -2629,15 +2631,15 @@ void EffectsManager::entityKill(Entity* entity) {
 		//const bn::sprite_tiles_ptr& tilesPtr = entity->sprite.spritePointer.tiles();
 		
 		const bn::sprite_tiles_item& tilesItem = entity->spriteTilesArray[entity->tileIndex];
-		BN_LOG(tilesItem.graphics_count(), " bruhsdhldf ");
-		auto createFunc = [p, tilesItem](Effect* obj) mutable -> void {
+		
+		auto createFunc = [entityX, entityY, tilesItem](Effect* obj) mutable -> void {
 			obj->sprite.spritePointer.set_tiles(
 				tilesItem,
 				0
 			);
-			obj->x = p.x * 16;
-			obj->y = p.y * 16;
-			obj->sprite.updateRawPosition(obj->x, obj->y);
+			obj->sprite.spritePointer.set_x(entityX);
+			obj->sprite.spritePointer.set_y(entityY);
+			
 		};
 		
 		auto tickFunc = [tilesItem](Effect* obj) mutable -> bool {
@@ -2671,18 +2673,22 @@ void EffectsManager::entityFall(Entity* entity) {
 	
 	EntityType t = entity->entityType();
 	Pos p = entity->p;
+	bn::fixed entityX = entity->sprite.screenx;
+	bn::fixed entityY = entity->sprite.screeny;
 	
-	auto createFallEffect = [p](SaneVector<fallFrame, 8> fallData) -> Effect* {
+	auto createFallEffect = [p, entityX, entityY](SaneVector<fallFrame, 8> fallData) -> Effect* {
 		
 		return new Effect(
-		[fallData, p](Effect* e) -> void {
+		[fallData, p, entityX, entityY](Effect* e) -> void {
 			
 			e->graphicsIndex = 0;
 			e->tempCounter = 0;
 			
-			e->x = p.x * 16;
-			e->y = p.y * 16;
-			e->sprite.updateRawPosition(e->x, e->y);
+			//e->x = p.x * 16;
+			//e->y = p.y * 16;
+			//e->sprite.updateRawPosition(e->x, e->y);
+			e->sprite.spritePointer.set_x(entityX);
+			e->sprite.spritePointer.set_y(entityY);
 			
 			e->sprite.spritePointer.set_tiles(
 				*fallData[e->tempCounter].spriteTiles,
