@@ -2546,12 +2546,128 @@ void EffectsManager::roomDust() {
 
 }
 
+void EffectsManager::entityKill(Entity* entity) {
+	
+	entity->sprite.setVisible(false);
+	
+	EntityType t = entity->entityType();
+	Pos p = entity->p;
+	
+	
+	
+	if(t == EntityType::Player) {
+		game->playSound(&bn::sound_items::snd_player_damage);
+		
+		
+		const bn::sprite_tiles_item* tiles;
+		
+		switch(game->mode) {
+			default:
+			case 0:
+				tiles = &bn::sprite_tiles_items::dw_spr_player_hit;
+				break;
+			case 1:
+				tiles = &bn::sprite_tiles_items::dw_spr_lil_hit;
+				break;
+			case 2:
+				tiles = &bn::sprite_tiles_items::dw_spr_cif_hit;
+				break;
+		}
+		
+		
+		auto createFunc = [p, tiles](Effect* obj) mutable -> void {
+			obj->sprite.spritePointer.set_tiles(
+				*tiles,
+				0
+			);
+			obj->x = p.x * 16;
+			obj->y = p.y * 16;
+			obj->sprite.updateRawPosition(obj->x - 1, obj->y);
+		};
+		
+		auto tickFunc = [tiles](Effect* obj) mutable -> bool {
+			
+			if(frame % 6 != 0) {
+				return false;
+			}
+			obj->graphicsIndex++;
+			obj->sprite.spritePointer.set_tiles(
+				*tiles,
+				obj->graphicsIndex % tiles->graphics_count()
+			);
+			
+			if(obj->tempCounter == 0) {
+				obj->sprite.updateRawPosition(obj->x + 1, obj->y);
+			} else {
+				obj->sprite.updateRawPosition(obj->x - 1, obj->y);
+			}
+			
+			obj->tempCounter = !obj->tempCounter;
+			
+			
+			return false;
+		};
+		
+		createEffect(createFunc, tickFunc);
+	
+	} else {
+		
+		// the fact that i cannot set a graphics index with a tiles ptr, bc  
+		// tiles ptrs are only supposed to be used for single graphicsindex sprites
+		// yet the only method i have of returning the tiles from a spritepointer is to get the sprite_tiles_ptr, is, atrocious
+		// additionally, i have no method of grabbing a graphicsindex from a spritePtr.
+		// i could,,, clone the spriteptr?
+		// but i still need the current sprite item, which i have 
+		// and tbh if i have the item(which i do), ill just rotate through graphicsindexes and be done
+		// due to general bullshitery, i think ill have to assume that the only things that can be passed into here are 16x16 sprites.
+		// omfg, tilesptr ONLY RETURNSTHE TILES FOR LIKE WHAT ITS CURRENT FRAME IS
+		// ok, theres options here. 
+		// i may not have access to graphicsindex, but thats ok. 
+		// i can,,, access the spriteTilesArray array in the entity for what frame its on?
+		// spriteTilesArray[tileIndex], should work,,, unless im updating it in another area, which i hope im not 
+		
+		//const bn::sprite_tiles_ptr& tilesPtr = entity->sprite.spritePointer.tiles();
+		
+		const bn::sprite_tiles_item& tilesItem = entity->spriteTilesArray[entity->tileIndex];
+		BN_LOG(tilesItem.graphics_count(), " bruhsdhldf ");
+		auto createFunc = [p, tilesItem](Effect* obj) mutable -> void {
+			obj->sprite.spritePointer.set_tiles(
+				tilesItem,
+				0
+			);
+			obj->x = p.x * 16;
+			obj->y = p.y * 16;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+		};
+		
+		auto tickFunc = [tilesItem](Effect* obj) mutable -> bool {
+			if(frame % 6 != 0) {
+				return false;
+			}
+			obj->graphicsIndex++;
+			obj->sprite.spritePointer.set_tiles(
+				tilesItem,
+				obj->graphicsIndex % tilesItem.graphics_count()
+			);
+			return false;
+		};
+		
+		createEffect(createFunc, tickFunc);
+		
+	}
+	
+	
+	
+}
+
 void EffectsManager::entityFall(Entity* entity) {
 
 	struct fallFrame {
 		const bn::sprite_tiles_item* spriteTiles = NULL;
 		int frameCount = 0;
 	};
+	
+	entity->sprite.setVisible(false);
 	
 	EntityType t = entity->entityType();
 	Pos p = entity->p;
@@ -2601,17 +2717,13 @@ void EffectsManager::entityFall(Entity* entity) {
 		);
 	};
 	
-	
-	
+
 	if(t == EntityType::Player) {
 		game->playSound(&bn::sound_items::snd_player_fall);
 	} else {
 		game->playSound(&bn::sound_items::snd_fall);
 	}
-	
 
-	entity->sprite.setVisible(false);
-	
 	switch(t) {
 		case EntityType::Player     :
 			switch(game->mode) {

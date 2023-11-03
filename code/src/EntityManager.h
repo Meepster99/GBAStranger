@@ -27,6 +27,8 @@ public:
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
 	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
+	
+	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
 
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
 	
@@ -88,7 +90,7 @@ public:
 	
 	bn::optional<Direction> canSeePlayer(const Pos& p) const;
 	bn::optional<Direction> canPathToPlayer(const Pos& p) const;
-	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStart);
+	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStartPos);
 	
 	bool levKill = false;
 	

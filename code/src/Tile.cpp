@@ -20,9 +20,7 @@ int Switch::totalCount = 0;
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
 void Glass::stepOn() {
-	if(game->state == GameState::Normal) {
-		bn::sound_items::snd_stepglassfloor.play();
-	}
+	game->playSound(&bn::sound_items::snd_stepglassfloor);
 }
 
 void Glass::stepOff() {

@@ -351,7 +351,8 @@ public:
 	void sparkle(Pos p, int sparkleLength = 8);
 	Effect* getRoomDustEffect(bool isCutscene = false);
 	void roomDust();
-	void entityFall(Entity* e);
+	void entityKill(Entity* entity);
+	void entityFall(Entity* entity);
 	void playerBrandRoomBackground();
 };
 

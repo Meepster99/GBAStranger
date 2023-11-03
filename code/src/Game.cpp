@@ -918,9 +918,9 @@ void Game::load() {
 		saveData = GameSave();
 	}
 	
-	BN_LOG("locust: ", saveData.locustCount);
-	BN_LOG("void: ", saveData.isVoided);
-	BN_LOG("room: ", saveData.roomIndex);
+	//BN_LOG("locust: ", saveData.locustCount);
+	//BN_LOG("void: ", saveData.isVoided);
+	//BN_LOG("room: ", saveData.roomIndex);
 
 	roomManager.roomIndex = saveData.roomIndex;
 	paletteIndex = saveData.paletteIndex;

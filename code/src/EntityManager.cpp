@@ -489,7 +489,7 @@ void EntityManager::doMoves() {
 	// (maybe) insert shadows move into its func? (MORE NEEDS TO BE DONE ON THIS)
 	
 	// do player move.
-	Pos playerStart = player->p;
+	playerStart = player->p;
 	bool playerMoved = moveEntity(player);
 	//updateMap(); // now that i dont care abt framedrops, 
 	
@@ -1081,12 +1081,29 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 	
 	// should this,,, 
 	
+	Pos playerPos = player->p;
+	if(playerPos != playerStart && enemyKill()) {
+		// this case means a enemy killed the player and the player moved, so we use the player start pos
+		playerPos = playerStart;
+		player->p = playerPos;
+	}
+	
+	
+	// i could use the enemykill/fallkill thigns, but tbh like 
+	// in certain cases, where an enemey kills you above a floor like, yea 
+	
 	if(playerWon()) {
 	
-	} else if(enemyKill()) {
-		
-	} else if(fallKill()) {
+	} else if(hasFloor(playerPos)) {
+		BN_LOG("killing player via enemy");
+		effectsManager->entityKill(player);
+	} else {
+		BN_LOG("killing player via fall");
 		effectsManager->entityFall(player);
+	}
+	
+	for(auto it = killedPlayer.begin(); it != killedPlayer.end(); ++it) {
+		effectsManager->entityKill(*it);
 	}
 	
 	
@@ -1365,7 +1382,7 @@ bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const {
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStart) { 
+bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerStartPos) { 
 	
 	const Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
 	
@@ -1378,7 +1395,7 @@ bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerSta
 			continue;
 		}
 		
-		if(testPos == playerStart) {
+		if(testPos == playerStartPos) {
 			
 			e->nextMove = testDirections[i];
 			
