@@ -87,6 +87,10 @@ public:
 		spritePointer.set_y(screeny);
 	}
 	
+	Pos getCurrentScreenPos() const {
+		return Pos((screenx.integer() + 8 + (6 * 16))/16, (screeny.integer() + (4 * 16))/16);
+	}
+	
 	void setRawX(const bn::fixed x) {
 		screenx = x - 224/2 + 8;
 		spritePointer.set_x(screenx);

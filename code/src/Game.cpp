@@ -29,6 +29,10 @@ bn::fixed sinTable[360] = {0.0,0.01745,0.0349,0.05234,0.06976,0.08716,0.10453,0.
 
 bn::random randomGenerator = bn::random();
 
+void doNothing() {
+	
+}
+
 void Game::doButanoUpdate() {
 	
 	bn::core::update();
@@ -82,6 +86,11 @@ void Game::createExitEffects() {
 	// before starting the transition will be, lets say spiritually taxing
 	// tbh, that will require so much rewriting/jank i probs just wont
 	
+	// this function is horrid.
+	
+	// might not be needed
+	//doButanoUpdate();
+	
 	Pos playerPos = entityManager.player->p;
 	
 	entityManager.createKillEffects();
@@ -104,7 +113,7 @@ void Game::createExitEffects() {
 		// this case means a enemy killed the player and the player moved, so we use the player start pos
 		
 		playerPos = entityManager.playerStart;
-		entityManager.player->p = playerPos;
+		//entityManager.player->p = playerPos;
 		
 	}
 	
@@ -113,7 +122,7 @@ void Game::createExitEffects() {
 	// in certain cases, where an enemey kills you above a floor like, yea 
 	
 	if(entityManager.playerWon()) {
-	
+		
 	} else if(entityManager.hasFloor(playerPos)) {
 		BN_LOG("killing player via enemy");
 		// unsure if this is a good idea, but it will make other calls to fallKill work
@@ -123,6 +132,8 @@ void Game::createExitEffects() {
 		BN_LOG("killing player via fall");
 		effectsManager.entityFall(entityManager.player);
 	}
+	
+	entityManager.player->p = playerPos;
 	
 }
 
@@ -248,7 +259,7 @@ void Game::resetRoom(bool debug) {
 	BN_LOG("entered reset room with debug=",debug);
 
 	// summon all room exiting effects
-	if(!debug) {
+	if(!debug && !entityManager.playerWon()) {
 		createExitEffects();
 	}
 
@@ -672,10 +683,6 @@ void Game::fadePalette(const int index) {
 			palettePointer[i] = localPaletteTable[i];
 		}
 	}
-	
-}
-
-void doNothing() {
 	
 }
 

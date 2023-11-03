@@ -313,8 +313,8 @@ void BigSprite::loadBoobTrap() {
 		// wtf. irlly need to switch over to namespaces
 		if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
 			bigSprite->effectsManager->doDialogue(
-			"i,,, why did you even do that? probably wanted to see if i had programed it in\n"
-			"well, i did let me move that out of the way\n"
+			"i,,, why did you even do that?\rprobably wanted to see if i had programed it in\n"
+			"well, i did\rlet me move that out of the way\n"
 			"it might hurt a little bit though"
 			);
 			bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
@@ -2548,15 +2548,19 @@ void EffectsManager::roomDust() {
 
 void EffectsManager::entityKill(Entity* entity) {
 	
-	entity->sprite.setVisible(false);
-	
 	EntityType t = entity->entityType();
-	//Pos p = entity->p;
+	Pos p = entity->p;
 	
 	// using these such as to get the past poses of the entities, where they should be/are currently
 	bn::fixed entityX = entity->sprite.screenx;
 	bn::fixed entityY = entity->sprite.screeny;
 	
+	
+	if(p != entity->sprite.getCurrentScreenPos()) {
+		p = entity->sprite.getCurrentScreenPos();
+	}
+	
+	entity->sprite.setVisible(false);
 	
 	if(t == EntityType::Player) {
 		game->playSound(&bn::sound_items::snd_player_damage);
@@ -2578,16 +2582,20 @@ void EffectsManager::entityKill(Entity* entity) {
 		}
 		
 		
-		auto createFunc = [entityX, entityY, tiles](Effect* obj) mutable -> void {
+		auto createFunc = [p, entityX, entityY, tiles](Effect* obj) mutable -> void {
 			obj->sprite.spritePointer.set_tiles(
 				*tiles,
 				0
 			);
-			obj->sprite.spritePointer.set_x(entityX-1);
-			obj->sprite.spritePointer.set_y(entityY);
+			obj->x = p.x * 16;
+			obj->y = p.y * 16;
+			obj->sprite.updateRawPosition(obj->x-1, obj->y);
+			
+			//obj->sprite.spritePointer.set_x(entityX-1);
+			//obj->sprite.spritePointer.set_y(entityY);
 		};
 		
-		auto tickFunc = [entityX, entityY, tiles](Effect* obj) mutable -> bool {
+		auto tickFunc = [p, entityX, entityY, tiles](Effect* obj) mutable -> bool {
 			
 			if(frame % 6 != 0) {
 				return false;
@@ -2599,9 +2607,11 @@ void EffectsManager::entityKill(Entity* entity) {
 			);
 			
 			if(obj->tempCounter == 0) {
-				obj->sprite.spritePointer.set_x(entityX+1);
+				//obj->sprite.spritePointer.set_x(entityX+1);
+				obj->sprite.setRawX(p.x * 16 + 1);
 			} else {
-				obj->sprite.spritePointer.set_x(entityX-1);
+				//obj->sprite.spritePointer.set_x(entityX-1);
+				obj->sprite.setRawX(p.x * 16 - 1);
 			}
 			
 			obj->tempCounter = !obj->tempCounter;
@@ -2613,6 +2623,8 @@ void EffectsManager::entityKill(Entity* entity) {
 		createEffect(createFunc, tickFunc);
 	
 	} else {
+		
+		
 		
 		// the fact that i cannot set a graphics index with a tiles ptr, bc  
 		// tiles ptrs are only supposed to be used for single graphicsindex sprites
@@ -2632,13 +2644,17 @@ void EffectsManager::entityKill(Entity* entity) {
 		
 		const bn::sprite_tiles_item& tilesItem = entity->spriteTilesArray[entity->tileIndex];
 		
-		auto createFunc = [entityX, entityY, tilesItem](Effect* obj) mutable -> void {
+		auto createFunc = [p, entityX, entityY, tilesItem](Effect* obj) mutable -> void {
 			obj->sprite.spritePointer.set_tiles(
 				tilesItem,
 				0
 			);
-			obj->sprite.spritePointer.set_x(entityX);
-			obj->sprite.spritePointer.set_y(entityY);
+			
+			obj->x = p.x * 16;
+			obj->y = p.y * 16;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			//obj->sprite.spritePointer.set_x(entityX);
+			//obj->sprite.spritePointer.set_y(entityY);
 			
 		};
 		
@@ -2673,6 +2689,11 @@ void EffectsManager::entityFall(Entity* entity) {
 	
 	EntityType t = entity->entityType();
 	Pos p = entity->p;
+	
+	if(p != entity->sprite.getCurrentScreenPos()) {
+		p = entity->sprite.getCurrentScreenPos();
+	}
+	
 	bn::fixed entityX = entity->sprite.screenx;
 	bn::fixed entityY = entity->sprite.screeny;
 	
@@ -2684,11 +2705,11 @@ void EffectsManager::entityFall(Entity* entity) {
 			e->graphicsIndex = 0;
 			e->tempCounter = 0;
 			
-			//e->x = p.x * 16;
-			//e->y = p.y * 16;
-			//e->sprite.updateRawPosition(e->x, e->y);
-			e->sprite.spritePointer.set_x(entityX);
-			e->sprite.spritePointer.set_y(entityY);
+			e->x = p.x * 16;
+			e->y = p.y * 16;
+			e->sprite.updateRawPosition(e->x, e->y);
+			//e->sprite.spritePointer.set_x(entityX);
+			//e->sprite.spritePointer.set_y(entityY);
 			
 			e->sprite.spritePointer.set_tiles(
 				*fallData[e->tempCounter].spriteTiles,

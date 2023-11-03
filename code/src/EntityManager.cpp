@@ -523,7 +523,7 @@ void EntityManager::doMoves() {
 	
 	player->pushAnimation = player->p == playerStart;
 	if(player->p != playerStart) {
-		//player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
+		player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
 	} else {
 		//,, this will play at the same time as a boulder push,,, but im tired ok
 		if(playerRes.second.has_value()) {
@@ -554,8 +554,11 @@ void EntityManager::doMoves() {
 		return;
 	}
 	
+	// do i even need this var to be a class var
+	playerStart = player->p;
+	
 	// should this be happening here, or on the if(player->p != playerStart) {
-	player->doUpdate();
+	//player->doUpdate();
 
 	// check if player has moved into enemy, if so, die.
 	// DO STATUE CHECKS
@@ -1089,6 +1092,9 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 
 void EntityManager::createKillEffects() const {
 	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
 		if((*it)->entityType() != EntityType::Player) {
 			effectsManager->entityKill(*it);
 		}

@@ -115,6 +115,9 @@ public:
 	bool obstacleKill() const { 
 		bool customKill = false;
 		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+			if(*it == NULL) {
+				continue;
+			}
 			if((*it)->isObstacle()) {
 				customKill = true;
 				break;
