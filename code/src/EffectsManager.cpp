@@ -2690,7 +2690,7 @@ void EffectsManager::entityFall(Entity* entity) {
 	EntityType t = entity->entityType();
 	Pos p = entity->p;
 	
-	if(p != entity->sprite.getCurrentScreenPos()) {
+	if(t == EntityType::Player && p != entity->sprite.getCurrentScreenPos()) {
 		p = entity->sprite.getCurrentScreenPos();
 	}
 	
