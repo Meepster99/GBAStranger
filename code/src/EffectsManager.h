@@ -303,6 +303,7 @@ public:
 
 	EffectsManager(Game* game_);
 	
+	~EffectsManager();
 
 	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency = 1) {
 		Effect* e = new Effect(create_, animate_, animationFrequency);

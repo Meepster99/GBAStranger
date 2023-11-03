@@ -162,6 +162,8 @@ public:
 		cutsceneManager.effectsManager = &effectsManager;
 		
 	}
+
+	~Game();
 	
 	void run();
 	

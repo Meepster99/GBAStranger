@@ -301,6 +301,40 @@ const char* TileManager::checkBrand() {
 	return NULL;
 }
 
+TileManager::~TileManager() {
+
+	if(entityManager->player != NULL) {
+		Player* player = entityManager->player;
+		
+		for(int i=0; i<player->rod.size(); i++) {
+			delete player->rod[i];
+			player->rod[i] = NULL;
+		}
+		player->rod.clear();
+	
+	}
+	
+	// will leftover pointers leave problems?
+	exitTile = NULL;
+	rodTile = NULL;
+	locustTile = NULL;
+	locustCounterTile = NULL;
+	memoryTile = NULL;
+	wingsTile  = NULL;
+	swordTile  = NULL;
+	
+	for(int x=0; x<14; x++) { 
+		for(int y=0; y<9; y++) {
+			if(floorMap[x][y] != NULL) {
+				delete floorMap[x][y];
+			}
+			floorMap[x][y] = NULL;
+		}
+	}
+	
+	
+}
+
 // ----- 
 
 void TileManager::doFloorSteps() { 

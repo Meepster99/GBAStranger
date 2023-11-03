@@ -41,6 +41,8 @@ public:
 
 	EntityManager(Game* game_) : game(game_) {}
 	
+	~EntityManager();
+	
 	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
 	
 	void updatePalette(Palette* pal);

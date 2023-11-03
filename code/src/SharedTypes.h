@@ -13,6 +13,11 @@
 //#include <cstring>
 
 #include "bn_bg_tiles.h"
+#include "bn_bg_maps.h"
+#include "bn_bg_palettes.h"
+#include "bn_sprite_tiles.h"
+#include "bn_sprite_palettes.h"
+//#include "bn_best_fit_allocator.h"
 
 #include "bn_version.h"
 

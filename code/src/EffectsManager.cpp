@@ -596,6 +596,25 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	
 }
 
+EffectsManager::~EffectsManager() {
+	for(int i=0; i<effectList.size(); i++) {
+		if(effectList[i] != NULL) {
+			delete effectList[i];
+		}
+		effectList[i] = NULL;
+	}
+	
+	effectList.clear();
+	
+	for(int i=0; i<bigSprites.size(); i++) {
+		if(bigSprites[i] != NULL) {
+			delete bigSprites[i];
+		}
+		bigSprites[i] = NULL;
+	}
+	
+	bigSprites.clear();
+}
 
 void EffectsManager::updatePalette(Palette* pal) {
 	
@@ -1904,18 +1923,6 @@ void EffectsManager::doMenu() {
 }
 
 // -----
-
-// yep. its exactly what it looks like.
-
-/*
-
-import math
-
-res = [ round(math.sin(math.radians(i)), 5) for i in range(0, 360) ]
-
-print("bn::fixed sinTable[360] = {{{:s}}};".format(",".join([str(v) for v in res])))
-
-*/
 
 void EffectsManager::glassBreak(Pos p) {
 	

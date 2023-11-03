@@ -292,6 +292,56 @@ void EntityManager::addEntity(Entity* e) {
 	
 }
 
+EntityManager::~EntityManager() {
+	
+	killedPlayer.clear();
+	
+	shadowQueue.clear();
+	
+	kickedList.clear();
+	
+	if(player != NULL) {
+		for(int i=0; i<player->rod.size(); i++) {
+			if(player->rod[i] != NULL) {
+				delete player->rod[i];
+				player->rod[i] = NULL;
+			}
+		}
+		player->rod.clear();
+	}
+	
+	
+	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
+		if(*it != NULL) { // sanity check
+			delete *it;
+		}
+		*it = NULL;
+	}
+	
+	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
+		if(*it != NULL) { // sanity check
+			delete *it;
+		}
+		*it = NULL;
+	}
+	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			entityMap[x][y].clear();
+			futureEntityMap[x][y].clear();
+		}
+	}
+	
+	entityList.clear();
+	enemyList.clear();
+	obstacleList.clear();
+	shadowList.clear();
+	deadList.clear();
+	
+	
+	player = NULL;
+}
+
 // ----- 
 
 bool EntityManager::moveEntity(Entity* e, bool dontSet) { 

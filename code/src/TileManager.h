@@ -117,6 +117,8 @@ public:
 		}
 	}
 	
+	~TileManager();
+	
 	const char* exitDestination = NULL;
 	bn::vector<bn::pair<const char*, Pos>, 8> secretDestinations;
 
