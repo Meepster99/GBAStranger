@@ -123,6 +123,8 @@ public:
 		return customKill;
 	}
 	
+	void createKillEffects() const;
+	
 	void hideForDialogueBox(bool vis, bool isCutscene);
 	bool exitRoom();
 	bool enterRoom();

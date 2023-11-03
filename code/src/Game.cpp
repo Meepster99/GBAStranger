@@ -84,6 +84,8 @@ void Game::createExitEffects() {
 	
 	Pos playerPos = entityManager.player->p;
 	
+	entityManager.createKillEffects();
+	
 	// determines if something(like a mon or lev statue) has killed the player
 	// may cause issues if the player dies to multiple things at once??
 	bool customKill = entityManager.obstacleKill();

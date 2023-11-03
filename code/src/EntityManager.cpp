@@ -1082,11 +1082,17 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 	
 	BN_ASSERT(hasKills(), "entityManager exitroom called when there were no kills?");
 	
-	// should this,,, 
-	
 	
 	// is this ok? should this be false
 	return true;
+}
+
+void EntityManager::createKillEffects() const {
+	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+		if((*it)->entityType() != EntityType::Player) {
+			effectsManager->entityKill(*it);
+		}
+	}
 }
 
 bool EntityManager::enterRoom() {
