@@ -524,10 +524,8 @@ const MessageStr randomBoulderMessages[] = {
 	MSGSTR("ugh\0"),
 	MSGSTR("i firmly believe that cif is best lord\0"),
 	MSGSTR("please if you know anyone who has a job in CS, give them\nmy contact info, i need a job\0"),
-	MSGSTR("this program was written in part by the following:\nexcessive ADHD medication, depression,\na NEET lifestyle, and viewers like you<3\0"),
 	MSGSTR("you might be able to still open the chest when you arent facing it\ndepending on if ive fixed that yet\0"), // it would be funny to program in an exception for this chest only
-	MSGSTR("uwu\nuwuuwuwuwuwuwu\0"),
-	MSGSTR("i am so tired. i always wonder who i am doing this all for. is it for me? no. is it for anyone else? i dont think so. idk, who knows anythiing anymore. i should really remove that\0"),
+	MSGSTR("uwu\nuwuuwuwuwuwuwu\0")
 };
 
 void Boulder::interact() {
