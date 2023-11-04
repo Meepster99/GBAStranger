@@ -71,8 +71,36 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	SaneSet<Pos, MAXENTITYSPRITES> posSet;
 	
 	for(int i=0; i<entitiesCount; i++) {
+		// i shouldnt have to do this, but despite getting a literal 1:1 memory recreation, it still chose to shit itself 
+		// it just didnt want to work.
+		// a byte would just get read on a loop for some reason?
+		// i cant believe i changed my endianness for this, and padded bytes and shitomfg
+		// the numbers getting read in were always repeats of one byte, but idk what it happens
+		// so im just doing it manually here
+		// and undoing all the endianness changes
 		
-		EntityHolder temp = entitiesPointer[i];
+		BN_LOG("bruh ", static_cast<int>(entitiesPointer[0].t));
+		BN_LOG("bruh ", entitiesPointer[0].x);
+		BN_LOG("bruh ", entitiesPointer[0].y);
+		
+		
+		EntityType tempType = entitiesPointer[i].t;
+		unsigned short tempX = entitiesPointer[i].x;
+		unsigned short tempY = entitiesPointer[i].y;
+		
+		
+		
+		if((reinterpret_cast<unsigned>(entitiesPointer) & 0x0E000000) == 0x0E000000) {
+			
+			u8* tempPtr = reinterpret_cast<u8*>(entitiesPointer);
+			tempType = static_cast<EntityType>(tempPtr[ (i*3) + 0]);
+			tempX = tempPtr[ (i*3) + 1];
+			tempY = tempPtr[ (i*3) + 2];
+			
+		}
+		
+		EntityHolder temp = {tempType, tempX, tempY};
+		
 		Pos tempPos(temp.x, temp.y);
 		
 		// why doesnt this line work omfg
@@ -178,7 +206,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new CifStatue(tempPos));
 				break;
 			default:
-				BN_ERROR("unknown entity tried to get loaded in, wtf");
+				BN_ERROR("unknown entity tried to get loaded in, wtf. id=", static_cast<int>(temp.t), " entityCount was ", entitiesCount);
 				break;
 		}
 		

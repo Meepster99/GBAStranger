@@ -70,6 +70,11 @@ public:
 // ----
 
 struct GameSave {
+	
+	// could use a bool, but i dont want to risk junk sram data.
+	// 42 will be a custom room
+	int isCustomSave = 0;
+	
 	u8 locustCount = 0;
 	bool isVoided = false;
 	int roomIndex = 1;
@@ -86,6 +91,7 @@ struct GameSave {
 	
 	uint64_t hash = 0;
 };
+
 
 class Game {
 public:
@@ -169,6 +175,7 @@ public:
 	
 	void save();
 	void load();
+	void loadCustomSave();
 	uint64_t getSaveHash();
 	
 	void loadTiles();

@@ -479,7 +479,6 @@ void Game::loadLevel(bool debug) {
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
 	
-	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
 
@@ -777,7 +776,10 @@ void Game::run() {
 	
 	globalGame = this;
 	
+	roomManager.isCustomRooms();
+	
 	load();
+	
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 	
 	bn::core::set_vblank_callback(didVBlank);
@@ -795,7 +797,7 @@ void Game::run() {
 		}
 	}
 	
-	if(brandBlank) {
+	if(brandBlank && !roomManager.isCustom) {
 		cutsceneManager.brandInput();
 	}
 	
@@ -944,6 +946,10 @@ uint64_t Game::getSaveHash() {
 void Game::save() {
 	//BN_LOG("saving save");
 	
+	if(roomManager.isCustom) {
+		return;
+	}
+	
 	BN_ASSERT(entityManager.player != NULL, "when saving save, the player was null!");
 	
 	saveData.locustCount = entityManager.player->locustCount;
@@ -973,8 +979,12 @@ void Game::save() {
 }
 
 void Game::load() {
-	BN_LOG("loading save");
+	//BN_LOG("loading save");
 	bn::sram::read(saveData);
+	
+	if(roomManager.isCustom) {
+		return;
+	}
 	
 	if(saveData.hash != getSaveHash()) {
 		BN_LOG("either a save wasnt found, or it was corrupted. creating new save");

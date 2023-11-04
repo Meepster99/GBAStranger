@@ -649,9 +649,11 @@ inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Pos& p) {
 
 struct EntityHolder {
 	const EntityType t;
-	const u8 x;
-	const u8 y;
-};
+	//const u8 x;
+	//const u8 y;
+	const unsigned short x;
+	const unsigned short y;
+};// __attribute__((packed)); // https://stackoverflow.com/questions/40642765/how-to-tell-gcc-to-disable-padding-inside-struct
 
 struct EffectHolder {
 	const bn::sprite_tiles_item* tiles;

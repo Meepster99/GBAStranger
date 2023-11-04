@@ -6,6 +6,8 @@ class RoomManager {
 public:
 
 	RoomManager();
+	
+	bool isCustom = false;
 
 	int roomIndex = 0;
 	int modeTracker = 0;
@@ -24,5 +26,19 @@ public:
 	void setMode(int mode);
 	
 	void gotoRoom(const char* roomName);
+	
+	void isCustomRooms();
+	void initCustomRooms();
+	Room loadCustomRoom();
+	
+	~RoomManager();
+
+private:
+	// dont have to use a vector here. i worry bc like, running out of space. i can use an unsigned short tho bc, 32kb = 2^15
+	// gods but regardless, it just burns 2k of stack mem, when i dont fucking need it. im allocating
+	
+	unsigned roomCountAlloc = 0;
+	unsigned short* roomOffsets = NULL;
+	char** roomNamesAlloc = NULL;
 	
 };
