@@ -647,13 +647,19 @@ inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Pos& p) {
 	return stream;
 }
 
+//#pragma scalar_storage_order little-endian
+//#pragma pack(1)
 struct EntityHolder {
 	const EntityType t;
 	//const u8 x;
 	//const u8 y;
 	const unsigned short x;
 	const unsigned short y;
-};// __attribute__((packed)); // https://stackoverflow.com/questions/40642765/how-to-tell-gcc-to-disable-padding-inside-struct
+};
+//#pragma pack()
+//#pragma scalar_storage_order reset
+//  __attribute__((packed, scalar_storage_order("little-endian")));
+// __attribute__((packed)); // https://stackoverflow.com/questions/40642765/how-to-tell-gcc-to-disable-padding-inside-struct
 
 struct EffectHolder {
 	const bn::sprite_tiles_item* tiles;

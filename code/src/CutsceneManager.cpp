@@ -1186,7 +1186,6 @@ void CutsceneManager::restoreAllButEffectsAndFloor() {
 	restoreLayer(3);
 }
 
-
 void CutsceneManager::delay(int delayFrameCount) {
 	// this function should of been made WAYYYY earlier
 	for(int i=0; i<delayFrameCount; i++) {

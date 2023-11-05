@@ -1518,7 +1518,17 @@ def main():
 	os.chdir(os.path.dirname(__file__))
 	
 	if len(sys.argv) != 1:
-		#generateCustomFloorBackground("./formattedOutput/customFloor/")	
+		#generateCustomFloorBackground("./formattedOutput/customFloor/")
+
+		# ok look.
+		# i didnt want to fork butano 
+		# ok i get i already have a fork for the tail test branch, but i just, look i just didnt want to fucking do it ok 
+		# out of all the code, the stack manipulation, the casting integers to pointers, this is what i am the most ashamed of.
+		# check out the start of main.cpp for a further explanation
+		
+		copyIfChanged("irq_handler.s", "../../butano/butano/hw/3rd_party/libugba/src/")
+	
+		
 		generateAllIncludes()
 		exit(0)
 		

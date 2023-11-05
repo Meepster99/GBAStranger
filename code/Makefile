@@ -32,7 +32,7 @@ BUILD       :=  build
 LIBBUTANO   :=  ../butano/butano/
 PYTHON      :=  python
 SOURCES     :=  src ../butano/common/src
-INCLUDES    :=  include ../butano/common/include ./build ../butano/butano/src/
+INCLUDES    :=  include ../butano/common/include ./build ../butano/butano/src/ ../butano/butano/hw/src/ ../butano/butano/hw/include/ ../butano/butano/hw/3rd_party/libugba/include/ ../butano/butano/hw/3rd_party/libugba/src/
 DATA        :=
 GRAPHICS    :=  graphics ../butano/common/graphics
 AUDIO       :=  audio ../butano/common/audio
@@ -43,6 +43,8 @@ ROMCODE     :=  GBST
 # https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
 #USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
 USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
+#USERFLAGS   :=  -O3 
+#USERFLAGS   := 
 USERASFLAGS :=  
 USERLDFLAGS :=  -flto=auto 
 USERLIBDIRS :=  

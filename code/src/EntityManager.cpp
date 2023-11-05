@@ -79,9 +79,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		// so im just doing it manually here
 		// and undoing all the endianness changes
 		
-		BN_LOG("bruh ", static_cast<int>(entitiesPointer[0].t));
-		BN_LOG("bruh ", entitiesPointer[0].x);
-		BN_LOG("bruh ", entitiesPointer[0].y);
+		//BN_LOG("bruh ", static_cast<int>(entitiesPointer[0].t));
+		//BN_LOG("bruh ", entitiesPointer[0].x);
+		//BN_LOG("bruh ", entitiesPointer[0].y);
 		
 		
 		EntityType tempType = entitiesPointer[i].t;
