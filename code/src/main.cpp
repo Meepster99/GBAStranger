@@ -221,9 +221,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	
 	unsigned short VCOUNT = 0;
 	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(0x04000002);
-	unsigned short startVal = 0;
-	unsigned short endVal = 40;
-	unsigned waitFrames = 0;
+	unsigned greenFrames = 0;
 	bool frameStarted = false;
 	unsigned short greenSwapState = 0xFFFF;
 	while(true) {
@@ -233,43 +231,32 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		if(VCOUNT == 0 && !frameStarted) {
 			frameStarted = true;
 			frame++;
-			//if(waitFrames > 0) {
-			
-			//unsigned short temp1 = (frame / 10) % 160;
-			//unsigned short temp2 = (startVal + 40) % 160;
-			
-			
-			startVal = (startVal + (bruhRand() & 3)) % 160;
-			endVal = (endVal + (bruhRand() & 1)) % 160;
-			
 		}
 		
-		if(waitFrames > 0) {
-			continue;
-		}
-
-		if(VCOUNT == startVal && startVal != 36) {
-			*greenswap = 1;
-		}
 		
-		if(VCOUNT == endVal) {
-			*greenswap = 0;
-		}
-		
-		// dont move the eyes
-		if(VCOUNT == 36 && greenSwapState == 0xFFFF) {
-			greenSwapState = *greenswap;
-			*greenswap = 0;
-		}
-		
-		if(VCOUNT == 37 && greenSwapState != 0xFFFF) {
-			*greenswap = greenSwapState;
-			greenSwapState = 0xFFFF;
+		if(greenFrames > 0) {
+			if(VCOUNT == 0) {
+				*greenswap = 1;
+			}
+			
+			// dont move the eyes
+			if(VCOUNT == 36 && greenSwapState == 0xFFFF) {
+				greenSwapState = *greenswap;
+				*greenswap = 0;
+			}
+			
+			if(VCOUNT == 37 && greenSwapState != 0xFFFF) {
+				*greenswap = greenSwapState;
+				greenSwapState = 0xFFFF;
+			}
 		}
 		
 		if(VCOUNT == 160) {
+			*greenswap = 0;
 			frameStarted = false;
-			//waitFrames = bruhRand() & 0xFF;
+			if(bruhRand() & 0xFF == 0) {
+				greenFrames = bruhRand() & 0x7FF;
+			}
 		}
 	
 	}
