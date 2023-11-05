@@ -1053,10 +1053,15 @@ void CutsceneManager::createPlayerBrandRoom() {
 			
 			globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			globalGame->collision.rawMap.bgPointer.set_priority(1);
+			globalGame->collision.rawMap.bgPointer.set_palette(game->pal->getBGPalette());
 			
 			maps[2]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			maps[2]->bgPointer.set_priority(1);
 			
+			maps[3]->bgPointer.set_palette(game->pal->getBGPalette());
+			maps[2]->bgPointer.set_palette(game->pal->getBGPalette());
+			maps[1]->bgPointer.set_palette(game->pal->getBGPalette());
+			maps[0]->bgPointer.set_palette(game->pal->getBGPalette());
 			
 			int n = globalGame->collision.rawMap.bgPointer.tiles().tiles_count();
 			

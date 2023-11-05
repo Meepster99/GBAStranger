@@ -24,7 +24,7 @@ Room RoomManager::loadRoom() {
 }
 
 const char* RoomManager::currentRoomName() { 
-	if(roomIndex < 0 || roomIndex >= (int)(sizeof(roomNames)/sizeof(roomNames[0]))) {
+	if(roomIndex < 0 || roomIndex > MAXROOMS - 1) {
 			BN_ERROR("Roomindex ", roomIndex, " out of bounds, max ", sizeof(roomNames)/sizeof(roomNames[0]));
 	}
 	
@@ -32,7 +32,7 @@ const char* RoomManager::currentRoomName() {
 }
 
 void RoomManager::nextRoom() {
-	if(roomIndex + 1 < (int)(sizeof(rooms)/sizeof(rooms[0])) - 1) {
+	if(roomIndex + 1 < MAXROOMS - 2) {
 		roomIndex++;
 		BN_LOG("roomIndex incremented to ", roomIndex);
 	}
@@ -51,7 +51,7 @@ void RoomManager::cifReset() {
 }
 
 void RoomManager::changeFloor(int val) {
-	roomIndex = MIN(roomIndex + val, (int)(sizeof(rooms)/sizeof(rooms[0])) - 1);
+	roomIndex = MIN(roomIndex + val, MAXROOMS - 2);
 	roomIndex = MAX(roomIndex, 0);
 	BN_LOG("roomIndex changed to ", roomIndex);
 }

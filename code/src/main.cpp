@@ -115,10 +115,6 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		}
 	}
 	
-	//for(int i=0; i<16; i++) {
-	//	palettePointer[i] = col1;
-	//}
-	
 	// set up bg offsets 
 	// https://problemkaputt.de/gbatek-lcd-i-o-bg-control.htm
 	//                                                   FEDCBA9876543210
