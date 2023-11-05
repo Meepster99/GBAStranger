@@ -27,11 +27,22 @@ unsigned* glitchTiles = NULL;
 //unsigned short* glitchMap = NULL; // we dont actually care abt this
 int* glitchTilesCount;
 
+unsigned short* col0 = NULL;
+unsigned short* col1 = NULL;
+unsigned short* col2 = NULL;
+unsigned short* col3 = NULL;
+unsigned short* col4 = NULL;
+
+
 __attribute__((section(".iwram"))) unsigned short bruhRand() {
 	const uint64_t a = 6364136223846793005;
 	static uint64_t seed = 1;
     seed = a * seed + 1;
-    return (unsigned short)(seed >> 32);
+	
+	unsigned short res = (seed >> 48);
+	res ^= ((seed >> 32) & 0xFFFF);
+	return res;
+    //return (unsigned short)(seed >> 32);
 }
 
 // cheese and rice, at least i dont have to write asm
@@ -85,29 +96,30 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	// setup palette 
 	volatile unsigned short* palettePointer = reinterpret_cast<volatile unsigned short*>(0x05000000);
 	// this array seems to be declared on the fucking rom. this is really fuckingbad
-
-	unsigned short col0 = palettePointer[512-16];
-	unsigned short col1 = palettePointer[512-15];
-	unsigned short col2 = palettePointer[512-14];
-	unsigned short col3 = palettePointer[512-13];
-	unsigned short col4 = palettePointer[512-12];
+	// this needs to be redone in the future!
+	
+	//unsigned short col0 = palettePointer[512-16];
+	//unsigned short col1 = palettePointer[512-15];
+	//unsigned short col2 = palettePointer[512-14];
+	//unsigned short col3 = palettePointer[512-13];
+	//unsigned short col4 = palettePointer[512-12];
 	
 	for(int i=0; i<1024/2; i++) {
 		switch(i % 16) {
 			case 0:
-				palettePointer[i] = col0;
+				palettePointer[i] = *col0;
 				break;
 			case 1:
-				palettePointer[i] = col1;
+				palettePointer[i] = *col1;
 				break;
 			case 2:
-				palettePointer[i] = col2;
+				palettePointer[i] = *col2;
 				break;
 			case 3:
-				palettePointer[i] = col3;
+				palettePointer[i] = *col3;
 				break;
 			case 4:
-				palettePointer[i] = col4;
+				palettePointer[i] = *col4;
 				break;
 			default:
 				palettePointer[i] = 0;
@@ -162,6 +174,10 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		temp = bruhRand() & 0x0FFF;
 		
 		tileIndex = (temp & 0x01FF) % maxTile;
+		if(tileIndex == 0) { // one extra attempt
+			temp = bruhRand() & 0x0FFF;
+			tileIndex = (temp & 0x01FF) % maxTile;
+		}
 		temp = (temp & ~0x01FF) | tileIndex;
 		
 		mapPtr[i] = temp;
@@ -169,6 +185,10 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		temp = bruhRand() & 0x0FFF;
 		
 		tileIndex = (temp & 0x01FF) % maxTile;
+		if(tileIndex == 0) { // one extra attempt
+			temp = bruhRand() & 0x0FFF;
+			tileIndex = (temp & 0x01FF) % maxTile;
+		}
 		temp = (temp & ~0x01FF) | tileIndex;
 		
 		mapPtr2[i] = temp;
@@ -197,10 +217,60 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		tilesPtr[i] = 0;
 	}
 	
-	
 	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
 	
+	unsigned short VCOUNT = 0;
+	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(0x04000002);
+	unsigned short startVal = 0;
+	unsigned short endVal = 40;
+	unsigned waitFrames = 0;
+	bool frameStarted = false;
+	unsigned short greenSwapState = 0xFFFF;
 	while(true) {
+		
+		VCOUNT = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+		
+		if(VCOUNT == 0 && !frameStarted) {
+			frameStarted = true;
+			frame++;
+			//if(waitFrames > 0) {
+			
+			//unsigned short temp1 = (frame / 10) % 160;
+			//unsigned short temp2 = (startVal + 40) % 160;
+			
+			
+			startVal = (startVal + (bruhRand() & 3)) % 160;
+			endVal = (endVal + (bruhRand() & 1)) % 160;
+			
+		}
+		
+		if(waitFrames > 0) {
+			continue;
+		}
+
+		if(VCOUNT == startVal && startVal != 36) {
+			*greenswap = 1;
+		}
+		
+		if(VCOUNT == endVal) {
+			*greenswap = 0;
+		}
+		
+		// dont move the eyes
+		if(VCOUNT == 36 && greenSwapState == 0xFFFF) {
+			greenSwapState = *greenswap;
+			*greenswap = 0;
+		}
+		
+		if(VCOUNT == 37 && greenSwapState != 0xFFFF) {
+			*greenswap = greenSwapState;
+			greenSwapState = 0xFFFF;
+		}
+		
+		if(VCOUNT == 160) {
+			frameStarted = false;
+			//waitFrames = bruhRand() & 0xFF;
+		}
 	
 	}
 	
@@ -219,6 +289,12 @@ int main() {
 
 	// copy bs into memory 
 
+	col0 = new unsigned short(0x7FE0);
+	col1 = new unsigned short(0x0000);
+	col2 = new unsigned short(0x7FFF);
+	col3 = new unsigned short(0x6318);
+	col4 = new unsigned short(0x4210);
+	
 	stareTilesCount = new int(reinterpret_cast<int>(dw_spr_un_stare_index0_bn_gfxMap) - reinterpret_cast<int>(dw_spr_un_stare_index0_bn_gfxTiles));
 	stareMapCount = new int(reinterpret_cast<int>(dw_spr_un_stare_index0_bn_gfxPal) - reinterpret_cast<int>(dw_spr_un_stare_index0_bn_gfxMap));
 	glitchTilesCount = new int(dw_spr_glitchedsprites_bn_gfxTilesLen);

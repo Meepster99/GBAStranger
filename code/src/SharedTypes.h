@@ -105,7 +105,14 @@ extern unsigned boobaCount;
 extern unsigned playerMoveCount;
 
 extern bn::random randomGenerator;
-	
+
+extern unsigned short* col0;
+extern unsigned short* col1;
+extern unsigned short* col2;
+extern unsigned short* col3;
+extern unsigned short* col4;
+
+__attribute__((section(".iwram"))) unsigned short bruhRand();
 
 enum class GameState {
 	Normal, // normal gameplay

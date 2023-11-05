@@ -555,6 +555,14 @@ void Game::changePalette(int offset) {
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
+	
+	*col0 = pal->colorArray[0].data();
+	*col1 = pal->colorArray[1].data();
+	*col2 = pal->colorArray[2].data();
+	*col3 = pal->colorArray[3].data();
+	*col4 = pal->colorArray[4].data();
+	
+	
 	// this is a problem, fuck it ima just have palette not cause a save.
 	//save();
 		
@@ -623,6 +631,7 @@ void Game::fadePalette(const int index) {
 	
 	//BN_ASSERT(isVblank, "palette fading should only happen in vblank, or at least i think");
 	
+	// THIS IS NEVER PROPERLY FREED DUMBASS
 	static unsigned short* localPaletteTable = NULL;
 	
 	if(localPaletteTable == NULL) {
@@ -706,6 +715,7 @@ void didVBlank() {
 	isVblank = true;
 	globalGame->doVBlank();	
 	randomGenerator.update();
+	bruhRand();
 	isVblank = false;
 }
 
