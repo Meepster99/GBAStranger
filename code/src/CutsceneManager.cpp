@@ -1131,11 +1131,17 @@ void CutsceneManager::crashGame() {
 	bn::sound::stop_all();
 	bn::music::stop();
 	
+	// mute sound so disabling vblank iqr doesnt fuck me 
+	*(reinterpret_cast<unsigned short*>(0x04000080)) = 0;
+	*(reinterpret_cast<unsigned short*>(0x04000082)) = 0;
+	*(reinterpret_cast<unsigned short*>(0x04000084)) = 0;
+	
 	for(int i=0; i<5; i++) {
 		game->doButanoUpdate();
 	}
-	
-	//bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
+	//bn::core::set_vblank_callback(doNothing);
+	//game->doButanoUpdate();
+	bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
 	
 	//unsigned* bgVram = reinterpret_cast<unsigned*>(0x06000000);
 	//unsigned* randomStuff = reinterpret_cast<unsigned*>(0x03000000);
@@ -1155,6 +1161,7 @@ void CutsceneManager::crashGame() {
 	}
 	*/
 	
+	/*
 	volatile unsigned short* palettePointer = reinterpret_cast<volatile unsigned short*>(0x05000000);
 	for(int i=0; i<1024/2; i++) {
 		switch(i % 5) {
@@ -1202,52 +1209,108 @@ void CutsceneManager::crashGame() {
 		*bgVram = temp;
 		bgVram++;
 	}
+	*/
 	
-	unsigned short VCOUNT = 0;
+	// having butano still running in here means i can potentially do some,, sound stuff?
+	// and program easier
+		
+	
+	
+	*(reinterpret_cast<unsigned short*>(0x04000000)) |= 0b0000000010000000;
+	
+	unsigned short* bg1Control = (reinterpret_cast<unsigned short*>(0x400000A));
+	unsigned short* bg2Control = (reinterpret_cast<unsigned short*>(0x400000C));
+	
+	
+	unsigned short bg1CharBlock = (*bg1Control & 0b0000000000001100) >> 2;
+	unsigned short bg2CharBlock = (*bg2Control & 0b0000000000001100) >> 2;
+	
+	unsigned short bg1MapBlock =  (*bg1Control & 0b0001111100000000) >> 8;
+	unsigned short bg2MapBlock =  (*bg2Control & 0b0001111100000000) >> 8;
+	
+	BN_LOG(bg1CharBlock, " ", bg1MapBlock);
+	BN_LOG(bg2CharBlock, " ", bg2MapBlock);
+	
+	volatile unsigned short* mapPtr1 = reinterpret_cast<unsigned short*>(0x06000000 + (2 * bg1MapBlock * 1024));
+	volatile unsigned short* mapPtr2 = reinterpret_cast<unsigned short*>(0x06000000 + (2 * bg2MapBlock * 1024));
+	unsigned* tilesPtr1 = reinterpret_cast<unsigned*>(0x06000000 + (bg1CharBlock * 16 * 1024));
+	unsigned* tilesPtr2 = reinterpret_cast<unsigned*>(0x06000000 + (bg2CharBlock * 16 * 1024));
+	
+	unsigned short maxTile = *glitchTilesCount/(4*8);
+	
+	auto getRandomTile = [maxTile]() -> unsigned short {
+		
+		//retry:
+		unsigned short rand = bruhRand();
+		unsigned short tileIndex = rand % maxTile;
+		
+		unsigned short x = tileIndex % 12;
+		unsigned short y = tileIndex / 12;
+		
+		if(x > 8 || y > 8) { // one extra attempt
+			//goto retry;
+			tileIndex = bruhRand() % maxTile;
+		}
+		return tileIndex | (rand & 0b0000110000000000);
+	};
+	
+	for(int i=0; i<*stareMapCount/2; i++) {
+		// https://problemkaputt.de/gbatek-lcd-vram-bg-screen-data-format-bg-map.htm
+		mapPtr1[i] = (mapPtr1[i] & 0xF000) | getRandomTile();
+		mapPtr2[i] = (mapPtr2[i] & 0xF000) | getRandomTile();
+	}
+	
+	for(int i=0; i<*glitchTilesCount/4; i++) {
+		tilesPtr1[i] = glitchTiles[i];
+		tilesPtr2[i] = glitchTiles[i];
+	}
+
+	//unsigned short* bg2YOffset = reinterpret_cast<unsigned short*>(0x0400001A);
+	//*bg2YOffset = (*bg2YOffset + 1) & 0x01FF;
+	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
+	
+	unsigned short* bg2XOffset = reinterpret_cast<unsigned short*>(0x04000018);
+	unsigned short* bg2YOffset = reinterpret_cast<unsigned short*>(0x0400001A);
+	unsigned short bg2XOffsetValue = 0;
+	unsigned short bg2YOffsetValue = 0; // the pointer is write only. im ashamed at how long this took me
+
+	//volatile unsigned short VCOUNT = 0;
 	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(0x04000002);
+	volatile unsigned short* DISPSTAT  = reinterpret_cast<volatile unsigned short*>(0x04000004);
 	unsigned greenFrames = 0;
 	bool frameStarted = false;
-	unsigned short greenSwapState = 0xFFFF;
 	while(true) {
 		
-		VCOUNT = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+		//VCOUNT = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
 		
-		if(VCOUNT == 0 && !frameStarted) {
-			frameStarted = true;
-			frame++;
-			if(greenFrames > 0) {
-				greenFrames--;
-				palettePointer[16 + 2] = *col1;
-			} else {
-				*greenswap = 0;
-				palettePointer[16 + 2] = *col2;
-			}
-		}
-				
-		if(greenFrames > 0) {
-			if(VCOUNT == 0) {
-				*greenswap = 1;
-			}
-			
-			// dont move the eyes(now that the eyes are blinking, this aint rlly needed)
-			if(VCOUNT == 36 && greenSwapState == 0xFFFF) {
-				greenSwapState = *greenswap;
-				*greenswap = 0;
-			}
-			
-			if(VCOUNT == 37 && greenSwapState != 0xFFFF) {
-				*greenswap = greenSwapState;
-				greenSwapState = 0xFFFF;
-			}
-		}
-		
-		if(VCOUNT == 160) {
-			*greenswap = 0;
+		if((*DISPSTAT & 1) == 0 && frameStarted) {
 			frameStarted = false;
 			if(greenFrames == 0 && (bruhRand() & 0x3FF) == 0) {
 				greenFrames = (bruhRand() & 0xF);
 			}
 		}
+		
+		if((*DISPSTAT & 1) == 1 && !frameStarted) {
+			frameStarted = true;
+			frame++;
+			
+			if(greenFrames > 0) {
+				greenFrames--;
+				*greenswap = 1;
+				bg2XOffsetValue = bruhRand() & 1;
+				bg2YOffsetValue = (bg2YOffsetValue - 1) & 0x01FF;
+			} else {
+				*greenswap = 0;
+				bg2XOffsetValue = 0;
+				bg2YOffsetValue = 0;
+			}
+			
+			*bg2XOffset = bg2XOffsetValue;
+			*bg2YOffset = bg2YOffsetValue;
+		}
+		
+		
+		//bn::core::update();
 	}
 
 	BN_ERROR("game 'crashed', i havent implimented it yet ");

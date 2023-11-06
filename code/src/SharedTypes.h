@@ -112,6 +112,14 @@ extern unsigned short* col2;
 extern unsigned short* col3;
 extern unsigned short* col4;
 
+extern unsigned* stareTiles;
+extern unsigned short* stareMap;
+extern int* stareTilesCount;
+extern int* stareMapCount;
+
+extern unsigned* glitchTiles;
+extern int* glitchTilesCount;
+
 #define MONTH (\
   __DATE__ [2] == 'n' ? (__DATE__ [1] == 'a' ? 1 : 6) \
 : __DATE__ [2] == 'b' ? 2 \
@@ -125,6 +133,8 @@ extern unsigned short* col4;
 : 12)
 
 __attribute__((section(".iwram"))) unsigned short bruhRand();
+
+void doNothing();
 
 enum class GameState {
 	Normal, // normal gameplay

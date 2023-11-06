@@ -25,7 +25,7 @@ int* stareMapCount = 0;
 
 unsigned* glitchTiles = NULL;
 //unsigned short* glitchMap = NULL; // we dont actually care abt this
-int* glitchTilesCount;
+int* glitchTilesCount = NULL;
 
 unsigned short* col0 = NULL;
 unsigned short* col1 = NULL;
@@ -33,6 +33,10 @@ unsigned short* col2 = NULL;
 unsigned short* col3 = NULL;
 unsigned short* col4 = NULL;
 
+
+void doNothing() {
+	
+}
 
 __attribute__((section(".iwram"))) unsigned short bruhRand() {
 	const uint64_t a = 6364136223846793005;
@@ -174,22 +178,23 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		temp = bruhRand() & 0x0FFF;
 		
 		tileIndex = (temp & 0x01FF) % maxTile;
-		if(tileIndex == 0) { // one extra attempt
+		if(tileIndex % 12 >= 6) { // one extra attempt
 			temp = bruhRand() & 0x0FFF;
 			tileIndex = (temp & 0x01FF) % maxTile;
 		}
-		temp = (temp & ~0x01FF) | tileIndex;
+		temp = (temp & 0b0000110000000000) | tileIndex;
 		
 		mapPtr[i] = temp;
 		
 		temp = bruhRand() & 0x0FFF;
 		
 		tileIndex = (temp & 0x01FF) % maxTile;
-		if(tileIndex == 0) { // one extra attempt
+		if(tileIndex % 12 >= 6) { // one extra attempt
 			temp = bruhRand() & 0x0FFF;
 			tileIndex = (temp & 0x01FF) % maxTile;
 		}
-		temp = (temp & ~0x01FF) | tileIndex;
+		// why did i have to change this line? did something happen when i updated butano?
+		temp = (temp & 0b0000110000000000) | tileIndex;
 		
 		mapPtr2[i] = temp;
 	}

@@ -29,10 +29,6 @@ bn::fixed sinTable[360] = {0.0,0.01745,0.0349,0.05234,0.06976,0.08716,0.10453,0.
 
 bn::random randomGenerator = bn::random();
 
-void doNothing() {
-	
-}
-
 void Game::doButanoUpdate() {
 	
 	bn::core::update();
