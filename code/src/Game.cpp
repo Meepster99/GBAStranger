@@ -289,8 +289,6 @@ void Game::resetRoom(bool debug) {
 	}
 	entityManager.player->locustCount = tileManager.getLocustCount();
 	
-	cutsceneManager.resetRoom();
-	
 	BN_LOG("reseting to room ", roomManager.currentRoomName());
 	
 	if(!debug) {
@@ -307,6 +305,9 @@ void Game::resetRoom(bool debug) {
 	}
 
 	state = GameState::Loading;
+	
+	cutsceneManager.resetRoom();
+	
 	save();
 	
 	// this hopefully wont slow down debug moving much
@@ -891,10 +892,20 @@ void Game::run() {
 			}
 			
 			// pokemon style reset 
-			if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::start_held() && bn::keypad::select_held()) {
+			// changing this to have multiple options
+			if(bn::keypad::a_held() && bn::keypad::b_held() && (bn::keypad::start_held() || bn::keypad::start_pressed())) {
 				//THIS IS SHIT, make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
 				//bn::core::reset();
 				BN_LOG("game reset called");
+				break;
+			}
+			if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::select_held()) {
+				//THIS IS SHIT, make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
+				//bn::core::reset();
+				BN_LOG("save reset called");
+				entityManager.player->locustCount = 0;
+				entityManager.player->isVoided = false;
+				save();
 				break;
 			}
 		}

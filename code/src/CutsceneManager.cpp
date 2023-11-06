@@ -1128,11 +1128,14 @@ void CutsceneManager::crashGame() {
 	// totally use some of the hacky shit you learned from writing the cart thing to 
 	// corrupt stuff here
 
+	bn::sound::stop_all();
+	bn::music::stop();
+	
 	for(int i=0; i<5; i++) {
 		game->doButanoUpdate();
 	}
 	
-	bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
+	//bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
 	
 	//unsigned* bgVram = reinterpret_cast<unsigned*>(0x06000000);
 	//unsigned* randomStuff = reinterpret_cast<unsigned*>(0x03000000);
