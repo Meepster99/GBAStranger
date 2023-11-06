@@ -362,6 +362,7 @@ public:
 	void entityFall(Entity* entity);
 	void playerBrandRoomBackground();
 	Effect* generateSweatEffect();
+	Effect* generateDialogueEndpointer();
 };
 
 class Dialogue {

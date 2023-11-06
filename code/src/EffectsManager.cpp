@@ -1326,9 +1326,15 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		return skipScrollBool;
 	};
 	
+	Effect* dialogueEndPointer = generateDialogueEndpointer();
+	
 	while(true) {
 
+		dialogueEndPointer->sprite.spritePointer.set_bg_priority(0);
+	
 		if(bn::keypad::a_pressed() || pressQueued) {
+			dialogueEndPointer->sprite.spritePointer.set_bg_priority(3);
+			
 			pressQueued = false;
 			
 			skipScroll = false;
@@ -1379,10 +1385,12 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 			
 		}
 
+		
 		game->doButanoUpdate();
 	}
 	
 	
+	removeEffect(dialogueEndPointer);
 	
 	
 	//game->doButanoUpdate();
@@ -1436,11 +1444,37 @@ bool EffectsManager::restRequest() {
 	}
 	
 	//textGenerator.generate((bn::fixed)-16, (bn::fixed)-30, bn::string_view("Rest?\0"), textSpritesLine1);
-	textGenerator.generate((bn::fixed)-24, (bn::fixed)-64, bn::string_view("Rest?\0"), restSprites);
+	textGenerator.generate((bn::fixed)-24, (bn::fixed)-30, bn::string_view("Rest?\0"), restSprites);
 	for(int i=0; i<restSprites.size(); i++) {
 		restSprites[i].set_bg_priority(0);
 		restSprites[i].set_palette(activeTextPalette);
 	}
+	
+	bn::vector<bn::vector<bn::sprite_ptr, 4>, 4> restSpritesOutline;
+	
+	
+	for(int j=0; j<4; j++) {
+		
+		restSpritesOutline.push_back(bn::vector<bn::sprite_ptr, 4>());
+		
+		bn::fixed x = -24;
+		bn::fixed y = -30;
+		
+		// stupid way of doing this but i dont want to write a switch case
+		Pos dif = Pos(1, 1);
+		dif.move(static_cast<Direction>(j));
+		
+		x += (dif.x - 1);
+		y += (dif.y - 1);
+		
+		textGenerator.generate(x, y, bn::string_view("Rest?\0"), restSpritesOutline[j]);
+		for(int i=0; i<restSpritesOutline[j].size(); i++) {
+			restSpritesOutline[j][i].set_bg_priority(0);
+			restSpritesOutline[j][i].set_z_order(1);
+			restSpritesOutline[j][i].set_palette(spritePalette->getBlackSpritePalette());
+		}
+	}
+	
 	
 	for(int i=0; i<60; i++) {
 		game->doButanoUpdate();
@@ -1492,7 +1526,10 @@ bool EffectsManager::restRequest() {
 		game->doButanoUpdate(); 
 	
 	}
-	
+	for(int i=0; i<4; i++) {
+		restSpritesOutline[i].clear();
+	}
+	restSpritesOutline.clear();
 	restSprites.clear();
 	yesSprites.clear();
 	noSprites.clear();
@@ -2976,6 +3013,50 @@ Effect* EffectsManager::generateSweatEffect() {
 	effectList.push_back(e);
 	return e;	
 
+}
+
+Effect* EffectsManager::generateDialogueEndpointer() {
+	
+	auto createFunc = [](Effect* obj) mutable -> void {
+		
+		obj->graphicsIndex = 0;
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_textbox_endpointer,
+			obj->graphicsIndex
+		);
+		
+		// effects automatically makes the sprite visible, but we dont want 
+		// this sprite to be visible initially. 
+		// this will let the dialogue thingy cover it up, and we can change it at will.
+		obj->sprite.spritePointer.set_bg_priority(3); 
+		
+		// tempCounter is 
+		
+		obj->sprite.spritePointer.set_x(108);
+		obj->sprite.spritePointer.set_y(68);
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		if(frame % 5 != 0) {
+			return false;
+		}
+		
+		obj->graphicsIndex++;
+	
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_textbox_endpointer,
+			obj->graphicsIndex % 6
+		);
+		
+		
+		return false;
+	};
+	
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	return e;
 }
 
 
