@@ -84,6 +84,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	// if A was pressed, meaning we pick up a tile,,,, then (true, NULL)
 	// should the move be invalid(picking up a tile with ENTITY on it, return false, null)
 	
+	Direction currentDirBackup = currentDir;
 	
 	if(bn::keypad::a_pressed()) {
 		
@@ -165,28 +166,129 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		return {true, bn::optional<Direction>()};
 	}
 	
+	nextMove = bn::optional<Direction>();
+	
 	if(bn::keypad::down_pressed()) {
 		currentDir = Direction::Down;
 		nextMove = bn::optional<Direction>(currentDir);
-		return {true, bn::optional<Direction>(currentDir)};
+		//return {true, bn::optional<Direction>(currentDir)};
 	} else if(bn::keypad::up_pressed()) {
 		currentDir = Direction::Up;
 		nextMove = bn::optional<Direction>(currentDir);
-		return {true, bn::optional<Direction>(currentDir)};
+		//return {true, bn::optional<Direction>(currentDir)};
 	} else if(bn::keypad::left_pressed()) {
 		currentDir = Direction::Left;
 		nextMove = bn::optional<Direction>(currentDir);
-		return {true, bn::optional<Direction>(currentDir)};
+		//return {true, bn::optional<Direction>(currentDir)};
 	} else if(bn::keypad::right_pressed()) {
 		currentDir = Direction::Right;
 		nextMove = bn::optional<Direction>(currentDir);
+		//return {true, bn::optional<Direction>(currentDir)};
+	}
+	
+	if(!nextMove.has_value()) {
+		return {false, bn::optional<Direction>()};
+	}
+	
+	// do sweat anim here.
+	// we can do this without needing to vblank, since it is meant to hold up execution
+	
+	Pos tempPos = p;
+	if(!tempPos.move(currentDir)) {
 		return {true, bn::optional<Direction>(currentDir)};
 	}
 	
-	
-	nextMove = bn::optional<Direction>();
-	return {false, bn::optional<Direction>()};
-	
+	if(wingsUse == hasWings && !entityManager->hasFloor(tempPos) && !entityManager->hasCollision(tempPos) && !entityManager->hasEntity(tempPos)) {
+		
+		BN_LOG("doing sweat!");
+		
+		// spr_sweat
+		
+		entityManager->shouldTickPlayer = false;
+		
+		// i should rlly probs not be using this coord system
+		bn::fixed xVal = sprite.screenx;
+		bn::fixed yVal = sprite.screeny;
+		
+		Direction invertDirections[4] = {Direction::Down, Direction::Up, Direction::Right, Direction::Left};
+		
+		Direction stopDir = invertDirections[static_cast<int>(currentDir)];
+		
+		// nice function name, dumbass
+		auto didPlayerPressStopDir = [stopDir]() -> bool {
+			if(bn::keypad::down_pressed() && stopDir == Direction::Down) {
+				return true;
+			} else if(bn::keypad::up_pressed() && stopDir == Direction::Up) {
+				return true;
+			} else if(bn::keypad::left_pressed() && stopDir == Direction::Left) {
+				return true;
+			} else if(bn::keypad::right_pressed() && stopDir == Direction::Right) {
+				return true;
+			}
+			return false;
+		};
+		
+		// direction is casted to int as up, down, left, right
+		int xDiffs[4] = {0, 0, -1, 1};
+		int yDiffs[4] = {-1, 1, 0, 0};
+		
+		int xDif = xDiffs[static_cast<int>(currentDir)];
+		int yDif = yDiffs[static_cast<int>(currentDir)];
+		
+		xVal += 8 * xDif;
+		yVal += 8 * yDif;
+		
+		//bn::fixed factor = 0.66;
+		bn::fixed factor = 0.9;
+		int tickAmount = (8.0 / factor).ceil_integer();
+
+		Effect* sweatEffect = effectsManager->generateSweatEffect();
+		
+		sprite.spritePointer.set_x(xVal);
+		sprite.spritePointer.set_y(yVal);
+		
+		doTick();
+		
+		bool playerStop = false;
+		
+		for(int i=0; i<20; i++) {
+			
+			for(int waitFrames=0; waitFrames<7; waitFrames++) {
+				playerStop = didPlayerPressStopDir();
+				if(playerStop) {
+					break;
+				}
+				game->doButanoUpdate();
+			}
+			if(playerStop) {
+				break;
+			}
+			doTick();
+			
+			if(i < tickAmount) {
+				xVal += xDif * factor;
+				yVal += yDif * factor;
+			
+				sprite.spritePointer.set_x(xVal);
+				sprite.spritePointer.set_y(yVal);
+			} else {
+				break;
+			}
+		}
+		
+		effectsManager->removeEffect(sweatEffect);
+		entityManager->shouldTickPlayer = true;
+		
+		if(playerStop) {
+			currentDir = currentDirBackup;
+			sprite.updatePosition(p);
+			doTick();
+			nextMove = bn::optional<Direction>();
+			return {false, bn::optional<Direction>()};
+		}
+	}
+
+	return {true, bn::optional<Direction>(currentDir)};
 }
 
 bn::optional<Direction> Player::getNextMove() {

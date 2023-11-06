@@ -605,6 +605,7 @@ EffectsManager::~EffectsManager() {
 	}
 	
 	effectList.clear();
+	removeEffectsList.clear();
 	
 	for(int i=0; i<bigSprites.size(); i++) {
 		if(bigSprites[i] != NULL) {
@@ -765,6 +766,15 @@ bool EffectsManager::exitRoom() {
 	
 	for(auto it = effectList.begin(); it != effectList.end(); ) {
 		
+		if(removeEffectsList.contains(*it)) {
+			removeEffectsList.erase(*it);
+			
+			delete (*it);
+			(*it) = NULL;
+			it = effectList.erase(it);
+			continue;
+		}
+		
 		bool res = (*it)->animate();
 		
 		if(res) {
@@ -775,6 +785,9 @@ bool EffectsManager::exitRoom() {
 			++it;
 		}
 	}
+	
+	BN_ASSERT(removeEffectsList.size() == 0, "removeEffectsList size was nonzero after a effectsmanager vblank. this should never happen!");
+	
 	
 	static bool firstRun = true;
 	static unsigned int firstFrame = 0;
@@ -838,6 +851,15 @@ void EffectsManager::doVBlank() { profileFunction();
 	
 	for(auto it = effectList.begin(); it != effectList.end(); ) {
 		
+		if(removeEffectsList.contains(*it)) {
+			removeEffectsList.erase(*it);
+			
+			delete (*it);
+			(*it) = NULL;
+			it = effectList.erase(it);
+			continue;
+		}
+		
 		bool res = (*it)->animate();
 		
 		if(res) {
@@ -848,6 +870,8 @@ void EffectsManager::doVBlank() { profileFunction();
 			++it;
 		}
 	}
+	
+	BN_ASSERT(removeEffectsList.size() == 0, "removeEffectsList size was nonzero after a effectsmanager vblank. this should never happen!");
 	
 	return;
 
@@ -934,6 +958,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	}
 	
 	bigSprites.clear();
+	
+	removeEffectsList.clear();
 	
 	if(effectsCount == 1) { // the first effect is just a dummy to avoid 0 length arrays
 		return;
@@ -1118,6 +1144,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	// TODO, FOR TEXT OUTLINE, RENDER THE TEXT 4 TIMES ON EACH DIR WITH BLACK TO GEN THE OUTLINE
 	
+	// TODO, spr_textbox_endpointer, rotate every 5/6 frames(ithink?)
 	
 	GameState restoreState = game->state;
 	if(!isCutscene) {
@@ -2887,4 +2914,68 @@ void EffectsManager::playerBrandRoomBackground() {
 	
 	
 }
+
+Effect* EffectsManager::generateSweatEffect() {
+	
+	// we return the effect here such as to destruct it properly
+	// in the playerinput func 
+	
+	// i feel like this has a high likelyhood of being dumb
+	// but it at least will make my accesses shorter
+	// i really should of overloaded all sprite_ptr funcs into spritepointer, but its wayyyy far gone now
+	Player* player = entityManager->player;
+	
+	auto createFunc = [player](Effect* obj) mutable -> void {
+		
+		obj->graphicsIndex = 0;
+		
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_sweat,
+			obj->graphicsIndex
+		);
+		
+		int xDiffs[4] = {-8, 8, 8, -8};
+		//int yDiffs[4] = {-8, -8, -8, -8};
+		
+		// using tempCounters as offsets 
+		obj->tempCounter  = xDiffs[static_cast<int>(player->currentDir)];
+		//obj->tempCounter2 = yDiffs[static_cast<int>(player->currentDir)];
+		obj->tempCounter2 = -8;
+		
+		if(player->currentDir == Direction::Up || player->currentDir == Direction::Right) {
+			obj->sprite.spritePointer.set_horizontal_flip(true);
+		}
+		
+		obj->sprite.spritePointer.set_x(obj->tempCounter + player->sprite.spritePointer.x());
+		obj->sprite.spritePointer.set_y(obj->tempCounter2 + player->sprite.spritePointer.y());
+		obj->sprite.spritePointer.set_z_order(-2);
+	};
+	
+	auto tickFunc = [player](Effect* obj) mutable -> bool {
+	
+		if(frame % 2 == 0) {
+			return false;
+		}
+		
+		obj->graphicsIndex++;
+		
+		// this should get destroyed once the new level loads, and it being here means we are dead, so like, its only going to return false
+		obj->sprite.spritePointer.set_tiles(
+			bn::sprite_tiles_items::dw_spr_sweat,
+			obj->graphicsIndex % 5
+		);
+		
+		obj->sprite.spritePointer.set_x(obj->tempCounter + player->sprite.spritePointer.x());
+		obj->sprite.spritePointer.set_y(obj->tempCounter2 + player->sprite.spritePointer.y());
+		return false;
+	};
+	
+	// i rlly should just have createeffect return the fucking effect ptr 
+	// also i never use animationfreq even when i should
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	return e;	
+
+}
+
 

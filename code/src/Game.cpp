@@ -765,6 +765,12 @@ void Game::doVBlank() { profileFunction();
 			//BN_LOG("done");
 			break;
 		case GameState::Exiting:
+			
+			// should these calls be here?
+			//entityManager.doVBlank();
+			//effectsManager.doVBlank();
+			//tileManager.doVBlank();
+		
 			if(!a) { a = entityManager.exitRoom(); }
 			if(!b) { b = effectsManager.exitRoom(); }
 			if(!c) { c = tileManager.exitRoom(); }

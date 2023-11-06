@@ -283,6 +283,7 @@ public:
 	
 	// do these even need to be pointers?
 	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
+	SaneSet<Effect*, MAXEFFECTSPRITES> removeEffectsList;
 	
 	bn::sprite_text_generator textGenerator;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine1;
@@ -308,6 +309,12 @@ public:
 	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency = 1) {
 		Effect* e = new Effect(create_, animate_, animationFrequency);
 		effectList.push_back(e);
+	}
+	
+	void removeEffect(Effect* effect) {
+		// should effectlist be a saneset?
+		// actually, ill just add this to a list, and remove it from like,,, the vblankfunc
+		removeEffectsList.insert(effect);
 	}
 	
 	// this is going to be where i define my effects, as static vars, to be called with EffectManager::effectname()
@@ -354,6 +361,7 @@ public:
 	void entityKill(Entity* entity);
 	void entityFall(Entity* entity);
 	void playerBrandRoomBackground();
+	Effect* generateSweatEffect();
 };
 
 class Dialogue {

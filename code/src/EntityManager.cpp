@@ -10,6 +10,8 @@
 
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 
+	shouldTickPlayer = true;
+
 	LevStatue::rodUses = 0;
 	LevStatue::totalLev = 0;
 
@@ -1064,6 +1066,9 @@ void EntityManager::updateScreen() {
 void EntityManager::doTicks() {
 	
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
+		if(!shouldTickPlayer && *it == player) {
+			continue;
+		}
 		(*it)->doTick();
 	}
 	

@@ -838,6 +838,9 @@ public:
 	}
 	
 	bool contains(const T& elem) const {
+		if(data.size() == 0) {
+			return false;
+		}
 		return binarySearch(elem) != -1;
 	}
 	

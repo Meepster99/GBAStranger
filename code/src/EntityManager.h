@@ -62,6 +62,8 @@ public:
 
 	void updateScreen();
 	
+	
+	bool shouldTickPlayer = true;
 	void doTicks();
 	
 	void fullUpdate();
