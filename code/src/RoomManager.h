@@ -26,7 +26,8 @@ public:
 	void setMode(int mode);
 	
 	void gotoRoom(const char* roomName);
-	
+	void gotoRoom(int newIndex);
+		
 	void isCustomRooms();
 	void initCustomRooms();
 	Room loadCustomRoom();

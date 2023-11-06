@@ -9,6 +9,7 @@ class Game;
 class EntityManager;
 class EffectsManager;
 class TileManager;
+class CutsceneManager;
 
 class Sprite {
 public:
@@ -122,6 +123,7 @@ public:
 	static EntityManager* entityManager;
 	static EffectsManager* effectsManager;
 	static TileManager* tileManager;
+	static CutsceneManager* cutsceneManager;
 	static Game* game;
 	
 	//bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> fallData;

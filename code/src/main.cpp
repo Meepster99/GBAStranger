@@ -155,7 +155,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	// the iterate values should be gotten dynamically from pointer subtraction!!
 	
 	for(int i=0; i<*stareMapCount/2; i++) {
-		mapPtr[i] = stareMap[i];
+		mapPtr[i] = stareMap[i] | 0b0001000000000000;
 	}
 	
 	for(int i=0; i<*stareTilesCount/4; i++) {
@@ -231,15 +231,21 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		if(VCOUNT == 0 && !frameStarted) {
 			frameStarted = true;
 			frame++;
+			if(greenFrames > 0) {
+				greenFrames--;
+				palettePointer[16 + 2] = *col1;
+			} else {
+				*greenswap = 0;
+				palettePointer[16 + 2] = *col2;
+			}
 		}
-		
-		
+				
 		if(greenFrames > 0) {
 			if(VCOUNT == 0) {
 				*greenswap = 1;
 			}
 			
-			// dont move the eyes
+			// dont move the eyes(now that the eyes are blinking, this aint rlly needed)
 			if(VCOUNT == 36 && greenSwapState == 0xFFFF) {
 				greenSwapState = *greenswap;
 				*greenswap = 0;
@@ -254,15 +260,11 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		if(VCOUNT == 160) {
 			*greenswap = 0;
 			frameStarted = false;
-			if(bruhRand() & 0xFF == 0) {
-				greenFrames = bruhRand() & 0x7FF;
+			if(greenFrames == 0 && (bruhRand() & 0x7FF) == 0) {
+				greenFrames = (bruhRand() & 0xF);
 			}
 		}
-	
 	}
-	
-	
-	
 }
 
 int main() {

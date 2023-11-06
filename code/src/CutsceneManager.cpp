@@ -4,8 +4,9 @@
 
 #include "Game.h"
 
+#include "bn_hw_irq.h"
 
-CutsceneManager::CutsceneManager(Game* game_) : game(game_) {
+CutsceneManager::CutsceneManager(Game* game_) : game(game_), disTextGenerator(dw_fnt_etext_12_sprite_font) {
 	
 	maps[0] = &game->collision.rawMap;
 	maps[1] = &game->tileManager.floorLayer.rawMap;
@@ -20,6 +21,15 @@ CutsceneManager::CutsceneManager(Game* game_) : game(game_) {
 }
 
 // -----
+
+void CutsceneManager::resetRoom() {
+	disOsTextSprites.clear();
+	for(int i=0; i<disTextSprites.size(); i++) {
+		disTextSprites[i].clear();
+	}
+	disTextSprites.clear();
+	disText.clear();
+}
 
 void CutsceneManager::introCutscene() {
 	
@@ -1109,6 +1119,493 @@ void CutsceneManager::createPlayerBrandRoom() {
 	
 	game->entityManager.addEntity(temp1);
 	game->entityManager.addEntity(temp2);
+	
+	
+}
+
+void CutsceneManager::crashGame() {
+	
+	// totally use some of the hacky shit you learned from writing the cart thing to 
+	// corrupt stuff here
+
+	for(int i=0; i<5; i++) {
+		game->doButanoUpdate();
+	}
+	
+	bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
+	
+	//unsigned* bgVram = reinterpret_cast<unsigned*>(0x06000000);
+	//unsigned* randomStuff = reinterpret_cast<unsigned*>(0x03000000);
+	//memcpy(bgVram, randomStuff, 0x18000/4);
+	
+	/*
+	u8* bgVram = reinterpret_cast<u8*>(0x06000000);
+	u8* randomStuff = reinterpret_cast<u8*>(0x03000000);
+	
+	for(int i=0; i<0x18000; i++) {
+		while(*randomStuff == 0) {
+			randomStuff++;
+		}
+		*bgVram = *randomStuff;
+		bgVram++;
+		randomStuff++;
+	}
+	*/
+	
+	volatile unsigned short* palettePointer = reinterpret_cast<volatile unsigned short*>(0x05000000);
+	for(int i=0; i<1024/2; i++) {
+		switch(i % 5) {
+			case 0:
+				if(i % 16 == 0) {
+					palettePointer[i] = *col0;
+				} else {
+					palettePointer[i] = *col1;
+				}
+				break;
+			case 1:
+				palettePointer[i] = *col1;
+				break;
+			case 2:
+				palettePointer[i] = *col2;
+				break;
+			case 3:
+				palettePointer[i] = *col3;
+				break;
+			case 4:
+				palettePointer[i] = *col4;
+				break;
+			default:
+				palettePointer[i] = 0;
+				break;
+		}
+	}
+	
+	unsigned* bgVram = reinterpret_cast<unsigned*>(0x06000000);
+	unsigned temp;
+	unsigned maxTile = 512;
+	unsigned tileIndex;
+
+	for(int i=0; i<0x18000; i++) {
+		temp = *bgVram ^ *(bgVram + ((short)bruhRand()));
+		
+		
+		tileIndex = (temp & 0x01FF) % maxTile;
+		if(tileIndex == 0) { // one extra attempt
+			temp = bruhRand() & 0x0FFF;
+			tileIndex = (temp & 0x01FF) % maxTile;
+		}
+		temp = (temp & ~0x01FF) | tileIndex;
+		
+		*bgVram = temp;
+		bgVram++;
+	}
+	
+	unsigned short VCOUNT = 0;
+	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(0x04000002);
+	unsigned greenFrames = 0;
+	bool frameStarted = false;
+	unsigned short greenSwapState = 0xFFFF;
+	while(true) {
+		
+		VCOUNT = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+		
+		if(VCOUNT == 0 && !frameStarted) {
+			frameStarted = true;
+			frame++;
+			if(greenFrames > 0) {
+				greenFrames--;
+				palettePointer[16 + 2] = *col1;
+			} else {
+				*greenswap = 0;
+				palettePointer[16 + 2] = *col2;
+			}
+		}
+				
+		if(greenFrames > 0) {
+			if(VCOUNT == 0) {
+				*greenswap = 1;
+			}
+			
+			// dont move the eyes(now that the eyes are blinking, this aint rlly needed)
+			if(VCOUNT == 36 && greenSwapState == 0xFFFF) {
+				greenSwapState = *greenswap;
+				*greenswap = 0;
+			}
+			
+			if(VCOUNT == 37 && greenSwapState != 0xFFFF) {
+				*greenswap = greenSwapState;
+				greenSwapState = 0xFFFF;
+			}
+		}
+		
+		if(VCOUNT == 160) {
+			*greenswap = 0;
+			frameStarted = false;
+			if(greenFrames == 0 && (bruhRand() & 0x3FF) == 0) {
+				greenFrames = (bruhRand() & 0xF);
+			}
+		}
+	}
+
+	BN_ERROR("game 'crashed', i havent implimented it yet ");
+	
+}
+
+void CutsceneManager::carcusEnding() {
+	
+	for(int i=0; i<60; i++) {
+		game->doButanoUpdate();
+	}
+	
+	BN_ERROR("look, idrk if ima make the carcus ending, TODO.");
+	
+}
+
+void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
+	// it is critical that we pass a ref of the pointer to do proper comparisons
+	// wait no is it?
+	// the bool isPickup isnt neccessary, but will reduce lookups
+	
+	/*
+	
+	picking up the ?? from B??? will crash your game @Inana
+	picking up VO or ID from VOID will crash you
+	picking up INFINITY
+	going down stairs with an incomplete BXXX value (no last 2 digits)
+	picking up void rod
+	
+	i could probs,, just like check the state of things when you die and set the count to that 
+	for non crash things, crash things occur here.
+	and also the anims in the background 
+	
+	console is printed from as top being the most recent line.
+	most recent line is lightgray, following are darkgray
+	top line is "DIS OS REPORT 05/11/112023
+	// use build date for date
+	
+	locust counter:
+	">ERR: INVALID/MISSING LI VALUE"
+	">LI VALUE RESTORED"
+	
+	locust sprite:
+	">ERR: LI NULL"
+	">LI RESTORED"
+
+	">ERR: INVALID/MISSING BR VALUE"
+	">BR VALUE RESTORED"
+	
+	">ERR: MEM1 REMOVED"
+	">MEM1 RESTORED"
+	
+	">ERR: MEM2 REMOVED"
+	">MEM2 RESTORED"
+	
+	">ERR: MEM3 REMOVED"
+	">MEM3 RESTORED"
+	
+	hp number removed:
+	">ERR: INVALID/MISSING HP VALUE"
+	">HP RESTORED"
+	
+	hp bar removed:
+	">FATAL ERROR: HP NULL" // kill player afterword
+	
+	
+	remove first B val, B? B0 B1 B2::
+	">FATAL ERROR : BR NULL"
+	
+	remove rod:
+	corrupts screen, also prints something behind it? 
+	checking out gml_Object_obj_errormessages_Create_0 and gml_Object_obj_player_Step_0
+	maybe gml_Object_obj_floor_hpn_Destroy_0
+	
+	">FATAL ERR: VR HAS BEEN SEVERED FROM SYSTEM\n"
+	
+	remove VO or ID:
+	">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN\n"
+	
+	the font?
+	fnt_etext_12
+	
+	// also, dropoff tiles COVER this text. 
+	// that,, may be a bit of an issue
+	
+	locust tile count valid position is DYNAMIC, TO WHERE THE LOCUST SPRITE IS
+	
+	gods i spent so much time on having locust/number tiles be able to update whereever they are on the board 
+	before realizing how much pain this will be
+	
+	*/
+	
+	
+	auto swap = [](WordTile*& a, WordTile*& b) {
+		WordTile* s;
+		s = a;
+		a = b;
+		b = s;
+	};
+	
+	//FloorTile* bufferedTile = NULL; // tile to check at end of func
+	const char* errorLine = NULL;
+	Pos tilePos = testTile->tilePos;
+	bool isVoided = game->entityManager.player->isVoided;
+	bool doCarcusEnding = false;
+	bool doCrashGame = false;
+	
+	// each time a number tile is placed, it needs to,
+	// dynamically check the number to the LEFT of it, for what behaviour to do.
+	// also, perform swaps in tileManager
+	SaneSet<WordTile*, 4> numberTiles;
+	numberTiles.insert(tileManager->locustCounterTile);
+	numberTiles.insert(tileManager->floorTile2);
+	if(!isVoided) {
+		numberTiles.insert(tileManager->voidTile2);
+	}
+	
+	if((void*)testTile == (void*)tileManager->memoryTile) {
+		errorLine = isPickup ? ">ERR: MEM1 REMOVED" : ">MEM1 RESTORED";
+	} else if((void*)testTile == (void*)tileManager->wingsTile) {
+		errorLine = isPickup ? ">ERR: MEM2 REMOVED" : ">MEM2 RESTORED";
+	} else if((void*)testTile == (void*)tileManager->swordTile) {
+		errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
+	} else if((void*)testTile == (void*)tileManager->locustTile) {
+		errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
+		// follow this up with a dynamic call to THIS SAME FUNC, 
+		// WITH THE TILE TO THE RIGHT
+		// BUT ONLY IF THAT TILE ISNT NULL.
+		// moving the locust number tile does nothing. the only thing that does things, 
+		// is the locust sprite tile.
+		// wait am i fucking halucinating?
+		// i am. 
+		// wtf
+			
+		errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
+	} else if((void*)testTile == (void*)tileManager->locustCounterTile) {
+		if(tilePos.x != 0 && (void*)tileManager->floorMap[tilePos.x-1][tilePos.y] == (void*)tileManager->locustTile) {
+			//bufferedTile = tileManager->locustTile;	
+		}
+	} else if((void*)testTile == (void*)tileManager->floorTile1) {
+		// carcus ending
+		if(tileManager->floorTile1->second == '?') {
+			//crashGame("
+		} else {
+			doCarcusEnding = true;
+			errorLine = ">FATAL ERROR : BR NULL";
+		}
+	} else if((void*)testTile == (void*)tileManager->rodTile) {
+		// crash, but i havent implimented that yet
+		errorLine = ">FATAL ERR: VR HAS BEEN SEVERED FROM SYSTEM";
+		doCrashGame = true;
+	} else if((void*)testTile == (void*)tileManager->voidTile1) {
+		if(isVoided) {
+			errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
+			doCrashGame = true;
+		} else {
+			errorLine = ">FATAL ERROR: HP NULL";
+			//doCrashGame = true;
+			game->entityManager.addKill(game->entityManager.player); // this makes them fall, not slump over, but its ok for now
+		}
+	} else if(isVoided && (void*)testTile == (void*)tileManager->voidTile2) {
+		// crash (is this crash different if voided vs unvoided?)
+		errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
+		doCrashGame = true;
+	}
+	
+	// deal with numbertiles 
+	
+	if((void*)testTile == (void*)tileManager->floorTile2) {
+		if(tileManager->floorTile2->first == '?' || tileManager->floorTile2->second == '?') {
+			errorLine = ">FATAL ERROR: BR NULL";
+			doCrashGame = true;
+		}		
+	}
+	
+	if(numberTiles.contains(static_cast<WordTile*>(testTile))) {
+		// it rlly would be nice if the locust sprite tile was a wordtile. 
+		// i could be hacky with it and have the locust tile be represented with chars, but idrk 
+		// if its worth it for this one jank case
+		
+		BN_LOG("number tile");
+		
+		if(tilePos.x != 0 && tileManager->floorMap[tilePos.x-1][tilePos.y] != NULL) {
+			
+			FloorTile* leftTile = tileManager->floorMap[tilePos.x-1][tilePos.y];
+			
+			int leftTileIndex = -1;
+			int currentTileIndex = -1;
+			
+			if(leftTile == (FloorTile*)tileManager->voidTile1) {
+				// even being here implies being unvoided
+				leftTileIndex = 0;
+			} else if(leftTile == (FloorTile*)tileManager->locustTile) {
+				leftTileIndex = 1;
+			} else if(leftTile == (FloorTile*)tileManager->floorTile1) {
+				leftTileIndex = 2;
+			} else {
+				BN_LOG("number tile left index not a modifier, returning");
+				return; // IS THIS OK?
+			}
+			
+			if(testTile == (FloorTile*)tileManager->voidTile2) {
+				currentTileIndex = 0;
+			} else if(testTile == (FloorTile*)tileManager->locustCounterTile) {
+				currentTileIndex = 1;
+			} else if(testTile == (FloorTile*)tileManager->floorTile2) {
+				currentTileIndex = 2;
+			} else {
+				BN_ERROR("this should like, never, ever, happen");
+			}
+			
+			BN_ASSERT(leftTileIndex != -1 && currentTileIndex != -1, "some really fucked shit occured in the dis os area");
+			
+	
+			// there is totally a better way of doing this.
+			// i remember in datastructurs hw6 i actually had a thing like this, where i was trying to swap pointers, and 
+			// thinking of the differences between a pointer, a double pointer, and a refrence to a pointer
+			
+			// wtf
+			//void** tilePointers[3] = {(void**)&tileManager->voidTile2, (void**)&tileManager->locustCounterTile, (void**)&tileManager->floorTile2};
+			
+			// since these two numbers are guarenteed to be unique, we can now do: jank shit
+			// better than hardcoding
+			if(leftTileIndex != currentTileIndex) {
+				int switchVal = leftTileIndex + currentTileIndex;
+				switch(switchVal) {
+					case 1:
+						swap(tileManager->voidTile2, tileManager->locustCounterTile);
+						break;
+					case 2:
+						swap(tileManager->voidTile2, tileManager->floorTile2);
+						break;
+					case 3:
+						swap(tileManager->locustCounterTile, tileManager->floorTile2);
+						break;
+					default:
+						BN_ERROR("once again, the dis os code is shit :)");
+						break;
+				}
+			}
+		
+			if(testTile == (FloorTile*)tileManager->voidTile2) {
+				errorLine = isPickup ? ">ERR: INVALID/MISSING HP VALUE" : ">HP RESTORED";
+			} else if(testTile == (FloorTile*)tileManager->locustCounterTile) {
+				errorLine = isPickup ? ">ERR: INVALID/MISSING LI VALUE" : ">LI VALUE RESTORED";
+			} else if(testTile == (FloorTile*)tileManager->floorTile2) {
+				errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
+			} else {
+				BN_ERROR("this should like, never, ever, happen, omfg");
+			}
+			
+			
+			//BN_LOG("voidtile2         is at ", tileManager->voidTile2->tilePos);
+			//BN_LOG("locustCounterTile is at ", tileManager->locustCounterTile->tilePos);
+			//BN_LOG("floorTile2        is at ", tileManager->floorTile2->tilePos);
+			
+			if((testTile == (FloorTile*)tileManager->floorTile2) && tilePos == Pos(13, 8) && !isPickup) {
+				
+				// if the restored value is equal to our current room, we dont do shit.
+				int testRoomIndex = tileManager->getRoomIndex();
+				//BN_LOG("swaprooms! ", testRoomIndex, " ", game->roomManager.roomIndex);
+				if(testRoomIndex != game->roomManager.roomIndex) {
+					//BN_LOG("swaprooms!");
+					game->entityManager.addKill(NULL);
+				}
+				
+			}
+		}
+	}
+	
+	
+	
+	
+	if(errorLine == NULL) {
+		return;
+	}
+	
+	if(disText.size() == disText.max_size()) {
+		disText.pop_back();
+	}
+	disText.insert(disText.begin(), errorLine);
+	
+	
+	if(disTextSprites.size() == 0) {
+		disTextSprites.push_back(bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
+		
+		char tempBuffer[32];
+		memset(tempBuffer, 0, 32);
+
+		strcpy(tempBuffer, "DIS OS REPORT \0");
+		if(__DATE__[4] == ' ') {
+			tempBuffer[14] = '0';
+		} else {
+			tempBuffer[14] = __DATE__[4];
+		}
+		
+		if(__DATE__[5] == ' ') {
+			tempBuffer[15] = '0';
+		} else {
+			tempBuffer[15] = __DATE__[5];
+		}
+		
+		tempBuffer[16] = '/';
+		tempBuffer[17] = '0' + (MONTH / 10);
+		tempBuffer[18] = '0' + (MONTH % 10);
+		tempBuffer[19] = '/';
+		tempBuffer[20] = '1';			
+		tempBuffer[21] = '1';
+	
+		// Nov  5 2023
+		
+		strcpy(tempBuffer+22, __DATE__+7);
+		
+		//strcpy(tempBuffer+14, __DATE__[4]);
+		//"DIS OS REPORT 05/11/112023"
+		//BN_LOG(tempBuffer);
+		//BN_LOG(__DATE__);
+		
+		disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16, bn::string_view(tempBuffer), disOsTextSprites);
+		for(int i=0; i<disOsTextSprites.size(); i++) {
+			disOsTextSprites[i].set_palette(game->pal->getWhiteSpritePalette());
+			disOsTextSprites[i].set_bg_priority(3);
+		}
+	}
+
+		
+	if(disTextSprites.size() == disTextSprites.max_size()) {
+		disTextSprites.pop_back();
+	}
+	
+	// move all previous sprites down 16 tiles.
+	for(int j=0; j<disTextSprites.size(); j++) {
+		for(int i=0; i<disTextSprites[j].size(); i++) {
+			disTextSprites[j][i].set_y(-80+16+((j+2)*16));
+			if(j == 0) {
+				disTextSprites[j][i].set_palette(game->pal->getDarkGraySpritePalette());
+			}
+		}
+	}
+	
+	disTextSprites.insert(disTextSprites.begin(), bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
+
+	BN_ASSERT(disTextSprites.size() >= 2, "in the dis text generator, there were not a minimum of two lines to be generated!");
+	
+	disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16+(1*16), bn::string_view(disText[0]), disTextSprites[0]);
+	for(int i=0; i<disTextSprites[0].size(); i++) {
+		disTextSprites[0][i].set_palette(game->pal->getLightGraySpritePalette());
+		disTextSprites[0][i].set_bg_priority(3);
+	}
+	
+	if(doCarcusEnding) {
+		carcusEnding();
+	}
+	
+	if(doCrashGame) {
+		crashGame();
+	}
+	
+	//if(bufferedTile != NULL) {
+	//	disCrash(bufferedTile, isPickup);
+	//
 	
 	
 }

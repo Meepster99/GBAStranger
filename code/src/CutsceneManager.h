@@ -3,6 +3,9 @@
 #include "SharedTypes.h"
 #include "EffectsManager.h"
 
+class TileManager;
+class FloorTile;
+
 #include <functional>
 
 // decided this was big enough to make a whole new thing 
@@ -27,6 +30,7 @@ public:
 	Game* game; 
 	CutsceneLayer cutsceneLayer;
 	EffectsManager* effectsManager;
+	TileManager* tileManager;
 	
 	BackgroundMap* maps[4];
 	int zIndexBackup[4];
@@ -34,6 +38,11 @@ public:
 	
 	bn::fixed xPosBackup[4];
 	bn::fixed yPosBackup[4];
+	
+	bn::sprite_text_generator disTextGenerator;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> disOsTextSprites;
+	bn::vector<bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>, 7> disTextSprites; // is this alloc going to be to large(if on stack)
+	bn::vector<const char*, 7> disText;
 	
 	// these things cant be arrays bc i cant have a ref to the pointer, i need the pointer itself 
 	//bn::vector<bn::regular_bg_tiles_ptr, 4> tilesBackup;
@@ -49,6 +58,8 @@ public:
 		}
 	}
 	
+	void resetRoom();
+	
 	void introCutscene();
 	
 	void cifDream();
@@ -56,6 +67,12 @@ public:
 	void brandInput();
 	
 	void createPlayerBrandRoom();
+	
+	void disCrash(FloorTile* testTile, bool isPickup);
+	
+	void crashGame();
+	
+	void carcusEnding();
 	
 	// -----
 	

@@ -124,6 +124,13 @@ void RoomManager::gotoRoom(const char* roomName) {
 	BN_ERROR("in gotoRoom, we were unable to goto the room, ", roomName, "searchstring was ", buffer);
 }
 
+void RoomManager::gotoRoom(int newIndex) {
+	newIndex = MIN(newIndex, MAXROOMS-1);
+	newIndex = MAX(newIndex, 0);
+	roomIndex = newIndex;
+	BN_LOG("roomIndex gotoed to ", roomIndex);
+}
+
 // -----
 
 RoomManager::~RoomManager() {

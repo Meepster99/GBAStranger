@@ -141,8 +141,12 @@ void Game::findNextRoom() {
 	
 
 	if(entityManager.playerWon()) {
-		entityManager.updateScreen(); // is this ok?	
+		entityManager.updateScreen(); // is this ok?
 
+
+		int tileManagerRoomIndex = tileManager.getRoomIndex();
+		int startRoomIndex = roomManager.roomIndex;
+	
 		// check for cif statue
 		bool cifReset = false;
 		Pos testPos = entityManager.player->p;
@@ -173,6 +177,11 @@ void Game::findNextRoom() {
 			} else {
 				roomManager.gotoRoom(tileManager.exitDestination);
 			}
+		}
+		
+		if(tileManagerRoomIndex != -1 && tileManagerRoomIndex != startRoomIndex) {
+			roomManager.gotoRoom(tileManagerRoomIndex);
+			return;
 		}
 		
 		bn::sound_items::snd_stairs.play();
@@ -252,6 +261,7 @@ void Game::findNextRoom() {
 			}
 		}
 	}
+	
 }
 
 void Game::resetRoom(bool debug) {
@@ -264,7 +274,22 @@ void Game::resetRoom(bool debug) {
 	}
 
 	// decide what room to goto next 
-	findNextRoom();
+	if(!debug) {
+		findNextRoom();
+	}
+	
+	if(!debug) {
+		if(!entityManager.player->isVoided) {
+			if(entityManager.player->locustCount > 0) { 
+				entityManager.player->locustCount--;
+			} else {
+				entityManager.player->isVoided = true;
+			}
+		}
+	}
+	entityManager.player->locustCount = tileManager.getLocustCount();
+	
+	cutsceneManager.resetRoom();
 	
 	BN_LOG("reseting to room ", roomManager.currentRoomName());
 	

@@ -656,6 +656,16 @@ def convertFonts(outputPath):
 			
 			tempImage[np.all(tempImage == [0, 0, 0], axis=-1)] = [0, 0, 255]
 			
+			# the colon for fnt_etext_12 needs to be moved to the RIGHT 3 pixels.
+			
+			if char == ord(':') and font == "fnt_etext_12.png":
+				#print("bruh")
+				#print(tempY,tempHeight, width)
+				
+				tiles[tempY:tempY + tempHeight, 3:4] = tempImage
+				charData[char]["width"] = 3
+				continue
+			
 			tiles[tempY:tempY + tempHeight, 0:width] = tempImage
 		
 		
@@ -1171,7 +1181,12 @@ def generateCustomFloorBackground(outputPath):
 			
 		tiles.append(detail)
 
-
+	# replace the transparency in dropoff with black.
+	# this is for the DIS text, i rlly hope it doesnt cause any issues
+	temp = tiles[2]
+	temp[temp == 0] = 1
+	tiles[2] = temp
+	
 	#tiles.append(temp[temp.shape[0]-16:temp.shape[0], 0:16])
 	
 	#print(temp.shape, stackedTiles.shape)
@@ -1254,6 +1269,13 @@ def generateCustomFloorBackground(outputPath):
 	tempIndex = 16 * (ord('B') - ord('!'))
 	nextTile[0:16, 0:8] = temp[tempIndex:tempIndex+16, 0:8]
 	tempIndex = 16 * (ord('?') - ord('!'))
+	nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
+	tiles.append(nextTile)
+	
+	nextTile = np.full((16, 16), 2, dtype=np.uint8)
+	tempIndex = 16 * (ord('H') - ord('!'))
+	nextTile[0:16, 0:8] = temp[tempIndex:tempIndex+16, 0:8]
+	tempIndex = 16 * (ord('P') - ord('!'))
 	nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
 	tiles.append(nextTile)
 	
@@ -1534,6 +1556,11 @@ def main():
 		
 	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
 	#return 
+	
+	
+	#convertFonts("./formattedOutput/fonts/");
+	#generateCustomFloorBackground("./formattedOutput/customFloor/")	
+	#return
 	
 	# with undertalemodtool:
 	

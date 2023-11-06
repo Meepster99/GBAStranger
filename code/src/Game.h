@@ -92,7 +92,6 @@ struct GameSave {
 	uint64_t hash = 0;
 };
 
-
 class Game {
 public:
 	
@@ -140,6 +139,7 @@ public:
 		Entity::entityManager = &entityManager;
 		Entity::effectsManager = &effectsManager;
 		Entity::tileManager = &tileManager;
+		Entity::cutsceneManager = &cutsceneManager;
 		
 		entityManager.effectsManager = &effectsManager;
 		entityManager.tileManager = &tileManager;
@@ -166,6 +166,7 @@ public:
 		collision.rawMap.bgPointer.set_tiles(backgroundTiles);
 	
 		cutsceneManager.effectsManager = &effectsManager;
+		cutsceneManager.tileManager = &tileManager;
 		
 	}
 

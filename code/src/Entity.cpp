@@ -12,7 +12,9 @@ Palette* Sprite::spritePalette = &defaultPalette;
 EntityManager* Entity::entityManager = NULL;
 EffectsManager* Entity::effectsManager = NULL;
 TileManager* Entity::tileManager = NULL;
+CutsceneManager* Entity::cutsceneManager = NULL;
 Game* Entity::game = NULL;
+
 
 int LevStatue::rodUses = 0;
 int LevStatue::totalLev = 0;
@@ -25,6 +27,8 @@ void Player::pushRod(Pos tilePos) {
 	
 	// pick tile up
 	
+	FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
+	
 	rod.push_back(tileManager->floorMap[tilePos.x][tilePos.y]);
 	
 	tileManager->floorMap[tilePos.x][tilePos.y] = NULL;
@@ -35,6 +39,8 @@ void Player::pushRod(Pos tilePos) {
 	
 	bn::sound_items::snd_voidrod_store.play();
 	effectsManager->voidRod(tilePos, currentDir);
+	
+	cutsceneManager->disCrash(tile, true);
 	
 }
 
@@ -54,6 +60,8 @@ void Player::popRod(Pos tilePos) {
 
 	bn::sound_items::snd_voidrod_place.play();
 	effectsManager->voidRod(tilePos, currentDir);
+	
+	cutsceneManager->disCrash(tempTile, false);
 }
 
 bool Player::inRod(FloorTile* tile) {

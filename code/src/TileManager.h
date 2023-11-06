@@ -72,6 +72,9 @@ public:
 	WordTile* voidTile1 = NULL;
 	WordTile* voidTile2 = NULL;
 	
+	WordTile* floorTile1 = NULL;
+	WordTile* floorTile2 = NULL;
+	
 	SpriteTile* memoryTile = NULL;
 	SpriteTile* wingsTile = NULL;
 	SpriteTile* swordTile = NULL;
@@ -132,6 +135,9 @@ public:
 	void updateLocust();
 	void updateVoidTiles();
 	void updateBurdenTiles();
+	
+	int getLocustCount();
+	int getRoomIndex();
 	
 	void fullDraw();
 	

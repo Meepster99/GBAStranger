@@ -209,6 +209,19 @@ public:
 	
 	int getTileValue() const override { BN_ERROR("getTileValue should not be called on a wordtile!"); return 0; }
 
+	int getNumber() {
+		// return the number that this tile is holding
+		if(!(first >= '0' && first <= '9')) {
+			return -1;
+		}
+		
+		if(!(second >= '0' && second <= '9')) {
+			return -1;
+		}
+		
+		return ((first - '0') * 10) + (second - '0');
+	}
+	
 	void draw() override;
 	
 };

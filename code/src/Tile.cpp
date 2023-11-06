@@ -146,7 +146,8 @@ int RodTile::getTileValue() const {
 }
 
 int LocustTile::getTileValue() const {
-	return startIndex + (entityManager->player->locustCount != 0);	
+	//return startIndex + (entityManager->player->locustCount != 0);	
+	return startIndex + 1;
 }
 
 static int inline getWordTileIndex(const char c) {
@@ -190,6 +191,11 @@ static int inline getWordTileIndex(const char c) {
 			return 16;
 		case '?':
 			return 17;
+			
+		case 'H':
+			return 18;
+		case 'P':
+			return 19;
 		
 		default: [[unlikely]]
 			BN_ERROR("unknown char ", c, " passed into getWordTileIndex");

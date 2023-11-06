@@ -37,6 +37,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	memoryTile = NULL;
 	wingsTile  = NULL;
 	swordTile  = NULL;
+	floorTile1 = NULL;
+	floorTile2 = NULL;
 	
 	int switchTracker = 0;
 
@@ -178,6 +180,9 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '?');
 		floorMap[13][8] = new WordTile(Pos(13, 8), '?', '?');
 	}
+	
+	floorTile1 = static_cast<WordTile*>(floorMap[12][8]);
+	floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
 	
 	
 	exitDestination = exitDest;
@@ -484,10 +489,10 @@ void TileManager::updateLocust() {
 	
 	if(!entityManager->player->inRod(locustCounterTile)) {
 		
-		if(entityManager->player->locustCount != 0) {
-			locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
-			locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
-		}
+		//if(entityManager->player->locustCount != 0) {
+		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
+		locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
+		//
 
 		updateTile(locustCounterTile->tilePos);
 	}
@@ -497,8 +502,8 @@ void TileManager::updateLocust() {
 void TileManager::updateVoidTiles() {
 	
 	bool isVoided = entityManager->player->isVoided;
-	
-	if(entityManager->player->inRod(voidTile1)) {
+	BN_LOG("brrhuasdiofhsjkfsl, ", isVoided);
+	if(!entityManager->player->inRod(voidTile1)) {
 		
 		voidTile1->first = isVoided ? 'V' : 'H';
 		voidTile1->second = isVoided ? 'O' : 'P';
@@ -506,7 +511,7 @@ void TileManager::updateVoidTiles() {
 		updateTile(voidTile1->tilePos);
 	}
 	
-	if(entityManager->player->inRod(voidTile2)) {
+	if(!entityManager->player->inRod(voidTile2)) {
 		
 		voidTile2->first = isVoided ? 'I' : '0';
 		voidTile2->second = isVoided ? 'D' : '7';
@@ -519,18 +524,59 @@ void TileManager::updateVoidTiles() {
 
 void TileManager::updateBurdenTiles() {
 	
-	if(entityManager->player->inRod(memoryTile)) {
+	if(!entityManager->player->inRod(memoryTile)) {
 		updateTile(memoryTile->tilePos);
 	}
 	
-	if(entityManager->player->inRod(wingsTile)) {
+	if(!entityManager->player->inRod(wingsTile)) {
 		updateTile(wingsTile->tilePos);
 	}
 	
-	if(entityManager->player->inRod(swordTile)) {
+	if(!entityManager->player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);
 	}
 	
+}
+
+int TileManager::getLocustCount() {
+	
+	if(entityManager->player->inRod(locustCounterTile) || 
+		entityManager->player->inRod(locustTile)) {
+		return 0;
+	}
+
+	
+	Pos counterPos = locustCounterTile->tilePos;
+	Pos locustPos = locustTile->tilePos;
+	locustPos.move(Direction::Right);
+	
+	if(locustPos != counterPos) {
+		return 0;
+	}
+	
+	return locustCounterTile->getNumber();
+}
+
+int TileManager::getRoomIndex() {
+	
+	if(entityManager->player->inRod(floorTile2)) {
+		return -1;
+	}
+	
+	Pos floor2Pos = floorTile2->tilePos;
+	Pos floor1Pos = floorTile1->tilePos;
+	floor1Pos.move(Direction::Right);
+	
+	if(floor1Pos != floor2Pos) {
+		return -1;
+	}
+	
+	char temp = floorTile1->second;
+	if(temp == '?') {
+		return -1;
+	}
+	
+	return ((floorTile1->second - '0') * 100) + floorTile2->getNumber();
 }
 
 bool TileManager::hasCollision(const Pos& p) {
