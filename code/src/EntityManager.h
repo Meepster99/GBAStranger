@@ -91,7 +91,7 @@ public:
 	bn::optional<TileType> hasFloor(const Pos& p) const;
 	
 	bn::optional<Direction> canSeePlayer(const Pos& p) const;
-	bn::optional<Direction> canPathToPlayer(const Pos& p) const;
+	bn::optional<Direction> canPathToPlayer(const Pos& p, const Pos& playerPos) const;
 	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStartPos);
 	
 	bool levKill = false;

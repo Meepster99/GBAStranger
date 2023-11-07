@@ -2192,6 +2192,8 @@ void EffectsManager::wings() {
 	
 	// this code is fucking shit.
 	
+
+	
 	bn::sound_items::snd_wingspawn.play();
 	
 	Player* player = entityManager->player;
@@ -2203,6 +2205,10 @@ void EffectsManager::wings() {
 			obj->tempCounter2 = 1; // first run bypass
 
 			obj->tiles = globalGame->mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_cif : &bn::sprite_tiles_items::dw_spr_void_wings;
+			
+			
+			obj->sprite.spritePointer.set_x(120+32);
+			obj->sprite.spritePointer.set_y(80+32);
 			
 			// this is something i should be doing much more :
 			obj->animateFunc(obj);

@@ -517,7 +517,6 @@ void EntityManager::doMoves() {
 		// nvm x2, gods that sounds horrid for efficiency. 
 		
 	}
-
 	
 	// (maybe) insert shadows move into its func? (MORE NEEDS TO BE DONE ON THIS)
 	
@@ -580,6 +579,23 @@ void EntityManager::doMoves() {
 	if(player->p == playerStart) {
 		shadowMove.reset();
 	}
+	
+	
+	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
+		if((*it)->entityType() == EntityType::Diamond) {	
+			Diamond* temp = static_cast<Diamond*>(*it);
+			// account for the goofy ahh edge case in which a diamond is one move away from 
+			// the player, have it move to the players previous position
+			// nvm turned out to be less goofy than i thought(no if statements at least)
+			if(!hasFloor(player->p)) {
+				temp->nextMove = canPathToPlayer(temp, playerStart);
+				//BN_LOG("diamond pathing with player start pos ", playerStart, " dir=", temp->nextMove.has_value());
+			} else {
+				temp->nextMove = canPathToPlayer(temp, player->p);
+				//BN_LOG("diamond pathing with player current pos ", player->p, " dir=", temp->nextMove.has_value());
+			}
+		}
+	}
 
 	// TODO when you have a shadow, and go from being onto a shadow tile to falling(with wings) it spawns the default gray sprite, fix that
 	manageShadows(shadowMove);
@@ -587,6 +603,7 @@ void EntityManager::doMoves() {
 	if(hasKills()) {
 		return;
 	}
+	
 	
 	// do i even need this var to be a class var
 	playerStart = player->p;
@@ -607,15 +624,7 @@ void EntityManager::doMoves() {
 		return;
 	}
 	
-	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
-		if((*it)->entityType() == EntityType::Diamond) {	
-			Diamond* temp = static_cast<Diamond*>(*it);
-			// account for the goofy ahh edge case in which a diamond is one move away from 
-			// the player, have it move to the players previous position
-			// nvm turned out to be less goofy than i thought(no if statements at least)
-			temp->nextMove = canPathToPlayer(temp, playerStart);
-		}
-	}
+	
 	
 	
 	// for all mimics
@@ -1359,11 +1368,16 @@ bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const {
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const { 
+bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p, const Pos& playerPos) const { 
 	
 	// oh boy. this is going to be fun.
 	
-	Pos playerPos = player->p;
+	// B186 is a decent level for testing 
+	// it seems that the diamonds will path if the players start OR END position is reachable.
+	// weird
+	// SIDESTEPPING A DIAMOND KILLS YOU??? (in gba ver, i needa fix that
+	
+	//Pos playerPos = player->p;
 	
 	BN_ASSERT(playerPos != p, "why in tarnation do you have a diamond and player at the same pos????");
 	
@@ -1427,7 +1441,9 @@ bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p) const {
 				return invertTestDirections[i];
 			}
 			
-			if(!hasEntity(test)) {
+			//if(!hasEntity(test)) {
+			if(!hasNonPlayerEntity(test)) {
+			//if(true) {
 				queue.push_back(test);
 				continue;
 			}
@@ -1461,7 +1477,7 @@ bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerSta
 		}
 	}
 	
-	return canPathToPlayer(e->p);
+	return canPathToPlayer(e->p, playerStartPos);
 }
 
 void EntityManager::rodUse() {
