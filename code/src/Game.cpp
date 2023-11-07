@@ -469,10 +469,24 @@ void Game::loadLevel(bool debug) {
 	}
 	//doButanoUpdate(); // these excess frame updates will just slow shit down
 	
+	/*
+	
+	bottom left corner of room 39 (rm_0040)
+	has collision covering,,,,, the ui. but that area is supposed to be accessable.
+	also of note, reverseing all my x y loops to go y x would maybe give a small speed boost bc of caching
+	
+	*/
 	
 
 	for(int x=0; x<14; x++) { 
+		//for(int y=0; y<9; y++) {
 		for(int y=0; y<9; y++) {
+			
+			if(y == 8) {
+				collisionMap[x][y] = 1;
+				detailsMap[x][y] = 0;
+				continue;
+			}
 			
 			collisionMap[x][y] = uncompressedCollision[x + 14 * y];
 			detailsMap[x][y] = uncompressedDetails[x + 14 * y];
