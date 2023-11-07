@@ -99,62 +99,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	if(tiles == &bn::sprite_tiles_items::dw_spr_chest) {
 		loadChest();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_birch) {
-		
-		bool spawnedInteractable = false;
-		
-		auto kickedFunc = [](void* unused) -> bool {
-			(void)unused;
-			game->playSound(&bn::sound_items::snd_push);
-			game->removeSound(&bn::sound_items::snd_push_small);
-			return true;
-		};
-		
-		if(game->mode == 2) {// cif mode 
-			if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
-				tiles = &bn::sprite_tiles_items::dw_spr_birch_b;
-				sprites[0].spritePointer.set_tiles(*tiles, 0);
-				effectsManager->roomDust();
-				
-				auto func1 = [](void* unused) -> void {
-					(void)unused;
-					globalGame->cutsceneManager.cifDream();
-				};
-				
-				// todo, we gotta add shake here
-				// shake also spawns leaves! do that too
-			
-				Interactable* temp1 = new Interactable(Pos(6, 4),
-					func1,
-					kickedFunc,
-					NULL,
-					NULL
-				);
-				
-				entityManager->addEntity(temp1);
-				
-				spawnedInteractable = true;
-			} else {
-				sprites[0].spritePointer.set_tiles(*tiles, 1);
-			}
-		}
-		
-		if(!spawnedInteractable) {
-			
-			auto func1 = [](void* unused) -> void {
-				(void)unused;
-			};
-			
-			Interactable* temp1 = new Interactable(Pos(6, 4),
-				func1,
-				kickedFunc,
-				NULL,
-				NULL
-			);
-			
-			entityManager->addEntity(temp1);
-		}
-		
-		
+		loadTree();
 	}
 	
 }
@@ -553,7 +498,161 @@ void BigSprite::loadChest() {
 	entityManager->addEntity(temp2);
 	
 }
+
+void BigSprite::loadTree() {
 	
+	switch(game->mode) {
+		default:
+		case 0:
+			tiles = &bn::sprite_tiles_items::dw_spr_birch;
+			break;
+		case 1:
+			tiles = &bn::sprite_tiles_items::dw_spr_birch;
+			break;
+		case 2:
+			tiles = &bn::sprite_tiles_items::dw_spr_birch_b;
+			if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
+				animationIndex = 0;
+			} else {
+				animationIndex = 1;
+			}
+			sprites[0].spritePointer.set_tiles(*tiles, animationIndex);
+			break;
+	}
+	
+	auto interactFunc = [](void* unused) -> void {
+		(void)unused;
+		
+		switch(game->mode) {
+			default:
+			case 0:
+				globalGame->effectsManager.doDialogue("[The tree seems to have something to show you, but cant yet.]\n[In the distance, you can barely make out the sound of a keyboard endlessly clacking away.]\n[Better move on]\0");
+				break;
+			case 1:
+				globalGame->effectsManager.doDialogue("[The tree seems to have something to show you, but cant yet.]\n[In the distance, you can barely make out the sound of a keyboard endlessly clacking away.]\n[Better move on]\0");
+				break;
+			case 2:
+				if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
+					globalGame->cutsceneManager.cifDream();
+				} else {
+					globalGame->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
+				}
+				break;
+		}
+	};
+	
+	unsigned startFrame = frame+1;
+	auto kickedFunc = [startFrame](void* bigSprite_) mutable -> bool {
+		
+		// i rlly still,, dislike using kickedfunc for anims. but,, it works, and gods do i not 
+		// want to go back and rewrite this code
+		// now that i think about it, am i,, basically having the kick overwrite bigsprites 
+		// animation code????? i think i am?? 
+		// wtf
+		// and i dont have any of the counters which made this easy in effects, ugh
+		// this is literally a jank effect written into a kick. 
+		// could i,,,, maybe have it launch an effect?
+		// tbh that might be better, except i could/would have multiple 
+		// shakes going on at once. 
+		// of course, i know my way around that.
+		// ugh 
+		
+		BigSprite* bigSprite = static_cast<BigSprite*>(bigSprite_);
+		
+		static bool firstRun = true;
+		static const bn::sprite_tiles_item* restoreTiles = NULL;
+		static int restoreAnimationIndex = 0;
+		
+		// very weirdly, the padding on the shook and non shook trees are different 
+		// im debating like,, should i not use padding for all bigsprites?
+		// ugh 
+		
+		if(firstRun) {
+			
+			globalGame->effectsManager.treeLeaves();
+
+			firstRun = false;
+			
+			game->playSound(&bn::sound_items::snd_push);
+			game->removeSound(&bn::sound_items::snd_push_small);
+			
+			restoreAnimationIndex = bigSprite->animationIndex;
+			restoreTiles = bigSprite->tiles;
+			bigSprite->animationIndex = 0;
+			
+			if(bigSprite->animationIndex == 0) {
+				if(restoreTiles == &bn::sprite_tiles_items::dw_spr_birch) {
+					bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_birch_shake;
+				} else {
+					bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_birch_shake_b;
+				}
+			} else { // bare tree
+				if(restoreTiles == &bn::sprite_tiles_items::dw_spr_birch) {
+					bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_birchbare_shake;
+				} else {
+					bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_birchbare_shake_b;
+				}
+			}
+			
+			bigSprite->sprites[0].spritePointer.set_x(bigSprite->sprites[0].spritePointer.x()-1);
+			
+			bigSprite->sprites[0].spritePointer.set_tiles(
+				*bigSprite->tiles,
+				bigSprite->animationIndex % 4
+			);	
+			
+		}
+		
+		if((frame - startFrame) % 6 != 0) {
+			return false;
+		}
+		bigSprite->animationIndex++;
+		bigSprite->sprites[0].spritePointer.set_tiles(
+			*bigSprite->tiles,
+			bigSprite->animationIndex % 4
+		);
+		
+		
+		
+		if(bigSprite->animationIndex == 6) {
+			
+			firstRun = true;
+			
+			bigSprite->animationIndex = restoreAnimationIndex;
+			bigSprite->tiles = restoreTiles;
+			restoreTiles = NULL;
+			
+			bigSprite->sprites[0].spritePointer.set_x(bigSprite->sprites[0].spritePointer.x()+1);
+			
+			bigSprite->sprites[0].spritePointer.set_tiles(
+				*bigSprite->tiles,
+				bigSprite->animationIndex
+			);
+			
+			
+			
+			return true;
+			
+		}
+		
+		
+		
+		return false;
+	};
+	
+	// todo, we gotta add shake here
+	// shake also spawns leaves! do that too
+
+	Interactable* temp1 = new Interactable(Pos(6, 4),
+		interactFunc,
+		kickedFunc,
+		NULL,
+		this
+	);
+	
+	entityManager->addEntity(temp1);
+	
+}
 
 // -----
 	
@@ -1014,7 +1113,29 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		effects++;
 	}
 	
+	unsigned roomNameHash = game->roomManager.currentRoomHash();
 	
+	// i rlly need a better method than this 
+	// and also, roonamess being named differently during hard mode just fucks me 
+	// ill make a better option here, but ughhh its not ideal still
+	switch(roomNameHash) {
+		
+		case hashString("rm_rest_area\0"):
+		case hashString("rm_rest_area_1\0"):
+		case hashString("rm_rest_area_2\0"):
+		case hashString("rm_rest_area_3\0"):
+		case hashString("rm_rest_area_4\0"):
+		case hashString("rm_rest_area_5\0"):
+		case hashString("rm_rest_area_6\0"):
+		case hashString("rm_rest_area_7\0"):
+		case hashString("rm_rest_area_8\0"):
+		case hashString("rm_rest_area_9\0"):
+			roomDust();
+			break;
+		default:
+			break;
+	}
+
 }
 
 // -----
@@ -3236,4 +3357,54 @@ void EffectsManager::questionMark() {
 	
 }
 
+void EffectsManager::treeLeaves() {
+	
+	// spr_leaves
+	// 8 frames 
+	// tree base is Pos(6, 4)
+	
+	auto createFunc = [](Effect* obj) mutable -> void {
+		
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_leaves;
+		
+		obj->tempCounter = 1;
+		obj->x = randomGenerator.get_int(5 * 16, 7 * 16);
+		obj->y = 3 * 16 + 8;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+		obj->sprite.spritePointer.set_z_order(-2);
+
+		obj->graphicsIndex = -1;
+		obj->animateFunc(obj);
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		// maybe,, calling animate from create is a bad idea tbh
+		// also the frame modulo trick is kinda shit, bc the frame a anim is called like, changes 
+		// i should of had a framestart thing in effects, but going back to change that all is more time than its worth
+		if(frame % 8 == 0 || obj->tempCounter == 1) { 
+			obj->graphicsIndex++;
+		}
+		obj->tempCounter = 0;
+
+		if(obj->graphicsIndex == 8) {
+			return true;
+		}
+
+		obj->sprite.spritePointer.set_y(obj->sprite.spritePointer.y() + 0.25);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+	
+	questionMarkCount++;
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	
+}
 

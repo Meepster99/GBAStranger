@@ -18,7 +18,8 @@ public:
 	Room loadRoom();
 	
 	const char* currentRoomName();
-
+	unsigned currentRoomHash();
+	
 	void nextRoom();
 	void prevRoom();
 	void cifReset();

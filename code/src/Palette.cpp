@@ -146,7 +146,8 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	
 	if(maxVal > 172) {
 		//whatthefuck = ugh.ceil_integer();
-	} else if(maxVal < 86) {
+	//else if(maxVal < 86) {
+	} else if(maxVal < 32) {
 		//whatthefuck = ugh.floor_integer();
 	}
 	

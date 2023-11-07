@@ -31,9 +31,35 @@ const char* RoomManager::currentRoomName() {
 	return roomNameArray[roomIndex].str; 
 }
 
+unsigned RoomManager::currentRoomHash() { 
+	if(roomIndex < 0 || roomIndex > MAXROOMS - 1) {
+			BN_ERROR("Roomindex ", roomIndex, " out of bounds, max ", sizeof(roomNames)/sizeof(roomNames[0]));
+	}
+	
+	const char* temp = roomNameArray[roomIndex].str;
+	
+	// goofy 
+	if(WTF(temp) >= 5) {
+		if(temp[0] == 'h' &&
+			temp[1] == 'a' &&
+			temp[2] == 'r' &&
+			temp[3] == 'd' &&
+			temp[4] == '_') {
+				temp += 5;
+		}
+	}
+	BN_LOG("roomhash returning ", hashString(temp));
+	
+	
+	return hashString(temp);
+}
+
 void RoomManager::nextRoom() {
-	if(roomIndex + 1 < MAXROOMS - 2) {
+	if(roomIndex + 1 < MAXROOMS - 1) {
 		roomIndex++;
+		if(currentRoomHash() == hashString("rm_rm4\0")) {
+			roomIndex--;
+		}
 		BN_LOG("roomIndex incremented to ", roomIndex);
 	}
 }
@@ -51,8 +77,15 @@ void RoomManager::cifReset() {
 }
 
 void RoomManager::changeFloor(int val) {
-	roomIndex = MIN(roomIndex + val, MAXROOMS - 2);
+	int backup = roomIndex;
+	
+	roomIndex = MIN(roomIndex + val, MAXROOMS - 1);
 	roomIndex = MAX(roomIndex, 0);
+	
+	if(currentRoomHash() == hashString("rm_rm4\0")) {
+		roomIndex = backup;
+	}
+	
 	BN_LOG("roomIndex changed to ", roomIndex);
 }
 

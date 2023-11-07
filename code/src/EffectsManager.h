@@ -182,6 +182,12 @@ public:
 	// i need to change all sprite arrays to just use 128
 	// this func is completley overwritten with way to many params that only come from the effectholder struct sometimes, and are hardcoded other times
 	
+	// looking back on this from the future, this whole fucking class is scuffed .
+	// i rlly should of done 64x64 sprites from the start
+	// and tbh this WHOLE class literally only animates tail.
+	// i should of just had more specialized tail only stuff
+	// much of this func was also written before i figured out i could use lambdas as well
+	
 	static Game* game;
 	static EntityManager* entityManager;
 	static EffectsManager* effectsManager;
@@ -199,7 +205,8 @@ public:
 	
 	bool autoAnimate;
 	int autoAnimateFrames = 32;
-	int (*customAnimate)(void) = NULL;
+	//int (*customAnimate)(void) = NULL;
+	std::function<int(void)> customAnimate;
 	
 	bool isBigSprite = false;
 
@@ -227,6 +234,7 @@ public:
 	void loadBoobTrap();
 	void loadTailHead();
 	void loadChest();
+	void loadTree();
 	
 	
 };
@@ -368,6 +376,8 @@ public:
 	
 	int questionMarkCount = 0;
 	void questionMark();
+	
+	void treeLeaves();
 	
 };
 

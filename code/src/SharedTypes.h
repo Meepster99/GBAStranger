@@ -962,3 +962,13 @@ struct MessageStr {
 	const char idek = '\0'; // sanity
 };
 
+constexpr unsigned hashString(const char *str) {
+    unsigned hash = 0;
+
+    while(*str) {
+        hash = (hash * 31) + (*str);
+        str++;
+    }
+
+    return hash;
+}
