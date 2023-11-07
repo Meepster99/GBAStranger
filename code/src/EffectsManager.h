@@ -365,6 +365,10 @@ public:
 	void playerBrandRoomBackground();
 	Effect* generateSweatEffect();
 	Effect* generateDialogueEndpointer();
+	
+	int questionMarkCount = 0;
+	void questionMark();
+	
 };
 
 class Dialogue {

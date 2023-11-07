@@ -504,7 +504,7 @@ void TileManager::updateLocust() {
 void TileManager::updateVoidTiles() {
 	
 	bool isVoided = entityManager->player->isVoided;
-	BN_LOG("brrhuasdiofhsjkfsl, ", isVoided);
+	//BN_LOG("brrhuasdiofhsjkfsl, ", isVoided);
 	if(!entityManager->player->inRod(voidTile1)) {
 		
 		voidTile1->first = isVoided ? 'V' : 'H';

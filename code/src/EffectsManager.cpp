@@ -344,6 +344,10 @@ void BigSprite::loadBoobTrap() {
 			"well, i did\rlet me move that out of the way\n"
 			"it might hurt a little bit though"
 			);
+			
+			// it would be quite funny to somehow have her boobs kill you
+			
+			bigSprite->effectsManager->entityKill(globalGame->entityManager.player);
 			bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
 			return;
 		}
@@ -954,6 +958,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 
 	// eventually, cleanup leftover effects here
 
+	questionMarkCount = 0;
+	
 	for(int i=0; i<effectList.size(); i++) {
 		if(effectList[i] != NULL) {
 			delete effectList[i];
@@ -3156,6 +3162,78 @@ Effect* EffectsManager::generateDialogueEndpointer() {
 	Effect* e = new Effect(createFunc, tickFunc);
 	//effectList.push_back(e);
 	return e;
+}
+
+void EffectsManager::questionMark() {
+	
+	// spr_question_black
+	// 9 frames
+	
+	// will this get properly reset on load?
+	//static int questionMarkCount = 0;
+	
+	if(questionMarkCount > 0) {
+		return;
+	}
+	
+	Pos playerPos = entityManager->player->p;
+	
+	auto createFunc = [playerPos](Effect* obj) mutable -> void {
+		
+		obj->graphicsIndex = 0;
+		
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_question_black;
+		
+		obj->x = playerPos.x * 16;
+		obj->y = playerPos.y * 16;
+		obj->y -= 8;
+		//obj->sprite.updateRawPosition(obj->x, obj->y-16);
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+		obj->sprite.spritePointer.set_z_order(-2);
+		
+		obj->tempCounter = 1; // make sure first run goes through
+		
+		obj->graphicsIndex = -1;
+		obj->animateFunc(obj);
+	};
+	
+	auto tickFunc = [this](Effect* obj) mutable -> bool {
+	
+		if(frame % 2 != 0 && obj->tempCounter == 0) {
+			return false;
+		}
+		
+		obj->tempCounter = 0;
+		obj->graphicsIndex++;
+		
+		if(obj->graphicsIndex >= 9) {
+			obj->tempCounter2++;
+			
+			if(obj->tempCounter2 == 10) {
+				questionMarkCount--;
+				return true;
+			}
+			
+			return false;
+		}
+		
+		obj->y--;
+		
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+	
+	questionMarkCount++;
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	
 }
 
 

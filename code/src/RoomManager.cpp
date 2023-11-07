@@ -168,7 +168,7 @@ void RoomManager::isCustomRooms() {
 
 	unsigned firstVal = readUnsigned();
 	
-	BN_LOG(firstVal);
+	//BN_LOG(firstVal);
 	
 	/*
 	EntityHolder test = {static_cast<EntityType>(readUnsigned()/10), 2, 3};
@@ -184,8 +184,8 @@ void RoomManager::isCustomRooms() {
 		initCustomRooms();
 	}
 	
-	BN_LOG(rm_0001::collision);
-	BN_LOG(rm_0001::entities);
+	//BN_LOG(rm_0001::collision);
+	//BN_LOG(rm_0001::entities);
 	
 	
 }

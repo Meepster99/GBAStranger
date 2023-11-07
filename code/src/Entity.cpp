@@ -94,11 +94,13 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		if(!moveRes) {
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			effectsManager->questionMark();
 			return {false, bn::optional<Direction>()};
 		}
 
 		if(entityManager->hasCollision(tilePos)) {
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			effectsManager->questionMark();
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -134,6 +136,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			
 			
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			effectsManager->questionMark();
 			return {false, bn::optional<Direction>()};
 		}
 		
@@ -152,13 +155,16 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				pushRod(tilePos);
 			} else if(tile == NULL && rod.size() == 0) { 
 				//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+				effectsManager->questionMark();
 				return {false, bn::optional<Direction>()};
 			} else if (tile != NULL && rod.size() != 0) {
 				//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+				effectsManager->questionMark();
 				return {false, bn::optional<Direction>()};
 			}
 		} else {
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			effectsManager->questionMark();
 		}
 
 		nextMove = bn::optional<Direction>();
@@ -189,12 +195,14 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	if(!nextMove.has_value()) {
 		return {false, bn::optional<Direction>()};
 	}
+
 	
 	// do sweat anim here.
 	// we can do this without needing to vblank, since it is meant to hold up execution
 	
 	Pos tempPos = p;
-	if(!tempPos.move(currentDir)) {
+	if(!tempPos.move(currentDir) || entityManager->hasCollision(tempPos)) {
+		game->playSound(&bn::sound_items::snd_push_small);
 		return {true, bn::optional<Direction>(currentDir)};
 	}
 	
@@ -663,6 +671,10 @@ void Boulder::interact() {
 void Obstacle::moveSucceded() {
 	game->playSound(&bn::sound_items::snd_push);
 	game->removeSound(&bn::sound_items::snd_push_small);
+}
+
+void Obstacle::moveFailed() {
+	//game->playSound(&bn::sound_items::snd_push_small);
 }
 
 void EusStatue::isDead() {

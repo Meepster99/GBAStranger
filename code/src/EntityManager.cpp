@@ -559,9 +559,11 @@ void EntityManager::doMoves() {
 	} else {
 		//,, this will play at the same time as a boulder push,,, but im tired ok
 		// we,, we can make ways around this right
-		if(playerRes.second.has_value()) {
+		
+		Pos temp = playerStart;
+		if(playerRes.second.has_value() && temp.move(player->currentDir) && hasNonInteractableObstacle(temp)) {
 			game->playSound(&bn::sound_items::snd_push_small);
-		}
+		}	
 	}
 	
 	// the playermoved bool is basically useless 
@@ -1315,6 +1317,24 @@ bool EntityManager::hasCollision(const Pos& p) const {
 	}
 	
 	return true;
+}
+
+bool EntityManager::hasNonInteractableObstacle(const Pos& p) const { //nice function name dumbass
+
+	const SaneSet<Entity*, 4>& temp = getMap(p);
+	
+	if(temp.size() == 0) {
+		return false;
+	}
+	
+	for(auto it = temp.cbegin(); it != temp.cend(); ++it) {
+		if((*it)->isObstacle() && (*it)->entityType() != EntityType::Interactable) {
+			return true;
+		}
+	}
+	
+	return false;
+
 }
 
 bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {

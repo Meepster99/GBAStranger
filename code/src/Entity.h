@@ -342,7 +342,7 @@ public:
 	
 	bn::optional<Direction> getNextMove() override;
 	
-	void moveFailed() override { return; }
+	void moveFailed() override;
 	void moveSucceded() override;
 	
 	void updateTileIndex() override {
