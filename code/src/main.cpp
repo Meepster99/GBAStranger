@@ -272,9 +272,26 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 }
 
+#define IDEK(n) CLAMP( (32 * (n + 4)) / 256, 0, 0xFF)
+
+#define CONVERT5BIT(n) CLAMP( (32 * n) / 256, 0, 0xFF)
+
+#define BRUH(n) CONVERT5BIT(n+4)
+
 int main() {
 	
 	bn::core::init(); 
+	
+	BN_LOG("butano inited");
+	//BN_LOG(val.colorArray[0].red(), " ", val.colorArray[0].green(), " ", val.colorArray[0].blue());
+	
+	//int idek = REDPALETTE.colorArray[1].red();
+	
+	
+	
+	BN_LOG("ok,,, ", IDEK(20));
+	bn::fixed wtf = (32 * (20 + 4))/256;
+	BN_LOG("wtf ", wtf);
 	
 	bn::bg_tiles::set_allow_offset(true);
 

@@ -303,6 +303,8 @@ void Game::resetRoom(bool debug) {
 	state = GameState::Loading;
 	
 	cutsceneManager.resetRoom();
+	queuedSounds.clear();
+	removedSounds.clear();
 	
 	save();
 	
@@ -751,11 +753,6 @@ void Game::doVBlank() { profileFunction();
 	// also should cutscenes have a vblank call? maybe 
 	// i could have it execute a lambda
 	
-	// WILL THIS LEAD TO A 1 FRAME AUDIO DELAY WITH SOUNDS?
-	// depending on if the sound handler runs before or after ours.
-	// this will require more investigation
-	doSoundVBlank();
-	
 	static bool a, b, c = false;
 	
 	switch(state) {
@@ -800,6 +797,12 @@ void Game::doVBlank() { profileFunction();
 			cutsceneManager.doVBlank();
 			break;
 	}
+	
+	// WILL THIS LEAD TO A 1 FRAME AUDIO DELAY WITH SOUNDS?
+	// depending on if the sound handler runs before or after ours.
+	// this will require more investigation
+	// also, this being below all other vblank managers is very important, since some vblank managers will add sounds to it!
+	doSoundVBlank();
 	
 	
 }
@@ -1090,11 +1093,18 @@ void Game::doSoundVBlank() {
 		return;
 	}
 
+	unsigned playedSounds = 0;
+	
 	for(auto it = queuedSounds.begin(); it != queuedSounds.end(); ++it) {
 		if(!removedSounds.contains(*it)) {
 			(*it)->play();
+			playedSounds++;
 		}
 	}	
+	
+	if(playedSounds != 0) {
+		BN_LOG("played ", playedSounds, " sound(s) (from the priority soundhandler)");
+	}
 	
 	queuedSounds.clear();
 	removedSounds.clear();

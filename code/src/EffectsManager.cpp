@@ -105,6 +105,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		auto kickedFunc = [](void* unused) -> bool {
 			(void)unused;
 			game->playSound(&bn::sound_items::snd_push);
+			game->removeSound(&bn::sound_items::snd_push_small);
 			return true;
 		};
 		

@@ -6,10 +6,69 @@
 //Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));
 //Palette redPalette(bn::color({0, 0, 0}), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));
 
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
+#define CLAMP(value, min_val, max_val) MAX(MIN((value), (max_val)), (min_val))
+
+// using fixed here was causing EXCESSIVE fucked shit 
+// but, since this all occurs in the preprocessor, i think we should be able to use doulbles
+// nope :) and i cant even used fixed
+// ok, i have 0 clue why i cannot use decimals here, but a solution is to like
+// add 4 to the input value.
+// why? idk
+// well, i do k, but why i cannot use decimals is unknown to the gods
+// wait adding 4 didnt work?? you have got to be fucking kidding me 
+
+/*
+
+0 clue whats going on here
+having TEST  be the thing to add 4, and call bruh works,
+adding 4 in bruh doesnt.
+wtf 
+
+#define BRUH(n) CLAMP( (32 * n) / 256, 0, 0xFF)
+
+
+//#define TEST(n) BRUH(n+4)
+#define TEST(n) CLAMP( (32 * (n+4)) / 256, 0, 0xFF)
+
+#define TEST2(n) bn::color( \
+    TEST(((n & 0xFF0000) >> 16)), \
+    TEST(((n & 0x00FF00) >> 8)), \
+    TEST(((n & 0x0000FF) >> 0)) )
+
+#define TEST3(a, b, c, d)  Palette(bn::color(0, 31, 31), TEST2(a), TEST2(d), TEST2(c), TEST2(b));
+
+const Palette val    = TEST3(1310720,12717325,16284503,16777215);	
+
+
+ok.
+n+4 and n + 4 are different. in defines. for some fucking reason .
+omfg 
+how many hours 
+gods 
+
+nope, that wasnt it????? 
+bc for some reason when i copy the define into here it doesnt work?
+
+*/
+
+//#define CONVERT5BIT(n) CLAMP( (((bn::fixed)32 * n) / 256).round_integer(), 0, 0xFF)
+//#define CONVERT5BIT(n) CLAMP( ((32.0 * n) / 256.0), 0, 0xFF)
+//#define CONVERT5BIT(n) CLAMP( (int)(0.5 + ((32.0 * n) / 256.0)), 0, 0xFF)
+//#define CONVERT5BIT(n) CLAMP( (32 * (n+4)) / 256, 0, 0xFF)
+
+// works:
+#define CONVERT5BIT(n) CLAMP( ( 32 * ( n  ) ) / 256 , 0 , 0xFF )
+
+// doesnt work:
+#define CONVERT5BIT(n) CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF )
+
 #define MAKECOLOR(n) bn::color( \
-    (32 * ((n & 0xFF0000) >> 16)) / 256, \
-    (32 * ((n & 0x00FF00) >> 8)) / 256, \
-    (32 * ((n & 0x0000FF) >> 0)) / 256) 
+    CONVERT5BIT(((n & 0xFF0000) >> 16)), \
+    CONVERT5BIT(((n & 0x00FF00) >> 8)), \
+    CONVERT5BIT(((n & 0x0000FF) >> 0)) )
 	
 #define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
 
