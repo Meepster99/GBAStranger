@@ -155,7 +155,7 @@ __attribute__(( optimize("O0"), target("arm"))) constexpr bn::color MAKECOLOR(un
 }
 	
 //#define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
-__attribute__(( optimize("O0"), target("arm"))) constexpr Palette PALETTEGEN(int a, int b, int c, int d) {
+__attribute__(( optimize("O0"), target("thumb"))) constexpr Palette PALETTEGEN(int a, int b, int c, int d) {
 	return Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
 }
 
