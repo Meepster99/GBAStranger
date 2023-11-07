@@ -921,7 +921,7 @@ void EntityManager::updateMap() {
 										addKill(temp);
 									} else {
 										// spawn wing anim/sound here
-										effectsManager->wings(player->p, player->currentDir);
+										effectsManager->wings();
 									}
 								}
 							}

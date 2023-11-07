@@ -351,7 +351,7 @@ public:
 	
 	void glassBreak(Pos p);
 	void voidRod(Pos p, Direction dir);
-	void wings(Pos p, Direction dir);
+	void wings();
 	void explosion(Pos p);
 	void sword(Pos p, Direction dir);
 	void monLightning(Pos p, Direction dir);

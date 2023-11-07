@@ -77,6 +77,10 @@ i could have it
 naw honestly, as much as i would like to blame someone other than myself
 i wouldnt of made this mistake if i had eaten food today 
 
+im now realizing, that after all this pain to change a rgb value from 
+(16, 0, 0) to (24, 0, 0), is that 
+16 looks better.
+
 */
 
 //#define CONVERT5BIT(n) CLAMP( (((bn::fixed)32 * n) / 256).round_integer(), 0, 0xFF)
@@ -90,7 +94,7 @@ i wouldnt of made this mistake if i had eaten food today
 // doesnt work:
 //#define CONVERT5BIT(n) CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF )
 
-__attribute__(( optimize("O0"), target("thumb"))) constexpr int CONVERT5BIT(int PLEASEHELP) {
+constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	//return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
 	
 	
@@ -126,11 +130,25 @@ __attribute__(( optimize("O0"), target("thumb"))) constexpr int CONVERT5BIT(int 
 	*/
 	
 
-	int whatthefuck = 128;
-	whatthefuck = whatthefuck + (PLEASEHELP << 5);
-	whatthefuck = whatthefuck >> 8;
+	//int whatthefuck = 128;
+	//whatthefuck = whatthefuck + (PLEASEHELP << 5);
+	//whatthefuck = whatthefuck >> 8;
 
+	// now, after spending 5 god damn hours on this shit 
+	// ima do something fun and convert the rgb to the CIELAB color space, and then back to 15 bitset
+	// but honestly, gods im tired
+	// its been so long since ive talked to any of my friends
 	
+	
+	bn::fixed ugh = (32.0 * PLEASEHELP) / 256.0;
+	
+	int whatthefuck = ugh.round_integer();
+	
+	if(maxVal > 172) {
+		//whatthefuck = ugh.ceil_integer();
+	} else if(maxVal < 86) {
+		//whatthefuck = ugh.floor_integer();
+	}
 	
 	//int whatthefuck = PLEASEHELP >> 3;
 	
@@ -146,7 +164,7 @@ __attribute__(( optimize("O0"), target("thumb"))) constexpr int CONVERT5BIT(int 
 	
 };
 
-static_assert(CONVERT5BIT(20) == 3, "jesus fuck. ");
+//static_assert(CONVERT5BIT(20) == 3, "jesus fuck. ");
 
 /*
 #define MAKECOLOR(n) bn::color( \
@@ -155,22 +173,24 @@ static_assert(CONVERT5BIT(20) == 3, "jesus fuck. ");
     CONVERT5BIT(((n & 0x0000FF) >> 0)) )
 */
 
-__attribute__(( optimize("O0"), target("thumb"))) constexpr bn::color MAKECOLOR(unsigned n) {
+constexpr bn::color MAKECOLOR(unsigned n) {
 	//return bn::color(CONVERT5BIT(((n & 0xFF0000) >> 16)), CONVERT5BIT(((n & 0x00FF00) >> 8)), CONVERT5BIT(((n & 0x0000FF) >> 0)));
 	
 	int r = (n & 0xFF0000) >> 16;
 	int g = (n & 0x00FF00) >> 8;
 	int b = (n & 0x0000FF) >> 0;
 	
-	r = CONVERT5BIT(r);
-	g = CONVERT5BIT(g);
-	b = CONVERT5BIT(b);
+	int maxVal = MAX(MAX(r, g), b);
+
+	r = CONVERT5BIT(r, maxVal);
+	g = CONVERT5BIT(g, maxVal);
+	b = CONVERT5BIT(b, maxVal);
 	
 	return bn::color(r, g, b);
 }
 	
 //#define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
-__attribute__(( optimize("O0"), target("thumb"))) constexpr Palette PALETTEGEN(int a, int b, int c, int d) {
+constexpr Palette PALETTEGEN(int a, int b, int c, int d) {
 	return Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
 }
 
@@ -183,31 +203,20 @@ __attribute__(( optimize("O0"), target("thumb"))) constexpr Palette PALETTEGEN(i
 Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));
 
 //Palette defaultPalette = PALETTEGEN(0, 8421504, 12632256, 16777215);
-//Palette GRAYPALETTE    = PALETTEGEN(0,8421504,12632256,16777215);
+Palette GRAYPALETTE    = PALETTEGEN(0,8421504,12632256,16777215);
 Palette REDPALETTE     = PALETTEGEN(1310720,12717325,16284503,16777215);
-//Palette REDPALETTE     = Palette(bn::color(0, 31, 31), MAKECOLOR(1310720), MAKECOLOR(12717325), MAKECOLOR(16284503), bn::color(16, 16, 16));
-//Palette ORANGEPALETTE  = PALETTEGEN(1183493,12606012,16359488,16777215);
-//Palette YELLOWPALETTE  = PALETTEGEN(986880,12220314,15385344,16777215);
-//Palette GREENPALETTE   = PALETTEGEN(5140,815204,5823883,16777215);
-//Palette BLUEPALETTE    = PALETTEGEN(1387312,488851,6605050,16777215);
-//Palette INDIGOPALETTE  = PALETTEGEN(852000,7685745,10983884,16777215);
-//Palette VIOLETPALETTE  = PALETTEGEN(327710,6631840,12288456,16777215);
-//
-//// credit to gooeyphantasm on disc for this one, titled blueberryjam
-//Palette BLUEBERRYJAMPALETTE = PALETTEGEN(0x24276c,0xb33598,0xff8f8e,0xfafdfc);
-//
-//Palette ZERORANGERPALETTE = PALETTEGEN(1579812,806758,14325314,15851985);
+Palette ORANGEPALETTE  = PALETTEGEN(1183493,12606012,16359488,16777215);
+Palette YELLOWPALETTE  = PALETTEGEN(986880,12220314,15385344,16777215);
+Palette GREENPALETTE   = PALETTEGEN(5140,815204,5823883,16777215);
+Palette BLUEPALETTE    = PALETTEGEN(1387312,488851,6605050,16777215);
+Palette INDIGOPALETTE  = PALETTEGEN(852000,7685745,10983884,16777215);
+Palette VIOLETPALETTE  = PALETTEGEN(327710,6631840,12288456,16777215);
 
-Palette GRAYPALETTE         = defaultPalette;
-//Palette REDPALETTE          = defaultPalette;
-Palette ORANGEPALETTE       = defaultPalette;
-Palette YELLOWPALETTE       = defaultPalette;
-Palette GREENPALETTE        = defaultPalette;
-Palette BLUEPALETTE         = defaultPalette;
-Palette INDIGOPALETTE       = defaultPalette;
-Palette VIOLETPALETTE       = defaultPalette;
-Palette BLUEBERRYJAMPALETTE = defaultPalette;
-Palette ZERORANGERPALETTE   = defaultPalette;
+// credit to gooeyphantasm on disc for this one, titled blueberryjam
+Palette BLUEBERRYJAMPALETTE = PALETTEGEN(0x24276c,0xb33598,0xff8f8e,0xfafdfc);
+
+Palette ZERORANGERPALETTE = PALETTEGEN(1579812,806758,14325314,15851985);
+
 
 Palette* paletteList[10] = {&GRAYPALETTE,&REDPALETTE,&ORANGEPALETTE,&YELLOWPALETTE,&GREENPALETTE,&BLUEPALETTE,&INDIGOPALETTE,&VIOLETPALETTE,&BLUEBERRYJAMPALETTE,&ZERORANGERPALETTE};
 

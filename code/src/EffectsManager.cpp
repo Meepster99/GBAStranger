@@ -687,7 +687,8 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 		layer = inward ? 13 : 0;
 	}
 	
-	if(autoSpeed && frame % 5 != 0) {
+	//if(autoSpeed && frame % 5 != 0) {
+	if(autoSpeed && frame % 3 != 0) {
 		return false;
 	}
 	
@@ -756,7 +757,8 @@ bool EffectsManager::topDownEffect(bool downward) {
 			effectsLayer.setBigTile(x, nextLine,
 				downward ? 1+16-fillLevel : 1+fillLevel, false, !downward);
 		}
-		fillLevel+=4;
+		//fillLevel+=4;
+		fillLevel+=8;
 		
 		if(fillLevel > 16) {
 			fillLevel = 0;
@@ -797,6 +799,7 @@ bool EffectsManager::exitRoom() {
 		return false;
 	}
 	
+	// i rlly need a method of lilke,, when to do this(as in how long to wait)
 	if(frame - firstFrame < 60 * 1) {
 		return false;
 	}
@@ -822,7 +825,8 @@ bool EffectsManager::enterRoom() {
 		return false;
 	}
 	
-	if(frame - firstFrame < 60 * 1) {
+	
+	if(frame - firstFrame < 15 * 1) {
 		return false;
 	}
 	
@@ -2157,7 +2161,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		
 }
 
-void EffectsManager::wings(Pos p, Direction dir) {
+void EffectsManager::wings() {
 	
 	// spr_void_wings for gray and lily 
 	// spr_void_wings_dissipate for gray and lily (how exactly does this layer work?)
@@ -2173,13 +2177,96 @@ void EffectsManager::wings(Pos p, Direction dir) {
 	
 	bn::sound_items::snd_wingspawn.play();
 	
-
-	auto goofy = [](Effect* obj, Pos goofyP, Direction goofyDir, int offset) mutable -> void {
+	Player* player = entityManager->player;
 	
+	auto getCreateFunc = [player](int wingNum) -> auto {
+		auto createFunc = [player, wingNum](Effect* obj) mutable -> void {
+			
+			obj->tempCounter = wingNum; // discern wings from each other 
+			obj->tempCounter2 = 1; // first run bypass
+
+			obj->tiles = globalGame->mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_cif : &bn::sprite_tiles_items::dw_spr_void_wings;
+			
+			// this is something i should be doing much more :
+			obj->animateFunc(obj);
+	
+		};
+		return createFunc;
+	};
+	
+	auto wingTickFunc = [player](Effect* obj) mutable -> bool {
+		
+		
+		if(globalGame->entityManager.player->wingsUse == 0) {
+			// play the wing destroy anim here!
+			
+			bn::fixed xPos = obj->sprite.spritePointer.x();
+			bn::fixed yPos = obj->sprite.spritePointer.y();
+			
+			bool horizontalFlip = obj->sprite.spritePointer.horizontal_flip();
+			
+			if(player->currentDir == Direction::Left || player->currentDir == Direction::Right) {
+				if((player->currentDir == Direction::Right) != horizontalFlip) {
+					horizontalFlip = player->currentDir == Direction::Right;
+					xPos += player->currentDir == Direction::Right ? -8 : 8;
+				}
+			}
+			
+			auto dissipateCreateFunc = [xPos, yPos, horizontalFlip](Effect* obj2) mutable -> void {
+				
+				obj2->tiles = globalGame->mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_dissipate_cif : &bn::sprite_tiles_items::dw_spr_void_wings_dissipate;
+				
+				obj2->sprite.spritePointer.set_x(xPos);
+				obj2->sprite.spritePointer.set_y(yPos);
+				
+				obj2->sprite.spritePointer.set_horizontal_flip(horizontalFlip);
+				
+				obj2->graphicsIndex = -1;
+				obj2->animateFunc(obj2);
+				
+			};
+			
+			auto dissipateTickFunc = [](Effect* obj2) mutable -> bool {
+				obj2->graphicsIndex++;
+				
+				if(obj2->graphicsIndex == 13) {
+					return true;
+				}
+				obj2->sprite.spritePointer.set_tiles(
+					*obj2->tiles,
+					obj2->graphicsIndex
+				);
+				
+				return false;
+			};
+			
+			globalGame->effectsManager.createEffect(dissipateCreateFunc, dissipateTickFunc);
+			
+			return true;
+		}
+		
+		if(frame % 2 == 0 && obj->tempCounter2 == 0) {
+			return false;
+		}
+		obj->tempCounter2 = 0;
+		
+		obj->graphicsIndex++;
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex % 3
+		);
+		
+		Direction dir = player->currentDir;
+		
+		int xOffset = 0;
+		int yOffset = 0;
+		
+		/*
 		obj->x = goofyP.x * 16;
 		obj->y = goofyP.y * 16;
 		if(goofyDir == Direction::Right) {
-			obj->sprite.spritePointer.set_horizontal_flip(true);
+			obj->sprite.spritePoint er.set_horizontal_flip(true);
 			obj->x -= 8;
 		} else if(goofyDir == Direction::Left) {
 			obj->x += 8;
@@ -2190,55 +2277,42 @@ void EffectsManager::wings(Pos p, Direction dir) {
 		if(offset < 0) {
 			obj->sprite.spritePointer.set_horizontal_flip(true);
 		}
-			
-		if(goofyDir == Direction::Up || goofyDir == Direction::Down) {
+		
+		if(player->currentDir == Direction::Up || player->currentDir == Direction::Down) {
 			obj->y -= 4;
 		}
+		*/
 		
-		obj->sprite.spritePointer.set_tiles(
-			globalGame->mode == 2 ? bn::sprite_tiles_items::dw_spr_void_wings_cif : bn::sprite_tiles_items::dw_spr_void_wings,
-			0
-		);
-	
-		obj->sprite.updateRawPosition(obj->x, obj->y);
+		if(dir == Direction::Left || dir == Direction::Right) {
+			obj->sprite.spritePointer.set_horizontal_flip(dir == Direction::Right);
+			
+			xOffset = dir == Direction::Right ? -8 : 8;
+			//yOffset = -2;
+		} else {
+			xOffset = obj->tempCounter == 0 ? -8 : 8;
+			obj->sprite.spritePointer.set_horizontal_flip(obj->tempCounter == 0);
+		}
+		
 		// dont set sprite prio when down bc, behind
-		if(goofyDir == Direction::Down) {
+		if(dir == Direction::Down) {
 			obj->sprite.spritePointer.set_z_order(0);
 		} else {
 			obj->sprite.spritePointer.set_z_order(-1);
 		}
-	};
-	
-	auto func2 = [](Effect* obj) mutable -> bool {
-		obj->graphicsIndex++;
-		if(globalGame->entityManager.player->wingsUse == 0) {
-			return true;
-		}
-		obj->sprite.spritePointer.set_tiles(
-			globalGame->mode == 2 ? bn::sprite_tiles_items::dw_spr_void_wings_cif : bn::sprite_tiles_items::dw_spr_void_wings,
-			obj->graphicsIndex % 3
-		);
+		
+		
+		
+		obj->sprite.spritePointer.set_x(player->sprite.spritePointer.x() + xOffset);
+		obj->sprite.spritePointer.set_y(player->sprite.spritePointer.y() + yOffset);
+		
+		
 		return false;
 	};
+
 	
-	auto funcLeftRight = [p, dir, goofy](Effect* obj) mutable -> void {	
-		goofy(obj, p, dir, 0);
-	};
+	createEffect(getCreateFunc(0), wingTickFunc);
+	createEffect(getCreateFunc(1), wingTickFunc);
 	
-	auto funcUpDown1 = [p, dir, goofy](Effect* obj) mutable -> void {	
-		goofy(obj, p, dir, -8);
-	};
-	
-	auto funcUpDown2 = [p, dir, goofy](Effect* obj) mutable -> void {	
-		goofy(obj, p, dir, 8);
-	};
-	
-	if(dir == Direction::Left || dir == Direction::Right) {
-		createEffect(funcLeftRight, func2);
-	} else {
-		createEffect(funcUpDown1, func2);
-		createEffect(funcUpDown2, func2);
-	}
 }
 
 void EffectsManager::explosion(Pos p)  {
@@ -2811,6 +2885,7 @@ void EffectsManager::entityFall(Entity* entity) {
 	
 
 	if(t == EntityType::Player) {
+		entityManager->player->wingsUse = 0;
 		game->playSound(&bn::sound_items::snd_player_fall);
 	} else {
 		game->playSound(&bn::sound_items::snd_fall);

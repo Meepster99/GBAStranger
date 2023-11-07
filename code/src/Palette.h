@@ -6,7 +6,7 @@
 #include "bn_sprite_palette_item.h"
 
 #include <bn_assert.h>
-//#include "bn_fixed.h"
+#include "bn_fixed.h"
 
 #define TRANSPARENT 0
 #define BLACK 1 

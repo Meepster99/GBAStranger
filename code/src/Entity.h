@@ -14,6 +14,10 @@ class CutsceneManager;
 class Sprite {
 public:
 	
+	// now that im extremely deep into this project, ive realized 
+	// that having this class EXTEND sprite_ptr would actually be what i wanted it to be 
+	// bc all i use this for is for constructors.
+	
 	bn::sprite_ptr spritePointer;
 		
 	bn::fixed screenx = 0;

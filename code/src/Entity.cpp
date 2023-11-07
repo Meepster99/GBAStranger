@@ -239,7 +239,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		yVal += 8 * yDif;
 		
 		//bn::fixed factor = 0.66;
-		bn::fixed factor = 0.9;
+		bn::fixed factor = 1.0;
 		int tickAmount = (8.0 / factor).ceil_integer();
 
 		Effect* sweatEffect = effectsManager->generateSweatEffect();
