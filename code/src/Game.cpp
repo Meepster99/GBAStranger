@@ -389,7 +389,7 @@ void Game::loadTiles() {
 
 void Game::loadLevel(bool debug) {
 	
-	BN_LOG("entered loadlevel with debug=", debug);
+	BN_LOG("entered loadlevel with debug=", debug, " roomname=", roomManager.currentRoomName(), " roomindex = ", roomManager.roomIndex);
 	
 	//load();
 

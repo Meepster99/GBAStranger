@@ -89,7 +89,9 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	
 	//BN_ASSERT(exitTile != NULL, "no exittile was loaded in this level?");
 
-	BN_ASSERT(Switch::pressedCount == 0, "after loading in new tiles, the number of pressed tiles wasnt 0?");
+	Switch::pressedCount = 0; // is this,,, ok? TODO, SEE IF THIS CAUSES ISSUES
+	
+	BN_ASSERT(Switch::pressedCount == 0, "after loading in new tiles, the number of pressed tiles wasnt 0? Switch::pressedCount = ", Switch::pressedCount);
 	
 	BN_ASSERT(Switch::totalCount == switchTracker, "after loading in new tiles, the number of switches and number inside the class wasnt equal???");
 	

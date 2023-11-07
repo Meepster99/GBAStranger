@@ -115,6 +115,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			tileManager->stepOn(tempPos);
 		}
 		
+		if(i == 0) {
+			BN_ASSERT(temp.t == EntityType::Player, "first entity loaded into a room MUST be the player");
+		}
 		
 		switch(temp.t) {
 			case EntityType::Player:
@@ -906,14 +909,14 @@ void EntityManager::updateMap() {
 					temp = *entityMap[x][y].begin();
 					
 					if(!hasFloor(Pos(x, y)) && !hasCollision(Pos(x, y))) {
-						if(temp->isPlayer()) {
-							
-							
+						if(temp->entityType() == EntityType::Shadow) {
+							addKill(temp);
+						} else if(temp->isPlayer()) {
 							if(!player->hasWings || player->hasWingsTile) {
 								BN_LOG("no floor kill");
 								addKill(temp);
 							} else {
-								if(player->wingMoveCheck != playerMoveCount) {
+								if(player->wingMoveCheck != playerMoveCount && !hasKills()) {
 									player->wingMoveCheck = playerMoveCount;
 									
 									player->wingsUse++;
@@ -957,9 +960,7 @@ void EntityManager::updateMap() {
 									}
 								}
 							}
-							
-						} else if(temp->entityType() == EntityType::Shadow) {
-							addKill(temp);
+
 						} else {
 							killEntity(temp);
 						}
