@@ -52,6 +52,10 @@ gods
 nope, that wasnt it????? 
 bc for some reason when i copy the define into here it doesnt work?
 
+tbh i could just do this in functions.
+but i want it to be constexpr?
+
+
 */
 
 //#define CONVERT5BIT(n) CLAMP( (((bn::fixed)32 * n) / 256).round_integer(), 0, 0xFF)
@@ -60,10 +64,14 @@ bc for some reason when i copy the define into here it doesnt work?
 //#define CONVERT5BIT(n) CLAMP( (32 * (n+4)) / 256, 0, 0xFF)
 
 // works:
-#define CONVERT5BIT(n) CLAMP( ( 32 * ( n  ) ) / 256 , 0 , 0xFF )
+//#define CONVERT5BIT(n) CLAMP( ( 32 * ( n  ) ) / 256 , 0 , 0xFF )
 
 // doesnt work:
-#define CONVERT5BIT(n) CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF )
+//#define CONVERT5BIT(n) CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF )
+
+int CONVERT5BIT(int n) {
+	return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
+};
 
 #define MAKECOLOR(n) bn::color( \
     CONVERT5BIT(((n & 0xFF0000) >> 16)), \
