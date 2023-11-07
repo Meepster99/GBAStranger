@@ -62,6 +62,21 @@ the defines i had leftover in main BETTER have not been causing this
 
 nope, they werent 
 
+i found it :)) and i want to die 
+
+bn::color calls bn_assert. doing this before bn::init is called, causes it to shit itself. 
+i was clamping at a max of 0xFF instead of 31. this caused it to try to call assert, and crash.
+
+im going to go do a pull request
+like i should of for the unordered map bug
+
+ugh but the more that i think abt it like,,, 
+im not sure 
+i could have it 
+
+naw honestly, as much as i would like to blame someone other than myself
+i wouldnt of made this mistake if i had eaten food today 
+
 */
 
 //#define CONVERT5BIT(n) CLAMP( (((bn::fixed)32 * n) / 256).round_integer(), 0, 0xFF)
@@ -75,7 +90,7 @@ nope, they werent
 // doesnt work:
 //#define CONVERT5BIT(n) CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF )
 
-__attribute__(( optimize("O0"), target("arm"))) constexpr int CONVERT5BIT(int PLEASEHELP) {
+__attribute__(( optimize("O0"), target("thumb"))) constexpr int CONVERT5BIT(int PLEASEHELP) {
 	//return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
 	
 	
@@ -122,8 +137,8 @@ __attribute__(( optimize("O0"), target("arm"))) constexpr int CONVERT5BIT(int PL
 	if(whatthefuck < 0) {
 		whatthefuck = 0;
 	}
-	if(whatthefuck > 0xFF) {
-		whatthefuck = 0xFF;
+	if(whatthefuck >= 32) {
+		whatthefuck = 31;
 	}
 	
 	return whatthefuck;
@@ -140,7 +155,7 @@ static_assert(CONVERT5BIT(20) == 3, "jesus fuck. ");
     CONVERT5BIT(((n & 0x0000FF) >> 0)) )
 */
 
-__attribute__(( optimize("O0"), target("arm"))) constexpr bn::color MAKECOLOR(unsigned n) {
+__attribute__(( optimize("O0"), target("thumb"))) constexpr bn::color MAKECOLOR(unsigned n) {
 	//return bn::color(CONVERT5BIT(((n & 0xFF0000) >> 16)), CONVERT5BIT(((n & 0x00FF00) >> 8)), CONVERT5BIT(((n & 0x0000FF) >> 0)));
 	
 	int r = (n & 0xFF0000) >> 16;
@@ -170,6 +185,7 @@ Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 3
 //Palette defaultPalette = PALETTEGEN(0, 8421504, 12632256, 16777215);
 //Palette GRAYPALETTE    = PALETTEGEN(0,8421504,12632256,16777215);
 Palette REDPALETTE     = PALETTEGEN(1310720,12717325,16284503,16777215);
+//Palette REDPALETTE     = Palette(bn::color(0, 31, 31), MAKECOLOR(1310720), MAKECOLOR(12717325), MAKECOLOR(16284503), bn::color(16, 16, 16));
 //Palette ORANGEPALETTE  = PALETTEGEN(1183493,12606012,16359488,16777215);
 //Palette YELLOWPALETTE  = PALETTEGEN(986880,12220314,15385344,16777215);
 //Palette GREENPALETTE   = PALETTEGEN(5140,815204,5823883,16777215);
