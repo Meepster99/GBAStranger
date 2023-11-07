@@ -918,6 +918,38 @@ void EntityManager::updateMap() {
 									
 									player->wingsUse++;
 									if(player->wingsUse == 2) {
+										
+										if(playerStart == player->p) { // ladies and gents, 10 layers of indentation. (not counting the switch statements weirdness)
+											// tbh, i rlly should of just made the,,, specialized predeath anims effects? but its easier this way, and i dont need main for anything else
+											shouldTickPlayer = false;
+											
+											unsigned tempCount = 0;
+											while(true) { // 11
+												player->doTick();
+												for(int j=0; j<6; j++) { // 12
+													game->doButanoUpdate();
+												}
+												if(!player->pushAnimation) {
+													tempCount++;
+													if(tempCount == 2) { // 13
+														break;
+													}
+												}
+											}
+											
+											player->wingsUse = 0;
+											Effect* sweatEffect = effectsManager->generateSweatEffect();
+											
+											for(int i=0; i<8; i++) {
+												player->doTick();
+												for(int j=0; j<6; j++) {
+													game->doButanoUpdate();
+												}
+											}
+											
+											effectsManager->removeEffect(sweatEffect);
+											shouldTickPlayer = true;
+										}
 										addKill(temp);
 									} else {
 										// spawn wing anim/sound here

@@ -258,12 +258,15 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				if(playerStop) {
 					break;
 				}
+				if(frame % 6 == 0) {
+					doTick();
+				}
 				game->doButanoUpdate();
 			}
 			if(playerStop) {
 				break;
 			}
-			doTick();
+			//doTick();
 			
 			if(i < tickAmount) {
 				xVal += xDif * factor;
