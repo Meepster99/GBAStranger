@@ -941,6 +941,11 @@ inline void *memset(void *ptr, int value, size_t num) {
 }
 
 inline int strcmp(const char *str1, const char *str2) {
+	
+	if(WTF(str1) != WTF(str2)) {
+		return -1;
+	}
+	
 	while (*str1 != '\0' && *str2 != '\0') {
 		if (*str1 != *str2) {
 			return (*str1 - *str2);

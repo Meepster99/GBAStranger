@@ -52,11 +52,7 @@ public:
 
 	bn::vector<std::function<void()>, 8> vBlankFuncs;
 	
-	void doVBlank() {
-		for(int i=0; i<vBlankFuncs.size(); i++) {
-			vBlankFuncs[i]();
-		}
-	}
+	void doVBlank();
 	
 	void resetRoom();
 	

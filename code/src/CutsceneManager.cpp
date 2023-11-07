@@ -22,6 +22,17 @@ CutsceneManager::CutsceneManager(Game* game_) : game(game_), disTextGenerator(dw
 
 // -----
 
+void CutsceneManager::doVBlank() {
+	for(int i=0; i<vBlankFuncs.size(); i++) {
+		vBlankFuncs[i]();
+	}
+	
+	if(effectsManager->dialogueEndPointer != NULL) {
+		effectsManager->dialogueEndPointer->animate();
+	}
+	
+}
+
 void CutsceneManager::resetRoom() {
 	disOsTextSprites.clear();
 	for(int i=0; i<disTextSprites.size(); i++) {

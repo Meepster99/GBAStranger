@@ -643,6 +643,11 @@ EffectsManager::~EffectsManager() {
 	}
 	
 	bigSprites.clear();
+	
+	if(dialogueEndPointer != NULL) {
+		delete dialogueEndPointer;
+		dialogueEndPointer = NULL;
+	}
 }
 
 void EffectsManager::updatePalette(Palette* pal) {
@@ -877,6 +882,10 @@ void EffectsManager::doVBlank() { profileFunction();
 	
 	BN_ASSERT(removeEffectsList.size() == 0, "removeEffectsList size was nonzero after a effectsmanager vblank. this should never happen!");
 	
+	if(dialogueEndPointer != NULL) {
+		dialogueEndPointer->animate();
+	}
+	
 	return;
 
 	/*
@@ -962,6 +971,11 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	}
 	
 	bigSprites.clear();
+	
+	if(dialogueEndPointer != NULL) { 
+		delete dialogueEndPointer;
+		dialogueEndPointer = NULL;
+	}
 	
 	removeEffectsList.clear();
 	
@@ -1331,7 +1345,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		return skipScrollBool;
 	};
 	
-	Effect* dialogueEndPointer = generateDialogueEndpointer();
+	// TODO, THIS WILL NOT PROPERLY SPAWN IN GAMESTATE IS IN CUTSCENE
+	// have a special pointer in effectsmanager literally just for this.
+	dialogueEndPointer = generateDialogueEndpointer();
 	
 	while(true) {
 
@@ -1395,7 +1411,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	}
 	
 	
-	removeEffect(dialogueEndPointer);
+	delete dialogueEndPointer;
+	dialogueEndPointer = NULL;
 	
 	
 	//game->doButanoUpdate();
@@ -3131,7 +3148,7 @@ Effect* EffectsManager::generateDialogueEndpointer() {
 	};
 	
 	Effect* e = new Effect(createFunc, tickFunc);
-	effectList.push_back(e);
+	//effectList.push_back(e);
 	return e;
 }
 

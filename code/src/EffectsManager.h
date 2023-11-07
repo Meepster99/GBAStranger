@@ -285,6 +285,8 @@ public:
 	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
 	SaneSet<Effect*, MAXEFFECTSPRITES> removeEffectsList;
 	
+	Effect* dialogueEndPointer = NULL;
+	
 	bn::sprite_text_generator textGenerator;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine1;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine2;
