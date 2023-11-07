@@ -55,6 +55,12 @@ bc for some reason when i copy the define into here it doesnt work?
 tbh i could just do this in functions.
 but i want it to be constexpr?
 
+is it variable scoping with layered defines??
+bc even with functions with noinline, its still shitting itself
+
+the defines i had leftover in main BETTER have not been causing this 
+
+nope, they werent 
 
 */
 
@@ -69,17 +75,92 @@ but i want it to be constexpr?
 // doesnt work:
 //#define CONVERT5BIT(n) CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF )
 
-int CONVERT5BIT(int n) {
-	return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
+__attribute__(( optimize("O0"), target("arm"))) constexpr int CONVERT5BIT(int PLEASEHELP) {
+	//return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
+	
+	
+	//int whatthefuck = ( 32 * ( n + 0) ) / 256;
+	//int whatthefuck = ( 32 * ( n + 4) ) / 256;
+	
+	/*
+	int dude = n;
+	dude++;
+	dude++;
+	dude++;
+	dude++;
+	
+	int whatthefuck = ( 32 * ( dude + 0) );
+	whatthefuck = whatthefuck >> 8;
+	*/
+	//int whatthefuck = PLEASEHELP;
+	//whatthefuck = ( 32 * ( whatthefuck + 0) );
+	//whatthefuck = whatthefuck >> 8;
+	
+	//return PLEASEHELP >> 3;
+	/*
+	int result;
+	asm volatile (
+        "mov r1, #128\n\t"
+        "add %0, r1, %1, lsl #5\n\t"
+        "asr %0, %0, #8"
+        : "=r" (result)
+        : "r" (PLEASEHELP)
+        : "r1"
+    );
+	return result;
+	*/
+	
+
+	int whatthefuck = 128;
+	whatthefuck = whatthefuck + (PLEASEHELP << 5);
+	whatthefuck = whatthefuck >> 8;
+
+	
+	
+	//int whatthefuck = PLEASEHELP >> 3;
+	
+	if(whatthefuck < 0) {
+		whatthefuck = 0;
+	}
+	if(whatthefuck > 0xFF) {
+		whatthefuck = 0xFF;
+	}
+	
+	return whatthefuck;
+	
+	
 };
 
+static_assert(CONVERT5BIT(20) == 3, "jesus fuck. ");
+
+/*
 #define MAKECOLOR(n) bn::color( \
     CONVERT5BIT(((n & 0xFF0000) >> 16)), \
     CONVERT5BIT(((n & 0x00FF00) >> 8)), \
     CONVERT5BIT(((n & 0x0000FF) >> 0)) )
-	
-#define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
+*/
 
+__attribute__(( optimize("O0"), target("arm"))) constexpr bn::color MAKECOLOR(unsigned n) {
+	//return bn::color(CONVERT5BIT(((n & 0xFF0000) >> 16)), CONVERT5BIT(((n & 0x00FF00) >> 8)), CONVERT5BIT(((n & 0x0000FF) >> 0)));
+	
+	int r = (n & 0xFF0000) >> 16;
+	int g = (n & 0x00FF00) >> 8;
+	int b = (n & 0x0000FF) >> 0;
+	
+	r = CONVERT5BIT(r);
+	g = CONVERT5BIT(g);
+	b = CONVERT5BIT(b);
+	
+	return bn::color(r, g, b);
+}
+	
+//#define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
+__attribute__(( optimize("O0"), target("arm"))) constexpr Palette PALETTEGEN(int a, int b, int c, int d) {
+	return Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
+}
+
+
+	
 // I SHOULD JUST HAVE A PALETTEMANAGER CLASS OMFG, OR INTEGRATE IT INTO GAME 
 //int Palette::fadePalette = -1;
 //bool Palette::toWhite = true;
@@ -87,34 +168,31 @@ int CONVERT5BIT(int n) {
 Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));
 
 //Palette defaultPalette = PALETTEGEN(0, 8421504, 12632256, 16777215);
-Palette GRAYPALETTE    = PALETTEGEN(0,8421504,12632256,16777215);
+//Palette GRAYPALETTE    = PALETTEGEN(0,8421504,12632256,16777215);
 Palette REDPALETTE     = PALETTEGEN(1310720,12717325,16284503,16777215);
-Palette ORANGEPALETTE  = PALETTEGEN(1183493,12606012,16359488,16777215);
-Palette YELLOWPALETTE  = PALETTEGEN(986880,12220314,15385344,16777215);
-Palette GREENPALETTE   = PALETTEGEN(5140,815204,5823883,16777215);
-Palette BLUEPALETTE    = PALETTEGEN(1387312,488851,6605050,16777215);
-Palette INDIGOPALETTE  = PALETTEGEN(852000,7685745,10983884,16777215);
-Palette VIOLETPALETTE  = PALETTEGEN(327710,6631840,12288456,16777215);
+//Palette ORANGEPALETTE  = PALETTEGEN(1183493,12606012,16359488,16777215);
+//Palette YELLOWPALETTE  = PALETTEGEN(986880,12220314,15385344,16777215);
+//Palette GREENPALETTE   = PALETTEGEN(5140,815204,5823883,16777215);
+//Palette BLUEPALETTE    = PALETTEGEN(1387312,488851,6605050,16777215);
+//Palette INDIGOPALETTE  = PALETTEGEN(852000,7685745,10983884,16777215);
+//Palette VIOLETPALETTE  = PALETTEGEN(327710,6631840,12288456,16777215);
+//
+//// credit to gooeyphantasm on disc for this one, titled blueberryjam
+//Palette BLUEBERRYJAMPALETTE = PALETTEGEN(0x24276c,0xb33598,0xff8f8e,0xfafdfc);
+//
+//Palette ZERORANGERPALETTE = PALETTEGEN(1579812,806758,14325314,15851985);
 
-// credit to gooeyphantasm on disc for this one, titled blueberryjam
-Palette BLUEBERRYJAMPALETTE = PALETTEGEN(0x24276c,0xb33598,0xff8f8e,0xfafdfc);
-
-/*
-from the disc, but like,, idk they dont seem right?
-colarray[0] = 2369387
-colarray[1] = 11744917
-colarray[2] = 16748431
-colarray[3] = 16777215
-colarray[4] = 16448767
-*/
-
-Palette ZERORANGERPALETTE = PALETTEGEN(1579812,806758,14325314,15851985);
+Palette GRAYPALETTE         = defaultPalette;
+//Palette REDPALETTE          = defaultPalette;
+Palette ORANGEPALETTE       = defaultPalette;
+Palette YELLOWPALETTE       = defaultPalette;
+Palette GREENPALETTE        = defaultPalette;
+Palette BLUEPALETTE         = defaultPalette;
+Palette INDIGOPALETTE       = defaultPalette;
+Palette VIOLETPALETTE       = defaultPalette;
+Palette BLUEBERRYJAMPALETTE = defaultPalette;
+Palette ZERORANGERPALETTE   = defaultPalette;
 
 Palette* paletteList[10] = {&GRAYPALETTE,&REDPALETTE,&ORANGEPALETTE,&YELLOWPALETTE,&GREENPALETTE,&BLUEPALETTE,&INDIGOPALETTE,&VIOLETPALETTE,&BLUEBERRYJAMPALETTE,&ZERORANGERPALETTE};
 
 const char* paletteNameList[10] = {"GRAY\0", "RED\0", "ORANGE\0", "YELLOW\0", "GREEN\0", "BLUE\0", "INDIGO\0", "VIOLET\0", "BLUEBERRYJAM\0", "ZERORANGER\0"};
-
-Palette redText(bn::color(0, 0, 0), bn::color(31, 0, 0), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));
-Palette greenText(bn::color(0, 0, 0), bn::color(0, 31, 0), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));
-Palette blueText(bn::color(0, 0, 0), bn::color(0, 0, 31), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));
-Palette whiteText(bn::color(0, 0, 0), bn::color(31, 31, 31), bn::color(0, 0, 0),bn::color(31, 0, 0), bn::color(31, 0, 0));

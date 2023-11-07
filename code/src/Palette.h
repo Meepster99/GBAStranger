@@ -254,7 +254,8 @@ extern Palette* paletteList[10];
 extern const char* paletteNameList[10];
 
 
-extern Palette redText;
-extern Palette greenText;
-extern Palette blueText;
-extern Palette whiteText;
+//extern Palette redText;
+//extern Palette greenText;
+//extern Palette blueText;
+//extern Palette whiteText;
+

@@ -1,8 +1,6 @@
 
 #include "Game.h"
 
-#include "Palette.h"
-
 Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 
 Game* globalGame = NULL;
