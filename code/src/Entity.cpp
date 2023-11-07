@@ -658,7 +658,8 @@ void Boulder::interact() {
 }
 
 void Obstacle::moveSucceded() {
-	bn::sound_items::snd_push.play();
+	game->playSound(&bn::sound_items::snd_push);
+	game->removeSound(&bn::sound_items::snd_push_small);
 }
 
 void EusStatue::isDead() {

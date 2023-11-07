@@ -751,6 +751,11 @@ void Game::doVBlank() { profileFunction();
 	// also should cutscenes have a vblank call? maybe 
 	// i could have it execute a lambda
 	
+	// WILL THIS LEAD TO A 1 FRAME AUDIO DELAY WITH SOUNDS?
+	// depending on if the sound handler runs before or after ours.
+	// this will require more investigation
+	doSoundVBlank();
+	
 	static bool a, b, c = false;
 	
 	switch(state) {
@@ -765,12 +770,6 @@ void Game::doVBlank() { profileFunction();
 			//BN_LOG("done");
 			break;
 		case GameState::Exiting:
-			
-			// should these calls be here?
-			//entityManager.doVBlank();
-			//effectsManager.doVBlank();
-			//tileManager.doVBlank();
-		
 			if(!a) { a = entityManager.exitRoom(); }
 			if(!b) { b = effectsManager.exitRoom(); }
 			if(!c) { c = tileManager.exitRoom(); }
@@ -787,6 +786,9 @@ void Game::doVBlank() { profileFunction();
 				state = GameState::Normal;
 				a = b = c = false; // vine boom sound effect
 			}
+			// tick effects even while intro is occuring
+			// this should of been here months ago.
+			effectsManager.doVBlank(); 
 			break;
 		case GameState::Loading:
 		case GameState::Paused:
@@ -1056,31 +1058,46 @@ void Game::load() {
 
 void Game::playSound(const bn::sound_item* sound) {
 	
-	static unsigned prevFrame = -1;
-	static unsigned soundsThisFrame = 0;
+	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED
 	
-	// could maybe have a queue to store sounds that could be played on future frames?
-	// but in my case, im going to have a SaneSet for sounds already played on this frame 
-	// or maybe just a vector 
-	// actually, no, SaneSet
-	
-	#define MAXSOUNDS 4
-	
-	static SaneSet<const bn::sound_item*, MAXSOUNDS> playedSounds;
-	
-	if(frame != prevFrame) {
-		prevFrame = frame;
-		soundsThisFrame = 0;
-		playedSounds.clear();
+	if(state == GameState::Loading || state == GameState::Entering) {
+		return;
+	}
+
+	if(!removedSounds.contains(sound)) {
+		queuedSounds.insert(sound);
 	}
 	
-	if( !(state == GameState::Loading || state == GameState::Entering) ) {
-		if(soundsThisFrame < MAXSOUNDS && !playedSounds.contains(sound)) {
-			sound->play();
-			soundsThisFrame++;
-			playedSounds.insert(sound);
-		}	
+}
+
+void Game::removeSound(const bn::sound_item* sound) {
+	
+	if(state == GameState::Loading || state == GameState::Entering) {
+		return;
+	}
+	
+	queuedSounds.erase(sound);
+	removedSounds.insert(sound);
+	
+}
+
+void Game::doSoundVBlank() {
+	
+	// should this if statement not be here and,,, just be like in the switch case? yes.
+	// but im tired 
+	
+	if(state == GameState::Loading || state == GameState::Entering) {
+		return;
+	}
+
+	for(auto it = queuedSounds.begin(); it != queuedSounds.end(); ++it) {
+		if(!removedSounds.contains(*it)) {
+			(*it)->play();
+		}
 	}	
+	
+	queuedSounds.clear();
+	removedSounds.clear();
 }
 
 

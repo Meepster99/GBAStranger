@@ -99,35 +99,61 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	if(tiles == &bn::sprite_tiles_items::dw_spr_chest) {
 		loadChest();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_birch) {
-		if(game->mode == 2 && strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) { // cif mode 
-			tiles = &bn::sprite_tiles_items::dw_spr_birch_b;
-			sprites[0].spritePointer.set_tiles(*tiles, 0);
-			effectsManager->roomDust();
+		
+		bool spawnedInteractable = false;
+		
+		auto kickedFunc = [](void* unused) -> bool {
+			(void)unused;
+			game->playSound(&bn::sound_items::snd_push);
+			return true;
+		};
+		
+		if(game->mode == 2) {// cif mode 
+			if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
+				tiles = &bn::sprite_tiles_items::dw_spr_birch_b;
+				sprites[0].spritePointer.set_tiles(*tiles, 0);
+				effectsManager->roomDust();
+				
+				auto func1 = [](void* unused) -> void {
+					(void)unused;
+					globalGame->cutsceneManager.cifDream();
+				};
+				
+				// todo, we gotta add shake here
+				// shake also spawns leaves! do that too
+			
+				Interactable* temp1 = new Interactable(Pos(6, 4),
+					func1,
+					kickedFunc,
+					NULL,
+					NULL
+				);
+				
+				entityManager->addEntity(temp1);
+				
+				spawnedInteractable = true;
+			} else {
+				sprites[0].spritePointer.set_tiles(*tiles, 1);
+			}
+		}
+		
+		if(!spawnedInteractable) {
 			
 			auto func1 = [](void* unused) -> void {
 				(void)unused;
-				globalGame->cutsceneManager.cifDream();
-			};
-			
-			auto func2 = [](void* unused) -> bool {
-				(void)unused;
-				return true;
 			};
 			
 			Interactable* temp1 = new Interactable(Pos(6, 4),
 				func1,
-				func2,
+				kickedFunc,
 				NULL,
 				NULL
 			);
 			
-			// shit code
-			//game->collisionMap[6][4] = 2;
-			
 			entityManager->addEntity(temp1);
-			
-			
 		}
+		
+		
 	}
 	
 }
@@ -353,7 +379,7 @@ void BigSprite::loadBoobTrap() {
 		}
 		
 		if(boobaCount > 16 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
-			game->playSound(&bn::sound_items::metal_pipe_falling_sound_effect);
+			bn::sound_items::metal_pipe_falling_sound_effect.play();
 			int lmao = 0;
 			while(lmao < 60 * 5) {
 				lmao++;
@@ -366,6 +392,7 @@ void BigSprite::loadBoobTrap() {
 		
 		if(timesCalled == 0) {
 			game->playSound(&bn::sound_items::snd_bounce);
+			game->removeSound(&bn::sound_items::snd_push_small);
 		}
 		
 		static_cast<BigSprite*>(obj)->animate(); 
@@ -756,35 +783,7 @@ bool EffectsManager::exitRoom() {
 	// trying to be safe by being sure that the only place where true returns 
 	// is the end of the func, right after we reset those vars, or something close to that
 	
-	for(int i=0; i<bigSprites.size(); i++) {
-		if(bigSprites[i]->autoAnimate) {
-			if(frame % bigSprites[i]->autoAnimateFrames == 0) {
-				bigSprites[i]->animate();
-			}
-		}
-	}
-	
-	for(auto it = effectList.begin(); it != effectList.end(); ) {
-		
-		if(removeEffectsList.contains(*it)) {
-			removeEffectsList.erase(*it);
-			
-			delete (*it);
-			(*it) = NULL;
-			it = effectList.erase(it);
-			continue;
-		}
-		
-		bool res = (*it)->animate();
-		
-		if(res) {
-			delete (*it);
-			(*it) = NULL;
-			it = effectList.erase(it);
-		} else {
-			++it;
-		}
-	}
+	doVBlank();
 	
 	BN_ASSERT(removeEffectsList.size() == 0, "removeEffectsList size was nonzero after a effectsmanager vblank. this should never happen!");
 	
@@ -1279,7 +1278,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		
 		// i may be bsing, but i think a sound plays at the start and and and when a space occurs 
 		// this is actually completley wrong! but im tired ok, and also kinda like it so im leaving it in
-		globalGame->playSound(sound);
+		//globalGame->playSound(sound);
+		sound->play();
 		
 		int bufferIndex = 0;
 		for(int i=0; i<textSprites.size(); i++) {
@@ -1444,7 +1444,7 @@ bool EffectsManager::restRequest() {
 	}
 	
 	//textGenerator.generate((bn::fixed)-16, (bn::fixed)-30, bn::string_view("Rest?\0"), textSpritesLine1);
-	textGenerator.generate((bn::fixed)-24, (bn::fixed)-30, bn::string_view("Rest?\0"), restSprites);
+	textGenerator.generate((bn::fixed)-16, (bn::fixed)-24, bn::string_view("Rest?\0"), restSprites);
 	for(int i=0; i<restSprites.size(); i++) {
 		restSprites[i].set_bg_priority(0);
 		restSprites[i].set_palette(activeTextPalette);
@@ -1457,8 +1457,8 @@ bool EffectsManager::restRequest() {
 		
 		restSpritesOutline.push_back(bn::vector<bn::sprite_ptr, 4>());
 		
-		bn::fixed x = -24;
-		bn::fixed y = -30;
+		bn::fixed x = -16;
+		bn::fixed y = -24;
 		
 		// stupid way of doing this but i dont want to write a switch case
 		Pos dif = Pos(1, 1);

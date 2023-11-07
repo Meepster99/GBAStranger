@@ -209,9 +209,23 @@ public:
 		return strangerNames[mode];
 	}
 	
+
+	// could maybe have a queue to store sounds that could be played on future frames?
+	// but in my case, im going to have a SaneSet for sounds already played on this frame 
+	// or maybe just a vector 
+	// actually, no, SaneSet
+	
+	#define MAXSOUNDS 4
 	
 	// this should maybe be its own file
 	void playSound(const bn::sound_item* sound);
+	void removeSound(const bn::sound_item* sound);
+	
+	void doSoundVBlank();
+
+private:
+	SaneSet<const bn::sound_item*, MAXSOUNDS> queuedSounds;
+	SaneSet<const bn::sound_item*, MAXSOUNDS*2> removedSounds;
 	
 };
 

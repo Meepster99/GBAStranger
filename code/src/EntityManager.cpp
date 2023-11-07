@@ -556,8 +556,9 @@ void EntityManager::doMoves() {
 		player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
 	} else {
 		//,, this will play at the same time as a boulder push,,, but im tired ok
+		// we,, we can make ways around this right
 		if(playerRes.second.has_value()) {
-			bn::sound_items::snd_push_small.play(); 
+			game->playSound(&bn::sound_items::snd_push_small);
 		}
 	}
 	
