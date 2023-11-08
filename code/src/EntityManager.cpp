@@ -943,7 +943,7 @@ void EntityManager::updateMap() {
 								BN_LOG("no floor kill");
 								addKill(temp);
 							} else {
-								if(player->wingMoveCheck != playerMoveCount && !hasKills()) {
+								if(player->wingMoveCheck != playerMoveCount && !hasKills()) { // removed one indent layer down here yeet
 									player->wingMoveCheck = playerMoveCount;
 									
 									player->wingsUse++;
@@ -951,6 +951,9 @@ void EntityManager::updateMap() {
 										
 										if(playerStart == player->p) { // ladies and gents, 10 layers of indentation. (not counting the switch statements weirdness)
 											// tbh, i rlly should of just made the,,, specialized predeath anims effects? but its easier this way, and i dont need main for anything else
+											
+											// THIS SHOULD 100% BE IN EFFECTS!
+											
 											shouldTickPlayer = false;
 											
 											unsigned tempCount = 0;

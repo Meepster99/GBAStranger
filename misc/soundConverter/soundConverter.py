@@ -27,29 +27,7 @@ RESET = Style.RESET_ALL
 
 outputPath = "./formattedOutput/"
 
-def convertAllMusic():
-
-	# msc_013.ogg	
-	
-	inputPath = "./Exported_Sounds/audiogroup_music"
-	
-	file = "msc_013.ogg"
-	
-	inputFilePath = os.path.join(inputPath, file)
-	
-	song = AudioSegment.from_ogg(inputFilePath)
-	
-	song = song.set_channels(1)
-	
-	#song = song[:30*1000]
-	
-	#song = song.compress(2)
-
-
-	outputFilePath = os.path.join(outputPath, file.rsplit(".", 1)[0] + ".wav")
-	song.export(outputFilePath, format="wav", parameters=["-ar","4000"])
-	
-	pass
+convertParameters = ["-ar","44100"]
 
 def convertAllSounds():
 
@@ -75,7 +53,7 @@ def convertAllSounds():
 	
 		outputFilePath = os.path.join(outputPath, wav.rsplit(".", 1)[0] + ".wav")
 		#song.export(outputFilePath, format="wav", parameters=["-ar","22050"])
-		song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
+		song.export(outputFilePath, format="wav", parameters=convertParameters)
 
 		
 		successCount += 1
@@ -128,7 +106,7 @@ def convertMisc():
 		song = song.set_channels(1)
 
 		outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
-		song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
+		song.export(outputFilePath, format="wav", parameters=convertParameters)
 
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp3")
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp4")
@@ -138,7 +116,7 @@ def convertMisc():
 	song = AudioSegment.from_mp3(fileName.rsplit(".", 1)[0] + ".mp3")
 	song = song.set_channels(1)
 	outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
-	song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
+	song.export(outputFilePath, format="wav", parameters=convertParameters)
 	
 	
 	pass

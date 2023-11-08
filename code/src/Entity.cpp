@@ -754,7 +754,7 @@ bn::optional<Direction> MonStatue::getNextMove() {
 }
 
 void TanStatue::isDead() {
-	if(tileManager->hasFloor(p)) {
+	if(tileManager->hasFloor(p)) { // i still have 0 clue if like,,, idek
 		tileManager->stepOff(p);
 	}
 }

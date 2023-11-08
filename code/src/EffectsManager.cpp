@@ -1139,7 +1139,7 @@ bool EffectsManager::exitRoom() {
 	}
 	
 	// i rlly need a method of lilke,, when to do this(as in how long to wait)
-	if(frame - firstFrame < 60 * 1) {
+	if(frame - firstFrame < 45 * 1) {
 		return false;
 	}
 	
@@ -3796,7 +3796,6 @@ Effect* EffectsManager::levStatueActive(LevStatue* levStatue) {
 	
 }
 
-
 void EffectsManager::levKill() {
 	
 	/*
@@ -3822,6 +3821,8 @@ void EffectsManager::levKill() {
 	entityManager->shouldTickPlayer = false;
 
 	unsigned startFrame = frame;
+	
+	bn::sound_items::snd_lockdamage.play();
 	
 	while(frame - startFrame < 60) {
 	
@@ -3884,6 +3885,8 @@ void EffectsManager::levKill() {
 	game->cutsceneManager.delay(15);
 	
 	Pos playerPos = entityManager->player->p;
+	
+	bn::sound_items::snd_judgment.play();
 	
 	for(int i=0; i<5; i++) {
 		game->cutsceneManager.cutsceneLayer.rawMap.create(*judgementBackgrounds[i]);

@@ -136,6 +136,9 @@ void Game::findNextRoom() {
 	
 
 	if(entityManager.playerWon()) {
+		
+		entityManager.player->wingsUse = 0;
+		
 		entityManager.updateScreen(); // is this ok?
 
 
@@ -262,6 +265,9 @@ void Game::findNextRoom() {
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
+
+	//player->wingsUse = 0; // this being here renders a bunch of my other patchwork bs irrelevent.
+	// wait actually,,, i am not sure if i want it here. i only have one other patch case left so yea
 
 	// summon all room exiting effects
 	if(!debug && !entityManager.playerWon()) {
@@ -823,6 +829,22 @@ void Game::doVBlank() { profileFunction();
 void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
+	
+	/* 
+	i swear, i have had multiple confirmed cases where strings arent nulltermed.
+	is my dialogue func going one char to far, making me need the extra nullterm? or whats happening?
+	
+	const char* test1 = "test1111111111111111111111111111";
+	const char* test2 = "test2222222222222222222222222222";
+	const char* test3 = "test3333333333333333333333333333";
+
+	
+	BN_LOG("test1 = ", test1, " addr = ", (void*)test1);
+	BN_LOG("test2 = ", test2, " addr = ", (void*)test2);
+	BN_LOG("test3 = ", test3, " addr = ", (void*)test3);
+	
+	BN_LOG((int)test2[8], "char=", test2[8]);
+	*/
 	
 	//u8* test = reinterpret_cast<u8*>(0x00001000);
 	

@@ -282,6 +282,8 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 
 //bn::color test(200, 200, 200);
 
+	
+
 int main() {
 	
 	bn::core::init(); 
@@ -290,7 +292,6 @@ int main() {
 	//BN_LOG(val.colorArray[0].red(), " ", val.colorArray[0].green(), " ", val.colorArray[0].blue());
 	//BN_LOG(test.red());
 	//int idek = REDPALETTE.colorArray[1].red();
-	
 	
 	
 	//BN_LOG("ok,,, ", IDEK(20));
