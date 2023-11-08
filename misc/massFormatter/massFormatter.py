@@ -42,6 +42,9 @@ palette = {
 	
 	# manual sanity fix
 	(20, 255, 255)	: 2,
+	
+	# why was the cyan in,, the thing not accurate?
+	(0, 246, 255)	: 0,
 }
 
 validChars = '_.%s%s' % (string.ascii_lowercase, string.digits)
@@ -134,7 +137,7 @@ def createFolder(folderPath):
 
 def writeBitmap(inputImageDontTouchLol, dest):
 
-	inputImage = np.array(inputImageDontTouchLol)
+	inputImage = np.array(inputImageDontTouchLol.convert("RGB"))
 	
 	max_width, max_height = inputImageDontTouchLol.size
 	

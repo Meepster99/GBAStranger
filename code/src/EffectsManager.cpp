@@ -542,10 +542,11 @@ void BigSprite::loadTree() {
 				auto giveEgg = []() -> void {
 					
 					bn::sound_items::egg.play();
-					
+				
+					unsigned eggBackup = globalGame->saveData.eggCount;
 					globalGame->saveData.eggCount++;
-					
-					if(globalGame->saveData.eggCount == 0) {
+				
+					if(eggBackup == 0) {
 						globalGame->effectsManager.doDialogue("\0* You got the egg\0");
 					} else {
 						
@@ -582,7 +583,7 @@ void BigSprite::loadTree() {
 				
 				const char* eggMsg1 = ""
 				"* Well, there is a fool here.\n"
-				"* They would be happy to see anyone.\n"
+				"* They would be happy to see anyone, including you.\n"
 				"* What do you think?"
 				"\0";
 				
@@ -593,7 +594,7 @@ void BigSprite::loadTree() {
 				"\0";
 				
 				const char* eggMsg3 = ""
-				"\0* Well, there is a fool here.\n"
+				"\0* Well, there is someone here.\n"
 				"* They are happy to see you.\n"
 				"* You are as well."
 				"\0";
@@ -683,10 +684,19 @@ void BigSprite::loadTree() {
 						globalGame->effectsManager.doDialogue("\0"
 						"* Again, thank you for spending time with me, and helping me with my eggs.\n"
 						"* It means the world, to me.\n"
-						"Thank you. <3\0"
+						"* Thank you. <3\0"
 						, &bn::sound_items::snd_cifer);
+						idrk.setVisible(false);
 						
-					
+						globalGame->effectsManager.doDialogue("\0"
+						"* Your friend lies back down, clean and well-rested\n"
+						"* You feel proud.\0");
+						
+						idrk.setVisible(true);
+						globalGame->effectsManager.doDialogue("\0"
+						"* Please come back any time if you want more eggs!\n"
+						"* Or,`to spend time with me.`I would appreciate it.\0"
+						, &bn::sound_items::snd_cifer);
 						idrk.setVisible(false);
 						
 					}
@@ -724,7 +734,7 @@ void BigSprite::loadTree() {
 				const char* inProgressMsg3 = "[The tree seems to have something to show you, but cant yet.]\n"
 				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
 				"[Behind the tree, someone is laying down on a bed, completely unaware of your presence.]\n"
-				"[Their hair is down to their knees, and shines in the glow surrounding the tree.]\n"
+				"[Their hair is down to their knees, and shines in the glow of the tree.]\n"
 				"[It is your friend.]\n"
 				"[And it seems they have finally taken a bath.]\n"
 				"[Maybe go say hello?]\0";
