@@ -132,7 +132,14 @@ def convertMisc():
 
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp3")
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp4")
-		
+	
+	
+	fileName = "egg.mp3"
+	song = AudioSegment.from_mp3(fileName.rsplit(".", 1)[0] + ".mp3")
+	song = song.set_channels(1)
+	outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
+	song.export(outputFilePath, format="wav", parameters=["-ar","44100"])
+	
 	
 	pass
 

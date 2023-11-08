@@ -565,6 +565,17 @@ def convertTiles(outputPath):
 	with open(os.path.join("./formattedOutput/allSprites/", "dw_" + "spr_glitchedsprites" + ".json"), "w") as f:
 		json.dump(outputJson, f)
 	
+	# 
+	
+	temp = Image.open("idrk.png")
+	writeBitmap(temp, os.path.join("./formattedOutput/allSprites/", "idrk" + ".bmp"))
+	outputJson = {
+		"type": "sprite",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join("./formattedOutput/allSprites/", "dw_" + "idrk" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	
 	print("done converting tiles")
 	pass
 	

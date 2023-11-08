@@ -516,29 +516,251 @@ void BigSprite::loadTree() {
 			} else {
 				animationIndex = 1;
 			}
-			sprites[0].spritePointer.set_tiles(*tiles, animationIndex);
 			break;
 	}
 	
-	auto interactFunc = [](void* unused) -> void {
-		(void)unused;
+	sprites[0].spritePointer.set_tiles(*tiles, animationIndex);
+	sprites[0].spritePointer.set_bg_priority(1);
+	sprites[0].spritePointer.set_z_order(-2);
+
+	
+	auto getInteractFunc = []() -> auto {
 		
-		switch(game->mode) {
-			default:
-			case 0:
-				globalGame->effectsManager.doDialogue("[The tree seems to have something to show you, but cant yet.]\n[In the distance, you can barely make out the sound of a keyboard endlessly clacking away.]\n[Better move on]\0");
-				break;
-			case 1:
-				globalGame->effectsManager.doDialogue("[The tree seems to have something to show you, but cant yet.]\n[In the distance, you can barely make out the sound of a keyboard endlessly clacking away.]\n[Better move on]\0");
-				break;
-			case 2:
-				if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
-					globalGame->cutsceneManager.cifDream();
+		bool alreadyTalked = false;
+		
+		return [alreadyTalked](void* unused) mutable -> void {
+			(void)unused;
+			
+			// hehe, have me give them an egg if behind the tree
+			
+			
+			
+			auto eggFunc = [&alreadyTalked]() mutable -> void {
+
+			
+				// my use of lambdas has become excessive 
+				auto giveEgg = []() -> void {
+					
+					bn::sound_items::egg.play();
+					
+					globalGame->saveData.eggCount++;
+					
+					if(globalGame->saveData.eggCount == 0) {
+						globalGame->effectsManager.doDialogue("\0* You got the egg\0");
+					} else {
+						
+						
+						//char buffer[64];
+						//memset(buffer, '\0', 64);
+						//\0* You got another egg\0"
+						// i miss snprintf
+						//https://gvaliente.github.io/butano/faq.html#faq_sprintf
+						bn::string<64> string;
+						bn::ostringstream string_stream(string);
+						// i dont think string stream likes me having this null char thestart
+						// nvm c_str instead of data worked
+						// nope???? wtf???
+						string_stream << "* You got another egg. You now have: ";
+						string_stream << globalGame->saveData.eggCount;
+						string_stream << " eggs\0";
+						
+						char buffer[64];
+						memset(buffer, '\0', 64); 
+						strncpy(buffer + 1, string.c_str(), string.size());
+			
+						globalGame->effectsManager.doDialogue(buffer);
+					}
+				};
+			
+				if(alreadyTalked) {
+					globalGame->effectsManager.doDialogue("* The fool is happily working away.\nBetter leave them to it\0");
+					return;
+				}	
+
+			
+				alreadyTalked = true;
+				
+				const char* eggMsg1 = ""
+				"* Well, there is a fool here.\n"
+				"* They would be happy to see anyone.\n"
+				"* What do you think?"
+				"\0";
+				
+				const char* eggMsg2 = ""
+				"* Well, there is a fool here.\n"
+				"* They might be happy to see you.\n"
+				"* What do you think?"
+				"\0";
+				
+				const char* eggMsg3 = ""
+				"\0* Well, there is a fool here.\n"
+				"* They are happy to see you.\n"
+				"* You are as well."
+				"\0";
+				
+				bool restRes = false;
+				
+				if(globalGame->saveData.eggCount == 0) {
+					globalGame->effectsManager.doDialogue(eggMsg1);
+					restRes = globalGame->effectsManager.restRequest("What do you think?\0");
+				} else if(globalGame->saveData.eggCount < 5) {
+					globalGame->effectsManager.doDialogue(eggMsg2);
+					restRes = globalGame->effectsManager.restRequest("What do you think?\0");
 				} else {
-					globalGame->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
+					globalGame->effectsManager.doDialogue(eggMsg3);
+					restRes = true;
 				}
-				break;
-		}
+
+				if(restRes) {
+					
+					// ohhh gods i need bigsprites(like sprites of the ppl) to actually make this make sense.
+					// spr_lillie_port_eh
+					// or i could just have a lil symbol for me.
+					// that might be good
+					// and good LORD, i would rather write a whole new class than interact with bigsprite ever again 
+					// ill just have them be effects tbh
+					
+					Sprite idrk(bn::sprite_items::dw_idrk);
+					idrk.setVisible(false);
+					idrk.updatePosition(Pos(11, 4));
+					
+					if(globalGame->saveData.eggCount == 0) {
+					
+						globalGame->effectsManager.doDialogue("\0* The fool slowly turns around and stares at you\0");
+						
+						idrk.setVisible(true);
+						globalGame->effectsManager.doDialogue("\0* Thank you for saying hello.\0", &bn::sound_items::snd_cifer);
+						idrk.setVisible(false);
+						
+						globalGame->effectsManager.doDialogue("\0* After awkwardly fumbling through their pockets, they force a gift into your hands\0");
+					
+						giveEgg();
+						
+						idrk.setVisible(true);
+						globalGame->effectsManager.doDialogue("\0* It reminds me of you. Please take good care of it.\0", &bn::sound_items::snd_cifer);
+						idrk.setVisible(false);
+						globalGame->effectsManager.doDialogue("\0* The fool returns to their computer, just as they were before.\0");
+						
+						globalGame->effectsManager.doDialogue("* What even was that?\0");
+						
+					} else if(globalGame->saveData.eggCount < 5) {
+						
+						globalGame->effectsManager.doDialogue("\0* The fool slowly turns around and stares at you\0");
+						
+						idrk.setVisible(true);
+						globalGame->effectsManager.doDialogue("* Hello again. Did you enjoy the egg?\0", &bn::sound_items::snd_cifer);
+						idrk.setVisible(false);
+						
+						restRes = globalGame->effectsManager.restRequest("Egg?\0");
+						
+						if(restRes) {
+							giveEgg();
+							idrk.setVisible(true);
+							globalGame->effectsManager.doDialogue("\0* Great! I thought you would.\n* Please come back for more later if you'd like.\0", &bn::sound_items::snd_cifer);
+							idrk.setVisible(false);
+							globalGame->effectsManager.doDialogue("* Thank you for spending time with me. It means the world.\0", &bn::sound_items::snd_cifer);
+						} else {
+							idrk.setVisible(true);
+							globalGame->effectsManager.doDialogue("\0* Thats,`,`,`ok.\n* They arent for everyone.\n* I understand that.\0", &bn::sound_items::snd_cifer);
+							idrk.setVisible(false);
+							globalGame->effectsManager.doDialogue("* They seem dejected, and return to their work\0");
+						}
+					} else {
+						alreadyTalked = false;
+						
+						
+						globalGame->effectsManager.doDialogue("\0* Your friend eagerly gets up from their bed and turns to you\0");
+						
+						idrk.setVisible(true);
+						globalGame->effectsManager.doDialogue("\0* Thank you for taking such good care of my eggs. I finally am able to rest.\n* As payment, would you like some breakfast?\0", &bn::sound_items::snd_cifer);
+						idrk.setVisible(false);
+
+						globalGame->effectsManager.doDialogue("\0* They offer you some scrambled eggs.\n"
+						"* You eat them without a second thought.\n"
+						"* The taste reminds you of home.\0");
+						
+						idrk.setVisible(true);
+						globalGame->effectsManager.doDialogue("\0"
+						"* Again, thank you for spending time with me, and helping me with my eggs.\n"
+						"* It means the world, to me.\n"
+						"Thank you. <3\0"
+						, &bn::sound_items::snd_cifer);
+						
+					
+						idrk.setVisible(false);
+						
+					}
+
+					// i understand now why dialogue systems exist.
+					// this is going to be the most complex convo in the whole game lmao
+					// have them take a bath and take a break after 5 eggs 
+					// gods, i should take a break
+					//globalGame->saveData.eggCount++;
+
+				} else {
+					globalGame->effectsManager.doDialogue("* You were better off leaving it alone.\0");
+				}
+			};
+			
+			auto inProgressFunc = []() -> void {
+				
+				
+				const char* inProgressMsg = "[The tree seems to have something to show you, but cant yet.]\n"
+				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
+				"[Behind the tree, someone sits with a slight hunch over a computer, quietly murmuring to themselves, completely unaware of your presence.]\n"
+				"[Their hair is down to their knees.]\n"
+				"[It seems like they are busy with their work, and haven't had a break in weeks.]\n"
+				"[They could definitely use a good bath.]\n"
+				"[Better move on]\0";
+				
+				const char* inProgressMsg2 = "[The tree seems to have something to show you, but cant yet.]\n"
+				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
+				"[Behind the tree, someone sits with a slight hunch over a computer, quietly murmuring to themselves, completely unaware of your presence.]\n"
+				"[Their hair is down to their knees.]\n"
+				"[You would recognize that disheveled look anywhere. They are the egg bringer, arbiter of breakfast!]\r[Or maybe the eggs are about something else?]\n"
+				"[They still havent taken a desperately needed bath.]\n"
+				"[Maybe go say hello?]\0";
+				
+				const char* inProgressMsg3 = "[The tree seems to have something to show you, but cant yet.]\n"
+				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
+				"[Behind the tree, someone is laying down on a bed, completely unaware of your presence.]\n"
+				"[Their hair is down to their knees, and shines in the glow surrounding the tree.]\n"
+				"[It is your friend.]\n"
+				"[And it seems they have finally taken a bath.]\n"
+				"[Maybe go say hello?]\0";
+				
+				if(globalGame->saveData.eggCount == 0) {
+					globalGame->effectsManager.doDialogue(inProgressMsg);
+				} else if(globalGame->saveData.eggCount < 5) {
+					globalGame->effectsManager.doDialogue(inProgressMsg2);
+				} else {
+					globalGame->effectsManager.doDialogue(inProgressMsg3);
+				}
+			};
+			
+			Pos playerPos = globalGame->entityManager.player->p;
+			
+			if(playerPos == Pos(6, 3)) {
+				eggFunc();
+			} else {
+				switch(game->mode) {
+					default:
+					case 0:
+						inProgressFunc();
+						break;
+					case 1:
+						inProgressFunc();
+						break;
+					case 2:
+						if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
+							globalGame->cutsceneManager.cifDream();
+						} else {
+							globalGame->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
+						}
+						break;
+				}
+			}
+		};
 	};
 	
 	unsigned startFrame = frame+1;
@@ -569,8 +791,6 @@ void BigSprite::loadTree() {
 		
 		if(firstRun) {
 			
-			globalGame->effectsManager.treeLeaves();
-
 			firstRun = false;
 			
 			game->playSound(&bn::sound_items::snd_push);
@@ -580,7 +800,8 @@ void BigSprite::loadTree() {
 			restoreTiles = bigSprite->tiles;
 			bigSprite->animationIndex = 0;
 			
-			if(bigSprite->animationIndex == 0) {
+			if(restoreAnimationIndex == 0) {
+				globalGame->effectsManager.treeLeaves();
 				if(restoreTiles == &bn::sprite_tiles_items::dw_spr_birch) {
 					bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_birch_shake;
 				} else {
@@ -644,7 +865,7 @@ void BigSprite::loadTree() {
 	// shake also spawns leaves! do that too
 
 	Interactable* temp1 = new Interactable(Pos(6, 4),
-		interactFunc,
+		getInteractFunc(),
 		kickedFunc,
 		NULL,
 		this
@@ -1273,7 +1494,7 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	}
 }
 
-void EffectsManager::doDialogue(const char* data, bool isCutscene) {
+void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sound_item* sound) {
 	
 	// this function has got to be one of the worst things i have ever written in my life.
 
@@ -1359,6 +1580,18 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	
 	// the c standard does not require const chars to be null termed. i didnt know this. im dumb
 	
+	// ok. the first char being null now means that we shouldnt update the screen at the end.
+	// this is jank as fuck 
+	// i could/should also,,, have a first/second char be to decide the sound, but ugh 
+	// this is primarily to play sound effects between dialogue without cutting the dialogue 
+	// totally a better less patchy way to do this 
+	
+	bool dontUpdateAtEnd = false;
+	if(*data == '\0') {
+		dontUpdateAtEnd = true;
+		data++;
+	}
+	
 	Dialogue dialogue(this, data);
 	textSpritesLine1.clear();
 	textSpritesLine2.clear();
@@ -1380,7 +1613,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		tempBuffer++;
 	}
 	
-	auto scrollLine = [](bn::sprite_text_generator& textGeneratorObj, 
+	auto scrollLine = [sound](bn::sprite_text_generator& textGeneratorObj, 
 		bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>& textSprites, 
 		char* bufferPtr, 
 		int offset,
@@ -1420,7 +1653,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 		globalGame->doButanoUpdate();
 		
 		// in the future, this needs to be gotten dynamically
-		const bn::sound_item* sound = &bn::sound_items::snd_voice2;
+		//const bn::sound_item* sound = &bn::sound_items::snd_voice2;
 		
 		// i may be bsing, but i think a sound plays at the start and and and when a space occurs 
 		// this is actually completley wrong! but im tired ok, and also kinda like it so im leaving it in
@@ -1562,7 +1795,9 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 	textSpritesLine1.clear();
 	textSpritesLine2.clear();
 	
-	game->doButanoUpdate();
+	if(!dontUpdateAtEnd) {
+		game->doButanoUpdate();
+	}
 	
 	
 	game->state = restoreState;
@@ -1570,7 +1805,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene) {
 
 }
 
-bool EffectsManager::restRequest() {
+bool EffectsManager::restRequest(const char* questionString) {
 	
 	// TODO, THIS TEXT HAS A RDER AROUND IT!!!!
 	//probs,,,, oh gods 
@@ -1581,7 +1816,7 @@ bool EffectsManager::restRequest() {
 	GameState restoreState = game->state;
 	game->state = GameState::Dialogue;
 	
-	bn::vector<bn::sprite_ptr, 4> restSprites;
+	bn::vector<bn::sprite_ptr, 32> restSprites;
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
 	bn::vector<bn::sprite_ptr, 4> noSprites;
 	
@@ -1592,22 +1827,30 @@ bool EffectsManager::restRequest() {
 		game->doButanoUpdate();
 	}
 	
+	int restX = -16;
+	int restY = -24;
+	
+	if(strcmp(questionString, "Rest?\0") != 0) {
+		restX -= (textGenerator.width(bn::string_view(questionString)) / 2);
+	}
+	
+	
 	//textGenerator.generate((bn::fixed)-16, (bn::fixed)-30, bn::string_view("Rest?\0"), textSpritesLine1);
-	textGenerator.generate((bn::fixed)-16, (bn::fixed)-24, bn::string_view("Rest?\0"), restSprites);
+	textGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view(questionString), restSprites);
 	for(int i=0; i<restSprites.size(); i++) {
 		restSprites[i].set_bg_priority(0);
 		restSprites[i].set_palette(activeTextPalette);
 	}
 	
-	bn::vector<bn::vector<bn::sprite_ptr, 4>, 4> restSpritesOutline;
+	bn::vector<bn::vector<bn::sprite_ptr, 32>, 4> restSpritesOutline;
 	
 	
 	for(int j=0; j<4; j++) {
 		
 		restSpritesOutline.push_back(bn::vector<bn::sprite_ptr, 4>());
 		
-		bn::fixed x = -16;
-		bn::fixed y = -24;
+		bn::fixed x = restX;
+		bn::fixed y = restY;
 		
 		// stupid way of doing this but i dont want to write a switch case
 		Pos dif = Pos(1, 1);
@@ -1616,7 +1859,7 @@ bool EffectsManager::restRequest() {
 		x += (dif.x - 1);
 		y += (dif.y - 1);
 		
-		textGenerator.generate(x, y, bn::string_view("Rest?\0"), restSpritesOutline[j]);
+		textGenerator.generate(x, y, bn::string_view(questionString), restSpritesOutline[j]);
 		for(int i=0; i<restSpritesOutline[j].size(); i++) {
 			restSpritesOutline[j][i].set_bg_priority(0);
 			restSpritesOutline[j][i].set_z_order(1);
@@ -1686,14 +1929,20 @@ bool EffectsManager::restRequest() {
 	
 	bool answer = res - 1;
 	
+	bool doCutsceneDialogue = strcmp(questionString, "Rest?\0") == 0;
+	
 	if(!answer) {
-		doDialogue("[You decide to move on]\0", false);
+		if(doCutsceneDialogue) {
+			doDialogue("[You decide to move on]\0", false);
+		}
 		game->state = restoreState;
 		return false;
 	}
 	
 	// ` marks are used to delay the text
-	doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
+	if(doCutsceneDialogue) {
+		doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
+	}
 	// PLAY THE EXIT THINGy
 	
 	

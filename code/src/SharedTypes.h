@@ -929,6 +929,24 @@ inline char *strcpy(char *dest, const char *src) {
 	return original_dest;
 }
 
+inline char *strncpy_custom(char *dest, const char *src, size_t n) {
+    char *dest_start = dest;
+
+    while (*src != '\0' && n > 0) {
+        *dest++ = *src++;
+        n--;
+    }
+
+    // If n is greater than the length of src, fill the remaining with null characters.
+    while (n > 0) {
+        *dest++ = '\0';
+        n--;
+    }
+
+    return dest_start;
+}
+
+
 inline void *memset(void *ptr, int value, size_t num) {
 	unsigned char *byte_ptr = (unsigned char *)ptr;
 	unsigned char byte_value = (unsigned char)value;

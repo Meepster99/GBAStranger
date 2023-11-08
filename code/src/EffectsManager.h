@@ -351,12 +351,18 @@ public:
 	// -----
 	
 	void hideForDialogueBox(bool vis, bool isCutscene);
-	void doDialogue(const char* data, bool isCutscene = false);
+	
+	// dialogue needs to become its own class.
+	// more than it already is
+	void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = &bn::sound_items::snd_voice2);
+	void doDialogue(const char* data, const bn::sound_item* sound) {
+		doDialogue(data, false, sound);
+	}
 	
 	void setBrandColor(int x, int y, bool isTile);
 	void doMenu();
 	
-	bool restRequest();
+	bool restRequest(const char* questionString = "Rest?\0");
 	
 	
 	void glassBreak(Pos p);

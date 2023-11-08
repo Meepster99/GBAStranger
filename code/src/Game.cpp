@@ -1000,6 +1000,12 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.hasSword;
 	rotateHash(1);
 	
+	// i should hash eggcount here, but im worried abt fucking ppls saves now
+	// nvm, better than than corrruption 
+	
+	hash ^= saveData.eggCount;
+	rotateHash(sizeof(saveData.eggCount) * 8);
+	
 	for(int i=0; i<6; i++) {
 		hash ^= saveData.playerBrand[i];
 		rotateHash(sizeof(saveData.playerBrand[i]) * 8);

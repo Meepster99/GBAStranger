@@ -89,6 +89,8 @@ struct GameSave {
 	
 	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
 	
+	unsigned eggCount = 0;
+	
 	uint64_t hash = 0;
 };
 
