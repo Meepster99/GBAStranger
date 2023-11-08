@@ -10,6 +10,7 @@ class EntityManager;
 class EffectsManager;
 class TileManager;
 class CutsceneManager;
+class Effect;
 
 class Sprite {
 public:
@@ -827,6 +828,8 @@ public:
 	TanStatue* clone() const override { return new TanStatue(*this); }
 
 	EntityType entityType() const override { return EntityType::TanStatue; }
+	
+	void isDead() override;
 
 };
 
@@ -857,6 +860,8 @@ public:
 
 	static int rodUses;
 	static int totalLev;
+	
+	Effect* activeEffect = NULL;
 
 	LevStatue(Pos p_) : Obstacle(p_) {
 		spriteTilesArray.clear(); 
@@ -866,15 +871,12 @@ public:
 		totalLev++;
 	}
 	
+	~LevStatue();
+	
 	void isDead() override;
 	
 	bool isActive = false;
-	void activate() {
-		animationIndex = 1;
-		isActive = true;
-		rodUses++;
-		doUpdate();
-	}
+	void activate();
 
 	LevStatue* clone() const override { return new LevStatue(*this); }
 

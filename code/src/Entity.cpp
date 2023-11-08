@@ -753,11 +753,29 @@ bn::optional<Direction> MonStatue::getNextMove() {
 	return Obstacle::getNextMove();
 }
 
+void TanStatue::isDead() {
+	if(tileManager->hasFloor(p)) {
+		tileManager->stepOff(p);
+	}
+}
+
+LevStatue::~LevStatue() {	
+	if(activeEffect != NULL) {
+		effectsManager->removeEffect(activeEffect);
+		activeEffect = NULL;
+	}
+}
+
 void LevStatue::isDead() {
 	totalLev--;
 	if(isActive) {
 		rodUses--;
 		entityManager->rodUse();
+	}
+	
+	if(activeEffect != NULL) {
+		effectsManager->removeEffect(activeEffect);
+		activeEffect = NULL;
 	}
 	
 
@@ -767,5 +785,15 @@ void LevStatue::isDead() {
 	
 }
 
-
+void LevStatue::activate() {
+	//animationIndex = 1;
+	
+	BN_ASSERT(activeEffect == NULL, "a lev statues active effect wasnt null why trying to activate it??");
+	
+	activeEffect = effectsManager->levStatueActive(this);
+	
+	isActive = true;
+	rodUses++;
+	doUpdate();
+}
 

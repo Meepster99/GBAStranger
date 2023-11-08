@@ -745,9 +745,21 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	
 	// this initially called on all entities, should it?
 	// if two entities collide on a tile, the tile should collapse
+	/*
 	if(tileManager->hasFloor(tempPos) && e->entityType() == EntityType::TanStatue) {
 		tileManager->stepOff(tempPos);
 	}
+	
+	if(e->entityType() == EntityType::LevStatue) {
+		// this happening here is fucking dumb, and i would prefer it occur with the destructor, but idk
+		// actually,,, we have the isdead func, which gets called during vblank. i could call it here? to some potential repercussions
+		//i cannot spell
+		// tan statue should also have that
+		//LevStatue::totalLev--;
+	}*/
+	
+	// this may be horrid
+	e->isDead();
 	
 	if(!hasFloor(tempPos)) {
 		effectsManager->entityFall(e);
@@ -1043,6 +1055,8 @@ void EntityManager::updateMap() {
 		}
 	}
 	
+	int levcount = 0;
+	
 	LevStatue* hasLevStatue = NULL;
 	// critical levels of goofyness
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
@@ -1051,20 +1065,40 @@ void EntityManager::updateMap() {
 			bn::optional<Direction> res = canSeePlayer((*it)->p);
 			if(res.has_value()) {
 				// puttint this mon line after, the *it, is it a useafterfree?
+				
+				
+				// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
+				// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
 				effectsManager->monLightning((*it)->p, res.value());
+				
+				for(int i=0; i<30; i++)  {
+					game->doButanoUpdate();
+				}
+				
+				
 				addKill(*it);
 			}
 		} else if((*it)->entityType() == EntityType::LevStatue) { 
+			BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
 			hasLevStatue = static_cast<LevStatue*>(*it);
 		}
 	}
 	
+	BN_ASSERT(LevStatue::totalLev == levcount, "lev statue count was somehow off??");
+	
+	bool doLevKill = false;
 	if(levKill) {
 		BN_LOG("levkill");
 		if(hasLevStatue != NULL) {
-			addKill(hasLevStatue);
+			doLevKill = true;
 		}
 		levKill = false;
+	}
+	
+	if(doLevKill) {
+		
+		effectsManager->levKill();
+		addKill(hasLevStatue);
 	}
 	
 	for(int x=0; x<14; x++) {
@@ -1090,7 +1124,7 @@ void EntityManager::doDeaths() {
 		
 		BN_ASSERT(*it != NULL, "a entity in deadlist was null, this should never happen!");
 		
-		(*it)->isDead();
+		//(*it)->isDead();
 		
 		Entity* temp = *it;
 			
@@ -1177,7 +1211,7 @@ void EntityManager::createKillEffects() const {
 		if(*it == NULL) {
 			continue;
 		}
-		if((*it)->entityType() != EntityType::Player) {
+		if((*it)->entityType() != EntityType::Player && (*it)->entityType() != EntityType::LevStatue) {
 			effectsManager->entityKill(*it);
 		}
 	}

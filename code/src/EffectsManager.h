@@ -88,6 +88,14 @@ public:
 		}
 	}
 	
+	void black() {
+		for(int x=0; x<14; x++) {
+			for(int y=0; y<9; y++) {
+				setBigTile(x, y, 1);
+			}
+		}
+	}
+	
 
 	
 };
@@ -379,13 +387,12 @@ public:
 	void playerBrandRoomBackground();
 	Effect* generateSweatEffect();
 	Effect* generateDialogueEndpointer();
-	
 	int questionMarkCount = 0;
 	void questionMark();
-	
 	void treeLeaves();
-	
 	void chestBonus(Chest* chest);
+	Effect* levStatueActive(LevStatue* levStatue);
+	void levKill();
 	
 };
 

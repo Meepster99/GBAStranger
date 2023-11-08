@@ -3113,6 +3113,7 @@ void EffectsManager::entityKill(Entity* entity) {
 	if(t == EntityType::Player) {
 		game->playSound(&bn::sound_items::snd_player_damage);
 		
+		entityManager->player->wingsUse = 0;
 		
 		const bn::sprite_tiles_item* tiles;
 		
@@ -3725,4 +3726,190 @@ void EffectsManager::chestBonus(Chest* chest) {
 	
 	
 }
+
+Effect* EffectsManager::levStatueActive(LevStatue* levStatue) {
+	
+	
+	auto createFunc = [levStatue](Effect* obj) mutable -> void {
+		
+		// honestly,,, could/should of just used sprites for everything instead of tiles,,, maybe?
+		// im only using tiles bc i figured out their whack ass syntax first
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_watcher_eyes_glow; // 9 frames
+		
+		obj->graphicsIndex = 0;
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex
+		);
+		
+		obj->sprite.updatePosition(levStatue->p);
+		
+		obj->sprite.spritePointer.set_z_order(-2);
+	};
+	
+	auto tickFunc = [levStatue](Effect* obj) mutable -> bool {
+	
+		if(frame % 2 == 0) {
+			return false;
+		}
+		
+		static bool shouldBlink = false;
+		//static int blinkIndex = 0;
+		// unlike normal, a static var would actually work/be what i want here. 
+		// it will however, have the intresting consequence of blinking more frequently the move lev statues there are, but it be like that 
+		if(!shouldBlink && (bruhRand() & 0xFF) == 0) {
+			shouldBlink = true;
+		}
+		
+		if(shouldBlink) {
+			obj->graphicsIndex++;
+		} else {
+			obj->graphicsIndex = 0;
+		}
+		
+		if(obj->graphicsIndex >= 9) {
+			shouldBlink = false;
+		}
+		
+		if(shouldBlink) {
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				obj->graphicsIndex % 9
+			);
+		} else {
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				0
+			);
+		}
+		
+		obj->sprite.updatePosition(levStatue->p);
+		
+		
+		return false;
+	};
+
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	return e;	
+	
+}
+
+
+void EffectsManager::levKill() {
+	
+	/*
+	
+	all statues flash 
+	
+	screen blacks 
+	
+	lightning 
+	
+	screen unblacks (all lev statues should not be in the flashed state) (which is fucking great for not having to have a one off) 
+	
+	play player death anim
+	
+	hand off to reset 
+	
+	the last two we already have a func for. this is going to be easy
+	
+	*/
+	
+	game->cutsceneManager.backupLayer(3);
+	
+	entityManager->shouldTickPlayer = false;
+
+	unsigned startFrame = frame;
+	
+	while(frame - startFrame < 60) {
+	
+		game->doButanoUpdate(); // is it ok to do this up here, instead of bottom of loop?
+	
+		if(frame % 2 != 0) {
+			continue;
+		}
+		
+		// how will this perform if kicking a lev statue off?
+		// should this technically be a cutscene? i could either add an assert as the start to ensure that haskills.size == 0, or i could just have this func be blocking .
+		// same with how i should of done mon statue!
+		for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+			if(*it == NULL) {
+				continue;
+			}
+			
+			if((*it)->entityType() == EntityType::LevStatue) {
+				
+				(*it)->animationIndex = ((*it)->animationIndex + 1) % 3;
+				(*it)->sprite.spritePointer.set_tiles(
+					bn::sprite_tiles_items::dw_spr_watcher,
+					(*it)->animationIndex
+				);
+			}
+		}
+	}
+	
+	startFrame = frame;
+	
+	entityManager->player->sprite.spritePointer.set_bg_priority(0);
+	
+	effectsLayer.black();
+	effectsLayer.reloadCells();
+	
+	// how will this perform if kicking a lev statue off?
+		// should this technically be a cutscene? i could either add an assert as the start to ensure that haskills.size == 0, or i could just have this func be blocking .
+		// same with how i should of done mon statue!
+	for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
+		
+		if((*it)->entityType() == EntityType::LevStatue) {
+			(*it)->sprite.spritePointer.set_tiles(
+				bn::sprite_tiles_items::dw_spr_watcher,
+				0
+			);
+		}
+	}
+	
+	// spr_judgment
+	// 5 frames. 
+	// actually, its spr_judgment_dark
+	// this is an example, off,, a time i should change up bigsprite.
+	// but tbh, using a bg layer has been working well for me
+	
+	const bn::regular_bg_item* judgementBackgrounds[5] = {&bn::regular_bg_items::dw_spr_judgment_dark_index0, &bn::regular_bg_items::dw_spr_judgment_dark_index1, &bn::regular_bg_items::dw_spr_judgment_dark_index2, &bn::regular_bg_items::dw_spr_judgment_dark_index3, &bn::regular_bg_items::dw_spr_judgment_dark_index4};
+	
+	game->cutsceneManager.delay(15);
+	
+	Pos playerPos = entityManager->player->p;
+	
+	for(int i=0; i<5; i++) {
+		game->cutsceneManager.cutsceneLayer.rawMap.create(*judgementBackgrounds[i]);
+		
+		game->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
+		game->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
+		game->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
+		
+		// why do i not make this func global omfg 
+		game->cutsceneManager.delay(4);
+	}
+	
+	// i PRAY this works
+	game->cutsceneManager.restoreLayer(3);
+	
+	game->cutsceneManager.delay(15);
+	
+	effectsLayer.clear();
+	effectsLayer.reloadCells();
+	
+	entityManager->player->sprite.spritePointer.set_bg_priority(1);
+	
+	entityKill(entityManager->player);
+	
+	
+}
+	
+	
 
