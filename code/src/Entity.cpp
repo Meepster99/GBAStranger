@@ -206,7 +206,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		return {true, bn::optional<Direction>(currentDir)};
 	}
 	
-	if(wingsUse == hasWings && !entityManager->hasFloor(tempPos) && !entityManager->hasCollision(tempPos) && !entityManager->hasEntity(tempPos)) {
+	if( ((wingsUse == hasWings) || hasWingsTile) && !entityManager->hasFloor(tempPos) && !entityManager->hasCollision(tempPos) && !entityManager->hasEntity(tempPos)) {
 		
 		BN_LOG("doing sweat!");
 		
