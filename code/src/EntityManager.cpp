@@ -186,6 +186,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			case EntityType::Chest:
 				entityList.insert(new Chest(tempPos));
 				break;
+			case EntityType::EmptyChest:
+				entityList.insert(new Chest(tempPos, true));
+				break;
 			case EntityType::AddStatue:
 				entityList.insert(new AddStatue(tempPos));
 				break;
@@ -1205,7 +1208,7 @@ void EntityManager::doVBlank() { profileFunction();
 		}
 	}
 	
-	if(kickedList.size() != 0) {
+	if(kickedList.size() != 0) {	
 		//BN_LOG("KICK");
 		for(auto it = kickedList.begin(); it != kickedList.end(); ) {
 			
@@ -1222,6 +1225,12 @@ void EntityManager::doVBlank() { profileFunction();
 			} else {
 				++it;
 			}
+		}
+	}
+	
+	if(obstacleList.size() != 0) {
+		for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}
 	}
 	

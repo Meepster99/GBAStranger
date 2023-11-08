@@ -385,6 +385,8 @@ public:
 	
 	void treeLeaves();
 	
+	void chestBonus(Chest* chest);
+	
 };
 
 class Dialogue {

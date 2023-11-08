@@ -332,6 +332,14 @@ public:
 	// contains the list of bumps done to this obstacle this tick/cycle/move, gods i need to get a more consistent wording.
 	bn::vector<Direction, 4> bumpDirections;
 	
+	// for things like,,,, hitting a chest3/6 times, or add statue
+	// programming this is going to suck
+	int specialBumpCount = 0;
+	int playerIdleStart = 0;
+	bool wasMoved = false;
+	
+	virtual void specialBumpFunction() { return; }
+	
 	Obstacle(Pos p_) : Entity(p_) {}
 	
 	bool isEnemy() const override { return false; }
@@ -355,7 +363,7 @@ public:
 	
 	virtual void interact() { return; }
 	
-	virtual bool kicked() { return true; }
+	virtual bool kicked();
 
 };
 
@@ -723,7 +731,9 @@ public:
 class Chest : public Obstacle {
 public:
 
-	Chest(Pos p_);
+	bool gotBonus = false;
+	
+	Chest(Pos p_, bool isEmpty = false);
 
 	Chest* clone() const override { return new Chest(*this); }
 
@@ -736,7 +746,9 @@ public:
 	
 	int interactCount = 0;
 	void interact() override; // spr_textbox_extra
-
+	
+	void specialBumpFunction() override; 
+	
 };
 
 class AddStatue : public Obstacle {

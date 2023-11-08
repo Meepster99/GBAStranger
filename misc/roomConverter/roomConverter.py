@@ -330,7 +330,7 @@ def readCreationCode(p, creationCode):
 
 	if dl_form:
 		return "dl_form = {:d}".format(dl_form)
-	
+		
 	if "na_secret" in bruh:
 		res = bruh["na_secret"]
 		tempRoom = None
@@ -339,6 +339,9 @@ def readCreationCode(p, creationCode):
 			
 	
 		return [res, tempRoom]
+	
+	if "contents" in bruh:
+		return "contents = {:d}".format(bruh["contents"])
 	
 	return None
 	
@@ -862,7 +865,28 @@ def convertObjects(layerData):
 			entityExport.insert(0, "EntityType::Player,{:d},{:d}".format(p.x, p.y))
 			
 		def obj_chest_small(p, creationCode):
-			entityExport.append("EntityType::Chest,{:d},{:d}".format(p.x, p.y))
+		
+			chestCreationCodes = {
+				None: "EntityType::Chest",
+				"contents = 0": "EntityType::EmptyChest", # actually should be a chest that gives nothing by default
+				"contents = 1": "EntityType::Chest",
+				"contents = 5": "EntityType::EmptyChest",
+				
+				# unknown. i think that 5 is empty, these are special stuff 
+				"contents = 4": "EntityType::EmptyChest",
+				"contents = 3": "EntityType::EmptyChest",
+				"contents = 2": "EntityType::EmptyChest",
+				"contents = 6": "EntityType::EmptyChest",
+				"contents = 7": "EntityType::EmptyChest",
+				"contents = 8": "EntityType::EmptyChest",
+				"contents = 9": "EntityType::EmptyChest",
+			}
+			
+			if creationCode not in chestCreationCodes:
+				print("couldnt find what to do with a chest with creationcode: ", creationCode)
+				exit(1)
+		
+			entityExport.append("{:s},{:d},{:d}".format(chestCreationCodes[creationCode], p.x, p.y))
 
 		def obj_boulder(p, creationCode):
 		

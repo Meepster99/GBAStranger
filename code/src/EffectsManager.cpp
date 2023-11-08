@@ -3661,9 +3661,68 @@ void EffectsManager::treeLeaves() {
 		return false;
 	};
 	
-	questionMarkCount++;
 	Effect* e = new Effect(createFunc, tickFunc);
 	effectList.push_back(e);
+	
+}
+
+void EffectsManager::chestBonus(Chest* chest) {
+	
+	
+	// hide the original chest sprite, 
+	// spr_chest_regular_flash
+	// some explosions (i have a func for that already right?)
+	
+	
+	auto createFunc = [chest](Effect* obj) mutable -> void {
+		
+		chest->sprite.setVisible(false);
+			
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_chest_regular_flash;
+		
+		obj->graphicsIndex = 0;
+		
+		obj->sprite.updatePosition(chest->p);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);
+	};
+	
+	auto tickFunc = [chest](Effect* obj) mutable -> bool {
+	
+		if(frame % 2 != 0) {
+			return false;
+		}
+		
+		if(obj->tempCounter % 8 == 0) {
+			globalGame->effectsManager.explosion(chest->p);
+		}
+		
+		obj->tempCounter++;
+
+		if(obj->tempCounter == 16) {
+			chest->sprite.setVisible(true);
+			return true;
+		}
+		
+		
+		
+		obj->graphicsIndex++;
+
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex % 3
+		);		
+		
+		return false;
+	};
+	
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	
+	
 	
 }
 

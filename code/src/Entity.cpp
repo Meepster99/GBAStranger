@@ -552,7 +552,26 @@ bn::optional<Direction> Obstacle::getNextMove() {
 	return bn::optional<Direction>(res);
 }
 
-Chest::Chest(Pos p_) : Obstacle(p_) {
+bool Obstacle::kicked() {
+	
+	// this might be(definitely is) bad for add statues, but for rn, im just hacking this together
+	
+	Pos tempPos = p;
+	if(tempPos.move(Direction::Up) && tempPos != entityManager->player->p) {
+		return true;
+	}
+	
+	if(ABS(playerIdleFrame - playerIdleStart) > 60) {
+		specialBumpCount = 0;
+	}
+	playerIdleStart = playerIdleFrame;
+	
+	specialBumpCount++;
+		
+	return true;
+}
+
+Chest::Chest(Pos p_, bool isEmpty) : Obstacle(p_) {
 	spriteTilesArray.clear();
 	spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_regular);
 	
@@ -561,6 +580,10 @@ Chest::Chest(Pos p_) : Obstacle(p_) {
 	
 	if(!tileManager->hasFloor(p_)) {
 		tileManager->floorMap[p_.x][p_.y] = new FloorTile(p_);
+	}
+	
+	if(isEmpty) {
+		animationIndex = 1;
 	}
 	
 	doUpdate();
@@ -615,13 +638,28 @@ void Chest::interact() {
 		
 		bn::sound_items::snd_open.play();
 	
-		entityManager->player->locustCount++;
+		if(gotBonus) {
+			entityManager->player->locustCount+=3;
+		} else {
+			entityManager->player->locustCount++;
+		}
 		tileManager->updateLocust();
 		// this isnt counted as a successful move, but we should still update locusts
 		tileManager->floorLayer.reloadCells();
 		
 		entityManager->player->currentDir = Direction::Down;
 		
+	}
+	
+}
+
+void Chest::specialBumpFunction() {
+	
+	//BN_LOG(specialBumpCount, " ", playerIdleFrame, " ", playerIdleStart);
+	if(!gotBonus && animationIndex == 0 && specialBumpCount == 3 && playerIdleFrame == playerIdleStart && (frame - playerIdleStart) >= 60 * 3) {
+		specialBumpCount = 0;
+		gotBonus = true;
+		effectsManager->chestBonus(this);
 	}
 	
 }

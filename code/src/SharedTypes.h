@@ -74,6 +74,8 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
+#define ABS(v) ( v < 0 ? -v : v )
+
 #define CLAMP(value, min_val, max_val) MAX(MIN((value), (max_val)), (min_val))
 
 typedef unsigned char u8;
@@ -100,6 +102,7 @@ typedef unsigned char u8;
 //static_assert(MAXENTITYSPRITES > 0);
 
 extern unsigned int frame;
+extern int playerIdleFrame;
 extern bool isVblank;
 extern unsigned boobaCount;
 extern unsigned playerMoveCount;
@@ -214,6 +217,8 @@ enum class EntityType {
 	
 	Interactable,
 	
+	// i am not sure if this is the best way to do this, but I am going with it 
+	EmptyChest,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {

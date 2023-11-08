@@ -6,6 +6,7 @@ Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 Game* globalGame = NULL;
 
 unsigned int frame = 0;
+int playerIdleFrame = 0; // frame at which the player started idleing
 bool isVblank = false;
 unsigned boobaCount = 0;
 unsigned playerMoveCount = 0;
@@ -879,7 +880,7 @@ void Game::run() {
 	//cutsceneManager.testCutscene(); 
 	
 	//while(true) { doButanoUpdate(); }
-	
+		
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
@@ -958,12 +959,13 @@ void Game::run() {
 				continue;
 			}
 			
+			playerIdleFrame = frame;
+		
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
 			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
 			BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
 		}
-		
 		
 		doButanoUpdate();
 	}
