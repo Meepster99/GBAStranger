@@ -28,13 +28,29 @@ bn::fixed sinTable[360] = {0.0,0.01745,0.0349,0.05234,0.06976,0.08716,0.10453,0.
 
 bn::random randomGenerator = bn::random();
 
+void delay(int delayFrameCount) {
+	// this function should of been made WAYYYY earlier
+	for(int i=0; i<delayFrameCount; i++) {
+		globalGame->doButanoUpdate();
+	}
+}
+
 void Game::doButanoUpdate() {
 	
 	bn::core::update();
 	
 	int temp = bn::core::last_missed_frames();
+	
+	bn::fixed vblankUsage = bn::core::last_vblank_usage();
+	
 	if(temp != 0) {
 		BN_LOG("dropped frames: ", temp);
+		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
+		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
+	}
+	
+	if(vblankUsage > 1) {
+		BN_LOG("VBLANK EXCEDED, THIS IS RLLY BAD: ");
 		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
 		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
 	}
@@ -107,7 +123,18 @@ void Game::createExitEffects() {
 		
 		// this case means a enemy killed the player and the player moved, so we use the player start pos
 		
-		playerPos = entityManager.playerStart;
+		// this line should NOT be commented out
+		// how do i discern a falldeath from running into an enemy vs, shadow walkoff?	
+		Pos tempPos = playerPos;
+		//if(tempPos.move(entityManager.player->currentDir)) {
+		if(true) {
+			if(entityManager.killAtPos(tempPos)) {
+				playerPos = entityManager.playerStart;
+			}
+		}
+		
+		
+		
 		//entityManager.player->p = playerPos;
 		
 	}

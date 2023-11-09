@@ -1506,6 +1506,20 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 
 void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sound_item* sound) {
 	
+	if(sound == NULL) {
+		switch(game->mode) {
+			default:
+			case 0:
+				sound = &bn::sound_items::snd_voice2;
+				break;
+			case 1:
+				sound = &bn::sound_items::snd_lillie;
+				break;
+			case 2:
+				sound = &bn::sound_items::snd_cifer;
+		}
+	}
+	
 	// this function has got to be one of the worst things i have ever written in my life.
 
 	// some notes 
@@ -3344,7 +3358,7 @@ void EffectsManager::entityFall(Entity* entity) {
 			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_co_fall, 2}, {&bn::sprite_tiles_items::dw_spr_co_falling, 6}}));
 			break;
 		case EntityType::Shadow     :
-			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_co_falling, 6}}));		
+			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_fall, 6}})); // this is actually,,, correct		
 			break;
 		case EntityType::Boulder    :
 		case EntityType::AddStatue  :
@@ -3438,7 +3452,7 @@ void EffectsManager::playerBrandRoomBackground() {
 	
 }
 
-Effect* EffectsManager::generateSweatEffect() {
+Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
 	
 	// we return the effect here such as to destruct it properly
 	// in the playerinput func 
@@ -3446,9 +3460,11 @@ Effect* EffectsManager::generateSweatEffect() {
 	// i feel like this has a high likelyhood of being dumb
 	// but it at least will make my accesses shorter
 	// i really should of overloaded all sprite_ptr funcs into spritepointer, but its wayyyy far gone now
-	Player* player = entityManager->player;
+	if(sweatEntity == NULL) {
+		sweatEntity = entityManager->player;
+	}
 	
-	auto createFunc = [player](Effect* obj) mutable -> void {
+	auto createFunc = [sweatEntity](Effect* obj) mutable -> void {
 		
 		obj->graphicsIndex = 0;
 		
@@ -3461,20 +3477,20 @@ Effect* EffectsManager::generateSweatEffect() {
 		//int yDiffs[4] = {-8, -8, -8, -8};
 		
 		// using tempCounters as offsets 
-		obj->tempCounter  = xDiffs[static_cast<int>(player->currentDir)];
+		obj->tempCounter  = xDiffs[static_cast<int>(sweatEntity->currentDir)];
 		//obj->tempCounter2 = yDiffs[static_cast<int>(player->currentDir)];
 		obj->tempCounter2 = -8;
 		
-		if(player->currentDir == Direction::Up || player->currentDir == Direction::Right) {
+		if(sweatEntity->currentDir == Direction::Up || sweatEntity->currentDir == Direction::Right) {
 			obj->sprite.spritePointer.set_horizontal_flip(true);
 		}
 		
-		obj->sprite.spritePointer.set_x(obj->tempCounter + player->sprite.spritePointer.x());
-		obj->sprite.spritePointer.set_y(obj->tempCounter2 + player->sprite.spritePointer.y());
+		obj->sprite.spritePointer.set_x(obj->tempCounter + sweatEntity->sprite.spritePointer.x());
+		obj->sprite.spritePointer.set_y(obj->tempCounter2 + sweatEntity->sprite.spritePointer.y());
 		obj->sprite.spritePointer.set_z_order(-2);
 	};
 	
-	auto tickFunc = [player](Effect* obj) mutable -> bool {
+	auto tickFunc = [sweatEntity](Effect* obj) mutable -> bool {
 	
 		if(frame % 2 == 0) {
 			return false;
@@ -3488,8 +3504,8 @@ Effect* EffectsManager::generateSweatEffect() {
 			obj->graphicsIndex % 5
 		);
 		
-		obj->sprite.spritePointer.set_x(obj->tempCounter + player->sprite.spritePointer.x());
-		obj->sprite.spritePointer.set_y(obj->tempCounter2 + player->sprite.spritePointer.y());
+		obj->sprite.spritePointer.set_x(obj->tempCounter + sweatEntity->sprite.spritePointer.x());
+		obj->sprite.spritePointer.set_y(obj->tempCounter2 + sweatEntity->sprite.spritePointer.y());
 		return false;
 	};
 	
@@ -3913,6 +3929,294 @@ void EffectsManager::levKill() {
 	
 	
 }
+
+void EffectsManager::fadeBrand() {
 	
 	
+	// cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBlackBGPalette());
+	
+	
+	auto createFunc = [](Effect* obj) mutable -> void {
+		
+		// goofy af.
+		obj->sprite.updateRawPosition(-32, -32);
+		
+		obj->tempCounter = 0;
+		
+		
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		obj->tempCounter++;
+		
+		constexpr int factor = 8;
+		constexpr int offset = 8;
+		
+		if(obj->tempCounter == offset + factor * 1) {
+			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(1, false));	
+		}
+	
+	
+		if(obj->tempCounter == offset + factor * 2) {
+			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(2, false));	
+		}
+		
+		if(obj->tempCounter == offset + factor * 3) {
+			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(3, false));	
+		}
+		
+		if(obj->tempCounter == offset + factor * 4) {
+			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(4, false));
+		}
+		
+		if(obj->tempCounter == offset + factor * 5) {
+			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPalette());
+			return true;
+		}
+	
+		
+		return false;
+	};
+	
+	Effect* e = new Effect(createFunc, tickFunc);
+	effectList.push_back(e);
+	
+	
+	
+}
+	
+void EffectsManager::glassShineSpark(const Pos& p) {
+	
+	
+	auto getCreateFunc = [](int x, int y) -> auto {
+		return [x, y](Effect* obj) mutable -> void {
+			
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_glassshinespark;
+			
+			obj->tempCounter = 1;
+			obj->x = x;
+			obj->y = y;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			obj->sprite.spritePointer.set_z_order(-2);
+
+			obj->graphicsIndex = -1;
+			obj->animateFunc(obj);
+		};
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		if(frame % 4 == 0 || obj->tempCounter == 1) { 
+			obj->graphicsIndex++;
+		}
+		obj->tempCounter = 0;
+
+		if(obj->graphicsIndex == 10) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+	
+	int x = p.x * 16;
+	int y = p.y * 16;
+	
+	Effect* e1 = new Effect(getCreateFunc(x-1, y-1), tickFunc);
+	Effect* e2 = new Effect(getCreateFunc(x+10, y+10), tickFunc);
+	
+	effectList.push_back(e1);
+	effectList.push_back(e2);
+	
+}
+
+void EffectsManager::switchGlow(const Pos& p) {
+	
+	auto getCreateFunc = [](int x, int y) -> auto {
+		return [x, y](Effect* obj) mutable -> void {
+			
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_floorswitch_glow3;
+			
+			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_floorswitch_glow3, bn::sprite_shape_size(32, 32));
+			
+			obj->tempCounter = 1;
+			obj->x = x;
+			obj->y = y;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			obj->sprite.spritePointer.set_z_order(1);
+
+			obj->graphicsIndex = -1;
+			obj->animateFunc(obj);
+		};
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		if(frame % 4 == 0 || obj->tempCounter == 1) { 
+			obj->graphicsIndex++;
+		}
+		obj->tempCounter = 0;
+
+		if(obj->graphicsIndex == 9) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+	
+	int x = p.x * 16;
+	int y = p.y * 16;
+	
+	Effect* e1 = new Effect(getCreateFunc(x, y), tickFunc);
+	
+	effectList.push_back(e1);
+
+}
+
+void EffectsManager::exitGlow(const Pos& p) {
+	
+	// 	todo, THIS. WHAT SPRITE(S) EVEN IS IT?
+	// spr_exit_target_b2 spr_exit_target ???
+	
+	
+}
+
+void EffectsManager::copyGlow(const Pos& p) {
+	
+	
+	// spr_add_shock
+	// 5 frames
+	
+	auto getCreateFunc = [](int x, int y) -> auto {
+		return [x, y](Effect* obj) mutable -> void {
+			
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_add_shock;
+			
+			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_add_shock, bn::sprite_shape_size(64, 64));
+			
+			obj->tempCounter = 1;
+			obj->x = x;
+			obj->y = y;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			obj->sprite.spritePointer.set_z_order(1);
+
+			obj->graphicsIndex = -1;
+			obj->animateFunc(obj);
+		};
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		if(frame % 4 == 0 || obj->tempCounter == 1) { 
+			obj->graphicsIndex++;
+		}
+		obj->tempCounter = 0;
+
+		if(obj->graphicsIndex == 5) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+	
+	int x = p.x * 16;
+	int y = p.y * 16;
+	
+	Effect* e1 = new Effect(getCreateFunc(x+8, y+8), tickFunc);
+	
+	effectList.push_back(e1);
+	
+	
+}
+
+void EffectsManager::shadowCreate(const Pos& p) {
+	
+	// since this sprite is actually a full tile, by making its prio higher(lower), we chillin, mega chillin
+	
+	//spr_cr_create
+	
+	auto getCreateFunc = [](int x, int y) -> auto {
+		return [x, y](Effect* obj) mutable -> void {
+			
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_cr_create;
+		
+			obj->tempCounter = 1;
+			obj->x = x;
+			obj->y = y;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			obj->sprite.spritePointer.set_z_order(-2); // -2 SHOULD be low enough
+
+			obj->graphicsIndex = -1;
+			obj->animateFunc(obj);
+		};
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		if(frame % 4 == 0 || obj->tempCounter == 1) { 
+			obj->graphicsIndex++;
+		}
+		obj->tempCounter = 0;
+
+		if(obj->graphicsIndex == 5) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+
+	int x = p.x * 16;
+	int y = p.y * 16;
+	
+	Effect* e1 = new Effect(getCreateFunc(x, y), tickFunc);
+	
+	effectList.push_back(e1);
+
+}
+
+void EffectsManager::shadowDeath(Shadow* shadow) {
+	
+
+	Pos tempPos = entityManager->playerStart;
+	
+	if(!entityManager->killAtPos(tempPos)) {
+		return;
+	}
+	
+	//shadow->doUpdate();
+	for(auto it = entityManager->shadowList.begin(); it != entityManager->shadowList.end(); ++it) {
+		(*it)->doUpdate();
+	}
+
+	generateSweatEffect(shadow);
+	
+	delay(60);
+	
+	entityFall(shadow);
+	
+}
 

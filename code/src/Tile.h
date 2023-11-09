@@ -71,6 +71,8 @@ public:
 	
 	bool isSteppedOn = false;
 	
+	virtual void isSteppedOnAnimation() { return; }
+	
 	virtual void stepOn() {
 		isSteppedOn = true;
 	}
@@ -98,6 +100,8 @@ public:
 	void stepOff() override;
 		
 	bool drawDropOff() const override { return false; }
+	
+	void isSteppedOnAnimation() override;
 	
 };
 
@@ -140,6 +144,8 @@ public:
 	
 	TileType tileType() const override { return TileType::Copy; }
 	
+	void isSteppedOnAnimation() override;
+	
 };
 
 class Switch : public FloorTile { // switch
@@ -166,6 +172,8 @@ public:
 	void stepOff() override;
 	
 	TileType tileType() const override { return TileType::Switch; }
+	
+	void isSteppedOnAnimation() override;
 };
 
 class Exit : public FloorTile { // exit, INCLUDE LOCKED AND UNLOCKED VERSIONS
@@ -190,6 +198,8 @@ public:
 	}
 	
 	bool shouldExit() { return Switch::pressedCount == Switch::totalCount; }
+	
+	void isSteppedOnAnimation() override;
 	
 };
 

@@ -83,7 +83,7 @@ public:
 			if(index == 1) {
 				tempColorArray[BLACK] = colorArray[BLACK];
 				tempColorArray[DARKGRAY] = colorArray[BLACK];
-				tempColorArray[LIGHTGRAY] = colorArray[BLACK];
+				tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
 				tempColorArray[WHITE] = colorArray[DARKGRAY];
 			}
 			
@@ -168,6 +168,18 @@ public:
 		bn::span<bn::color> spanthing(tempColorArray);
 
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+	}
+	
+	const bn::bg_palette_item getBlackBGPalette() {
+		
+		tempColorArray[BLACK] = colorArray[BLACK];
+		tempColorArray[DARKGRAY] = colorArray[BLACK];
+		tempColorArray[LIGHTGRAY] = colorArray[BLACK];
+		tempColorArray[WHITE] = colorArray[BLACK];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
+
+		return bn::bg_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
 	const bn::bg_palette_item getBGPaletteFade(int index = -1, bool toWhite = true) {

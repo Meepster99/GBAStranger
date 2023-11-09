@@ -362,7 +362,7 @@ public:
 	
 	// dialogue needs to become its own class.
 	// more than it already is
-	void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = &bn::sound_items::snd_voice2);
+	void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = NULL);
 	void doDialogue(const char* data, const bn::sound_item* sound) {
 		doDialogue(data, false, sound);
 	}
@@ -385,7 +385,7 @@ public:
 	void entityKill(Entity* entity);
 	void entityFall(Entity* entity);
 	void playerBrandRoomBackground();
-	Effect* generateSweatEffect();
+	Effect* generateSweatEffect(Entity* sweatEntity = NULL);
 	Effect* generateDialogueEndpointer();
 	int questionMarkCount = 0;
 	void questionMark();
@@ -393,6 +393,13 @@ public:
 	void chestBonus(Chest* chest);
 	Effect* levStatueActive(LevStatue* levStatue);
 	void levKill();
+	void fadeBrand();
+	void glassShineSpark(const Pos& p);
+	void switchGlow(const Pos& p);
+	void exitGlow(const Pos& p);
+	void copyGlow(const Pos& p);
+	void shadowCreate(const Pos& p);
+	void shadowDeath(Shadow* shadow);
 	
 };
 

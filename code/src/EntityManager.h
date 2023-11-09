@@ -129,6 +129,18 @@ public:
 		return customKill;
 	}
 	
+	bool killAtPos(const Pos& p) const { 
+		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+			if(*it == NULL) {
+				continue;
+			}
+			if((*it)->entityType() != EntityType::Player && (*it)->p == p) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	void createKillEffects() const;
 	
 	void hideForDialogueBox(bool vis, bool isCutscene);

@@ -865,6 +865,8 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 		
 		it = shadowQueue.erase(it);
 		
+		
+		effectsManager->shadowCreate(queuePos);
 		Shadow* temp = new Shadow(queuePos);
 		shadowList.push_back(temp); 
 		entityList.insert(temp);
@@ -918,6 +920,8 @@ void EntityManager::updateMap() {
 	}
 	
 	// do the rest.
+	
+	Shadow* doShadowDeath = NULL;
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -937,8 +941,11 @@ void EntityManager::updateMap() {
 					
 					if(!hasFloor(Pos(x, y)) && !hasCollision(Pos(x, y))) {
 						if(temp->entityType() == EntityType::Shadow) {
+							//effectsManager->shadowDeath(static_cast<Shadow*>(temp));
+							doShadowDeath = static_cast<Shadow*>(temp);
+							//doShadowDeath = true;
 							addKill(temp);
-						} else if(temp->isPlayer()) {
+						} else if(temp->entityType() == EntityType::Player) {
 							if(!player->hasWings || player->hasWingsTile) {
 								BN_LOG("no floor kill");
 								addKill(temp);
@@ -953,7 +960,7 @@ void EntityManager::updateMap() {
 											// tbh, i rlly should of just made the,,, specialized predeath anims effects? but its easier this way, and i dont need main for anything else
 											
 											// THIS SHOULD 100% BE IN EFFECTS!
-											
+											// I LITERALLY HAVE DOKILLEFFECTS FOR A REASON
 											shouldTickPlayer = false;
 											
 											unsigned tempCount = 0;
@@ -1042,6 +1049,11 @@ void EntityManager::updateMap() {
 		}
 	}
 	
+	if(doShadowDeath != NULL) {
+		// SHOULD 100% BE IN DOKILLEFFECTS
+		//effectsManager->shadowDeath(doShadowDeath);
+	}
+	
 	if(hasFloor(player->p)) {
 		player->wingsUse = 0;
 	}
@@ -1082,12 +1094,13 @@ void EntityManager::updateMap() {
 				addKill(*it);
 			}
 		} else if((*it)->entityType() == EntityType::LevStatue) { 
-			BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
+			++levcount;
+			//BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
 			hasLevStatue = static_cast<LevStatue*>(*it);
 		}
 	}
 	
-	BN_ASSERT(LevStatue::totalLev == levcount, "lev statue count was somehow off??");
+	BN_ASSERT(LevStatue::totalLev == levcount, "lev statue count was somehow off??", LevStatue::totalLev, "!=", levcount);
 	
 	bool doLevKill = false;
 	if(levKill) {
@@ -1210,14 +1223,32 @@ bool EntityManager::exitRoom() { // this func is absolutely horrid. rewrite it t
 }
 
 void EntityManager::createKillEffects() const {
+	
+	Entity* hasShadowKill = NULL;
+	
 	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
 		if(*it == NULL) {
 			continue;
 		}
-		if((*it)->entityType() != EntityType::Player && (*it)->entityType() != EntityType::LevStatue) {
+		if((*it)->entityType() == EntityType::Shadow) {
+			hasShadowKill = *it;
+			break;
+		}
+	}
+	
+	if(hasShadowKill != NULL) {		
+		effectsManager->shadowDeath(static_cast<Shadow*>(hasShadowKill));
+	}
+	
+	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
+		if((*it)->entityType() != EntityType::Player && (*it)->entityType() != EntityType::LevStatue && (*it)->entityType() != EntityType::Shadow) {
 			effectsManager->entityKill(*it);
 		}
 	}
+	
 }
 
 bool EntityManager::enterRoom() {

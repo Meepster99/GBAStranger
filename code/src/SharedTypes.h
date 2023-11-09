@@ -109,6 +109,8 @@ extern unsigned playerMoveCount;
 
 extern bn::random randomGenerator;
 
+extern void delay(int delayFrameCount);
+
 extern unsigned short* col0;
 extern unsigned short* col1;
 extern unsigned short* col2;
@@ -764,7 +766,6 @@ public:
 
 class Entity;
 
-
 //template <size_t Size>
 //using EntitySet = bn::unordered_set<Entity*, Size, bn::hash<Entity*>, bn::equal_to<Entity*>>;
 
@@ -951,7 +952,6 @@ inline char *strncpy_custom(char *dest, const char *src, size_t n) {
     return dest_start;
 }
 
-
 inline void *memset(void *ptr, int value, size_t num) {
 	unsigned char *byte_ptr = (unsigned char *)ptr;
 	unsigned char byte_value = (unsigned char)value;
@@ -995,3 +995,5 @@ constexpr unsigned hashString(const char *str) {
 
     return hash;
 }
+
+

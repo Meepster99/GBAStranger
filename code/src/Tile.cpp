@@ -20,10 +20,12 @@ int Switch::totalCount = 0;
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
 void Glass::stepOn() {
+	isSteppedOn = true;
 	game->playSound(&bn::sound_items::snd_stepglassfloor);
 }
 
 void Glass::stepOff() {
+	isSteppedOn = false;
 	if(isAlive) {
 		//effectsManager->createEffect(tilePos, EffectTypeCast(glassAnimation));
 		effectsManager->glassBreak(tilePos);
@@ -36,7 +38,16 @@ void Glass::stepOff() {
 	}*/
 }
 
+void Glass::isSteppedOnAnimation() {
+	
+	if((bruhRand() & 0x7F) == 0) {
+		effectsManager->glassShineSpark(tilePos);
+	}
+	
+}
+
 void Bomb::stepOn() {
+	isSteppedOn = true;
 	charge++;
 	if(charge == 2) {
 		isAlive = false;
@@ -65,7 +76,7 @@ void Bomb::stepOn() {
 }
 
 void Death::stepOn() {
-	
+	isSteppedOn = true;
 	// this needs to call updatemap as well. gods(maybe?)
 	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
 	
@@ -81,7 +92,7 @@ void Death::stepOn() {
 	
 }
 
-void Switch::stepOn() {
+void Switch::stepOn() {	
 	pressedCount++;
 	isSteppedOn = true;
 	tileManager->updateExit();
@@ -93,6 +104,12 @@ void Switch::stepOff() {
 	isSteppedOn = false;
 	tileManager->updateExit();
 	game->playSound(&bn::sound_items::snd_activate);
+}
+
+void Switch::isSteppedOnAnimation() {
+	if((bruhRand() & 0x1FF) == 0) {
+		effectsManager->switchGlow(tilePos);
+	}
 }
 
 int RodTile::getTileValue() const {
@@ -224,6 +241,22 @@ void WordTile::draw() {
 	
 	rawMap->setTile(x * 2 + 2, y * 2 + 1, secondTile); 
 	rawMap->setTile(x * 2 + 2, y * 2 + 2, secondTile + 2); 
+}
+
+void Exit::isSteppedOnAnimation() {
+	if((bruhRand() & 0x1FF) == 0) {
+		effectsManager->exitGlow(tilePos);
+	}
+}
+
+void Copy::isSteppedOnAnimation() {
+	// this pos check is so much less expensive than doing a getPos. i think theres some other places too 
+	// ALSO, i still dont have the proper shadow creation thing. 
+	// i should start letting things like that hold up main
+	if(tilePos == entityManager->player->p && (bruhRand() & 0x1FF) == 0) {
+		effectsManager->copyGlow(tilePos);
+	}
+	
 }
 
 

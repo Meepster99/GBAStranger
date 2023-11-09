@@ -228,13 +228,13 @@ int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
 		}
 	}
 	
-	BN_LOG("checkbrand returned ", matchIndex);
+	//BN_LOG("checkbrand returned ", matchIndex);
 
 	return matchIndex;
 }
 
 const char* TileManager::checkBrand() {
-	
+
 	switch(game->roomManager.roomIndex) {
 		case 23: 
 		case 53: 
@@ -277,6 +277,7 @@ const char* TileManager::checkBrand() {
 
 	//BN_LOG(matches[0], matches[1], matches[2], matches[3], matches[4], matches[5], matches[6], matches[7], matches[8], matches[9]);
 	
+	static int prevMatchIndex = -1;
 	int matchIndex = checkBrandIndex(roomState);
 	
 	
@@ -294,17 +295,30 @@ const char* TileManager::checkBrand() {
 	
 	if(matchIndex != -1) {
 	
-		if(matchIndex < 8) {
-			cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
-		} else {
-			cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	
+		if(matchIndex != prevMatchIndex) {
+			if(matchIndex < 8) {
+				cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
+			} else {
+				cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+			}
+			
+			//cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBGPaletteFade(2, false));
+			cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBlackBGPalette());
+			
+			
+			//BN_LOG(matchIndex, " ", prevMatchIndex);
+			effectsManager->fadeBrand();
+			prevMatchIndex = matchIndex;
 		}
 	
+		
 		
 		return destinations[matchIndex];
 	}
 	cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 	
+	prevMatchIndex = matchIndex;
 	return NULL;
 }
 
@@ -608,6 +622,23 @@ bool TileManager::enterRoom() {
 void TileManager::doVBlank() { profileFunction();
 	
 	// things like glass breaking(and maybe others) should occur in here!
+	
+	
+	// i PRAY that this doesnt kill performance. something sorta similar to this may have fucked performance back when i was trying to get death tiles working?
+	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			if(floorMap[x][y] == NULL) {
+				continue;
+			}
+			
+			BN_ASSERT(floorMap[x][y]->isAlive, "a floor tile wasnt alive during vblank?? how??");
+			
+			if(floorMap[x][y]->isSteppedOn) {
+				floorMap[x][y]->isSteppedOnAnimation();
+			}
+		}
+	}
 	
 	
 	
