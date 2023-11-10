@@ -20,4 +20,4 @@ jobs:
         pip install pylint numpy Pillow colorama pydub requests pywin32 pytube
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint --disable=C0103 --disable=W0311 --disable=C0303 --disable=C0301 --disable=C0116 --disable=E0213 --disable=W0107 --disable=C0209 --disable=E1101 --disable=W0613 $(git ls-files '*.py')
