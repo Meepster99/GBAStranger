@@ -120,7 +120,7 @@ namespace WTFPROFILER {
 	}
 	
 	
-	// this will fuck up heavily on recursive funcs. 
+	// this will (curse) up heavily on recursive funcs. 
 	
 	// I HAVE 0 CLUE
 	// i, my map doesnt work, theirs does, theirs is in ewram, and yea??
@@ -143,7 +143,7 @@ namespace WTFPROFILER {
 		// i have 0 clue whats going on here. i updated my butano version, and clear started giving me insanely weird bugs. this fixes them
 		// https://github.com/GValiente/butano/commit/010ce11208ee5bb42b6fbba0baf06b9f02cc0426
 		profilerMap = bn::unordered_map<const char*, ProfilerData, MAXPROFILERFUNCS>();
-		// im keeping the above line there bc i dont trust shit.
+		// im keeping the above line there bc i dont trust (curse).
 		
 		BN_LOG("Profiler reset");
 	}
@@ -264,7 +264,7 @@ namespace WTFPROFILER {
 			
 			temp = profilerStack.back();
 			
-			//fuckng supidest bug every. i wanted to reassign the ref, not update it.
+			//(curse)ng supidest bug every. i wanted to reassign the ref, not update it.
 			// gods this was so much time loss. 
 			// i havent ate enough or slept enough
 			// data = profilerMap(temp.hash, temp.ID);

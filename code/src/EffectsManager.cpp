@@ -35,7 +35,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	// gods i REALLY dont like this code 
 	//bool doFirstDraw = true;
 	// i now absolutely despise this code. 
-	// the way that a chest(32 x 16 sprite) was exported somehow fucked everything up here
+	// the way that a chest(32 x 16 sprite) was exported somehow (curse)ed everything up here
 	
 	if(tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
 		loadBoobTrap();
@@ -184,7 +184,7 @@ void BigSprite::firstDraw() {
 			if(!autoAnimate) {
 				// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
 				// is this 4, or ithis 8???
-				// omfg dumbass, its 4 for the number of subtiles, idiot
+				// omfg (curse), its 4 for the number of subtiles, idiot
 				for(int j=0; j<4; j++) {
 					// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
 					int offset = 4 * (x + (y * width)) + j + indexOffset;
@@ -196,7 +196,7 @@ void BigSprite::firstDraw() {
 					
 					for(int i=0; i<8; i++) {
 						if(tileRef[i] != 0) {
-							goto doBigTile; // shit code
+							goto doBigTile; // (curse) code
 						}
 					}
 				}
@@ -362,7 +362,7 @@ void BigSprite::loadBoobTrap() {
 		(void*)this
 	);
 	
-	// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
+	// yes, these are the same object but with a slightly different pos, and yes, i am to scared to (curse)ing copy them
 	Interactable* temp2 = new Interactable(Pos(10, 3),
 		func1,
 		func2,
@@ -399,7 +399,7 @@ void BigSprite::loadTailHead() {
 	customAnimate = []() -> int {
 		
 		// this was a switch statement until i became a conspiracy theorist.
-		BN_ASSERT(globalGame->entityManager.player != NULL, "WHAT THE FUCK");
+		BN_ASSERT(globalGame->entityManager.player != NULL, "WHAT THE (curse)");
 		int playerX = globalGame->entityManager.player->p.x;
 		if(playerX <= 6) {
 			return 2;
@@ -419,12 +419,12 @@ void BigSprite::loadTailHead() {
 
 void BigSprite::loadChest() {
 	
-	//BN_LOG("hey dumbfuck, load a chest");
+	//BN_LOG("hey dumb(curse), load a chest");
 	
 	// this thing quite literaly:
 	// isnt a bigsprite
 	// isnt animated 
-	// what the fuck am i on 
+	// what the (curse) am i on 
 	
 	// and now that im going back to previously written code, and using it for completely unintended purposes, i am reminded that i am a trash programmer
 	// i hijacked the KICK function to do this random bs????
@@ -486,7 +486,7 @@ void BigSprite::loadChest() {
 		(void*)this
 	);
 	
-	// yes, these are the same object but with a slightly different pos, and yes, i am to scared to fucking copy them
+	// yes, these are the same object but with a slightly different pos, and yes, i am to scared to (curse)ing copy them
 	Interactable* temp2 = new Interactable(Pos(7, yIndex),
 		func1,
 		func2,
@@ -1348,7 +1348,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	unsigned roomNameHash = game->roomManager.currentRoomHash();
 	
 	// i rlly need a better method than this 
-	// and also, roonamess being named differently during hard mode just fucks me 
+	// and also, roonamess being named differently during hard mode just (curse)s me 
 	// ill make a better option here, but ughhh its not ideal still
 	switch(roomNameHash) {
 		
@@ -1376,7 +1376,7 @@ Dialogue::Dialogue(EffectsManager* effectsManager_, const char* data_) : effects
 	
 	
 	// gods should i just make a dialogue class 
-	// honestly, i didnt need it, and this code is fucking trash.
+	// honestly, i didnt need it, and this code is (curse)ing trash.
 	// nv, hopefully not anymore, im going to make it less trash 
 	
 	data = data_;
@@ -1598,7 +1598,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	
 	// im going to remove the \r stuff, and just have \n. \r will now be done automaticallys
 	
-	// oh shit 
+	// oh (curse) 
 	// textgenerator has the width( function 
 	// wow. i really like 
 	// so much of this project has been me only finding major features weeks after 
@@ -1606,7 +1606,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	// the c standard does not require const chars to be null termed. i didnt know this. im dumb
 	
 	// ok. the first char being null now means that we shouldnt update the screen at the end.
-	// this is jank as fuck 
+	// this is jank as (curse) 
 	// i could/should also,,, have a first/second char be to decide the sound, but ugh 
 	// this is primarily to play sound effects between dialogue without cutting the dialogue 
 	// totally a better less patchy way to do this 
@@ -1646,7 +1646,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		bool enableSkipScrollBool
 		) mutable -> bool {
 			
-		// cringe is occuring! this should/could maybe be static, but im fucking scared
+		// cringe is occuring! this should/could maybe be static, but im (curse)ing scared
 		char filteredBuffer[256];
 		
 		char* originalBufferPtr = bufferPtr;
@@ -1977,7 +1977,7 @@ bool EffectsManager::restRequest(const char* questionString) {
 
 // -----
 
-// jesus fuck
+// jesus (curse)
 MenuOption::MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int), int xVal) :
 	optionName(optionName_),
 	getOption(getOption_),
@@ -2416,7 +2416,7 @@ void EffectsManager::glassBreak(Pos p) {
 	// we cannot use static vars in this joint, so static "vars" will have to be,,, alloced in real time. i think?
 	// or i can just use the canerious std::functional
 	// gods this is absolutely horrid.
-	// i really should of just made fucking,, i should of just made graphicsIndex a static var 
+	// i really should of just made (curse)ing,, i should of just made graphicsIndex a static var 
 	// i am assuming i will need more static vars in the future when im not even rlly sure, ugh idk
 	
 
@@ -2589,9 +2589,9 @@ void EffectsManager::wings() {
 	
 	// is precomputing this right here,, ok
 	// ima just decide the sprite item in-func 
-	// why isnt there a fucking func that lets me just change the graphics index without having to also lable the sprite item??
+	// why isnt there a (curse)ing func that lets me just change the graphics index without having to also lable the sprite item??
 	
-	// this code is fucking shit.
+	// this code is (curse)ing (curse).
 	
 
 	
@@ -3197,7 +3197,7 @@ void EffectsManager::entityKill(Entity* entity) {
 		// i could,,, clone the spriteptr?
 		// but i still need the current sprite item, which i have 
 		// and tbh if i have the item(which i do), ill just rotate through graphicsindexes and be done
-		// due to general bullshitery, i think ill have to assume that the only things that can be passed into here are 16x16 sprites.
+		// due to general bull(curse)ery, i think ill have to assume that the only things that can be passed into here are 16x16 sprites.
 		// omfg, tilesptr ONLY RETURNSTHE TILES FOR LIKE WHAT ITS CURRENT FRAME IS
 		// ok, theres options here. 
 		// i may not have access to graphicsindex, but thats ok. 
@@ -3510,7 +3510,7 @@ Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
 		return false;
 	};
 	
-	// i rlly should just have createeffect return the fucking effect ptr 
+	// i rlly should just have createeffect return the (curse)ing effect ptr 
 	// also i never use animationfreq even when i should
 	Effect* e = new Effect(createFunc, tickFunc);
 	effectList.push_back(e);
@@ -3658,7 +3658,7 @@ void EffectsManager::treeLeaves() {
 	auto tickFunc = [](Effect* obj) mutable -> bool {
 	
 		// maybe,, calling animate from create is a bad idea tbh
-		// also the frame modulo trick is kinda shit, bc the frame a anim is called like, changes 
+		// also the frame modulo trick is kinda (curse), bc the frame a anim is called like, changes 
 		// i should of had a framestart thing in effects, but going back to change that all is more time than its worth
 		if(frame % 8 == 0 || obj->tempCounter == 1) { 
 			obj->graphicsIndex++;
@@ -3823,7 +3823,7 @@ void EffectsManager::levKill() {
 	
 	lightning 
 	
-	screen unblacks (all lev statues should not be in the flashed state) (which is fucking great for not having to have a one off) 
+	screen unblacks (all lev statues should not be in the flashed state) (which is (curse)ing great for not having to have a one off) 
 	
 	play player death anim
 	

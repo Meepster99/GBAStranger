@@ -7,8 +7,8 @@ using System.Text;
 //using Newtonsoft.Json;
 using UndertaleModLib.Models;
 
-// I FUCKING HATE THIS SM.
-// why the fuck does the gui have system.text.json, and the cli doesnt???????
+// I (curse)ING HATE THIS SM.
+// why the (curse) does the gui have system.text.json, and the cli doesnt???????
 
 
 public class CustomStreamWriter

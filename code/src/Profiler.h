@@ -174,7 +174,7 @@ public:
 	
 	// wtf is this 
 	// https://gvaliente.github.io/butano/faq.html#faq_memory_types
-	// im not even running out of memory BUT THIS FUCKING UNORDERED MAP DOESNT WANT TO FUCKING WORK
+	// im not even running out of memory BUT THIS (curse)ING UNORDERED MAP DOESNT WANT TO (curse)ING WORK
 
 	//BN_DATA_EWRAM static bn::unordered_map<const char*, ProfilerData, MAXPROFILERFUNCS> profilerMap;
 	
@@ -213,23 +213,23 @@ public:
 	
 };
 
-// this being previously defined as static fucked me hard bc im,,, we are,, 
+// this being previously defined as static (curse)ed me hard bc im,,, we are,, 
 // the hashing is,,, gods this is so confusing
 // the hashing is going based off the pointer instead of the actual string???
 // static made the pointers the same 
 // but even with that, it still doesnt fully work
 
-// i swear. i am fucking high. i do not understand this shit 
+// i swear. i am (curse)ing high. i do not understand this (curse) 
 // i defined the hash as a const, still nothing
 // my now assumption is that since we are hashing the pointer, and not the string, that 
-// O3 is commiting some fuckery, and making them different?
+// O3 is commiting some (curse)ery, and making them different?
 // so ill need to write a string hash func
 
 // ok nvm, adding the static back fixed it??????
 // i,, gods 
 // i shouldof just made the hash the key
-// ive lost so much time on a feature that i dont really even fucking need tbh omfg
-// and the timeloss wasnt even on actually implimenting it, but just pointer fuckery.
+// ive lost so much time on a feature that i dont really even (curse)ing need tbh omfg
+// and the timeloss wasnt even on actually implimenting it, but just pointer (curse)ery.
 
 #ifdef ENABLEPROFILER
 #define profileFunction() \

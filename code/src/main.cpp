@@ -10,12 +10,12 @@
 
 // https://github.com/GValiente/butano/blob/master/butano/hw/3rd_party/libugba/include/ugba/definitions.h
 
-// 3 fucking hours.
+// 3 (curse)ing hours.
 // the interrupt. 
 // is commented out.
 // in https://github.com/GValiente/butano/blob/8e0c20f9264fe2d3eebeb1e198ad02878a025ed8/butano/hw/3rd_party/libugba/src/irq_handler.s#L106
 // i need to speak to the manager.
-// I AM ACTUALLY SO FUCKING PISSED.
+// I AM ACTUALLY SO (curse)ING PISSED.
 // moving the func to game.cpp(actually maybe not)
 
 unsigned* stareTiles = NULL;
@@ -62,7 +62,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	
 	// dw_spr_un_stare_index0_bn_gfx
 	// i can change its .section to iwram.
-	// im about to commit a fucking crime 
+	// im about to commit a (curse)ing crime 
 	// the thing is,,, why does like, 
 	// i rlly dont want to have to mod that thing on the fly oh gods, esp since its compiled after massformater
 	// i could maybe just copy it into iwram?
@@ -70,7 +70,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	//those tiles being flip reduced,..
 	// im about to commit so many crimes
 	// it seems that, gods putting it in iwram may actually make this extremely easy, and 
-	// im lazy as fuck.
+	// im lazy as (curse).
 	// you might have to compile twice on a clean compile lmao, to change the files
 	// or, i could alloc them in iwram at runtime. 
 	// llmao, we ball
@@ -99,7 +99,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	
 	// setup palette 
 	volatile unsigned short* palettePointer = reinterpret_cast<volatile unsigned short*>(0x05000000);
-	// this array seems to be declared on the fucking rom. this is really fuckingbad
+	// this array seems to be declared on the (curse)ing rom. this is really (curse)ingbad
 	// this needs to be redone in the future!
 	
 	//unsigned short col0 = palettePointer[512-16];

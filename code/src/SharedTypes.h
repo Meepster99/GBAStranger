@@ -32,7 +32,7 @@
 
 #include "bn_blending.h"
 
-// it is so fucking dumb that i didnt realize this was a thing until now 
+// it is so (curse)ing dumb that i didnt realize this was a thing until now 
 #include "bn_window.h"
 #include "bn_rect_window.h"
 
@@ -321,7 +321,7 @@ public:
 			// for all tilesets from the game, tile 0 
 			// is just a checkerboard. if possible, i rlly, and i mean really, 
 			// should overwrite that with transparent here.
-			// actually, fuck it, ill just do it in preprocessing.
+			// actually, (curse) it, ill just do it in preprocessing.
 			
 			init(zIndex);
 			
@@ -463,8 +463,8 @@ class Layer {
 public:
 
 	// rawmap is now a pointer to avoid all the bs in regards to statically allocating the bs in it
-	// WILL THIS BEING IN HEAP SLOW SHIT DOWN??
-	// bc if so,, we are fucked
+	// WILL THIS BEING IN HEAP SLOW (curse) DOWN??
+	// bc if so,, we are (curse)ed
 	BackgroundMap rawMap;
 	// dont ask
 	Layer(bn::regular_bg_tiles_item tileset, int zIndex, int fillIndex = 0) :
@@ -526,7 +526,7 @@ public:
 	u8 tempTileIndicies[4];
 	
 	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
-		// this func actually being able to flip shit properly is UNCONFIRMED bc I AM SLEEPY
+		// this func actually being able to flip (curse) properly is UNCONFIRMED bc I AM SLEEPY
 		
 		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
 		tempTileIndicies[1] = 4 * tile + ((flipY << 1) | !flipX);
@@ -773,11 +773,11 @@ class Entity;
 //using EntitySetIterator = EntitySet<Size>::iterator;
 //using EntitySetIterator = bn::unordered_set::iterator;
 
-// set without insanity. slower? def, but im so fucking done
+// set without insanity. slower? def, but im so (curse)ing done
 // ill haeve the backend be a vector.
 // resizing on every insert,,, gods
-// i however, cannot give a fuck anymore :) 
-// spent way to long on this only to stop being a dumbass and understand what pointer stability is
+// i however, cannot give a (curse) anymore :) 
+// spent way to long on this only to stop being a (curse) and understand what pointer stability is
 // i could maybe use,, unique pointer? but tbh i just dont want to 
 // actually, we only have unique pointers! no shared, so im doing this
 // insertion will be slow, but at least lookup will be fast.

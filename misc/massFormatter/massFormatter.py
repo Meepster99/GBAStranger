@@ -165,7 +165,7 @@ def writeBitmap(inputImageDontTouchLol, dest):
 	
 	def write4Num(arr, num, index):
 		
-		# gods there is def a better way todo this, but im fucking tired 
+		# gods there is def a better way todo this, but im (curse)ing tired 
 		# this,, was the better way, i changed item
 		
 		byte_0 = (num >> 24) & 0xFF
@@ -205,7 +205,7 @@ def writeBitmap(inputImageDontTouchLol, dest):
 	# color planes?
 	image[0x1A] = 1
 	
-	# BITS PER FUCKING PIXEL
+	# BITS PER (curse)ING PIXEL
 	image[0x1C] = 4
 	
 	write2Num(image, 16, 0x2E)
@@ -287,7 +287,7 @@ def writeBitmap(inputImageDontTouchLol, dest):
 	# that doesnt get annoying
 	
 	# nvm, i read their code wrong, im a fool.
-	# im just going to pray that my bullshittery here doesnt like
+	# im just going to pray that my bull(curse)tery here doesnt like
 	# if any files get overwritten bc of case differences, ima be so mad.
 
 	newDest = list(os.path.split(dest))
@@ -468,7 +468,7 @@ def convertTiles(outputPath):
 	
 		# gods what is the difference between a sprite tiles and a sprite??
 	
-	# this thing is bc sometimes like,,, i just have random vram being used by other shit(that was inited as a default) and im never sure if its properly freed 
+	# this thing is bc sometimes like,,, i just have random vram being used by other (curse)(that was inited as a default) and im never sure if its properly freed 
 	# this is just a small bg tile, for uses of initing things 
 	
 	temp = Image.new("RGBA", (16, 16), (0, 255, 255, 255))
@@ -637,7 +637,7 @@ def convertFonts(outputPath):
 			"""	
 			
 			if width >= 16:
-				print("im not fucking dealing with {:s} rn".format(font))
+				print("im not (curse)ing dealing with {:s} rn".format(font))
 				shouldSkip = True
 				break
 			
@@ -810,10 +810,10 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 		# but will i have to name every,, sub-background as its own? 
 		# i could also maybe like,, do it with scaling, 
 		# or actually, ill have it be the spritename_number
-		# but then that will fuck up my code which,, grabs which items are needed
+		# but then that will (curse) up my code which,, grabs which items are needed
 		# meaning i need ANOTHER one off fix 
 		# it seems that butano has built in compression though. 
-		# i just hope this doesnt fuck shit up with my prexisting classes 
+		# i just hope this doesnt (curse) (curse) up with my prexisting classes 
 		# actually,,, it totally will
 		
 		spriteIndex = spriteName.rsplit("index", 1)
@@ -956,7 +956,7 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 
 	tempImage = Image.fromarray(allTiles)
 	
-	# im going to want to extend the namespace of spriteitemstiles with my own shit: mainly 
+	# im going to want to extend the namespace of spriteitemstiles with my own (curse): mainly 
 	# the width of the bigsprite 
 	#,, possibly the loading position of the bigsprite? do i have access to that easily?
 	
@@ -980,7 +980,7 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 
 def genSprite(spriteName, isBackground = False):
 
-	# generates any fucking sprite i want, on demand
+	# generates any (curse)ing sprite i want, on demand
 	
 	
 	
@@ -1087,7 +1087,7 @@ def genSprite(spriteName, isBackground = False):
 			v+=1;
 			paddedSpriteSize = (paddedSpriteSize[0], v)
 	
-	# shit programming 
+	# (curse) programming 
 	if paddedSpriteSize[0] == 64 and paddedSpriteSize[1] == 16:
 		paddedSpriteSize = (64, 32)
 		
@@ -1338,7 +1338,7 @@ def generateEffectsTiles(outputPath):
 
 	# for saftey, im always having the first tile be a transparent one
 	# additionally, these tiles no longer need to be 16x16, and tbh i should make them,,,
-	# fuck it ill 8x8 
+	# (curse) it ill 8x8 
 	# reconsidered on that, in the case that in the future i want more complex background effects, going 16x16 will be better
 	
 	tiles = np.full((256+16, 16, 3), (0, 255, 255), dtype=np.uint8)
@@ -1558,7 +1558,7 @@ def main():
 
 		# ok look.
 		# i didnt want to fork butano 
-		# ok i get i already have a fork for the tail test branch, but i just, look i just didnt want to fucking do it ok 
+		# ok i get i already have a fork for the tail test branch, but i just, look i just didnt want to (curse)ing do it ok 
 		# out of all the code, the stack manipulation, the casting integers to pointers, this is what i am the most ashamed of.
 		# check out the start of main.cpp for a further explanation
 		

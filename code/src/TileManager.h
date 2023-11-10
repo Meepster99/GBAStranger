@@ -34,7 +34,7 @@ public:
 					floorMap[x][y] = NULL;
 				}
 				
-				// i pray this doesnt fuck my performance.
+				// i pray this doesnt (curse) my performance.
 				if(floorMap[x][y] == NULL) {
 					FloorTile::drawPit(x, y);
 				} else {

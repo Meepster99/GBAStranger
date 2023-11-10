@@ -185,18 +185,18 @@ public:
 	const bn::bg_palette_item getBGPaletteFade(int index = -1, bool toWhite = true) {
 		(void)index;
 
-		// ok something is fucked with the color array 
+		// ok something is (curse)ed with the color array 
 		// copying it didnt work, assignment didnt work, im building from scratch now.
-		// ok something is EXTREMELY FUCKED with the colour class 
+		// ok something is EXTREMELY (curse)ED with the colour class 
 		// things arent making sense, blue is coming from nowhere?
 		
 		//,,, am i going to have to do all palets at compile time
 		// or maybe if i make the tempthing an array like,, yea?
 		// OK,
 		//for some reason, tempcolarray HAD to be declared as a class var?? why??
-		// ok honestly, fuck it. 
+		// ok honestly, (curse) it. 
 		// i want memory level access to the palete table, and idc how i get it.
-		// ive had so much trouble with this shit, having to change all the palets of everything, when i can just access the god damn table.
+		// ive had so much trouble with this (curse), having to change all the palets of everything, when i can just access the god damn table.
 		// but,, i already have a framework in place,, and i resolved this issue 
 		// is there ever a case where 
 		// actually no, i would have to manually change any sprite i have during a cutscene, thats annoying 
@@ -228,7 +228,7 @@ public:
 	
 	const bn::sprite_palette_item getFontSpritePalette() {
 		// sets the palette specifically for when,,, im in the menu section??
-		// why the fuck do the fonts take the lastc colors in the array??
+		// why the (curse) do the fonts take the lastc colors in the array??
 		bn::span<bn::color> spanthing(fontColorArray);
 			
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);

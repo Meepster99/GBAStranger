@@ -271,7 +271,7 @@ public:
 	bool hasRod = true;
 	bool hasSuperRod = false;
 	//FloorTile* rod = NULL;
-	// ik i should be useing a queue, but your honor, im fucking tired, and my tummy hurt
+	// ik i should be useing a queue, but your honor, im (curse)ing tired, and my tummy hurt
 	bn::vector<FloorTile*, 128> rod; 
 	
 	void pushRod(Pos tilePos);
@@ -287,7 +287,7 @@ public:
 	
 	bool hasWingsTile = false;
 	
-	// jank as fuck
+	// jank as (curse)
 	int wingsUse = 0;
 	unsigned wingMoveCheck = -1;
 	

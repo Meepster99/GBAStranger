@@ -138,7 +138,7 @@ void RoomManager::gotoRoom(const char* roomName) {
 	
 	
 	
-	// shit time complexity, but im tired.
+	// (curse) time complexity, but im tired.
 	for(int i=0; i<(int)(sizeof(rooms)/sizeof(rooms[0])); i++) {
 		
 		if(WTF(buffer) != WTF(roomNameArray[i].str)) {
@@ -306,9 +306,9 @@ Room RoomManager::loadCustomRoom() {
 	
 	// could use a bool, but i dont want to risk junk sram data.
 	// 42 will be a custom room
-	// how the FUCK am i going to do this if i want to use compression?
+	// how the (curse) am i going to do this if i want to use compression?
 	// alternatively, one could include ~78 rooms  (conservative estimate)
-	// without compression. so fuck it, we ball.
+	// without compression. so (curse) it, we ball.
 	//int isCustomSave = 42;
 	
 	
@@ -317,22 +317,22 @@ Room RoomManager::loadCustomRoom() {
 	// nvm, doing this the hard way.
 	// nvm we are doing this the even harder way.
 	// i wont have enough time to load a thing into the stack into the first place, bc loading 32kb into stack is dumb.
-	// so this will be an alloc, and ill use pointer fuckery to load it in. 
-	// actually, i dont even need pointer fuckery, ill just read directly from srams
+	// so this will be an alloc, and ill use pointer (curse)ery to load it in. 
+	// actually, i dont even need pointer (curse)ery, ill just read directly from srams
 	
 	// we will do a stream based approach, as in first(well second, first unsigned is 42), second is room count, and then afterword we load all rooms 
 	// that is going to suck 
 	// additionally, not supporting anything like,,, dialogue, or etc
 	// going to use lambdas for specific like,,, reading of unsigneds
 	
-	// reading everything ahead of time would be,, shit 
+	// reading everything ahead of time would be,, (curse) 
 	// should i then therefore,, have this be a custom reader? meaning it should be in room manager? yes
 	// and also, i should have a table with offsets to where each individual rooms starts? ok 
 	// actually,,,,, if i wanna get REALLY weird with it 
 	// i can have an offset to collision, offset to details, offset to floor, and then entityies, and an unsigned at the start for entity count, and just set those jank 
 	// ass pointers as like,,,, the actual things.
 	// only concern will be,,, the entityholder struct(what size is EntityType? are the u8s actually like, being stored as such?
-	// struct allignment has a large chance to fuck me here
+	// struct allignment has a large chance to (curse) me here
 	
 	/*
 	
@@ -423,7 +423,7 @@ Room RoomManager::loadCustomRoom() {
 	//unsigned test = readUnsigned();
 	//BN_LOG(test);
 	
-	// what the fuck. what the FUCK,,, what the,,,fuck
+	// what the (curse). what the (curse),,, what the,,,(curse)
 	Room res(
 	reinterpret_cast<void*>(0x0E000000 + collisionOffset),
 	reinterpret_cast<void*>(0x0E000000 + floorOffset),

@@ -23,7 +23,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	kickedList.clear();
 	
-	// saving is jank as fuck, and this is evidence of it
+	// saving is jank as (curse), and this is evidence of it
 	//int locustCountBackup = 0;
 	//bool isVoidedBackup = false;
 	
@@ -73,10 +73,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	SaneSet<Pos, MAXENTITYSPRITES> posSet;
 	
 	for(int i=0; i<entitiesCount; i++) {
-		// i shouldnt have to do this, but despite getting a literal 1:1 memory recreation, it still chose to shit itself 
+		// i shouldnt have to do this, but despite getting a literal 1:1 memory recreation, it still chose to (curse) itself 
 		// it just didnt want to work.
 		// a byte would just get read on a loop for some reason?
-		// i cant believe i changed my endianness for this, and padded bytes and shitomfg
+		// i cant believe i changed my endianness for this, and padded bytes and (curse)omfg
 		// the numbers getting read in were always repeats of one byte, but idk what it happens
 		// so im just doing it manually here
 		// and undoing all the endianness changes
@@ -716,7 +716,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	}
 	
 	if(e->entityType() == EntityType::Interactable) {
-		// hopefully this doesnt fuck anything up
+		// hopefully this doesnt (curse) anything up
 		return entityMap[e->p.x][e->p.y].end();
 	}
 	
@@ -739,7 +739,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	enemyList.erase(e);		
 
 	// this was legacy, but is now here just to make sure i dont leak memory in rlly stupid ways
-	// and also for EUS STATUES, NOT MODIFYING THE FUCKIN BS IN THE MIDDLE OF A GAMEUPDATE
+	// and also for EUS STATUES, NOT MODIFYING THE (curse)IN BS IN THE MIDDLE OF A GAMEUPDATE
 	deadList.insert(e);
 	
 	
@@ -751,7 +751,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	}
 	
 	if(e->entityType() == EntityType::LevStatue) {
-		// this happening here is fucking dumb, and i would prefer it occur with the destructor, but idk
+		// this happening here is (curse)ing dumb, and i would prefer it occur with the destructor, but idk
 		// actually,,, we have the isdead func, which gets called during vblank. i could call it here? to some potential repercussions
 		//i cannot spell
 		// tan statue should also have that
@@ -1076,7 +1076,7 @@ void EntityManager::updateMap() {
 	// critical levels of goofyness
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		if((*it)->entityType() == EntityType::MonStatue) { 
-			// mon statues werent fucking like, working properly at the end of a tick, i think this fixes that
+			// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
 			bn::optional<Direction> res = canSeePlayer((*it)->p);
 			if(res.has_value()) {
 				// puttint this mon line after, the *it, is it a useafterfree?
@@ -1397,7 +1397,7 @@ bool EntityManager::hasCollision(const Pos& p) const {
 	return true;
 }
 
-bool EntityManager::hasNonInteractableObstacle(const Pos& p) const { //nice function name dumbass
+bool EntityManager::hasNonInteractableObstacle(const Pos& p) const { //nice function name (curse)
 
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 	
@@ -1618,7 +1618,7 @@ void EntityManager::rodUse() {
 void EntityManager::sanity() const {
 	
 	// this func kills performance(should it?)
-	// do iterators like fuck performance as well?
+	// do iterators like (curse) performance as well?
 	// i could easily let saneset have indexing(and tbh, why didnt i earlier?)
 	// well, if i want to remove i sorta need iterators.
 	

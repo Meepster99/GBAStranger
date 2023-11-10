@@ -106,8 +106,8 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		if(entityManager->hasObstacle(tilePos)) {
 			// do dialogue here
-			// what abt npcs tho, fuck
-			// shadows not technically being enemies rlly fucks me
+			// what abt npcs tho, (curse)
+			// shadows not technically being enemies rlly (curse)s me
 			
 			Obstacle* temp = static_cast<Obstacle*>(*(entityManager->getMap(tilePos).begin()));
 			
@@ -222,7 +222,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		
 		Direction stopDir = invertDirections[static_cast<int>(currentDir)];
 		
-		// nice function name, dumbass
+		// nice function name, (curse)
 		auto didPlayerPressStopDir = [stopDir]() -> bool {
 			if(bn::keypad::down_pressed() && stopDir == Direction::Down) {
 				return true;
@@ -369,7 +369,7 @@ void Player::updateTileIndex() {
 	
 	// there should of been a way to do this by,,, setting the bool in hasmoved, but that didnt seem to work.
 	// now the bool is updated by movefailed and movesucceded
-	// nope, im just going to use the playermoved bool from the entityManager, fuck it
+	// nope, im just going to use the playermoved bool from the entityManager, (curse) it
 	// nope, player->p == playerStart
 	// gods this is so dumb
 	
@@ -593,8 +593,8 @@ void Chest::interact() {
 	
 	// this is actually the only place im even using game in here
 	// and i could(actually should? probs just pass the roomManager into here, but idk 
-	// to be 100% real is that i need to go convert all that shit into namespaces, but i 
-	// fucking hate namespaces, and if i have to rewrite a bunch of my h files i will freak
+	// to be 100% real is that i need to go convert all that (curse) into namespaces, but i 
+	// (curse)ing hate namespaces, and if i have to rewrite a bunch of my h files i will freak
 	
 	if(game->roomManager.roomIndex > 3) {
 		// this if statement is here on purpose for a very stupid easter egg, see the random boulder msgs

@@ -103,7 +103,7 @@ IRQ_GlobalInterruptHandler:
     tst     r1, r2
     bne     interrupt_found
 
-	// im losing it :)
+	// i am having a wonderful time. :)
     add     r3, r3, #4
     mov     r2, #(1 << 13) // GAMEPAK
     tst     r1, r2

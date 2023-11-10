@@ -89,7 +89,7 @@ public:
 	bool hasObstacle(const Pos& p) const;
 	bool hasCollision(const Pos& p) const;
 	bn::optional<TileType> hasFloor(const Pos& p) const;
-	bool hasNonInteractableObstacle(const Pos& p) const; //nice function name dumbass
+	bool hasNonInteractableObstacle(const Pos& p) const; //nice function name (curse)
 	
 	bn::optional<Direction> canSeePlayer(const Pos& p) const;
 	bn::optional<Direction> canPathToPlayer(const Pos& p, const Pos& playerPos) const;

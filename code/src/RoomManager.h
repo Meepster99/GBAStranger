@@ -37,7 +37,7 @@ public:
 
 private:
 	// dont have to use a vector here. i worry bc like, running out of space. i can use an unsigned short tho bc, 32kb = 2^15
-	// gods but regardless, it just burns 2k of stack mem, when i dont fucking need it. im allocating
+	// gods but regardless, it just burns 2k of stack mem, when i dont (curse)ing need it. im allocating
 	
 	unsigned roomCountAlloc = 0;
 	unsigned short* roomOffsets = NULL;

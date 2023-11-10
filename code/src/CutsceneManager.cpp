@@ -153,7 +153,7 @@ void CutsceneManager::introCutscene() {
 	}
 
 	
-	game->effectsManager.doDialogue("[You aquired a strange rod]\n[Simply holding it makes you feel uneasy]\n[You begin to imagine your whole life existing on a 2001 handheld]\n[Something is completely fucked]\0", true);
+	game->effectsManager.doDialogue("[You aquired a strange rod]\n[Simply holding it makes you feel uneasy]\n[You begin to imagine your whole life existing on a 2001 handheld]\n[Something is completely (curse)ed]\0", true);
 	game->playSound(&bn::sound_items::void_stranger_ost_56);
 	
 	// its insane that i never overloaded the set_tiles func
@@ -228,9 +228,9 @@ void CutsceneManager::cifDream() {
 	/*
 	while spr_cdream_add_eus_b could/should/would be a bigsprite 
 	
-	i dont want to fucking do that
+	i dont want to (curse)ing do that
 	so going to make it 2 64x64 sprites, having to custom do that in the formatter 
-	bc butano wont load shit is,, annoying
+	bc butano wont load (curse) is,, annoying
 	
 	or,,, i could do it with a bg item?? but like, should i? it seems inefficent and stupid 
 	
@@ -382,7 +382,7 @@ void CutsceneManager::cifDream() {
 	
 	// ugh.
 	// the fade in with cif having 2 light levels is, an inconvience. i should just make a palete class, but i would have to rewrite the sprite class as well 
-	// and chnge a ton of shit. this is the best i can do
+	// and chnge a ton of (curse). this is the best i can do
 	//bn::blending::set_transparency_alpha(0.75);
 	
 	auto bgPalette = globalGame->pal->getBGPalette();
@@ -611,7 +611,7 @@ void CutsceneManager::cifDream() {
 	// i rlly should of just made a class
 	
 	// in order for us to backup the palette table, butano update has to push it to actual ram 
-	// this lets us to a frame update, without flashing shit
+	// this lets us to a frame update, without flashing (curse)
 	// ok nvm, this just aint going to work. 
 	// ugh 
 	// 
@@ -661,7 +661,7 @@ void CutsceneManager::cifDream() {
 	
 	bn::music::stop();
 	
-	// hide VRAM bulshittery.
+	// hide VRAM bul(curse)tery.
 	maps[1]->bgPointer.set_priority(0);
 	bn::sprite_text_generator textGenerator(dw_fnt_text_12_sprite_font);
 	textGenerator.set_center_alignment();
@@ -753,7 +753,7 @@ void CutsceneManager::brandInput() {
 	Sprite allDoneSpriteLeft(bn::sprite_items::dw_default_sprite_64);
 	Sprite allDoneSpriteRight(bn::sprite_items::dw_default_sprite_64);
 	
-	// i did not know i could inline shit like this
+	// i did not know i could inline (curse) like this
 	// annoying i couldnt do it with refs tho
 	for(Sprite* sprite : {&allDoneSprite, &allDoneSpriteLeft, &allDoneSpriteRight}) {
 		sprite->spritePointer.set_palette(game->pal->getLightGraySpritePalette());
@@ -1035,7 +1035,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 		return;
 	};
 	
-	// holy shit. 
+	// holy (curse). 
 	// gml_Object_obj_confinement_Step_0, has scr_errormessage(40)
 	// in gml_Object_obj_errormessages_Create_0, it says:
 	// str_error40 = ">THIS DESECRATION CAN NOT CONTINUE\n"
@@ -1136,13 +1136,13 @@ void CutsceneManager::createPlayerBrandRoom() {
 
 void CutsceneManager::crashGame() {
 	
-	// totally use some of the hacky shit you learned from writing the cart thing to 
+	// totally use some of the hacky (curse) you learned from writing the cart thing to 
 	// corrupt stuff here
 
 	bn::sound::stop_all();
 	bn::music::stop();
 	
-	// mute sound so disabling vblank iqr doesnt fuck me 
+	// mute sound so disabling vblank iqr doesnt (curse) me 
 	*(reinterpret_cast<unsigned short*>(0x04000080)) = 0;
 	*(reinterpret_cast<unsigned short*>(0x04000082)) = 0;
 	*(reinterpret_cast<unsigned short*>(0x04000084)) = 0;
@@ -1452,7 +1452,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 		// BUT ONLY IF THAT TILE ISNT NULL.
 		// moving the locust number tile does nothing. the only thing that does things, 
 		// is the locust sprite tile.
-		// wait am i fucking halucinating?
+		// wait am i (curse)ing halucinating?
 		// i am. 
 		// wtf
 			
@@ -1533,7 +1533,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 				BN_ERROR("this should like, never, ever, happen");
 			}
 			
-			BN_ASSERT(leftTileIndex != -1 && currentTileIndex != -1, "some really fucked shit occured in the dis os area");
+			BN_ASSERT(leftTileIndex != -1 && currentTileIndex != -1, "some really (curse)ed (curse) occured in the dis os area");
 			
 	
 			// there is totally a better way of doing this.
@@ -1543,7 +1543,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 			// wtf
 			//void** tilePointers[3] = {(void**)&tileManager->voidTile2, (void**)&tileManager->locustCounterTile, (void**)&tileManager->floorTile2};
 			
-			// since these two numbers are guarenteed to be unique, we can now do: jank shit
+			// since these two numbers are guarenteed to be unique, we can now do: jank (curse)
 			// better than hardcoding
 			if(leftTileIndex != currentTileIndex) {
 				int switchVal = leftTileIndex + currentTileIndex;
@@ -1558,7 +1558,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 						swap(tileManager->locustCounterTile, tileManager->floorTile2);
 						break;
 					default:
-						BN_ERROR("once again, the dis os code is shit :)");
+						BN_ERROR("once again, the dis os code is (curse) :)");
 						break;
 				}
 			}
@@ -1580,7 +1580,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 			
 			if((testTile == (FloorTile*)tileManager->floorTile2) && tilePos == Pos(13, 8) && !isPickup) {
 				
-				// if the restored value is equal to our current room, we dont do shit.
+				// if the restored value is equal to our current room, we dont do (curse).
 				int testRoomIndex = tileManager->getRoomIndex();
 				//BN_LOG("swaprooms! ", testRoomIndex, " ", game->roomManager.roomIndex);
 				if(testRoomIndex != game->roomManager.roomIndex) {

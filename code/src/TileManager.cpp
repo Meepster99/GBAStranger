@@ -624,7 +624,7 @@ void TileManager::doVBlank() { profileFunction();
 	// things like glass breaking(and maybe others) should occur in here!
 	
 	
-	// i PRAY that this doesnt kill performance. something sorta similar to this may have fucked performance back when i was trying to get death tiles working?
+	// i PRAY that this doesnt kill performance. something sorta similar to this may have (curse)ed performance back when i was trying to get death tiles working?
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -636,6 +636,8 @@ void TileManager::doVBlank() { profileFunction();
 			
 			if(floorMap[x][y]->isSteppedOn) {
 				floorMap[x][y]->isSteppedOnAnimation();
+			} else if(floorMap[x][y]->tileType() == TileType::Exit) {
+				static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
 			}
 		}
 	}

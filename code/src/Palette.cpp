@@ -11,14 +11,14 @@
 
 #define CLAMP(value, min_val, max_val) MAX(MIN((value), (max_val)), (min_val))
 
-// using fixed here was causing EXCESSIVE fucked shit 
+// using fixed here was causing EXCESSIVE (curse)ed (curse) 
 // but, since this all occurs in the preprocessor, i think we should be able to use doulbles
 // nope :) and i cant even used fixed
 // ok, i have 0 clue why i cannot use decimals here, but a solution is to like
 // add 4 to the input value.
 // why? idk
 // well, i do k, but why i cannot use decimals is unknown to the gods
-// wait adding 4 didnt work?? you have got to be fucking kidding me 
+// wait adding 4 didnt work?? you have got to be (curse)ing kidding me 
 
 /*
 
@@ -44,7 +44,7 @@ const Palette val    = TEST3(1310720,12717325,16284503,16777215);
 
 
 ok.
-n+4 and n + 4 are different. in defines. for some fucking reason .
+n+4 and n + 4 are different. in defines. for some (curse)ing reason .
 omfg 
 how many hours 
 gods 
@@ -56,7 +56,7 @@ tbh i could just do this in functions.
 but i want it to be constexpr?
 
 is it variable scoping with layered defines??
-bc even with functions with noinline, its still shitting itself
+bc even with functions with noinline, its still (curse)ting itself
 
 the defines i had leftover in main BETTER have not been causing this 
 
@@ -64,7 +64,7 @@ nope, they werent
 
 i found it :)) and i want to die 
 
-bn::color calls bn_assert. doing this before bn::init is called, causes it to shit itself. 
+bn::color calls bn_assert. doing this before bn::init is called, causes it to (curse) itself. 
 i was clamping at a max of 0xFF instead of 31. this caused it to try to call assert, and crash.
 
 im going to go do a pull request
@@ -98,8 +98,8 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	//return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
 	
 	
-	//int whatthefuck = ( 32 * ( n + 0) ) / 256;
-	//int whatthefuck = ( 32 * ( n + 4) ) / 256;
+	//int whatthe(curse) = ( 32 * ( n + 0) ) / 256;
+	//int whatthe(curse) = ( 32 * ( n + 4) ) / 256;
 	
 	/*
 	int dude = n;
@@ -108,12 +108,12 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	dude++;
 	dude++;
 	
-	int whatthefuck = ( 32 * ( dude + 0) );
-	whatthefuck = whatthefuck >> 8;
+	int whatthe(curse) = ( 32 * ( dude + 0) );
+	whatthe(curse) = whatthe(curse) >> 8;
 	*/
-	//int whatthefuck = PLEASEHELP;
-	//whatthefuck = ( 32 * ( whatthefuck + 0) );
-	//whatthefuck = whatthefuck >> 8;
+	//int whatthe(curse) = PLEASEHELP;
+	//whatthe(curse) = ( 32 * ( whatthe(curse) + 0) );
+	//whatthe(curse) = whatthe(curse) >> 8;
 	
 	//return PLEASEHELP >> 3;
 	/*
@@ -130,11 +130,11 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	*/
 	
 
-	//int whatthefuck = 128;
-	//whatthefuck = whatthefuck + (PLEASEHELP << 5);
-	//whatthefuck = whatthefuck >> 8;
+	//int whatthe(curse) = 128;
+	//whatthe(curse) = whatthe(curse) + (PLEASEHELP << 5);
+	//whatthe(curse) = whatthe(curse) >> 8;
 
-	// now, after spending 5 god damn hours on this shit 
+	// now, after spending 5 god damn hours on this (curse) 
 	// ima do something fun and convert the rgb to the CIELAB color space, and then back to 15 bitset
 	// but honestly, gods im tired
 	// its been so long since ive talked to any of my friends
@@ -142,30 +142,30 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	
 	bn::fixed ugh = (32.0 * PLEASEHELP) / 256.0;
 	
-	int whatthefuck = ugh.round_integer();
+	int whatthe = ugh.round_integer();
 	
 	if(maxVal > 172) {
-		//whatthefuck = ugh.ceil_integer();
+		//whatthe(curse) = ugh.ceil_integer();
 	//else if(maxVal < 86) {
 	} else if(maxVal < 32) {
-		//whatthefuck = ugh.floor_integer();
+		//whatthe(curse) = ugh.floor_integer();
 	}
 	
-	//int whatthefuck = PLEASEHELP >> 3;
+	//int whatthe(curse) = PLEASEHELP >> 3;
 	
-	if(whatthefuck < 0) {
-		whatthefuck = 0;
+	if(whatthe < 0) {
+		whatthe = 0;
 	}
-	if(whatthefuck >= 32) {
-		whatthefuck = 31;
+	if(whatthe >= 32) {
+		whatthe = 31;
 	}
 	
-	return whatthefuck;
+	return whatthe;
 	
 	
 };
 
-//static_assert(CONVERT5BIT(20) == 3, "jesus fuck. ");
+//static_assert(CONVERT5BIT(20) == 3, "jesus (curse). ");
 
 /*
 #define MAKECOLOR(n) bn::color( \

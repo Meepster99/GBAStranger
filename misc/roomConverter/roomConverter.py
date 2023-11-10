@@ -53,11 +53,11 @@ class Pos:
 
 newCreationCodesData = {}
 
-# shit horrible code omfg
+# (curse) horrible code omfg
 room = "ugh"
 
 
-# fuck it, going to be doing this manually. ( not anymore )
+# (curse) it, going to be doing this manually. ( not anymore )
 def readCreationCode(p, creationCode):
 	
 	if creationCode is None:
@@ -143,7 +143,7 @@ def readCreationCode(p, creationCode):
 			if frames[i].function == "convertObjects":
 				break
 		else:
-			print("fuck")
+			print("(curse)")
 			exit(1)
 			
 		frame = frames[i]
@@ -223,11 +223,11 @@ def readCreationCode(p, creationCode):
 		temp = temp.replace("&&", "and")
 		
 		# autism, omfg 
-		temp = temp.replace("!=", "JESUSFUCKINGCHRIST")
+		temp = temp.replace("!=", "JESUS(curse)INGCHRIST")
 		
 		temp = temp.replace("!", "not ")
 		
-		temp = temp.replace("JESUSFUCKINGCHRIST", "!=")
+		temp = temp.replace("JESUS(curse)INGCHRIST", "!=")
 		
 		temp = temp.replace("else if", "elif")
 		temp = temp.replace("global.cc_state", "0")
@@ -261,7 +261,7 @@ def readCreationCode(p, creationCode):
 					break
 				index += 1
 			else:
-				print("wtf, what the fuck. what the fuck")
+				print("wtf, what the (curse). what the (curse)")
 				exit(1)
 			
 			temp = temp[:index] + "\"" + temp[index:]
@@ -283,7 +283,7 @@ def readCreationCode(p, creationCode):
 		exec(execString, globalBruh, bruh)
 	except Exception as e:
 		
-		print(RED + "readCreationCode fucked up" + RESET)
+		print(RED + "readCreationCode (curse)ed up" + RESET)
 		
 	
 		print(creationCode)
@@ -294,7 +294,7 @@ def readCreationCode(p, creationCode):
 		print(execString)
 		print("-----")
 		
-		print(RED + "readCreationCode fucked up" + RESET)
+		print(RED + "readCreationCode (curse)ed up" + RESET)
 		print(e)
 		print("\n")
 		exit(1)
@@ -354,7 +354,7 @@ def readCreationCode(p, creationCode):
 	#creationCodeData[idek] = [None]
 	
 	if idek not in creationCodeData:
-		print(RED + idek + " wasnt found in creationcode data!!! this is rlly fucking bad!!!! add it!!!!" + RESET)
+		print(RED + idek + " wasnt found in creationcode data!!! this is rlly (curse)ing bad!!!! add it!!!!" + RESET)
 		
 		
 		newCreationCodesData[idek] = [None]
@@ -520,7 +520,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 // should this be different between normal and hard?? idek
 #define MAXROOMS {:d}
 		
-// i fucking despise that this is the only way i can get this to work
+// i (curse)ing despise that this is the only way i can get this to work
 struct MessageStrJank {{
 	const char* str;
 	const char idek = '\\0'; // sanity
@@ -569,7 +569,7 @@ def compressData(arr):
 	val = arr[0]
 	for i in range(1, len(arr) + 1):
 		
-		# using this second bit here fucks me in terms of the 126 thing, but i still think it will help me in the long run
+		# using this second bit here (curse)s me in terms of the 126 thing, but i still think it will help me in the long run
 		# this reduced my bits by like,, 2% but idc, im leaving it in
 		if arr[min(i, len(arr)-1)] & 0xC0: # 1100 0000 
 			print("a value passed into the compression func had bit 7 or bit 6 set. this is not allowed!")
@@ -726,7 +726,7 @@ def convertObjects(layerData):
 	
 	# goofy 
 	# oh god its so goofy
-	# does python seriously not allow lambdas to be multiline/assign shit?
+	# does python seriously not allow lambdas to be multiline/assign (curse)?
 	# i despise that this is actually the best/most readable/easiest way to do this
 	class ObjectFunctions:
 		
@@ -846,7 +846,7 @@ def convertObjects(layerData):
 		
 			# this code makes me want to cry 
 			
-			# i was going to pass "dont" in as a creation code, but that fucked to many things up. so now, im going to see if 
+			# i was going to pass "dont" in as a creation code, but that (curse)ed to many things up. so now, im going to see if 
 			# this is being called from exec via the stack frames. omfg 
 			
 		
@@ -2435,7 +2435,7 @@ def convertAllRooms():
 	f.write("//Did you know every time you sigh, a little bit of happiness escapes?\n")
 
 	
-	# this is fucking dumb, i should be recording the CHANGES between the normal and hard mode, this turns all the effort i put into compression to shit
+	# this is (curse)ing dumb, i should be recording the CHANGES between the normal and hard mode, this turns all the effort i put into compression to (curse)
 	isHardModePass = False
 	
 	print("starting normal mode conversion")

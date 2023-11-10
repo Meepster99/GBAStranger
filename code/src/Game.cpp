@@ -230,7 +230,7 @@ void Game::findNextRoom() {
 			
 			if(beeReset) {
 				roomManager.changeFloor(entityManager.player->locustCount);
-				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this shit
+				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this (curse)
 				// but does this update the save file?
 			}
 		}
@@ -385,7 +385,7 @@ void Game::loadTiles() {
 	BN_ASSERT(tileRefOpt.has_value(), "wtf");
 	bn::span<bn::tile> tileRef = tileRefOpt.value();
 	
-	// copying to vram(directly) will cause issues when like,,,, going bullshitery relating to 
+	// copying to vram(directly) will cause issues when like,,,, going bull(curse)ery relating to 
 	// swapping via debug keys, but thats fine, its debug
 	
 	for(int i=0; i<collisionTileCount; i++) {
@@ -462,7 +462,7 @@ void Game::loadLevel(bool debug) {
 	//BN_ASSERT(detailsTileCount < 128 * 4, "detailsTileCount, wtf = ", detailsTileCount);
 	
 	// i could maybe avoid realloc each time,, but im not 100% sure 
-	// a tile being 4 subtiles always fucks my math up
+	// a tile being 4 subtiles always (curse)s my math up
 	// also, im no longer going to use a bitwise, im just going to add the number of collision tiles 
 	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
 	
@@ -485,7 +485,7 @@ void Game::loadLevel(bool debug) {
 	
 	// this call is here to update the ref manager, and properly free the memory
 	// it ispossible to maybe avoid this by calling update in bn_bg_blocks_manager directly
-	//doButanoUpdate(); // these excess frame updates will just slow shit down
+	//doButanoUpdate(); // these excess frame updates will just slow (curse) down
 	
 	// i could(and maybe should) realloc this every time 
 	// but im wasting bg tiles on, stuff that i dont even know abt?
@@ -501,7 +501,7 @@ void Game::loadLevel(bool debug) {
 		
 		
 	}
-	//doButanoUpdate(); // these excess frame updates will just slow shit down
+	//doButanoUpdate(); // these excess frame updates will just slow (curse) down
 	
 	/*
 	
@@ -525,7 +525,7 @@ void Game::loadLevel(bool debug) {
 			collisionMap[x][y] = uncompressedCollision[x + 14 * y];
 			detailsMap[x][y] = uncompressedDetails[x + 14 * y];
 			
-			// when changing the color palettes, some weird shit happened where, areas 
+			// when changing the color palettes, some weird (curse) happened where, areas 
 			// would be transparent when they shouldnt be? this hopefully fixes that
 		
 			if(collisionMap[x][y] == 0) {
@@ -601,7 +601,7 @@ void Game::changePalette(int offset) {
 	
 	// this is a horrid way of doing it, i should be able to just like,,, access the actual palette table???
 	
-	// why the fuck didnt i have a getpalete function in the game class. im going to have to redo so much bs
+	// why the (curse) didnt i have a getpalete function in the game class. im going to have to redo so much bs
 	
 	
 	const int paletteListSize = (int)(sizeof(paletteList) / sizeof(paletteList[0]));
@@ -633,13 +633,13 @@ void Game::changePalette(int offset) {
 	*col4 = pal->colorArray[4].data();
 	
 	
-	// this is a problem, fuck it ima just have palette not cause a save.
+	// this is a problem, (curse) it ima just have palette not cause a save.
 	//save();
 		
 
 	// oh boy, prepare for fun 
 	// as far as i know, butano doesnt give me direct memory access, nor does it give me direct palette access.
-	// this means that we are about to have a fun time with direct memory shit 
+	// this means that we are about to have a fun time with direct memory (curse) 
 	// reminds me of the original gb 
 	// going to have to probs go back and fix some of the random areas where i manually am setting a palette 
 	// probs might actually make those funcs private
@@ -647,7 +647,7 @@ void Game::changePalette(int offset) {
 	// ok, so,, issue 
 	// from menu text changing color 
 	//,, yea
-	// maybe ill just update the effects thing and pray that like, actually no i know that butano will fuck me on this 
+	// maybe ill just update the effects thing and pray that like, actually no i know that butano will (curse) me on this 
 	// ugh 
 	// it seems like,,, this entire journey was pointless 
 	// esp since i got the stupid thing in palete.h working(WHY DOES A STACK ALLOCED ARRAY NOT WORK??)
@@ -683,7 +683,7 @@ void Game::fadePalette(const int index) {
 	// this currently will only fade from black to white, as for white to blank, idk 
 	// i did the intro cutscenes fade much differently, doing the fade for cif is a massive pain
 	// im also going to assume a limit on the number of palettes but,, gods ugh.
-	// fuck it, we alloc a whole kb of memory.
+	// (curse) it, we alloc a whole kb of memory.
 	// im going to basically have to do that inthe heap
 	// is new auto allocated in the heap? or do i have to do some weird staticdata bs
 	
@@ -697,11 +697,11 @@ void Game::fadePalette(const int index) {
 	// i should try my best to not use my own memcpy funcs
 	// actually,,,, couldnt i just not be stupid and have a static var in the palete class. 
 	// omfg 
-	// but then i have to update each palette of like everything, every fucking frame. 
+	// but then i have to update each palette of like everything, every (curse)ing frame. 
 	
 	//BN_ASSERT(isVblank, "palette fading should only happen in vblank, or at least i think");
 	
-	// THIS IS NEVER PROPERLY FREED DUMBASS
+	// THIS IS NEVER PROPERLY FREED (curse)
 	static unsigned short* localPaletteTable = NULL;
 	
 	if(localPaletteTable == NULL) {
@@ -965,13 +965,13 @@ void Game::run() {
 			// pokemon style reset 
 			// changing this to have multiple options
 			if(bn::keypad::a_held() && bn::keypad::b_held() && (bn::keypad::start_held() || bn::keypad::start_pressed())) {
-				//THIS IS SHIT, make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
+				//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
 				//bn::core::reset();
 				BN_LOG("game reset called");
 				break;
 			}
 			if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::select_held()) {
-				//THIS IS SHIT, make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
+				//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
 				//bn::core::reset();
 				BN_LOG("save reset called");
 				entityManager.player->locustCount = 0;
@@ -1053,7 +1053,7 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.hasSword;
 	rotateHash(1);
 	
-	// i should hash eggcount here, but im worried abt fucking ppls saves now
+	// i should hash eggcount here, but im worried abt (curse)ing ppls saves now
 	// nvm, better than than corrruption 
 	
 	hash ^= saveData.eggCount;
