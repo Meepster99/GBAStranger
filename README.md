@@ -9,7 +9,7 @@ clone the repo, and do `git submodule update --init --recursive`
 
 run convertAllAssets.py, located in the misc folder
 
-make the makefile in code/ preferably with -j8 or -j16
+make the makefile in code/ preferably with -j8 or -j16 and LOG=1 or PROFILE=1
 
 
 ## Instructions to build rust code.
