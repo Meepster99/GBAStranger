@@ -1022,13 +1022,10 @@ void CutsceneManager::createPlayerBrandRoom() {
 		(void)obj;
 		
 		effectsManager->doDialogue(""
-		"i was going to try writing something meaningful here, but im a bit too tired to do so. "
-		"i really should of ate today, or slept, or took care of myself in any form, "
-		"but the moment i stop working on this project, the thoughts just come flooding back. "
-		"and so i dont stop working.\n"
-		
-		"i have to wonder, where in my life did i go wrong. I can do all this, program whatever i want, but i cant take basic care of myself.\n"
-		"but, regardless of all that. thanks for playing this. i put a lot of effort into it. ik its just an objectively worse version of the actual game, but still, thank you\n"
+		"now that i am worried about people from some job seeing this, i have to filter myself.\n"
+		"not really a big fan of that, but its understandable.\n"
+		"of course, the previous commits are still there,,, so, yea. but im tired\n"
+		"so regardless of all that, thanks for playing. it means the world\n"
 		"With love,`Inana <3\n"
 		"\0");
 
