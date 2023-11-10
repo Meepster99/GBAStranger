@@ -14,6 +14,8 @@ jobs:
         with:
           style: file
           files-changed-only: false
+          ignore: "!./butano"
+          
 
       - name: Fail fast?!
         #if: steps.linter.outputs.checks-failed > 0
