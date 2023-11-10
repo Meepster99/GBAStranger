@@ -1,0 +1,23 @@
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint numpy Pillow colorama pydub requests pywin32 pytube
+    - name: Analysing the code with pylint
+      run: |
+        pylint --disable=C0103 --disable=W0311 --disable=C0303 --disable=C0301 --disable=C0116 --disable=E0213 --disable=W0107 --disable=C0209 --disable=E1101 --disable=W0613 $(git ls-files '*.py')
