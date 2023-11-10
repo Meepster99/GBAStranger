@@ -146,9 +146,13 @@ public:
 	int tempCounter2 = 0; // now we are excessive
 	
 	Effect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency_ = 1) : 
-	sprite(bn::sprite_tiles_items::dw_spr_gray_w_d), createFunc(create_), animateFunc(animate_), animationFrequency(animationFrequency_)
-	{ 
-		sprite.setVisible(false);
+	sprite(bn::sprite_tiles_items::dw_default_sprite_tiles_transparent), createFunc(create_), animateFunc(animate_), animationFrequency(animationFrequency_)
+	{
+		// sometimes, effects create NEW effects during vblank.
+		// this can cause extremely (messed up) (things)
+		// default_sprite_transparent
+		// was created to stop all the random grays from appearing. altho they will still technically be there
+		sprite.setVisible(false);	
 	}
 	
 	bool firstRun = true;

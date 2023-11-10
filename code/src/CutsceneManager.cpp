@@ -1106,8 +1106,11 @@ void CutsceneManager::createPlayerBrandRoom() {
 			}
 		}
 		
-		globalGame->playSound(&bn::sound_items::snd_ex_heartbeat_b);
-		globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
+		//globalGame->playSound(&bn::sound_items::snd_ex_heartbeat_b);
+		//globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
+		
+		bn::sound_items::snd_ex_heartbeat_b.play();
+		bn::sound_items::snd_ex_heartbeat.play();
 		
 		effectsManager->playerBrandRoomBackground();
 		

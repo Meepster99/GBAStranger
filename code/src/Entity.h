@@ -28,7 +28,8 @@ public:
 
 	Sprite(const bn::sprite_tiles_item& startTilesItem) : 
 		spritePointer(
-			bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
+			//bn::sprite_ptr::create(bn::fixed(0), bn::fixed(0), 
+			bn::sprite_ptr::create(bn::fixed(-120), bn::fixed(-80), 
 			bn::sprite_shape_size(16, 16),
 			startTilesItem.create_tiles(),
 			spritePalette->getSpritePalette().create_palette())

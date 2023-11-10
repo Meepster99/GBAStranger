@@ -1006,7 +1006,6 @@ void EntityManager::updateMap() {
 					continue;
 				default: [[unlikely]]
 					// remove all enemies, keep obstacles
-					//for(int i=0; i<entityMap[x][y].size(); i++) {
 					for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ) {
 						
 						temp = *it;

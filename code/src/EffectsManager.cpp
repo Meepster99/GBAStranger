@@ -3380,77 +3380,92 @@ void EffectsManager::entityFall(Entity* entity) {
 
 void EffectsManager::playerBrandRoomBackground() {
 	
-	const bn::sprite_palette_ptr tempPalettes[3] = {
-	game->pal->getWhiteSpritePalette().create_palette(),
-	game->pal->getDarkGraySpritePalette().create_palette(),
-	game->pal->getLightGraySpritePalette().create_palette()};
+	auto createFunc = [](Effect* obj) mutable -> void {
+
+		int randIndex = randomGenerator.get_int(0, 4);
+
+		if(randIndex == 0) {
+			obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_32_32);
+		} else if(randIndex == 1) {
+			obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_64_32);
+		} else if(randIndex == 2) {
+			obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_32_64);
+		} else {
+			obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_64);
+		}
 	
-	for(int unused=0; unused<16; unused++) {
+		const bn::sprite_palette_ptr tempPalettes[3] = {
+		globalGame->pal->getWhiteSpritePalette().create_palette(),
+		globalGame->pal->getDarkGraySpritePalette().create_palette(),
+		globalGame->pal->getLightGraySpritePalette().create_palette()};
+	
+		obj->sprite.spritePointer.set_palette(tempPalettes[randomGenerator.get_int(0, 3)]);
+
+		obj->sprite.spritePointer.set_bg_priority(3);
+	
+		obj->tempCounter = randomGenerator.get_int(1, 8);
+		obj->tempCounter2 = randomGenerator.get_int(1, 8);
+	
+		obj->tempCounter = randomGenerator.get_int(0, 2) == 0 ? obj->tempCounter : -obj->tempCounter;
+		obj->tempCounter2 = randomGenerator.get_int(0, 2) ==0 ? obj->tempCounter2 : -obj->tempCounter2;
 		
-		auto createFunc = [tempPalettes](Effect* obj) mutable -> void {
 	
-			int randIndex = randomGenerator.get_int(0, 4);
-	
-			if(randIndex == 0) {
-				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_32_32);
-			} else if(randIndex == 1) {
-				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_64_32);
-			} else if(randIndex == 2) {
-				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_32_64);
-			} else {
-				obj->sprite = Sprite(bn::sprite_items::dw_default_sprite_64);
-			}
+		obj->x = randomGenerator.get_int(-32, 32);
+		obj->y = randomGenerator.get_int(-32, 32);
 		
-			obj->sprite.spritePointer.set_palette(tempPalettes[randomGenerator.get_int(0, 3)]);
-	
-			//bn::fixed horizontalScale = 0.1 + randomGenerator.get_fixed(1.9);
-			//bn::fixed verticalScale = 0.1 + randomGenerator.get_fixed(1.9);
-	
-			// smaller the overall size of the sprite, the lower z order
-			//int res = (((horizontalScale * 64) * (verticalScale * 64)).integer()) / ((2 * 64 * 2 * 64) / 8);
-			//obj->sprite.spritePointer.set_z_order(res);
+		obj->sprite.spritePointer.set_position(obj->x, obj->y);
+	};
+
+	auto tickFunc = [](Effect* obj) mutable -> bool {
 			
-			// this causes crashes when talking during the movement of the bg??
-			//obj->sprite.spritePointer.set_z_order(randIndex);
-	
-			//obj->sprite.spritePointer.set_horizontal_scale(horizontalScale);
-			//obj->sprite.spritePointer.set_vertical_scale(verticalScale);
-	
-			obj->sprite.spritePointer.set_bg_priority(3);
+		obj->x += obj->tempCounter;
+		obj->y += obj->tempCounter2;
+		obj->sprite.spritePointer.set_position(obj->x, obj->y);
 		
-			obj->tempCounter = randomGenerator.get_int(1, 8);
-			obj->tempCounter2 = randomGenerator.get_int(1, 8);
+		const int cutOff = 32;
+		if(obj->x > 240/2 + cutOff || obj->y > 160/2 + cutOff ||
+		obj->x < -(240/2+cutOff) || obj->y < -(160/2+cutOff)) {
+			return true;
+		}
 		
-			obj->tempCounter = randomGenerator.get_int(0, 2) == 0 ? obj->tempCounter : -obj->tempCounter;
-			obj->tempCounter2 = randomGenerator.get_int(0, 2) ==0 ? obj->tempCounter2 : -obj->tempCounter2;
-			
+		return false;
+	};
+	
+	// creating all rects on the same frame was causing not frame drops, but vblank drops 
+	// which fucked up the audio. this will fix it 
+	
+	auto generatorCreateFunc = [](Effect* obj) mutable -> void {
 		
-			obj->x = randomGenerator.get_int(-32, 32);
-			obj->y = randomGenerator.get_int(-32, 32);
-			
-			obj->sprite.spritePointer.set_position(obj->x, obj->y);
-		};
+		obj->x = -32;
+		obj->y = -32;
 		
-		auto tickFunc = [](Effect* obj) mutable -> bool {
-			
-			obj->x += obj->tempCounter;
-			obj->y += obj->tempCounter2;
-			obj->sprite.spritePointer.set_position(obj->x, obj->y);
-			
-			const int cutOff = 32;
-			if(obj->x > 240/2 + cutOff || obj->y > 160/2 + cutOff ||
-			obj->x < -(240/2+cutOff) || obj->y < -(160/2+cutOff)) {
-				return true;
-			}
-			
-			return false;
-		};
+		obj->sprite.spritePointer.set_position(obj->x, obj->y);
+	};
+	
+	
+	auto generatorTickFunc = [this, createFunc, tickFunc](Effect* obj) mutable -> bool {
+		(void)obj;
+		
+		static int effectCount = 0;
+		
+		if(effectCount >= 16) {
+			effectCount = 0;
+			return true;
+		}
 		
 		createEffect(createFunc, tickFunc);
+		//Effect* e = new Effect(createFunc, tickFunc);
+		//effectList.insert(effectList.begin(), e);
 		
-	}
+		
+		effectCount++;
+		
+		return false;	
+	};
 	
 	
+	createEffect(generatorCreateFunc, generatorTickFunc);
+
 }
 
 Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
