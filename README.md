@@ -1,3 +1,5 @@
+[![cpp-linter](https://github.com/Meepster99/GBAStranger/actions/workflows/cpp-linter.yml/badge.svg?kill_cache=1)](https://github.com/Meepster99/GBAStranger/actions/workflows/cpp-linter.yml)
+[![Pylint](https://github.com/Meepster99/GBAStranger/actions/workflows/pylint.yml/badge.svg?kill_cache=1)](https://github.com/Meepster99/GBAStranger/actions/workflows/pylint.yml)
 
 ## Instructions to build C++ code.
 
