@@ -5,6 +5,8 @@
 
 #include "bn_hw_irq.h"
 
+// bash -c " git ls-files *.py *.cpp *.h | xargs cat | sed '/^\s*$/d' | wc -l"
+
 
 //#include "ugba/ugba.h"
 

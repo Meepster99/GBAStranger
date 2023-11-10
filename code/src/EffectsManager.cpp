@@ -1563,7 +1563,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	
 	effectsLayer.setBigTile(0, 6, 19);
 	effectsLayer.setBigTile(13, 6, 20);
-	effectsLayer.setBigTile(0, 8, 21);
+	effectsLayer.setBigTile(0, 8, 21);	
 	effectsLayer.setBigTile(13, 8, 22);
 	effectsLayer.setBigTile(0, 7, 25);
 	effectsLayer.setBigTile(13, 7, 26);
