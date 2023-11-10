@@ -943,6 +943,19 @@ public:
 	
 };
 
+class OtherPlayer : public Obstacle {
+public:
 
+	OtherPlayer(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_gray_w_d);
+	
+	}
+
+	OtherPlayer* clone() const override { return new OtherPlayer(*this); }
+
+	EntityType entityType() const override { return EntityType::OtherPlayer; }
+	
+};
 
 

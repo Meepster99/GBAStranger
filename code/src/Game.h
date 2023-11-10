@@ -8,6 +8,7 @@
 #include "EntityManager.h"
 #include "EffectsManager.h"
 #include "CutsceneManager.h"
+//#include "LinkManager.h"
 
 extern Game* globalGame;
 extern bn::fixed sinTable[360];
@@ -116,6 +117,8 @@ public:
 	
 	CutsceneManager cutsceneManager;
 	
+	//LinkManager linkManager;
+	
 	bn::timer miscTimer;
 	
 	GameState state = GameState::Loading;
@@ -131,6 +134,7 @@ public:
 	effectsManager(this),
 	tileManager(this),
 	cutsceneManager(this)
+	//linkManager(this)
 	{
 		
 		// goofy
@@ -169,6 +173,12 @@ public:
 	
 		cutsceneManager.effectsManager = &effectsManager;
 		cutsceneManager.tileManager = &tileManager;
+		
+		
+		//linkManager.entityManager = &entityManager;
+		//linkManager.effectsManager = &effectsManager;
+		//linkManager.tileManager = &tileManager;		
+		
 		
 	}
 

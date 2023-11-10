@@ -153,7 +153,10 @@ void CutsceneManager::introCutscene() {
 	}
 
 	
-	game->effectsManager.doDialogue("[You aquired a strange rod]\n[Simply holding it makes you feel uneasy]\n[You begin to imagine your whole life existing on a 2001 handheld]\n[Something is completely (curse)ed]\0", true);
+	game->effectsManager.doDialogue("[You aquired a strange rod]\n"
+	"[Simply holding it makes you feel uneasy]\n"
+	"[You begin to imagine your whole life existing on a 2001 handheld]\n"
+	"[Something is completely messed up, but in a PG way]\0", true);
 	game->playSound(&bn::sound_items::void_stranger_ost_56);
 	
 	// its insane that i never overloaded the set_tiles func

@@ -924,7 +924,6 @@ void Game::run() {
 	//cutsceneManager.cifDream();
 	
 	//bn::core::update(); 
-
 	
 	//cutsceneManager.testCutscene(); 
 	
@@ -1015,7 +1014,9 @@ void Game::run() {
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
 			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
-			BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
+			if(tickCount > FRAMETICKS) {
+				BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
+			}
 		}
 		
 		doButanoUpdate();

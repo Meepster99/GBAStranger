@@ -48,7 +48,7 @@ unsigned RoomManager::currentRoomHash() {
 				temp += 5;
 		}
 	}
-	BN_LOG("roomhash returning ", hashString(temp));
+	//BN_LOG("roomhash returning ", hashString(temp));
 	
 	
 	return hashString(temp);

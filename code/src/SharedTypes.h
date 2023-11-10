@@ -45,6 +45,9 @@
 
 #include "bn_sprites_mosaic.h"
 
+#include "bn_link.h"
+#include "bn_link_state.h"
+#include "bn_link_player.h"
 
 // danger zone, again 
 #include "bn_bg_blocks_manager.h"
@@ -221,6 +224,8 @@ enum class EntityType {
 	
 	// i am not sure if this is the best way to do this, but I am going with it 
 	EmptyChest,
+	
+	OtherPlayer
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {
@@ -249,6 +254,8 @@ static const char *EntityTypeToString[] ={
 	"LevStatue",
 	"CifStatue",
 	"Interactable",
+	"EmptyChest",
+	"OtherPlayer"
 };
 
 	stream << EntityTypeToString[static_cast<int>(e)];
