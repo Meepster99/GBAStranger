@@ -1,3 +1,6 @@
+
+[![cpp-linter](https://github.com/cpp-linter/cpp-linter-action/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/cpp-linter/cpp-linter-action/actions/workflows/cpp-linter.yml)
+
 ## Instructions to build rust code.
 
 Use `cargo build -vv` to compile the rust code. This will take a while the first time since it converts all the
