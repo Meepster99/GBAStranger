@@ -140,6 +140,8 @@ public:
 	const bn::sprite_tiles_item* tiles = NULL;
 	
 	// having one of these is ok, but if it gets excessive i should switch back over to passing them inside the [] of the lambdas
+	// i still worry heavily about these variables. are they a good idea over, just passing things into lambdas? i am not sure.
+	// i pray this doesnt hurt readability to much
 	int tempCounter = 0;
 	int tempCounter2 = 0; // now we are excessive
 	
@@ -396,10 +398,12 @@ public:
 	void fadeBrand();
 	void glassShineSpark(const Pos& p);
 	void switchGlow(const Pos& p);
+	int exitGlowCount = 0;
 	void exitGlow(const Pos& p);
 	void copyGlow(const Pos& p);
 	void shadowCreate(const Pos& p);
 	void shadowDeath(Shadow* shadow);
+	void smokeCloud(Pos p, const Direction dir);
 	
 };
 

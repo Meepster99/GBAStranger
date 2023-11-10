@@ -1289,6 +1289,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	// eventually, cleanup leftover effects here
 
 	questionMarkCount = 0;
+	exitGlowCount = 0;
 	
 	for(int i=0; i<effectList.size(); i++) {
 		if(effectList[i] != NULL) {
@@ -4087,9 +4088,173 @@ void EffectsManager::switchGlow(const Pos& p) {
 
 void EffectsManager::exitGlow(const Pos& p) {
 	
-	// 	todo, THIS. WHAT SPRITE(S) EVEN IS IT?
+	// todo, THIS. WHAT SPRITE(S) EVEN IS IT?
 	// spr_exit_target_b2 spr_exit_target ???
+	// very weird behaviour. may deserve looking at some gml code 
+	// appears at start of level(i think?) if covered.
+	// appears if afk for a while, and they stays until player input.
+	// has a very fancy,, dissapear anim? not sure if ill put that it
+	// use floor 65 (rm_0066) for testing	
 	
+	// spawns on level start, and when inactive for,,, 10secs?
+	
+	// dw_spr_exit_target_b seems to be one of the sprites,,,, whats the other?
+	// dw_spr_exit_target_arrow,, seems to be like,, one frame of it?? forthe circle // INDEX 5
+	// as for the dissapear animation,,, idrk 
+	// this func took me a pathetic amount of time. i probably didnt eat enough today.
+	
+	if(exitGlowCount != 0) {
+		return;
+	}
+	
+	int x = p.x * 16;
+	int y = p.y * 16;
+	
+	int initFrame = playerIdleFrame;
+	
+	// is passing this vs passing a ref to the exitGlowCount better?
+	auto getTickFunc = [this, x, y, initFrame](const bool flip, bool isDot) -> auto { // the axis in this case, is what diag axis tomove along
+		
+		int offsetVal = 8;
+		
+		// i can safely say that the stress is getting to me. what is this
+		
+		int xStart = x + (flip ? -offsetVal : offsetVal);
+		int tempVal = (flip ? -offsetVal : offsetVal);
+		int yStart = y + (isDot ? -tempVal : tempVal);
+		
+		int paletteIndex = 0; // should captures like these be replacements for the tempcounter?
+		int shouldDisappear = 0;
+		int startOffset = 80+16; // like,, i was going to try fitting this as a temp counter, but it being here honestly is just better
+		return [this, xStart, yStart, flip, isDot, paletteIndex, initFrame, shouldDisappear, startOffset](Effect* obj) mutable -> bool {
+			
+			// THIS SHOULD TOGGLE WHEN DOTICK IS CALLED. TODO, INTEGRATE THAT
+			
+			if(frame % 12 == 0) {
+				paletteIndex++;
+				switch(paletteIndex & 0b11) { // i have had,,,, weird interactions when putting paletes inside of arrays. additionally, this will let the palette change even when the user swaps it
+					default:
+					case 0:
+						obj->sprite.spritePointer.set_palette(globalGame->pal->getWhiteSpritePalette());
+						break;
+					case 1:
+						obj->sprite.spritePointer.set_palette(globalGame->pal->getLightGraySpritePalette());
+						break;
+					case 2:
+						obj->sprite.spritePointer.set_palette(globalGame->pal->getDarkGraySpritePalette());
+						break;
+					case 3:
+						obj->sprite.spritePointer.set_palette(globalGame->pal->getLightGraySpritePalette());
+						break;
+				}
+			}
+			
+			if(playerIdleFrame != initFrame && !shouldDisappear) {
+				// todo, possible disentagrate anim
+				shouldDisappear = 1;
+			}
+			
+			if(shouldDisappear) {
+				
+				if(frame % 2 != 0) {
+					return false;
+				}
+				
+				shouldDisappear++;
+				
+				if(shouldDisappear >= 4) {
+					exitGlowCount--;
+					return true;
+				}
+				
+				obj->graphicsIndex++;
+				
+				if(obj->graphicsIndex == obj->tiles->graphics_count()) {
+					exitGlowCount--;
+					return true;
+				}
+			
+				obj->sprite.spritePointer.set_tiles(
+					*obj->tiles,
+					obj->graphicsIndex
+				);
+				
+			}
+		
+			if(frame % 8 == 0) {
+				obj->tempCounter2 += obj->tempCounter ? 1 : -1;
+			
+				if(ABS(obj->tempCounter2) >= 3) {
+					obj->tempCounter = !obj->tempCounter;
+				}
+			}
+			
+			int tempX = xStart + (true == obj->tempCounter);
+			int tempY = yStart + (flip == obj->tempCounter);
+			
+			if(startOffset) {
+				tempX += (flip) ? -startOffset : startOffset;
+				tempY += (flip == isDot) ? startOffset : -startOffset;
+				startOffset-=4;
+			}
+			
+			tempX = CLAMP(tempX, -32, 240 + 32);
+			tempY = CLAMP(tempY, -32, 160 + 32);
+			
+			obj->sprite.updateRawPosition(tempX, tempY);
+		
+			return false;
+		};
+	};
+		
+	auto generateEffect = [this, getTickFunc](const bool flip, const bn::sprite_tiles_item* tiles) -> void {
+		exitGlowCount++;
+		
+		auto dotCreateFunc = [flip, tiles](Effect* obj) mutable -> void {
+			
+			//obj->tiles = &bn::sprite_tiles_items::dw_spr_exit_target_arrow;
+		
+			obj->tiles = tiles;
+		
+			//obj->x = x + (flip ? -12 : 12);
+			//obj->y = y + (flip ? 12 : -12);
+			
+			obj->x = -32;
+			obj->y = -32;
+				
+			obj->sprite.updateRawPosition(obj->x + !flip, obj->y + flip);
+			
+			obj->sprite.spritePointer.set_z_order(-2); // -2 SHOULD be low enough
+			
+			obj->sprite.spritePointer.set_vertical_flip(!flip);
+			
+			if(tiles == &bn::sprite_tiles_items::dw_spr_exit_target_arrow) {
+				obj->sprite.spritePointer.set_horizontal_flip(flip);
+				obj->graphicsIndex = 5;
+			} else {
+				obj->sprite.spritePointer.set_horizontal_flip(!flip);
+				obj->graphicsIndex = 0;
+			}
+		
+			obj->sprite.spritePointer.set_palette(globalGame->pal->getWhiteSpritePalette());
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				obj->graphicsIndex
+			);
+			
+			obj->tempCounter = !flip; // being used as a bool(moreso, a direction) for what direction to move in 
+			obj->tempCounter2 = 0; // offset to use
+		};
+		
+		createEffect(dotCreateFunc, getTickFunc(flip, tiles == &bn::sprite_tiles_items::dw_spr_exit_target_arrow));
+		
+	};
+	
+	generateEffect(false, &bn::sprite_tiles_items::dw_spr_exit_target_b);
+	generateEffect(true, &bn::sprite_tiles_items::dw_spr_exit_target_b);
+	
+	generateEffect(false, &bn::sprite_tiles_items::dw_spr_exit_target_arrow);
+	generateEffect(true, &bn::sprite_tiles_items::dw_spr_exit_target_arrow);
 	
 }
 
@@ -4219,4 +4384,60 @@ void EffectsManager::shadowDeath(Shadow* shadow) {
 	entityFall(shadow);
 	
 }
+
+void EffectsManager::smokeCloud(Pos p, const Direction dir) {
+	
+
+	if(!p.moveInvert(dir, true, true)) {
+		return;
+	}
+
+	auto createFunc = [p, dir](Effect* obj) mutable -> void {
+			
+		obj->tiles = (dir == Direction::Left || dir == Direction::Right) ? &bn::sprite_tiles_items::dw_spr_smokecloud_h : &bn::sprite_tiles_items::dw_spr_smokecloud_v;
+	
+		obj->tempCounter = 1;
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+		if(dir == Direction::Right) {
+			obj->sprite.spritePointer.set_horizontal_flip(true);
+		} else if(dir == Direction::Down) {
+			obj->sprite.spritePointer.set_vertical_flip(true);
+		}
+		
+		//obj->sprite.spritePointer.set_z_order(-2); // -2 SHOULD be low enough
+
+		obj->graphicsIndex = -1;
+		obj->animateFunc(obj);
+	
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+	
+		if(frame % 4 == 0 || obj->tempCounter == 1) { 
+			obj->graphicsIndex++;
+		}
+		obj->tempCounter = 0;
+
+		if(obj->graphicsIndex == 8) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->graphicsIndex 
+		);		
+		
+		return false;
+	};
+
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);
+	
+}
+
+
 

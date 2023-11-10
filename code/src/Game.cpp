@@ -929,6 +929,8 @@ void Game::run() {
 	//cutsceneManager.testCutscene(); 
 	
 	//while(true) { doButanoUpdate(); }
+	
+	//effectsManager.exitGlow(Pos(5, 4));
 		
 	BN_LOG("starting main gameloop");
 	while(true) {

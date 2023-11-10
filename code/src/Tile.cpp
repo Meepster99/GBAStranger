@@ -40,7 +40,7 @@ void Glass::stepOff() {
 
 void Glass::isSteppedOnAnimation() {
 	
-	if((bruhRand() & 0x7F) == 0) {
+	if((bruhRand() & 0xFF) == 0) {
 		effectsManager->glassShineSpark(tilePos);
 	}
 	
@@ -244,7 +244,9 @@ void WordTile::draw() {
 }
 
 void Exit::isSteppedOnAnimation() {
-	if((bruhRand() & 0x1FF) == 0) {
+	
+	if(isFirstCall || (frame - playerIdleFrame == 60 * 8)) { // THIS EQUALS SIGN SHOULD ENSURE ONLY ONE THING SPAWNS AT ONCE,, I HOPE?
+		isFirstCall = false;
 		effectsManager->exitGlow(tilePos);
 	}
 }

@@ -199,6 +199,8 @@ public:
 	
 	bool shouldExit() { return Switch::pressedCount == Switch::totalCount; }
 	
+	bool isFirstCall = true;
+	
 	void isSteppedOnAnimation() override;
 	
 };

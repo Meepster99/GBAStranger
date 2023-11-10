@@ -709,6 +709,7 @@ void Boulder::interact() {
 void Obstacle::moveSucceded() {
 	game->playSound(&bn::sound_items::snd_push);
 	game->removeSound(&bn::sound_items::snd_push_small);
+	effectsManager->smokeCloud(p, currentDir);
 }
 
 void Obstacle::moveFailed() {
