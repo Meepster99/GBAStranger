@@ -636,7 +636,8 @@ void TileManager::doVBlank() { profileFunction();
 			
 			if(floorMap[x][y]->isSteppedOn) {
 				floorMap[x][y]->isSteppedOnAnimation();
-			} else if(floorMap[x][y]->tileType() == TileType::Exit) {
+			} 
+			if(floorMap[x][y]->tileType() == TileType::Exit) { // not ideal code.
 				static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
 			}
 		}

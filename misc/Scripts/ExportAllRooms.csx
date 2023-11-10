@@ -23,43 +23,43 @@ public class CustomStreamWriter
         _streamWriter = new StreamWriter(stream);
     }
 	
-    public void WriteNull(string shoot)
+    public void WriteNull(string s)
     {
 		_streamWriter.WriteLine(prevLine);
-		prevLine = "\""+shoot+"\"" + ": null,";
+		prevLine = "\""+s+"\"" + ": null,";
 	}
 	
-	  public void WriteString(string shoot, string me)
+	  public void WriteString(string s, string val)
     {
 		_streamWriter.WriteLine(prevLine);
-		prevLine = "\""+shoot+"\"" + ":" + "\"" + me + "\",";
+		prevLine = "\""+s+"\"" + ":" + "\"" + val + "\",";
 	}
 	
-		  public void WriteNumber(string shoot, uint me)
+		  public void WriteNumber(string s, uint val)
     {
 		_streamWriter.WriteLine(prevLine);
-		prevLine = "\""+shoot+"\"" + ":" + me + ",";
+		prevLine = "\""+s+"\"" + ":" + val + ",";
 	}
 	
-			  public void WriteNumber(string shoot, int me)
+			  public void WriteNumber(string s, int val)
     {
 		_streamWriter.WriteLine(prevLine);
-		prevLine = "\""+shoot+"\"" + ":" + me + ",";
+		prevLine = "\""+s+"\"" + ":" + val + ",";
 	}
 	
-			  public void WriteNumber(string shoot, float me)
+			  public void WriteNumber(string s, float val)
     {
 		_streamWriter.WriteLine(prevLine);
-		prevLine = "\""+shoot+"\"" + ":" + me + ",";
+		prevLine = "\""+s+"\"" + ":" + val + ",";
 	}
 	
-		  public void WriteBoolean(string shoot, bool me)
+		  public void WriteBoolean(string s, bool val)
     {
 		_streamWriter.WriteLine(prevLine);
-		if(me) {
-			prevLine = "\""+shoot+"\"" + ": true,";	
+		if(val) {
+			prevLine = "\""+s+"\"" + ": true,";	
 		} else {
-			prevLine = "\""+shoot+"\"" + ": false,";	
+			prevLine = "\""+s+"\"" + ": false,";	
 		}
 		
 	}
@@ -69,10 +69,10 @@ public class CustomStreamWriter
 			prevLine = "   ";
 			_streamWriter.WriteLine("[");
 		}
-	public void WriteStartArray(string shoot) {
+	public void WriteStartArray(string s) {
 		_streamWriter.WriteLine(prevLine);
 		prevLine = "   ";
-		_streamWriter.WriteLine("\""+shoot+"\"" + ": [");
+		_streamWriter.WriteLine("\""+s+"\"" + ": [");
 	}
 	
 		public void WriteEndArray() {
@@ -86,11 +86,11 @@ public class CustomStreamWriter
 		_streamWriter.WriteLine("{");
 	}
 	
-	public void WriteStartObject(string shoot) {
+	public void WriteStartObject(string s) {
 		
 		_streamWriter.WriteLine(prevLine);
 		prevLine = "   ";
-		_streamWriter.WriteLine("\""+shoot+"\"" + ": {");
+		_streamWriter.WriteLine("\""+s+"\"" + ": {");
 	}
 	
 		

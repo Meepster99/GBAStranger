@@ -23,7 +23,7 @@ def install(package):
 
 
 if __name__ == "__main__":
-	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", "zipfile", ("win32api", "pywin32"), "pytube"] ]
+	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", ("win32api", "pywin32"), "pytube"] ]
 
 	try:
 		res = subprocess.check_output(['which', 'ffmpeg'], stderr=subprocess.STDOUT)

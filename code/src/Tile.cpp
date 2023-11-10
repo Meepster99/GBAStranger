@@ -248,6 +248,7 @@ void Exit::isSteppedOnAnimation() {
 	if((isFirstCall || (frame - playerIdleFrame == 60 * 8)) && tilePos != entityManager->player->p) { // THIS EQUALS SIGN SHOULD ENSURE ONLY ONE THING SPAWNS AT ONCE,, I HOPE?
 		effectsManager->exitGlow(tilePos);
 	}
+	isFirstCall = false;
 	
 	
 }
