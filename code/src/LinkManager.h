@@ -10,18 +10,33 @@ class EffectsManager;
 class LinkManager {
 public:
 
-	bn::optional<bn::link_state> linkStateOpt;
-	
 	EntityManager* entityManager;
 	EffectsManager* effectsManager;
 	TileManager* tileManager;
 	Game* game;
+	
+	int ID = -1;
+	int playerCount = -1;
 
 	LinkManager(Game* game_) : game(game_) {}
+	
+	bn::vector<Packet, 256> allData;
+
+	void sendPacket(const Packet packet);
+	
+	bn::optional<Packet> recvPacket();
+
+	void backupState();
 
 	void sendState();
 	
 	void recvState();
+	
+	void init();
+	
+private:
+	
+	static unsigned short recvShort();
 
 };
 

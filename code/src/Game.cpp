@@ -856,6 +856,8 @@ void Game::doVBlank() { profileFunction();
 void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
+		
+	linkManager.init();
 	
 	/* 
 	i swear, i have had multiple confirmed cases where strings arent nulltermed.
@@ -930,7 +932,9 @@ void Game::run() {
 	//while(true) { doButanoUpdate(); }
 	
 	//effectsManager.exitGlow(Pos(5, 4));
-		
+
+	//BN_LOG(BN_CFG_LINK_MAX_MESSAGES);
+	
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
@@ -979,7 +983,9 @@ void Game::run() {
 				break;
 			}
 		}
-			
+		
+		linkManager.recvState();
+		
 		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
 			
 			inputTimer.restart();
@@ -1001,8 +1007,10 @@ void Game::run() {
 				}
 				continue;
 			}
-			
+	
+			linkManager.backupState();
 			entityManager.doMoves();
+			linkManager.sendState();
 		
 			if(entityManager.hasKills()) {
 				resetRoom();

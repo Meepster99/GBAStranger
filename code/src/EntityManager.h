@@ -28,6 +28,8 @@ public:
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
 	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
 	
+	bn::vector<OtherPlayer*, 3> otherPlayerList;
+	
 	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
 
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
@@ -54,7 +56,7 @@ public:
 	void moveEnemies();
 	void moveObstacles();
 	
-	void doMoves();
+	void doMoves(bool headless=false);
 
 	void manageShadows(bn::optional<Direction> playerDir);	
 
@@ -147,6 +149,8 @@ public:
 	bool exitRoom();
 	bool enterRoom();
 	void doVBlank();
+	
+	///void updateOtherPlayer(const bn::link_player& packet);
 		
 private:
 	// make a class OBJECT, have entity and floortile extend it, have this be an array of that.

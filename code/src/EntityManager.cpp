@@ -66,6 +66,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	obstacleList.clear();
 	shadowList.clear();
 	deadList.clear();
+	otherPlayerList.clear();
 	
 	
 	player = NULL;
@@ -226,6 +227,27 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	BN_ASSERT(player != NULL, "finished loading in all sprites, but a player wasnt found");
 	
+	
+	
+	
+	/*
+	Pos tempMultiPos = player->p;
+	//BN_LOG("found ", game->linkManager.playerCount);
+	int playerID = 0;
+	for(int j=0; j<game->linkManager.playerCount-1; j++) {
+		tempMultiPos.move(Direction::Right);
+		
+		if(playerID == game->linkManager.ID) {
+			playerID++;
+		}
+		OtherPlayer* tempOtherPlayer = new OtherPlayer(tempMultiPos, playerID);
+		playerID++;
+		entityList.insert(tempOtherPlayer);
+		otherPlayerList.push_back(tempOtherPlayer);
+	}
+	*/
+	
+	
 	// create starting map.
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
 		
@@ -309,8 +331,8 @@ void EntityManager::updatePalette(Palette* pal) {
 
 void EntityManager::addEntity(Entity* e) {
 	
-	BN_ASSERT(entityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
-	BN_ASSERT(futureEntityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
+	//BN_ASSERT(entityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
+	//BN_ASSERT(futureEntityMap[e->p.x][e->p.y].size() == 0, "tried adding entity to non zero position");
 	//BN_ASSERT(hasFloor(e->p) || hasCollision(e->p), "tried adding entity to position without floor or collision");
 	
 	entityList.insert(e);
@@ -481,7 +503,7 @@ void EntityManager::moveObstacles() {
 	moveEntities(obstacleList.begin(), obstacleList.end());
 }
 
-void EntityManager::doMoves() {
+void EntityManager::doMoves(bool headless) {
 	
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -499,7 +521,7 @@ void EntityManager::doMoves() {
 		player->wingsUse = 0;
 	}
 	
-	if(!playerRes.first) {
+	if(!playerRes.first && !headless) {
 		return;
 	}
 	
@@ -526,7 +548,10 @@ void EntityManager::doMoves() {
 	
 	// do player move.
 	playerStart = player->p;
-	bool playerMoved = moveEntity(player);
+	bool playerMoved = false;
+	if(!headless) {
+		playerMoved = moveEntity(player);
+	}
 	//updateMap(); // now that i dont care abt framedrops, 
 	
 	// telling the difference between if the player failed a move vs is talking to something is gonna be weird
@@ -557,10 +582,12 @@ void EntityManager::doMoves() {
 	// IF WE ARE ONE TILE AWAY FROM EXIT, AND SHADOWS ARE ON BUTTONS, WE DO NOT LEAVE THE LEVE
 	// still tho, calling doFloorSteps will update the shadows, which is needed 
 	
-	player->pushAnimation = player->p == playerStart;
+	if(!headless) {
+		player->pushAnimation = player->p == playerStart;
+	}
 	if(player->p != playerStart) {
 		player->doUpdate(); // previously, the player would update their direction after falling, this fixes that
-	} else {
+	} else if(!headless) {
 		//,, this will play at the same time as a boulder push,,, but im tired ok
 		// we,, we can make ways around this right
 		
@@ -922,6 +949,7 @@ void EntityManager::updateMap() {
 	// do the rest.
 	
 	Shadow* doShadowDeath = NULL;
+	bool hasOtherPlayer = false;
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1006,6 +1034,19 @@ void EntityManager::updateMap() {
 					continue;
 				default: [[unlikely]]
 					// remove all enemies, keep obstacles
+					
+					
+					for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ) {
+						if((*it)->entityType() == EntityType::OtherPlayer) {
+							hasOtherPlayer = true;
+							break;
+						}
+					}
+					
+					if(hasOtherPlayer) {
+						continue;
+					}
+					
 					for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ) {
 						
 						temp = *it;
@@ -1645,6 +1686,8 @@ void EntityManager::sanity() const {
 	
 	
 }
+
+// -----
 
 
 

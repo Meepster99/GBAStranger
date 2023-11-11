@@ -225,7 +225,9 @@ enum class EntityType {
 	// i am not sure if this is the best way to do this, but I am going with it 
 	EmptyChest,
 	
-	OtherPlayer
+	OtherPlayer,
+	
+	LASTENTITYTYPE
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {
@@ -1002,5 +1004,53 @@ constexpr unsigned hashString(const char *str) {
 
     return hash;
 }
+
+
+static_assert(static_cast<int>(EntityType::LASTENTITYTYPE) < 32, "Entitytype enum cant have more than 32 values!");
+
+/*
+
+a,, kill for entities, step for tiles,, i cannot do this in two bytes 
+4 ? maybe
+or i could have seperate like,, structs for packet types?
+
+step, 
+
+
+
+*/
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
+struct Packet {
+	union {
+		struct {
+			// this is repeated data,, but,, 
+			// should all 4 players be in 1 array? sothen other players can,,, push ppl easier?
+			unsigned ID : 2; 
+				
+			// entity? tile? something else stupid?
+			unsigned packetType : 2; 
+			
+			// entitytype or tiletype
+			unsigned packetDataType : 5;
+			
+			unsigned pickUp : 1;
+			unsigned steppedOn : 1; 
+			unsigned kill : 1;
+			
+			unsigned dir : 2;
+			unsigned x : 4;
+			unsigned y : 4;
+		};
+		unsigned data;
+	};
+};
+
+#pragma GCC diagnostic pop
+
+static_assert(sizeof(Packet) <= 4, "InnerPacket must be <= 4 bytes!");
+
 
 

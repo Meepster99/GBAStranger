@@ -42,7 +42,8 @@ ROMCODE     :=  GBST
 # SAVE ME O3
 # https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
 #USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
-USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -fms-extensions -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ -DBN_CFG_LINK_BAUD_RATE=BN_LINK_BAUD_RATE_38400_BPS -DBN_CFG_LINK_MAX_MESSAGES=512
+USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ -DBN_CFG_LINK_BAUD_RATE=BN_LINK_BAUD_RATE_38400_BPS -DBN_CFG_LINK_MAX_MESSAGES=512
 #USERFLAGS   :=  -O3 
 #USERFLAGS   := 
 USERASFLAGS :=  

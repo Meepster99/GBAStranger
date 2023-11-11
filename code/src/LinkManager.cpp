@@ -6,6 +6,7 @@
 #include "EffectsManager.h"
 #include "EntityManager.h"
 
+#include "bn_link_baud_rate.h"
 
 /*
 
@@ -59,43 +60,119 @@ doing this nicely is just not going to be possibe.
 before a move, copy and backup the state
 also oh my god if a player dies like,,, i dont even want to think about that 
 i just thing im not going to do this
+no, this whole implimentation is fucked 
 
+like,,,, ugh i could just send the whole room state, but thats bad 
+i could just send player input, but then i couldnt sync rooms 
+i could do some bs where uppon entering a room it requests the room state???? 
+
+also shit. the data rate is bits. not bytes
+how abt this. 
+ill have it only send player moves. (ill figure out killing entities later)
+and ill s
+
+
+ugh. fuck it, im just going to send ALL BOARD CHANGES.
+and backup the game state before and after,,, yea
+
+gods i just, if i do all of it and it lags like,, ugh
 
 */
 
+// how did i not know about bit fields earler???
 
-void LinkManager::sendState() {
+void LinkManager::sendPacket(const Packet packet) {
+	
+	/*
+	#if BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_9600_BPS
+		const int bps = 9600;
+	#elif BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_38400_BPS    
+		const int bps = 38400;
+	#elif BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_57600_BPS    
+		const int bps = 57600;
+	#elif BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_115200_BPS   
+		const int bps = 115200;
+	#else 
+		const int bps = 9600;
+	#endif
 	
 	
-	bn::link::send(game->roomManager.roomIndex);
+	const int bytesPerFrame = (bps / 60) / 8;
+	
+	static bn::timer sendTimer;
+	*/
+	
+	//bn::link::send(d);
+	
 	
 }
 
-void LinkManager::recvState() {
+static unsigned short LinkManager::recvShort() {
+	
+	static bn::optional<bn::link_state> linkStateOpt;
 	
 	
+	
+	
+}
+
+bn::optional<Packet> LinkManager::recvPacket() {
 	linkStateOpt = bn::link::receive();
 		
 	if(!linkStateOpt.has_value()) {
 		return;
 	}
 	
-	
 	bn::link_state& linkState = linkStateOpt.value();
-		
-	BN_LOG("current id: ", linkState.current_player_id());
-	BN_LOG("playercount: ", linkState.player_count());
 	
+	ID = linkState.current_player_id();
+	playerCount = linkState.player_count();
+
+	const bn::ivector<bn::link_player>& otherData = linkState.other_players();
+	
+	if(otherData.size() == 0) {
+		break;
+	}
+
+	for(const auto& data : otherData) {
+		allData.push_back(data);
+	}
+}
+
+void LinkManager::sendState() {
+
+
+
+	
+}
+
+void LinkManager::recvState() {
+	
+	// this might be v slow
+	// maybe do a static alloc?
+	allData.clear();
+	
+	while(true) {
+		
+		bn::optional<Packet> temp = recvPacket();
+		
+		if(!temp.has_value()) {
+			break;
+		}
+			
+	}
+	
+
+	
+	
+}
+
+void LinkManager::backupState() {
 	
 	
 	
 	
 }
-
-
-
-
-
 
 
 
