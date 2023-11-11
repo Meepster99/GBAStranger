@@ -1023,7 +1023,12 @@ step,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-struct Packet {
+enum class PacketType {
+	Entity,
+	Tile,
+};
+
+/*struct Packet {
 	union {
 		struct {
 			// this is repeated data,, but,, 
@@ -1031,22 +1036,83 @@ struct Packet {
 			unsigned ID : 2; 
 				
 			// entity? tile? something else stupid?
-			unsigned packetType : 2; 
+			PacketType packetType : 2; 
 			
 			// entitytype or tiletype
-			unsigned packetDataType : 5;
+			union  __attribute__ ((__packed__)) { // this MAY waste 3 bits ( i could fit other things in here if needed)
+				EntityType entityType : 5;
+				TileType tileType : 5;
+			};
 			
 			unsigned pickUp : 1;
 			unsigned steppedOn : 1; 
 			unsigned kill : 1;
+			unsigned didMove : 1;
 			
-			unsigned dir : 2;
+			Direction dir : 2;
 			unsigned x : 4;
 			unsigned y : 4;
 		};
+		
+		struct {
+			unsigned short upperData;
+			unsigned short lowerData;
+		};
+		
+		unsigned data;
+	};
+};*/
+
+struct Packet {
+	union {
+		struct {
+	
+			PacketType packetType : 1; 
+			
+			union __attribute__ ((__packed__)) {
+				// entity packet 
+				struct __attribute__ ((__packed__)) {
+					
+					EntityType entityType : 5;
+					
+					unsigned prevX : 4;
+					unsigned prevY : 4;
+					
+					unsigned x : 4;
+					unsigned y : 4;
+					
+					unsigned kill : 1;
+					
+				};
+				
+				// tile packet
+				struct __attribute__ ((__packed__)) {
+					
+					EntityType tileType : 5;
+					
+					//unsigned x : 4;
+					//unsigned y : 4;
+					
+					unsigned steppedOn : 1;
+					unsigned steppedOff : 1;
+					
+					unsigned pickUp : 1;
+					unsigned putDown : 1;
+					
+				};
+			};	
+		};
+	
+		struct {
+			unsigned short upperData;
+			unsigned short lowerData;
+		};
+		
 		unsigned data;
 	};
 };
+
+
 
 #pragma GCC diagnostic pop
 

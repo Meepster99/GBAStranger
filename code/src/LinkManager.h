@@ -7,6 +7,12 @@ class EntityManager;
 class TileManager;
 class EffectsManager;
 
+
+struct ShortReturn {
+	unsigned short data[4];
+};
+
+
 class LinkManager {
 public:
 
@@ -20,23 +26,19 @@ public:
 
 	LinkManager(Game* game_) : game(game_) {}
 	
-	bn::vector<unsigned short, 256> allData[3]; // array for each id.
+	bn::vector<Packet, 256> allPackets[4]; // array for each id.
 
 	void sendPacket(const Packet packet);
 	
-	bn::optional<Packet> recvPacket();
-
-	void backupState();
+	bool recvPacket();
 
 	void sendState();
 	
 	void recvState();
-	
-	void init();
-	
+
 private:
 	
-	bool recvShort();
+	ShortReturn recvShort();
 
 };
 

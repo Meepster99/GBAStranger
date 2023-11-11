@@ -66,7 +66,11 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	obstacleList.clear();
 	shadowList.clear();
 	deadList.clear();
-	otherPlayerList.clear();
+	playerList.clear();
+	//playerList[0] = NULL;
+	//playerList[1] = NULL;
+	//playerList[2] = NULL;
+	//playerList[3] = NULL;
 	
 	
 	player = NULL;
@@ -346,6 +350,27 @@ void EntityManager::addEntity(Entity* e) {
 	
 	entityMap[e->p.x][e->p.y].insert(e);
 	futureEntityMap[e->p.x][e->p.y].insert(e);
+	
+	
+}
+
+
+void EntityManager::moveEntityToPos(Pos start, Pos end) {
+	
+	BN_ASSERT(entityMap[start.x][start.y].size() == 1, "when moving entity to pos, the start pos size != 1");
+	BN_ASSERT(entityMap[end.x][end.y].size() == 0, "when moving entity to pos, the end pos size != 0");
+	
+	BN_ASSERT(futureEntityMap[start.x][start.y].size() == 1, "when moving entity to pos, the start pos size != 1 in future");
+	BN_ASSERT(futureEntityMap[end.x][end.y].size() == 0, "when moving entity to pos, the end pos size != 0 in future");
+	
+	Entity* entity = *(entityMap[start.x][start.y].begin());
+	entityMap[start.x][start.y].clear();
+	futureEntityMap[start.x][start.y].clear();
+	
+	entity->p = end;
+	
+	entityMap[end.x][end.y].insert(entity);
+	futureEntityMap[end.x][end.y].insert(entity);
 	
 	
 }
@@ -639,7 +664,9 @@ void EntityManager::doMoves(bool headless) {
 	
 	
 	// do i even need this var to be a class var
-	playerStart = player->p;
+	
+	// I AM COMMENTING THIS OUT. IT MAY BE A DISSASTER.
+	//playerStart = player->p;
 	
 	// should this be happening here, or on the if(player->p != playerStart) {
 	//player->doUpdate();

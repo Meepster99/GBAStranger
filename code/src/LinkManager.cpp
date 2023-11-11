@@ -77,44 +77,38 @@ and backup the game state before and after,,, yea
 
 gods i just, if i do all of it and it lags like,, ugh
 
+
+
+
+this is not easily feasable with my limited expirence.
+unless i do this, the easy way, with lag, and possibly disable sound as a result.
+
+how do i know what entity to move where??
+i could give each entity an id?
+or have past and current positions, but tracking that is a full byte 
+and i could also,, just send the move dir????
+im to tired and burnt out for this
+
 */
 
 // how did i not know about bit fields earler???
 
 void LinkManager::sendPacket(const Packet packet) {
-	
-	/*
-	#if BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_9600_BPS
-		const int bps = 9600;
-	#elif BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_38400_BPS    
-		const int bps = 38400;
-	#elif BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_57600_BPS    
-		const int bps = 57600;
-	#elif BN_CFG_LINK_BAUD_RATE == BN_LINK_BAUD_RATE_115200_BPS   
-		const int bps = 115200;
-	#else 
-		const int bps = 9600;
-	#endif
-	
-	
-	const int bytesPerFrame = (bps / 60) / 8;
-	
-	static bn::timer sendTimer;
-	*/
-	
-	//bn::link::send(d);
-	
-	
+	bn::link::send(packet.upperData);
+	bn::link::send(packet.lowerData);
 }
 
-bool LinkManager::recvShort() {
+ShortReturn LinkManager::recvShort() {
 	
 	static bn::optional<bn::link_state> linkStateOpt;
 	
 	linkStateOpt = bn::link::receive();
-		
+	
+	ShortReturn res;
+	memset(res.data, 0xFFFF, 4 * sizeof(unsigned short));
+	
 	if(!linkStateOpt.has_value()) {
-		return false;
+		return res;
 	}
 	
 	bn::link_state& linkState = linkStateOpt.value();
@@ -125,50 +119,115 @@ bool LinkManager::recvShort() {
 	const bn::ivector<bn::link_player>& otherData = linkState.other_players();
 	
 	for(const auto& data : otherData) {
-		allData[data.id()].push_back(data.data());
+		res.data[data.id()] = data.data();
 	}
 
-	return true;
+	return res;
 }
 
-bn::optional<Packet> LinkManager::recvPacket() {
+bool LinkManager::recvPacket() {
 	
+	ShortReturn res1 = recvShort();
+	ShortReturn res2 = recvShort();
+	
+	unsigned successCount = 0;
+	for(int i=0; i<4; i++) {
+		if(res1.data[i] == 0xFFFF || res2.data[i] == 0xFFFF) {
+			BN_ASSERT(res1.data[i] == 0xFFFF && res2.data[i] == 0xFFFF, "recvshort data was messed up");
+			continue;
+		}
+		
+		successCount++;
+		
+		Packet tempPacket;
+		tempPacket.upperData = res1.data[i];
+		tempPacket.lowerData = res2.data[i];
+		
+		BN_ASSERT(allPackets[i].size() + 1 != allPackets[i].max_size(), "recv packet buffer overflow");
+		
+		allPackets[i].push_back(tempPacket);		
+	}
+	
+	return successCount != 0;
 }
 
 void LinkManager::sendState() {
 
-
-
+	Packet temp;
+	
+	if(entityManager->playerStart == entityManager->player->p) {
+		return;
+	}
+	
+	temp.prevX = entityManager->playerStart.x; 
+	temp.prevY = entityManager->playerStart.y; 
+	
+	temp.x = entityManager->player->p.x;
+	temp.y = entityManager->player->p.y;
+	temp.entityType = entityManager->player->entityType();
+	temp.packetType = PacketType::Entity;
+	
+	sendPacket(temp);
 	
 }
 
 void LinkManager::recvState() {
+
+	allPackets[0].clear();
+	allPackets[1].clear();
+	allPackets[2].clear();
+	allPackets[3].clear();
 	
-	// this might be v slow
-	// maybe do a static alloc?
-	allData.clear();
+	while(recvPacket()) { }
 	
-	while(true) {
-		
-		bn::optional<Packet> temp = recvPacket();
-		
-		if(!temp.has_value()) {
-			break;
+	for(int i=0; i<4; i++) {
+		for(const auto& packet : allPackets[i]) {
+			if(packet.packetType == PacketType::Entity) {
+				
+				//switch
+				
+				Pos startPos = Pos(packet.prevX, packet.prevY);
+				Pos endPos = Pos(packet.x, packet.y);
+				
+				BN_LOG(startPos, " --> ", endPos);
+				
+				SaneSet<Entity*, 4>& temp = entityManager->getMap(startPos);
+				
+				//Entity* tempEntity = NULL;
+				
+				if(temp.size() == 0 && packet.entityType == EntityType::Player) {
+					OtherPlayer* e = new OtherPlayer(startPos, i);
+					
+					BN_ASSERT(entityManager->playerList.size() + 1 != entityManager->playerList.max_size(), "otherplayer buffer overflow, tempsize = ", temp.size());
+					entityManager->playerList.push_back(e);
+					entityManager->entityList.insert(e);
+					entityManager->obstacleList.insert(e);	
+					
+					entityManager->entityMap[e->p.x][e->p.y].insert(e);
+					entityManager->futureEntityMap[e->p.x][e->p.y].insert(e);
+				}
+					
+				entityManager->moveEntityToPos(startPos, endPos);
+				
+			} else if(packet.packetType == PacketType::Tile) {
+				
+				
+				
+				
+				
+				
+				
+			} else {
+				BN_ERROR("unknown packet type");
+			}
 		}
-			
 	}
 	
+	
+	entityManager->updateScreen();
 
-	
-	
 }
 
-void LinkManager::backupState() {
-	
-	
-	
-	
-}
 
 
 

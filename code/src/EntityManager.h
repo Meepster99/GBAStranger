@@ -28,7 +28,8 @@ public:
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
 	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
 	
-	bn::vector<OtherPlayer*, 3> otherPlayerList;
+	bn::vector<Entity*, 4> playerList;
+	//Entity* playerList[4];
 	
 	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
 
@@ -112,6 +113,8 @@ public:
 	
 	void addEntity(Entity* e);
 	
+	void moveEntityToPos(Pos start, Pos end);
+	
 	bool hasKills() const { return killedPlayer.size() != 0; }
 	// should i just make killedplayer public? idek anymore
 	bool playerWon() const { return killedPlayer.contains(NULL); }
@@ -150,7 +153,7 @@ public:
 	bool enterRoom();
 	void doVBlank();
 	
-	///void updateOtherPlayer(const bn::link_player& packet);
+	//void updateOtherPlayer(const bn::link_player& packet);
 		
 private:
 	// make a class OBJECT, have entity and floortile extend it, have this be an array of that.

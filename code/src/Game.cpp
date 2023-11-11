@@ -857,7 +857,7 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 		
-	linkManager.init();
+	//linkManager.init();
 	
 	/* 
 	i swear, i have had multiple confirmed cases where strings arent nulltermed.
@@ -1008,7 +1008,6 @@ void Game::run() {
 				continue;
 			}
 	
-			linkManager.backupState();
 			entityManager.doMoves();
 			linkManager.sendState();
 		
