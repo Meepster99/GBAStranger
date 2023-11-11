@@ -41,6 +41,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		loadBoobTrap();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
 		loadTailHead();
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_gor) {
+		loadGorHead();
 	}
 	
 	if(width > 4 || height > 4) {
@@ -883,6 +885,148 @@ void BigSprite::loadTree() {
 	
 	entityManager->addEntity(temp1);
 	
+}
+
+void BigSprite::loadGorHead() {
+	
+	
+	/*
+	Many college students have gone to college
+	And gotten hooked on drugs, marijuana, and alcohol
+	Listen, stop trying to be somebody else
+	Don't try to be someone else
+	Be yourself and know that that's good enough
+	Don't try to be someone else
+	Don't try to be like someone else
+	Don't try to act like someone else, be yourself
+	Be secure with yourself
+	Rely and trust upon your own decisions
+	On your own beliefs
+	You understand the things that I've taught you
+	Not to drink alcohol, not to use drugs
+	Don't use that cocaine or marijuana
+	Because that stuff is highly addictive
+	When people become weed-heads
+	They become sluggish, lazy, stupid and unconcerned
+	Sluggish, lazy, stupid and unconcerned
+	That's all marijuana does to you, okay?
+	This is mom
+	Unless you're taking it under doctor's, um, control
+	Then it's regulated
+	Do not smoke marijuana, do not consume alcohol
+	Do not get in the car with someone who is inebriated
+	This is mom, call me, bye
+	*/
+	
+	auto wingInteractFunc = [](void* obj) -> void {
+		(void)obj;
+	};
+	
+	auto wingKickFunc = [](void* obj) -> bool {
+		(void)obj;
+		return true;
+	};
+
+	int talkCount = 0;
+	auto gorInteractFunc = [talkCount](void* obj) mutable -> void {
+		(void)obj;
+		
+		// give locust if they dont have any
+		
+		if(globalGame->entityManager.player->locustCount == 0) {
+			globalGame->effectsManager.doDialogue(""
+			"damnnnnnnnnnnn\n"
+			"you are flat broke\n"
+			"i got some spare change lying around, here\n"
+			"now, go yeet yourself at the floor of that statue to the right, and have fun\n"
+			"\0");
+			
+			globalGame->entityManager.player->locustCount = 1;
+			globalGame->tileManager.updateLocust();
+			globalGame->tileManager.floorLayer.reloadCells();
+			
+			return;
+		}
+	
+		
+		talkCount++;
+		
+		if(talkCount == 0) {
+		
+			globalGame->effectsManager.doDialogue("\0Many college students have gone to college\0");
+			globalGame->effectsManager.doDialogue("\0And gotten hooked on drugs, marijuana, and alcohol\0");
+			globalGame->effectsManager.doDialogue("\0Listen, stop trying to be somebody else\0");
+			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0");
+			globalGame->effectsManager.doDialogue("\0Be yourself and know that that's good enough\0");
+			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0");
+			globalGame->effectsManager.doDialogue("\0Don't try to be like someone else\0");
+			globalGame->effectsManager.doDialogue("\0Don't try to act like someone else, be yourself\0");
+			globalGame->effectsManager.doDialogue("\0Be secure with yourself\0");
+			globalGame->effectsManager.doDialogue("\0Rely and trust upon your own decisions\0");
+			globalGame->effectsManager.doDialogue("\0On your own beliefs\0");
+			globalGame->effectsManager.doDialogue("\0You understand the things that I've taught you\0");
+			globalGame->effectsManager.doDialogue("\0Not to drink alcohol, not to use drugs\0");
+			globalGame->effectsManager.doDialogue("\0Don't use that cocaine or marijuana\0");
+			globalGame->effectsManager.doDialogue("\0Because that stuff is highly addictive\0");
+			globalGame->effectsManager.doDialogue("\0When people become weed-heads\0");
+			globalGame->effectsManager.doDialogue("\0They become sluggish, lazy, stupid and unconcerned\0");
+			globalGame->effectsManager.doDialogue("\0Sluggish, lazy, stupid and unconcerned\0");
+			globalGame->effectsManager.doDialogue("\0That's all marijuana does to you, okay?\0");
+			globalGame->effectsManager.doDialogue("\0This is mom\0");
+			globalGame->effectsManager.doDialogue("\0Unless you're taking it under doctor's, um, control\0");
+			globalGame->effectsManager.doDialogue("\0Then it's regulated\0");
+			globalGame->effectsManager.doDialogue("\0Do not smoke marijuana, do not consume alcohol\0");
+			globalGame->effectsManager.doDialogue("\0Do not get in the car with someone who is inebriated\0");
+			globalGame->effectsManager.doDialogue("\0This is mom, call me, bye\0");
+		
+		} else {
+			globalGame->effectsManager.doDialogue("Thank you for listening to me recite the lyrics to Frank Ocean's Song: Be Yourself.\0");
+		}
+			
+		
+		
+		
+	};
+	
+	auto gorKickFunc = [](void* obj) -> bool {
+		(void)obj;
+		return true;
+	};
+	
+	
+	
+	const Pos wingInteractablePoses[] = {
+		Pos(9, 5),
+		Pos(8, 5),
+		Pos(9, 4),
+		Pos(8, 4),
+		
+		Pos(3, 5),
+		Pos(4, 5),
+		Pos(3, 4),
+		Pos(4, 4),
+
+	};
+	
+	for(unsigned i=0; i<sizeof(wingInteractablePoses)/sizeof(wingInteractablePoses[0]); i++) {
+		Interactable* temp = new Interactable(wingInteractablePoses[i],
+			wingInteractFunc,
+			wingKickFunc,
+			(void*)this,
+			(void*)this
+		);
+		entityManager->addEntity(temp);
+	}
+	
+	for(unsigned i=0; i<3; i++) {
+		Interactable* temp = new Interactable(Pos(5 + i, 4),
+			gorInteractFunc,
+			gorKickFunc,
+			(void*)this,
+			(void*)this
+		);
+		entityManager->addEntity(temp);
+	}	
 }
 
 // -----

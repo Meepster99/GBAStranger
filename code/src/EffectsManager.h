@@ -249,7 +249,7 @@ public:
 	void loadTailHead();
 	void loadChest();
 	void loadTree();
-	
+	void loadGorHead();
 	
 };
 

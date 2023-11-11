@@ -133,10 +133,7 @@ void Game::createExitEffects() {
 			}
 		}
 		
-		
-		
 		//entityManager.player->p = playerPos;
-		
 	}
 	
 	
@@ -229,8 +226,12 @@ void Game::findNextRoom() {
 			}
 			
 			if(beeReset) {
+				BN_LOG("bee reset occured");
 				roomManager.changeFloor(entityManager.player->locustCount);
 				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this (curse)
+				tileManager.locustCounterTile->first = '0';
+				tileManager.locustCounterTile->second = '0';
+				
 				// but does this update the save file?
 			}
 		}
