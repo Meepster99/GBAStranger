@@ -20,7 +20,7 @@ public:
 
 	LinkManager(Game* game_) : game(game_) {}
 	
-	bn::vector<Packet, 256> allData;
+	bn::vector<unsigned short, 256> allData[3]; // array for each id.
 
 	void sendPacket(const Packet packet);
 	
@@ -36,7 +36,7 @@ public:
 	
 private:
 	
-	static unsigned short recvShort();
+	bool recvShort();
 
 };
 

@@ -107,20 +107,14 @@ void LinkManager::sendPacket(const Packet packet) {
 	
 }
 
-static unsigned short LinkManager::recvShort() {
+bool LinkManager::recvShort() {
 	
 	static bn::optional<bn::link_state> linkStateOpt;
 	
-	
-	
-	
-}
-
-bn::optional<Packet> LinkManager::recvPacket() {
 	linkStateOpt = bn::link::receive();
 		
 	if(!linkStateOpt.has_value()) {
-		return;
+		return false;
 	}
 	
 	bn::link_state& linkState = linkStateOpt.value();
@@ -130,13 +124,15 @@ bn::optional<Packet> LinkManager::recvPacket() {
 
 	const bn::ivector<bn::link_player>& otherData = linkState.other_players();
 	
-	if(otherData.size() == 0) {
-		break;
+	for(const auto& data : otherData) {
+		allData[data.id()].push_back(data.data());
 	}
 
-	for(const auto& data : otherData) {
-		allData.push_back(data);
-	}
+	return true;
+}
+
+bn::optional<Packet> LinkManager::recvPacket() {
+	
 }
 
 void LinkManager::sendState() {
