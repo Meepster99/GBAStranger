@@ -41,9 +41,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		loadBoobTrap();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
 		loadTailHead();
-	} else if(tiles == &bn::sprite_tiles_items::dw_spr_gor) {
-		loadGorHead();
-	}
+	} 
 	
 	if(width > 4 || height > 4) {
 		
@@ -102,6 +100,11 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		loadChest();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_birch) {
 		loadTree();
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_gor) {
+		loadGorHead();
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_gor_hair) {
+		animationIndex = 1;
+		animate();
 	}
 	
 }
@@ -931,15 +934,25 @@ void BigSprite::loadGorHead() {
 	auto gorInteractFunc = [talkCount](void* obj) mutable -> void {
 		(void)obj;
 		
-		// give locust if they dont have any
 		
+		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		
+		//bigSprite->sprites[0].spritePointer.tiles()
+		
+		if(bigSprite->tiles == &bn::sprite_tiles_items::dw_spr_gor_sleep) {
+			globalGame->effectsManager.doDialogue("[A giant head lies before you, blocking your path]\0");
+			return;
+		}
+		
+		
+		// give locust if they dont have any
 		if(globalGame->entityManager.player->locustCount == 0) {
 			globalGame->effectsManager.doDialogue(""
 			"damnnnnnnnnnnn\n"
 			"you are flat broke\n"
 			"i got some spare change lying around, here\n"
 			"now, go yeet yourself at the floor of that statue to the right, and have fun\n"
-			"\0");
+			"\0", &bn::sound_items::snd_gor);
 			
 			globalGame->entityManager.player->locustCount = 1;
 			globalGame->tileManager.updateLocust();
@@ -947,53 +960,74 @@ void BigSprite::loadGorHead() {
 			
 			return;
 		}
-	
-		
-		talkCount++;
 		
 		if(talkCount == 0) {
 		
-			globalGame->effectsManager.doDialogue("\0Many college students have gone to college\0");
-			globalGame->effectsManager.doDialogue("\0And gotten hooked on drugs, marijuana, and alcohol\0");
-			globalGame->effectsManager.doDialogue("\0Listen, stop trying to be somebody else\0");
-			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0");
-			globalGame->effectsManager.doDialogue("\0Be yourself and know that that's good enough\0");
-			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0");
-			globalGame->effectsManager.doDialogue("\0Don't try to be like someone else\0");
-			globalGame->effectsManager.doDialogue("\0Don't try to act like someone else, be yourself\0");
-			globalGame->effectsManager.doDialogue("\0Be secure with yourself\0");
-			globalGame->effectsManager.doDialogue("\0Rely and trust upon your own decisions\0");
-			globalGame->effectsManager.doDialogue("\0On your own beliefs\0");
-			globalGame->effectsManager.doDialogue("\0You understand the things that I've taught you\0");
-			globalGame->effectsManager.doDialogue("\0Not to drink alcohol, not to use drugs\0");
-			globalGame->effectsManager.doDialogue("\0Don't use that cocaine or marijuana\0");
-			globalGame->effectsManager.doDialogue("\0Because that stuff is highly addictive\0");
-			globalGame->effectsManager.doDialogue("\0When people become weed-heads\0");
-			globalGame->effectsManager.doDialogue("\0They become sluggish, lazy, stupid and unconcerned\0");
-			globalGame->effectsManager.doDialogue("\0Sluggish, lazy, stupid and unconcerned\0");
-			globalGame->effectsManager.doDialogue("\0That's all marijuana does to you, okay?\0");
-			globalGame->effectsManager.doDialogue("\0This is mom\0");
-			globalGame->effectsManager.doDialogue("\0Unless you're taking it under doctor's, um, control\0");
-			globalGame->effectsManager.doDialogue("\0Then it's regulated\0");
-			globalGame->effectsManager.doDialogue("\0Do not smoke marijuana, do not consume alcohol\0");
-			globalGame->effectsManager.doDialogue("\0Do not get in the car with someone who is inebriated\0");
-			globalGame->effectsManager.doDialogue("\0This is mom, call me, bye\0");
+			globalGame->effectsManager.doDialogue("\0Many college students have gone to college\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0And gotten hooked on drugs, marijuana, and alcohol\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Listen, stop trying to be somebody else\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Be yourself and know that that's good enough\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Don't try to be like someone else\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Don't try to act like someone else, be yourself\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Be secure with yourself\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Rely and trust upon your own decisions\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0On your own beliefs\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0You understand the things that I've taught you\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Not to drink alcohol, not to use drugs\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Don't use that cocaine or marijuana\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Because that stuff is highly addictive\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0When people become weed-heads\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0They become sluggish, lazy, stupid and unconcerned\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Sluggish, lazy, stupid and unconcerned\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0That's all marijuana does to you, okay?\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0This is mom\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Unless you're taking it under doctor's, um, control\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Then it's regulated\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Do not smoke marijuana, do not consume alcohol\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0Do not get in the car with someone who is inebriated\0", &bn::sound_items::snd_gor);
+			globalGame->effectsManager.doDialogue("\0This is mom, call me, bye\0", &bn::sound_items::snd_gor);
 		
 		} else {
-			globalGame->effectsManager.doDialogue("Thank you for listening to me recite the lyrics to Frank Ocean's Song: Be Yourself.\0");
+			globalGame->effectsManager.doDialogue("Thank you for listening to me recite the lyrics to Frank Ocean's Song: Be Yourself.\0", &bn::sound_items::snd_gor);
 		}
 			
-		
+		talkCount++;
 		
 		
 	};
 	
 	auto gorKickFunc = [](void* obj) -> bool {
-		(void)obj;
-		return true;
+		
+		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		
+		static int frameCount = 0;
+		
+		if(frameCount == 0) {
+			bn::sound_items::snd_bounceimpact.play();
+		}
+		
+		frameCount++;
+		
+		if(frameCount > 10) {
+			frameCount = 0;
+			bigSprite->sprites[0].spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_gor);
+			bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_gor;
+			globalGame->effectsManager.bigSprites[1]->animationIndex = 1;
+			globalGame->effectsManager.bigSprites[1]->animate();
+			return true;
+		}
+		
+		bigSprite->sprites[0].spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_gor_hit);
+		bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_gor_hit;
+		
+		// this is jank and stupid
+		globalGame->effectsManager.bigSprites[1]->animationIndex = 0;
+		globalGame->effectsManager.bigSprites[1]->animate();
+		
+		return false;
 	};
-	
-	
 	
 	const Pos wingInteractablePoses[] = {
 		Pos(9, 5),
@@ -1027,6 +1061,10 @@ void BigSprite::loadGorHead() {
 		);
 		entityManager->addEntity(temp);
 	}	
+	
+	
+	sprites[0].spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_gor_sleep);
+	tiles = &bn::sprite_tiles_items::dw_spr_gor_sleep;
 }
 
 // -----
