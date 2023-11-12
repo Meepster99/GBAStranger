@@ -235,6 +235,8 @@ int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
 
 const char* TileManager::checkBrand() {
 
+	static int prevMatchIndex = -1;
+
 	switch(game->roomManager.roomIndex) {
 		case 23: 
 		case 53: 
@@ -248,6 +250,7 @@ const char* TileManager::checkBrand() {
 		
 			break;
 		default:
+			prevMatchIndex = -1;
 			return NULL;
 			break;
 	}
@@ -255,6 +258,7 @@ const char* TileManager::checkBrand() {
 	if(!entityManager->player->inRod(exitTile)) {
 		// if the player doesnt have the exit tile, return
 		cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+		prevMatchIndex = -1;
 		return NULL;
 	}
 	
@@ -277,7 +281,6 @@ const char* TileManager::checkBrand() {
 
 	//BN_LOG(matches[0], matches[1], matches[2], matches[3], matches[4], matches[5], matches[6], matches[7], matches[8], matches[9]);
 	
-	static int prevMatchIndex = -1;
 	int matchIndex = checkBrandIndex(roomState);
 	
 	
@@ -292,6 +295,8 @@ const char* TileManager::checkBrand() {
 	&bn::regular_bg_items::dw_spr_lordborders_index6,
 	&bn::regular_bg_items::dw_spr_lordborders_index7
 	};
+	
+	//BN_LOG(matchIndex, " ", prevMatchIndex);
 	
 	if(matchIndex != -1) {
 	
@@ -312,8 +317,6 @@ const char* TileManager::checkBrand() {
 			prevMatchIndex = matchIndex;
 		}
 	
-		
-		
 		return destinations[matchIndex];
 	}
 	cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
