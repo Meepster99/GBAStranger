@@ -612,6 +612,10 @@ void Game::changePalette(int offset) {
 	paletteIndex = ((paletteIndex % paletteListSize) + paletteListSize) % paletteListSize;
 	
 	pal = paletteList[paletteIndex];
+	
+	if(paletteIndex == paletteListSize - 1) {
+		cutsceneManager.inputCustomPalette();
+	}
 
 	entityManager.updatePalette(paletteList[paletteIndex]);
 	effectsManager.updatePalette(paletteList[paletteIndex]);
@@ -632,6 +636,16 @@ void Game::changePalette(int offset) {
 	*col2 = pal->colorArray[2].data();
 	*col3 = pal->colorArray[3].data();
 	*col4 = pal->colorArray[4].data();
+	
+	BN_LOG(*col1);
+	BN_LOG(*col2);
+	BN_LOG(*col3);
+	BN_LOG(*col4);
+	
+	saveData.col1Save = *col1;
+	saveData.col2Save = *col2;
+	saveData.col3Save = *col3;
+	saveData.col4Save = *col4;
 	
 	
 	// this is a problem, (curse) it ima just have palette not cause a save.
@@ -1061,6 +1075,18 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.eggCount;
 	rotateHash(sizeof(saveData.eggCount) * 8);
 	
+	hash ^= saveData.col1Save;
+	rotateHash(sizeof(saveData.col1Save) * 8);
+
+	hash ^= saveData.col2Save;
+	rotateHash(sizeof(saveData.col1Save) * 8);
+	
+	hash ^= saveData.col3Save;
+	rotateHash(sizeof(saveData.col1Save) * 8);
+	
+	hash ^= saveData.col4Save;
+	rotateHash(sizeof(saveData.col1Save) * 8);
+	
 	for(int i=0; i<6; i++) {
 		hash ^= saveData.playerBrand[i];
 		rotateHash(sizeof(saveData.playerBrand[i]) * 8);
@@ -1125,6 +1151,12 @@ void Game::load() {
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
 	roomManager.setMode(mode);
+	
+	CUSTOM.colorArray[1].set_data(saveData.col1Save);
+	CUSTOM.colorArray[2].set_data(saveData.col2Save);
+	CUSTOM.colorArray[3].set_data(saveData.col3Save);
+	CUSTOM.colorArray[4].set_data(saveData.col4Save);
+	
 	
 	for(int i=0; i<6; i++) {
 		tileManager.playerBrand[i] = saveData.playerBrand[i];

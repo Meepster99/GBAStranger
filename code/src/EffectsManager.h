@@ -292,6 +292,8 @@ public:
 	void draw(bool isActive);
 	void draw();
 	
+	void setVisible(bool vis);
+	
 };
 
 class EffectsManager {
@@ -375,6 +377,8 @@ public:
 	
 	void setBrandColor(int x, int y, bool isTile);
 	void doMenu();
+	
+	void setMenuVis(bool vis);
 	
 	bool restRequest(const char* questionString = "Rest?\0");
 	

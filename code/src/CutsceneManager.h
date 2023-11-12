@@ -70,6 +70,8 @@ public:
 	
 	void carcusEnding();
 	
+	void inputCustomPalette();
+	
 	// -----
 	
 	void backupLayer(int i);

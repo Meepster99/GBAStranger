@@ -92,6 +92,11 @@ struct GameSave {
 	
 	unsigned eggCount = 0;
 	
+	int col1Save = 0;
+	int col2Save = 32767;
+	int col3Save = 25368;
+	int col4Save = 16912;
+	
 	uint64_t hash = 0;
 };
 

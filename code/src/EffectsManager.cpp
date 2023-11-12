@@ -2027,8 +2027,9 @@ bool EffectsManager::restRequest(const char* questionString) {
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
 	bn::vector<bn::sprite_ptr, 4> noSprites;
 	
-	auto activeTextPalette = spritePalette->getSpritePalette();
-	auto alternateTextPalette = spritePalette->getAlternateSpritePalette();
+	auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
+	auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
+	auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
 	
 	for(int i=0; i<60; i++) {
 		game->doButanoUpdate();
@@ -2070,7 +2071,7 @@ bool EffectsManager::restRequest(const char* questionString) {
 		for(int i=0; i<restSpritesOutline[j].size(); i++) {
 			restSpritesOutline[j][i].set_bg_priority(0);
 			restSpritesOutline[j][i].set_z_order(1);
-			restSpritesOutline[j][i].set_palette(spritePalette->getBlackSpritePalette());
+			restSpritesOutline[j][i].set_palette(blackTextPalette);
 		}
 	}
 	
@@ -2218,6 +2219,12 @@ void MenuOption::draw() {
 	draw(isActiveState);
 }	
 
+void MenuOption::setVisible(bool vis) {
+	for(int i=0; i<textSprites.size(); i++) {
+		textSprites[i].set_visible(vis);
+	}
+}
+
 void EffectsManager::setBrandColor(int x, int y, bool isTile) {
 	
 	// this whole func took me a pathetically long length of time due to not eating
@@ -2258,6 +2265,16 @@ void EffectsManager::setBrandColor(int x, int y, bool isTile) {
 		
 			tileRef[122 + quadrant].data[yIndex + yOffset] = tile;
 		}
+	}
+}
+
+void EffectsManager::setMenuVis(bool vis) {
+	for(int i=0; i<menuOptions.size(); i++) {
+		menuOptions[i].setVisible(vis);
+	}
+	
+	for(int i=0; i<verTextSprites.size(); i++) {
+		verTextSprites[i].set_visible(vis);
 	}
 }
 

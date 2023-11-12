@@ -1690,6 +1690,179 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 	
 }
 
+void CutsceneManager::inputCustomPalette() {
+	
+	
+	if(effectsManager->menuOptions.size() == 0) {
+		return;
+	}
+	
+	BN_LOG("entering custompalette input");
+	
+	
+	effectsManager->setMenuVis(false);
+	
+	bn::sprite_text_generator textGenerator(common::variable_8x8_sprite_font);
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> cursor;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> instructions;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> status;
+	
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view("Left/Right to swap colors\0"), instructions);
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view("A to enter a color\0"), instructions);
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view("Left/Right to swap R/G/B\0"), instructions);
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view("Up/Down to change selected val\0"), instructions);
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view("A to exit that color\0"), instructions);
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view("B to return to main menu\0"), instructions);
+
+	textGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view("\\/\0"), cursor);
+	cursor[0].set_bg_priority(0);
+	cursor[0].set_palette(game->pal->getLightGraySpritePalette());
+	
+	for(int i=0; i<instructions.size(); i++) {
+		instructions[i].set_bg_priority(0);
+		instructions[i].set_palette(defaultPalette.getFontSpritePalette());
+	}
+	
+	
+	const bn::sprite_item* tempItem = &bn::sprite_items::dw_default_sprite_32_32;
+	Sprite colorOptions[4] = {Sprite(*tempItem), Sprite(*tempItem), Sprite(*tempItem), Sprite(*tempItem)};
+	
+	for(int i=0; i<4; i++) {
+		colorOptions[i].spritePointer.set_bg_priority(0);
+		colorOptions[i].spritePointer.set_x(-32 + (i * 32));
+	}
+	
+	int currentSelector = 0;
+	int rgbSelector = 0;
+	bool selected = false;
+	
+	
+	constexpr int paletteLookup[4] = {1, 4, 3, 2};
+				
+	
+	auto writeStatus = [paletteLookup, &textGenerator, &status, &currentSelector, &rgbSelector, &selected]() mutable -> void {
+		
+		status.clear();
+		
+		bn::string<64> string;
+		bn::ostringstream string_stream(string);
+		
+		bn::color& colorRef = globalGame->pal->colorArray[paletteLookup[currentSelector]];
+		
+		if(selected) {
+			if(rgbSelector == 0) {
+				string_stream << " R:" << colorRef.red() << " g:" << colorRef.green() << " b:" << colorRef.blue();
+			} else if(rgbSelector == 1) {
+				string_stream << " r:" << colorRef.red() << " G:" << colorRef.green() << " b:" << colorRef.blue();
+			} else {
+				string_stream << " r:" << colorRef.red() << " g:" << colorRef.green() << " B:" << colorRef.blue();
+			}
+		} else {
+			string_stream << "UNSELECTED";
+		}
+		
+		textGenerator.generate((bn::fixed)-104, (bn::fixed)-56, bn::string_view(string), status);
+		
+		
+		for(int i=0; i<status.size(); i++) {
+			status[i].set_bg_priority(0);
+			status[i].set_palette(defaultPalette.getFontSpritePalette());
+		}
+	};
+	
+	writeStatus();
+	
+	
+	
+	game->doButanoUpdate();
+	
+	while(true) {
+		
+		colorOptions[0].spritePointer.set_palette(game->pal->getBlackSpritePalette());
+		colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
+		colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
+		colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
+		writeStatus();
+		
+		if(bn::keypad::b_pressed()) {
+			break;
+		}
+		
+		if(!selected) {
+			if(bn::keypad::left_pressed()) {
+				currentSelector--;
+			} else if(bn::keypad::right_pressed()) {
+				currentSelector++;
+			}
+		}
+			
+		currentSelector = CLAMP(currentSelector, 0, 3);
+		cursor[0].set_x(-32 + 8 + (currentSelector * 32));
+		cursor[0].set_y(-32);
+		
+		
+		if(bn::keypad::a_pressed()) {
+			selected = !selected;
+			game->doButanoUpdate();
+		}
+		
+		while(selected) {
+			
+			if(bn::keypad::left_pressed()) {
+				rgbSelector--;
+			} else if(bn::keypad::right_pressed()) {
+				rgbSelector++;
+			}	
+			
+			rgbSelector = CLAMP(rgbSelector, 0, 2);
+
+						
+			if(bn::keypad::up_held() || bn::keypad::down_held()) {
+				
+				int changeVal = bn::keypad::up_held() ? 1 : -1;
+				
+				bn::color& colorRef = game->pal->colorArray[paletteLookup[currentSelector]];
+				
+				if(rgbSelector == 0) {
+					colorRef.set_red(CLAMP(colorRef.red() + changeVal, 0, 31));
+				} else if(rgbSelector == 1) {
+					colorRef.set_green(CLAMP(colorRef.green() + changeVal, 0, 31));
+				} else {
+					colorRef.set_blue(CLAMP(colorRef.blue() + changeVal, 0, 31));
+				}
+				
+				colorOptions[0].spritePointer.set_palette(game->pal->getBlackSpritePalette());
+				colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
+				colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
+				colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
+		
+				writeStatus();
+				delay(5);
+			
+			}
+	
+
+
+
+
+
+			if(bn::keypad::a_pressed()) {
+				selected = !selected;
+			}
+			
+			writeStatus();
+			game->doButanoUpdate();
+		}
+	
+		game->doButanoUpdate();
+	}
+	
+	effectsManager->setMenuVis(true);
+	
+	
+	
+}
+
 // -----
 
 void CutsceneManager::freeLayer(int i) {

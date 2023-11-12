@@ -13,7 +13,13 @@
 #define WHITE 2
 #define LIGHTGRAY 3
 #define DARKGRAY 4
-
+ 
+#define A 0
+#define B 1
+#define C 2
+#define D 3
+#define E 4
+ 
 class Palette {
 public:
 
@@ -221,7 +227,16 @@ public:
 	const bn::sprite_palette_item getAlternateSpritePalette() {
 		// sets the palette specifically for when,,, im in the menu section??
 		
-		bn::span<bn::color> spanthing(alternateColorArray);
+		
+		tempColorArray[0] = colorArray[A];
+		tempColorArray[1] = colorArray[B];
+		tempColorArray[2] = colorArray[E];
+		tempColorArray[3] = colorArray[D];
+		tempColorArray[4] = colorArray[C];
+		
+	
+		//bn::span<bn::color> spanthing(alternateColorArray);
+		bn::span<bn::color> spanthing(tempColorArray);
 			
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
@@ -229,7 +244,29 @@ public:
 	const bn::sprite_palette_item getFontSpritePalette() {
 		// sets the palette specifically for when,,, im in the menu section??
 		// why the (curse) do the fonts take the lastc colors in the array??
-		bn::span<bn::color> spanthing(fontColorArray);
+		//bn::span<bn::color> spanthing(fontColorArray);
+		
+		
+		//  {a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e},
+		
+		tempColorArray[0] = colorArray[A];
+		tempColorArray[1] = colorArray[E];
+		tempColorArray[2] = colorArray[D];
+		tempColorArray[3] = colorArray[D];
+		tempColorArray[4] = colorArray[A];
+        tempColorArray[5] = colorArray[E];
+        tempColorArray[6] = colorArray[D];
+        tempColorArray[7] = colorArray[D];
+		tempColorArray[8] = colorArray[A];
+        tempColorArray[9] = colorArray[E];
+        tempColorArray[10] = colorArray[D];
+		tempColorArray[11] = colorArray[D];
+		tempColorArray[12] = colorArray[B];
+		tempColorArray[13] = colorArray[E];
+		tempColorArray[14] = colorArray[E];
+		tempColorArray[15] = colorArray[E];
+		
+		bn::span<bn::color> spanthing(tempColorArray);
 			
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
@@ -262,8 +299,19 @@ extern Palette BLUEBERRYJAMPALETTE;
 
 extern Palette ZERORANGERPALETTE;
 
-extern Palette* paletteList[10];
-extern const char* paletteNameList[10];
+extern Palette DEPTHS;
+
+//extern Palette MORNING;
+//extern Palette NOON;
+//extern Palette EVENING;
+extern Palette NIGHT;
+
+extern Palette MILK;
+
+extern Palette CUSTOM;
+
+extern Palette* paletteList[14];
+extern const char* paletteNameList[14];
 
 
 //extern Palette redText;
