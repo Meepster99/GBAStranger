@@ -3909,6 +3909,8 @@ void EffectsManager::chestBonus(Chest* chest) {
 	auto createFunc = [chest](Effect* obj) mutable -> void {
 		
 		chest->sprite.setVisible(false);
+		
+		bn::sound_items::snd_resurrect.play();
 			
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_chest_regular_flash;
 		
