@@ -3,6 +3,8 @@ from pydub import AudioSegment
 import os, sys
 import shutil
 import subprocess
+import re
+import hashlib
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
 
@@ -27,7 +29,51 @@ RESET = Style.RESET_ALL
 
 outputPath = "./formattedOutput/"
 
-convertParameters = ["-ar","44100"]
+# sound is played over gba at 31khz rn,,, so lowering this shouldnt be to big of a deal?
+# ALSO, make it only copy over,,, needed sound files?
+#convertParameters = ["-ar","44100"]
+convertParameters = ["-ar","31000"]
+
+def copyIfChanged(inputFile, outputPath):
+	
+	if not os.path.isfile(os.path.join(outputPath, os.path.basename(inputFile))):
+		shutil.copy(inputFile, outputPath)
+		return True
+	else:
+		thisFileHash = hashlib.md5(open(inputFile, 'rb').read()).hexdigest()
+		otherFileHash = hashlib.md5(open(os.path.join(outputPath, os.path.basename(inputFile)), 'rb').read()).hexdigest()
+
+		if thisFileHash != otherFileHash:
+			shutil.copy(inputFile, outputPath)
+			return True
+	
+	return False
+
+
+def getNeededSounds():
+	
+	codeFolder = "../../code/src/"
+	
+	codeFiles = [os.path.join(codeFolder, f) for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
+	
+	codeFiles.remove("../../code/src/dataWinIncludes.h")
+	
+	refs = set()
+	
+	# NOT ALL SOUNDS START WITH SND
+	pattern1 = r'sound_items::snd_\w+'		
+	
+	for file in codeFiles:
+		with open(file, 'r', encoding='utf-8', errors='ignore') as f:
+			content = f.read()
+			matches = [ s[len("sound_items::"):] for s in re.findall(pattern1, content) ]
+			refs.update(matches)
+		
+	refs.add("metal_pipe_falling_sound_effect")
+	refs.add("egg")
+	refs.add("void_stranger_ost_56")
+	
+	return refs
 
 def convertAllSounds():
 
@@ -121,10 +167,27 @@ def convertMisc():
 	
 	pass
 
+def copyNeededSounds():
+
+	refs = getNeededSounds()
+	
+	for snd in refs:
+		res = copyIfChanged(os.path.join("./formattedOutput/", snd + ".wav"), "../../code/audio/")
+		
+		if res:
+			print(CYAN + "copying over {:s}".format(snd) + RESET)
+
+	
+	pass
+	
 def main():
 
 	os.chdir(os.path.dirname(__file__))
 
+	if len(sys.argv) != 1:
+		copyNeededSounds()
+		exit(0)
+	
 	if os.path.exists("./formattedOutput"):
 		shutil.rmtree("./formattedOutput")
 		
@@ -139,8 +202,10 @@ def main():
 	convertMisc()
 	
 	[ os.remove(os.path.join("../../code/audio/", f)) for f in os.listdir("../../code/audio/") if f.endswith(".wav") ]
-	copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/audio/", f)) for f in os.listdir(copyFrom) if f.endswith(".wav") ]
-	copyFunc("./formattedOutput/")
+	#copyFunc = lambda copyFrom : [ shutil.copy(os.path.join(copyFrom, f), os.path.join("../../code/audio/", f)) for f in os.listdir(copyFrom) if f.endswith(".wav") ]
+	#copyFunc("./formattedOutput/")
+	
+	copyNeededSounds()
 	
 	pass
 	

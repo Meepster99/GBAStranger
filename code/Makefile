@@ -55,7 +55,7 @@ USERLIBS    :=
 # maybe this will fix my previous issues with the WTF strlen func
 DEFAULTLIBS :=  -static-libstdc++
 USERBUILD   :=  
-EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes
+EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; python  ../misc/soundConverter/soundConverter.py regenIncludes
 
 ifdef LOG
 	USERFLAGS += -DENABLELOGGING=true 
