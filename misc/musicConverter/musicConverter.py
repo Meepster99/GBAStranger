@@ -7,6 +7,7 @@ import hashlib
 import struct
 import json
 import wave
+import math
 
 
 from colorama import init, Fore, Back, Style
@@ -315,6 +316,16 @@ def Compress(mptSampleData, maxLength):
 		
 # 
 
+#GBASAMPLERATE = 9000
+#GBASAMPLERATE = 24000
+
+# 31k might,, be a bit to high for the gba to handle? it started having some static "blips" occasionally
+GBASAMPLERATE = 31000
+
+# 27k still has,, some,, but less(i think?) 
+# but is it worth the quality drop?
+#GBASAMPLERATE = 27000
+
 class ITFile:
 
 	def __init__(self, filename):
@@ -328,7 +339,6 @@ class ITFile:
 		
 		#self.f = None
 		
-		
 		shutil.rmtree("tempFiles")
 		createFolder("tempFiles")
 		
@@ -336,6 +346,7 @@ class ITFile:
 		# TODO, REMOVE THIS STEP, NO POINT IN PIPING THROUGH GSM WHEN WE MURDER THE QUALITY ON OUR OWN LATER 
 		
 		# ffmpeg -i msc_voidsong.ogg -ac 1 -af 'aresample=18157' -strict unofficial -c:a gsm test2.gsm
+		"""
 		runCommand([
 			'ffmpeg',
 			"-y", '-i', filename,
@@ -345,6 +356,35 @@ class ITFile:
 			"-strict", "unofficial", "-c:a", "gsm",
 			"tempOutput.gsm"
 			])
+		"""
+		
+		# looking back on things,,, does the bs im doing with freq changing even help at all??
+		
+		runCommand([
+			'ffmpeg',
+			"-y", '-i', filename,
+			#"-ac", "1", "-af", "aresample=18157",
+			#"-ac", "1", "-af", "aresample=8000",
+			#"-ac", "1", "-af", "aresample=18000",
+			#"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE*2),
+			#"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
+			"tempOutput.wav"
+			])
+		
+		# does,,, lowing the shit and playing it at 2x speed actually help my filesize at all???
+		# increaseing the duration also like,,, fucks me in terms of sample count 
+		
+		
+		
+		
+		
+		#print(self.duration)
+		#print(self.tickValue)
+		#print(self.segmentTime)
+		#exit(1)
+		
+		#print(self.duration)
+		#exit(1)
 			
 		# gods 
 		# if i downsample to 16000 instead of 18157 then,,,,, '
@@ -358,13 +398,16 @@ class ITFile:
 		#speed_factor = 18157 / 8000
 		#speed_factor = 2
 		# ffmpeg -i .\tempOutput.gsm -t 00:05:10.58 tempOutputFromGsm.wav
+		"""
 		runCommand([
 			'ffmpeg',
-			"-y", '-i', "tempOutput.gsm",
+			#"-y", '-i', "tempOutput.gsm",
+			"-y", '-i', "tempOutput.wav",
 			#"-t", "00:05:10.58",
 			#"-t", "155.29",
 			#'-filter:a', f'atempo={speed_factor}',
-			'-filter:a', 'asetrate=9000',
+			#'-filter:a', 'asetrate=9000', 
+			'-filter:a', 'asetrate={:d}'.format(GBASAMPLERATE), 
 			#"-af", "aresample=8000",
 			"tempOutputFromGsm.wav"
 			])
@@ -380,25 +423,129 @@ class ITFile:
 			#"-af", "aresample=8000",
 			"tempOutput.wav"
 			])
+		"""
 		
-
+		"""
 		# ffmpeg -i test.wav -f segment -segment_time 2 -c copy tempFiles/output_%03d.wav
 		runCommand([
 			'ffmpeg',
 			"-y", '-i', "tempOutput.wav",
+			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
 			#"-f", "segment", "-segment_time", "2", 
 			#"-f", "segment", "-segment_time", "4", 
 			#"-f", "segment", "-segment_time", "3.5", 
 			#"-f", "segment", "-segment_time", "3", 
-			"-f", "segment", "-segment_time", "2.5", # fucking edging getting to 0xFF, im at 248 on voided with this 
-			"-c", "copy", 
+			#"-f", "segment", "-segment_time", "2.5", # fucking edging getting to 0xFF, im at 248 on voided with this 
+			#"-f", "segment", "-segment_time", "2.000",
+			"-f", "segment", "-segment_time", "{:f}".format(self.segmentTime),
+			#"-c", "copy", 
 			#"-af", "aresample=18157",
 			"tempFiles/output_%03d.wav"
 			])
+		"""
+		
+		runCommand([
+			'ffmpeg',
+			"-y", '-i', "tempOutput.wav",
+			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
+			"tempOutput2.wav"
+			])
+		
+		#ffmpeg -i input_audio.wav -filter_complex "[0:a]asplit=n=2000[S1][S2][S3]..." -map "[S1]" output1.wav -map "[S2]" output2.wav -map "[S3]" output3.wav
+		# ffmpeg -i input_audio.wav -filter_complex "[0:a]asplit=n=2000[S]" -map "[S]" output_%03d.wav
+		
+		#filterParam = "[0:a]aresample={:d},asplit=33000[S]".format(GBASAMPLERATE)
+		
+		""""
+		runCommand([
+			'ffmpeg',
+			"-y", '-i', "tempOutput2.wav",
+			#"-ac", "1",# "-af", "aresample={:d}".format(GBASAMPLERATE),
+			"-filter_complex", "[0:a]asplit=33000[S]", #"-map", "\"[S]\"",
+			"tempFiles/output_%03d.wav"
+			])
+		"""
+		
+		waveFile = wave.open("tempOutput2.wav")
+		#frameCount = waveFile.getnframes()
+		frameCount = waveFile.getnframes()
+		self.duration = waveFile.getnframes() / waveFile.getframerate()
+		waveFile.close()
+		
+		
+		self.tickValue = math.ceil( (1440/60) * ( (self.duration/254)/1))
+		# WAIT TICKVALUE CAN GO LIKE,, TO 1????
+		# WAS IT BEFORE I WAS ON THE IT FORMAT THAT I LIKE,,, THOUGHT IT COULDNT??
+		self.tickValue = max(self.tickValue, 1)
+		
+		while self.tickValue < 64:
+		
+			self.segmentTime = (self.tickValue / 24) * 1
+			
+			samplesPerSegment = self.segmentTime * GBASAMPLERATE
+			
+			if not samplesPerSegment.is_integer():
+				print(RED + "samplesPerSegment wasnt a integer! panic!" + RESET)
+				print("samplesperseg: ", samplesPerSegment)
+				print("segmenttime: ", self.segmentTime)
+				print("tickval: ", self.tickValue)
+				self.tickValue += 1
+				continue
+				#exit(1)
+				#print("or dont")
+				
+			break
+			
+		samplesPerSegment = int(samplesPerSegment)
+		
+		#print(samplesPerSegment)
+		
+		#ffmpeg -i input.wav -filter_complex "[0]atrim=start=0:end=9999[a]; [0]atrim=start=10000:end=19999[b]; [0]atrim=start=20000:end=29999[c]; ..." -map "[a]" output_1.wav -map "[b]" output_2.wav -map "[c]" output_3.wav ...
+		# do not ask.
+		
+		cmd = [
+			"ffmpeg", "-i", "tempOutput2.wav", "-filter_complex"
+		]
+		
+		filterString = []
+		mapCmds = []
+		
+		#frameCount = samplesPerSegment*4
+		index = 1
+		for i in range(0, frameCount, samplesPerSegment):
+			start = i
+			#end = min(i+samplesPerSegment-1, frameCount)
+			end = min(i+samplesPerSegment, frameCount)
+		
+			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, end, index))
+			
+			mapCmds.append("-map")
+			mapCmds.append("[{:d}]".format(index))
+			mapCmds.append("tempFiles/output_{:03d}.wav".format(index))
+			
+			index += 1
+		
+		#print(filterString)
+		#filterString += "\""
+		cmd.append("; ".join(filterString))
+		
+		cmd += mapCmds
+		
+		
+		
+		runCommand(cmd)
+		
+		#print(" ".join(cmd))
+		#print(frameCount)
+		
+		#exit(1)
+		
+		
 	
-
+		
 		
 		removeFile("tempOutput.wav")
+		removeFile("tempOutput2.wav")
 		removeFile("tempOutput.gsm")
 		removeFile("tempOutputFromGsm.wav")
 		
@@ -414,6 +561,28 @@ class ITFile:
 			print("idk what to do dumbass, either split the song, increase the segment time, or fix shit")
 			exit(1)
 		#print(self.sampleFilenames)
+		
+		vals = []
+		
+		for filename in self.sampleFilenames[:-1]:
+			waveFile = wave.open(filename)
+			#print( waveFile.getnframes())
+			temp = waveFile.getnframes()# / waveFile.getframerate()
+			waveFile.close()
+			vals.append(temp)
+		
+		minVal = min(vals)
+		maxVal = max(vals)
+		difVal = maxVal - minVal
+		secondsCount = difVal / GBASAMPLERATE
+		
+		print(CYAN + "min: {:f}  max: {:f}  dif: {:f} which is {:f} seconds".format(minVal, maxVal, difVal, secondsCount) + RESET)
+		
+		if secondsCount > 0.01:
+			print("somethings fucked")
+			exit(1)
+			
+		#exit(1)
 		
 		
 		pass
@@ -481,7 +650,11 @@ class ITFile:
 		bytes += struct.pack("B", 64)
 		
 		# flags vol 
-		bytes += struct.pack("B", 0x0B)
+		# turning on pingpong sustain,,, to maybe stop the blips between notes?
+		#bytes += struct.pack("B", 0x0B | 0x80 | 0x20) 
+		# ACTUALLY NO, BC THAT WILL FUCK UP THE END OF THE SONG,,, BUT DOES IT HELP?
+		# ya know what? im just going to ,,,, hope this doesnt happen.
+		bytes += struct.pack("B", 0x0B) 
 		
 		# default vol 
 		bytes += struct.pack("B", 64)
@@ -508,13 +681,14 @@ class ITFile:
 		bytes += struct.pack("I", 0)
 	
 		# C5 (middle C) speed
-		bytes += struct.pack("I", 9000)
+		bytes += struct.pack("I", GBASAMPLERATE)
 		
 		# Sustain loop beginning
 		bytes += struct.pack("I", 0)
 		
 		# Sustain loop end
-		bytes += struct.pack("I", 0)
+		#bytes += struct.pack("I", 0)
+		bytes += struct.pack("I", fileSampleCount)
 		
 		sampleDataOffset = len(bytes)
 		# Sample pointer
@@ -627,7 +801,7 @@ class ITFile:
 				patternBytes += struct.pack("B", 0x02)
 			else:
 				patternBytes += struct.pack("B", 0x01)
-				patternBytes += struct.pack("B", i)
+				patternBytes += struct.pack("B", i+1)
 			
 			# nullterm
 			patternBytes += struct.pack("B", 0)
@@ -740,12 +914,19 @@ class ITFile:
 		# "globvol": 128,
 		bytes += struct.pack("B", 128)
 		# "mixvol": 48,
-		bytes += struct.pack("B", 48)
+		#bytes += struct.pack("B", 48)
+		bytes += struct.pack("B", 128) # actually becomes 255 for some reason
+		
+		# does this control synth or sampkle vol??
+		#bytes += struct.pack("B", 255)
+		
+		
 		# "initspeed": 24,
 		#bytes += struct.pack("B", 24)
+		bytes += struct.pack("B", self.tickValue)
 		#bytes += struct.pack("B", 21)
 		#bytes += struct.pack("B", 18)
-		bytes += struct.pack("B", 15)
+		#bytes += struct.pack("B", 15)
 		# "inittempo": 60,
 		bytes += struct.pack("B", 60)
 		# "pansep": 128,
@@ -834,6 +1015,26 @@ class ITFile:
 		# the actual file seems to put my name in it at the end, even though i dont believe that is in the spec
 		# wait no! it is
 		
+		# sample vol is here, for some reason?
+		#bytes += struct.pack("B", 0xFF)
+		
+		
+		
+		# i have no clue, i wanted to set sample vol, which is down here for some reason
+		footerBytes = [
+		0x53, 0x54, 0x50, 0x4D, 0x2E, 0x2E, 0x2E, 0x43, 0x02, 0x00, 0x01, 0x00,
+		0x2E, 0x2E, 0x4D, 0x54, 0x01, 0x00, 0x00, 0x2E, 0x4D, 0x4D, 0x50, 0x04,
+		0x00, 0x04, 0x00, 0x00, 0x00, 0x56, 0x57, 0x53, 0x4C, 0x04, 0x00, 0x00,
+		0x04, 0x31, 0x01, 0x2E, 0x41, 0x50, 0x53, 0x04, 0x00, 0xFF, 0x00, 0x00,
+		0x00, 0x56, 0x54, 0x53, 0x56, 0x04, 0x00, 0x30, 0x00, 0x00, 0x00, 0x2E,
+		0x46, 0x53, 0x4D, 0x10, 0x00, 0x81, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x05,
+		0x00, 0x00, 0x00, 0x80, 0x01, 0xD0, 0x01, 0x88, 0x01, 0x43, 0x43, 0x4F,
+		0x4C, 0x04, 0x00, 0xFF, 0xA8, 0xA8, 0x00
+		]
+		
+		for b in footerBytes:
+			bytes += struct.pack("B", b)
+		
 		bytes += bytearray("INANA", "ascii")
 		
 		memoryView = memoryview(bytes)
@@ -896,17 +1097,46 @@ def doFile(filename):
 	print("done converting {:s}".format(filename))
 	
 	pass
+
+def getNeededFiles():
+
+	res = []
+
+
+
+
+	return res
+	
+def copyNeededMusic():
+
+
+
+
+	pass
 	
 def convertAllFiles():
 
 	os.chdir(os.path.dirname(__file__))
-
-	files = ["msc_voidsong.ogg"]
+	
+	if len(sys.argv) != 1:
+		copyNeededMusic()
+		exit(0)
+	
+	if os.path.exists("./formattedOutput"):
+		shutil.rmtree("./formattedOutput")
+		
+	os.mkdir("./formattedOutput/")
+	
+	files = getNeededFiles()
+	#files = ["msc_voidsong.ogg", "msc_013.ogg"]
+	#files = ["msc_013.ogg"]
+	#files = ["msc_voidsong.ogg"]
 	
 	for file in files:
 		doFile(file)
 		
-	
+	shutil.rmtree("tempFiles")
+	createFolder("tempFiles")
 
 
 

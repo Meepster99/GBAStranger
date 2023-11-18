@@ -307,6 +307,7 @@ void Game::resetRoom(bool debug) {
 		findNextRoom();
 	}
 	
+	entityManager.player->locustCount = tileManager.getLocustCount();
 	if(!debug) {
 		if(!entityManager.player->isVoided) {
 			if(entityManager.player->locustCount > 0) { 
@@ -316,7 +317,7 @@ void Game::resetRoom(bool debug) {
 			}
 		}
 	}
-	entityManager.player->locustCount = tileManager.getLocustCount();
+	
 	
 	BN_LOG("reseting to room ", roomManager.currentRoomName());
 	
@@ -949,8 +950,11 @@ void Game::run() {
 	
 	
 	bn::music_items::msc_voidsong.play();
-	bn::music::set_pitch(2);
-	bn::music::set_tempo(0.5);
+	//bn::music_items::msc_013.play();
+	
+	
+	//bn::music::set_pitch(2);
+	//bn::music::set_tempo(0.5);
 
 	BN_LOG("starting main gameloop");
 	while(true) {
