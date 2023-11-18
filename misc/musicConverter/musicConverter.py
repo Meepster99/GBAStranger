@@ -330,7 +330,7 @@ class ITFile:
 
 	def __init__(self, filename):
 	
-		self.filename = filename
+		self.filename = os.path.basename(filename)
 		
 		# not efficient
 		#self.bytes = []
@@ -339,7 +339,8 @@ class ITFile:
 		
 		#self.f = None
 		
-		shutil.rmtree("tempFiles")
+		if os.path.isdir("tempFiles"):
+			shutil.rmtree("tempFiles")
 		createFolder("tempFiles")
 		
 		
@@ -362,7 +363,7 @@ class ITFile:
 		
 		runCommand([
 			'ffmpeg',
-			"-y", '-i', filename,
+			"-y", '-i', filename + ".ogg",
 			#"-ac", "1", "-af", "aresample=18157",
 			#"-ac", "1", "-af", "aresample=8000",
 			#"-ac", "1", "-af", "aresample=18000",
@@ -1051,8 +1052,8 @@ class ITFile:
 			
 			memoryView[index:index+4] = struct.pack("I", val)
 
-		
-		f = open(self.filename.rsplit(".", 1)[0] + ".it", "wb")
+		output = os.path.join("./formattedOutput/", self.filename.rsplit(".", 1)[0] + ".it")
+		f = open(output, "wb")
 		f.write(bytes)
 		f.close()
 		
@@ -1061,6 +1062,8 @@ class ITFile:
 # 
 	
 def doFile(filename):
+
+	
 
 	print("converting {:s}".format(filename))
 	
@@ -1091,7 +1094,9 @@ def doFile(filename):
 	
 	#removeFile("tempOutput.wav")
 
-	test = ITFile(filename)
+	inputPath = os.path.join("../ExportData/Exported_Sounds/audiogroup_music/", filename)
+	
+	test = ITFile(inputPath)
 	test.write()
 	
 	print("done converting {:s}".format(filename))
@@ -1100,16 +1105,48 @@ def doFile(filename):
 
 def getNeededFiles():
 
-	res = []
+	codeFolder = "../../code/src/"
+	
+	codeFiles = [os.path.join(codeFolder, f) for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
+	
+	codeFiles.remove("../../code/src/dataWinIncludes.h")
+	
+	refs = set()
+	
+	# NOT ALL SOUNDS START WITH SND
+	pattern1 = r'bn::music_items::\w+.play\(\)\;'		
+	
+	for file in codeFiles:
+		with open(file, 'r', encoding='utf-8', errors='ignore') as f:
+			content = f.read()
+			matches = [ s.strip()[len("bn::music_items::"):-8] for s in re.findall(pattern1, content) ]
+			refs.update(matches)
+		
+	#refs.add("metal_pipe_falling_sound_effect")
+	#refs.add("egg")
+	#refs.add("void_stranger_ost_56")
 
+	#if os.path.basename(filename) == "cifdream":
+	#	return
+	
+	refs.remove("cifdream")
 
-
-
-	return res
+	return refs
 	
 def copyNeededMusic():
 
+	destPath = "../../code/audio/"
 
+	copyIfChanged("cifdream.xm", destPath)
+	
+	files = getNeededFiles()
+	
+	for file in files:
+		if not os.path.isfile(os.path.join("./formattedOutput/", file + ".it")):
+			doFile(file)
+		res = copyIfChanged(os.path.join("./formattedOutput/", file + ".it"), destPath)
+		if res:
+			print(CYAN + "copied over {:s}".format(file) + RESET)
 
 
 	pass
@@ -1128,6 +1165,8 @@ def convertAllFiles():
 	os.mkdir("./formattedOutput/")
 	
 	files = getNeededFiles()
+	#print(files)
+	#exit(1)
 	#files = ["msc_voidsong.ogg", "msc_013.ogg"]
 	#files = ["msc_013.ogg"]
 	#files = ["msc_voidsong.ogg"]
@@ -1135,10 +1174,11 @@ def convertAllFiles():
 	for file in files:
 		doFile(file)
 		
-	shutil.rmtree("tempFiles")
-	createFolder("tempFiles")
+	if os.path.isdir("tempFiles"):
+		shutil.rmtree("tempFiles")
+	#createFolder("tempFiles")
 
-
+	copyNeededMusic()
 
 	pass
 
