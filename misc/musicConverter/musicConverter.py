@@ -17,6 +17,8 @@ import queue
 import time 
 from threading import Thread
 
+from pydub import AudioSegment
+
 
 from colorama import init, Fore, Back, Style
 
@@ -91,7 +93,7 @@ def removeFile(filePath):
 
 # gods this took forever 
 
-
+"""
 baseLength = 8 # wtf is this 
 defWidth = 17
 
@@ -102,6 +104,19 @@ lowerB = -8;
 upperB = 7;
 #defWidth = 17;
 mask = 0xFFFF;
+"""
+
+baseLength = 0
+
+lowerTab = [0, -1, -3, -7, -15, -31, -60, -124, -128];
+upperTab = [0, 1, 3, 7, 15, 31, 59, 123, 127];
+fetchA = 3;
+lowerB = -4;
+upperB = 3;
+defWidth = 9;
+mask = 0xFF;
+
+
 ITWidthChangeSize= [ 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ];
 
 bwt = []
@@ -198,7 +213,8 @@ def SquishRecurse(sWidth, lWidth, rWidth, width, offset, length, src):
 			xrwidth = rWidth if i == end else sWidth;
 
 			#is16 = sizeof(typename sample_t) > 1;
-			is16 = True
+			#is16 = True
+			is16 = False
 			wcsl = GetWidthChangeSize(xlwidth, is16);
 			wcss = GetWidthChangeSize(sWidth, is16);
 			wcsw = GetWidthChangeSize(width + 1, is16);
@@ -240,7 +256,8 @@ def CompressBlock(data, offset, actualLength):
 	# void ITCompression::CopySample(T *target, const T *source, SmpLength offset, SmpLength length, SmpLength skip)
 
 	blockSize = 0x8000
-	baseLength = min(actualLength, blockSize // 2);
+	#baseLength = min(actualLength, blockSize // 2);
+	baseLength = min(actualLength, blockSize // 1);
 	
 	
 	bwt = [defWidth] * baseLength
@@ -338,6 +355,7 @@ GBASAMPLERATE = 31000
 # i think that that is more critical
 
 # 58505516
+# 48861096
 
 
 class ITFile:
@@ -360,18 +378,7 @@ class ITFile:
 		
 		# TODO, REMOVE THIS STEP, NO POINT IN PIPING THROUGH GSM WHEN WE MURDER THE QUALITY ON OUR OWN LATER 
 		
-		# ffmpeg -i msc_voidsong.ogg -ac 1 -af 'aresample=18157' -strict unofficial -c:a gsm test2.gsm
-		"""
-		runCommand([
-			'ffmpeg',
-			"-y", '-i', filename,
-			#"-ac", "1", "-af", "aresample=18157",
-			#"-ac", "1", "-af", "aresample=8000",
-			"-ac", "1", "-af", "aresample=18000",
-			"-strict", "unofficial", "-c:a", "gsm",
-			"tempOutput.gsm"
-			])
-		"""
+	
 		
 		# looking back on things,,, does the bs im doing with freq changing even help at all??
 		
@@ -393,99 +400,31 @@ class ITFile:
 		
 		
 		
-		#print(self.duration)
-		#print(self.tickValue)
-		#print(self.segmentTime)
-		#exit(1)
-		
-		#print(self.duration)
-		#exit(1)
-			
-		# gods 
-		# if i downsample to 16000 instead of 18157 then,,,,, '
-		# i can pitch up by a factor of 2 i butano,,,, which will also reduce length by 2,,,,
-			
-		
-		# fixes pitch, cost filesize?
-		# there doesnt seem to be a good way around this.
-		# ffmpeg -i .\tempOutput.gsm -t 00:05:10.58 -filter:a "asetrate=18157" tempOutputFromGsm.wav
-		
-		#speed_factor = 18157 / 8000
-		#speed_factor = 2
-		# ffmpeg -i .\tempOutput.gsm -t 00:05:10.58 tempOutputFromGsm.wav
-		"""
-		runCommand([
-			'ffmpeg',
-			#"-y", '-i', "tempOutput.gsm",
-			"-y", '-i', "tempOutput.wav",
-			#"-t", "00:05:10.58",
-			#"-t", "155.29",
-			#'-filter:a', f'atempo={speed_factor}',
-			#'-filter:a', 'asetrate=9000', 
-			'-filter:a', 'asetrate={:d}'.format(GBASAMPLERATE), 
-			#"-af", "aresample=8000",
-			"tempOutputFromGsm.wav"
-			])
-			
-		runCommand([
-			'ffmpeg',
-			"-y", '-i', "tempOutputFromGsm.wav",
-			#'-filter:a', f'atempo={speed_factor}',
-			#'-filter_complex', f'[0:a]asetrate=8000*{speed_factor},atempo={speed_factor}[outa]',
-			#'-filter_complex', f'[0:a]asetrate=8000*{speed_factor}[outa]',
-			#'-filter_complex', f'[0:a]atempo={speed_factor}[outa]',
-			#'-map', '[outa]',
-			#"-af", "aresample=8000",
-			"tempOutput.wav"
-			])
-		"""
-		
-		"""
-		# ffmpeg -i test.wav -f segment -segment_time 2 -c copy tempFiles/output_%03d.wav
-		runCommand([
-			'ffmpeg',
-			"-y", '-i', "tempOutput.wav",
-			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			#"-f", "segment", "-segment_time", "2", 
-			#"-f", "segment", "-segment_time", "4", 
-			#"-f", "segment", "-segment_time", "3.5", 
-			#"-f", "segment", "-segment_time", "3", 
-			#"-f", "segment", "-segment_time", "2.5", # fucking edging getting to 0xFF, im at 248 on voided with this 
-			#"-f", "segment", "-segment_time", "2.000",
-			"-f", "segment", "-segment_time", "{:f}".format(self.segmentTime),
-			#"-c", "copy", 
-			#"-af", "aresample=18157",
-			"tempFiles/output_%03d.wav"
-			])
-		"""
-		
 		runCommand([
 			'ffmpeg',
 			"-y", '-i', self.filename + ".wav",
 			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
+			#"-acodec", "pcm_s8",
 			self.filename + "2.wav"
 			])
 		
-		#ffmpeg -i input_audio.wav -filter_complex "[0:a]asplit=n=2000[S1][S2][S3]..." -map "[S1]" output1.wav -map "[S2]" output2.wav -map "[S3]" output3.wav
-		# ffmpeg -i input_audio.wav -filter_complex "[0:a]asplit=n=2000[S]" -map "[S]" output_%03d.wav
 		
-		#filterParam = "[0:a]aresample={:d},asplit=33000[S]".format(GBASAMPLERATE)
+		#temp = AudioSegment.from_wav(self.filename + "2.wav")
+		#temp.set_sample_width(1)
+		#temp.export(self.filename + "3.wav", "wav")
+		#temp.export(self.filename + "3.pcm", format='s8')
 		
-		""""
-		runCommand([
-			'ffmpeg',
-			"-y", '-i', "tempOutput2.wav",
-			#"-ac", "1",# "-af", "aresample={:d}".format(GBASAMPLERATE),
-			"-filter_complex", "[0:a]asplit=33000[S]", #"-map", "\"[S]\"",
-			"tempFiles/output_%03d.wav"
-			])
-		"""
+		#return
+		
+		#frameCount = os.path.getsize(self.filename + "3.pcm")
+		#self.duration = frameCount / GBASAMPLERATE
 		
 		waveFile = wave.open(self.filename + "2.wav")
-		#frameCount = waveFile.getnframes()
 		frameCount = waveFile.getnframes()
 		self.duration = waveFile.getnframes() / waveFile.getframerate()
 		waveFile.close()
+		
+		#temp = AudioSegment.from_pcm(self.filename + "3.wav")
 		
 		
 		self.tickValue = math.ceil( (1440/60) * ( (self.duration/254)/1))
@@ -559,11 +498,8 @@ class ITFile:
 	
 		
 		
-		removeFile(self.filename + ".wav")
-		removeFile(self.filename + "2.wav")
-		#removeFile("tempOutput2.wav")
-		#removeFile("tempOutput.gsm")
-		#removeFile("tempOutputFromGsm.wav")
+		#removeFile(self.filename + ".wav")
+		#removeFile(self.filename + "2.wav")
 		
 			
 		
@@ -597,6 +533,21 @@ class ITFile:
 		if secondsCount > 0.01:
 			print("somethings fucked")
 			exit(1)
+			
+			
+		for filename in self.sampleFilenames:
+			
+			
+			output = filename.rsplit(".", 1)[0] + ".pcm"
+			
+			temp = AudioSegment.from_wav(filename)
+			temp.export(output, format='s8')
+		
+		for filename in self.sampleFilenames:
+			removeFile(filename)
+			
+		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
+
 		
 		print(GREEN + "marinating {:s}".format(self.filename) + RESET)
 		
@@ -615,18 +566,30 @@ class ITFile:
 		# i have like,,, no clue what to do here
 		
 		# this duplicate file open is stupid.
-		wavFile = wave.open(sampleFilename)
-		sampleCount = wavFile.getnframes() # once again, var name duplication 
-		wavBytes = wavFile.readframes(sampleCount)
-		wavFile.close()
 		
-		wavSamples = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)
+		#wavFile = wave.open(sampleFilename)
+		#sampleCount = wavFile.getnframes() # once again, var name duplication 
+		#wavBytes = wavFile.readframes(sampleCount)
+		#wavFile.close()
+		
+		sampleCount = os.path.getsize(sampleFilename)
+		with open(sampleFilename, 'rb') as file:
+			wavBytes = bytearray(file.read())
+		
+		
+		#wavSamples = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)
+		
+		wavSignedBytes = struct.unpack('<' + 'b' * (len(wavBytes) // 1), wavBytes)
 		
 		# https://github.com/OpenMPT/openmpt/blob/47fc65b7b01455021284e3a5251ef16736bcd077/soundlib/ITCompression.cpp
 		# this is going to suck.
 		# https://github.com/marmalade/tune4Airplay/blob/master/trunk/docs/ITTECH.TXT
 	
-		res = Compress(wavSamples, sampleCount)
+		#res = Compress(wavSamples, sampleCount)
+		res = Compress(wavSignedBytes, sampleCount)
+		
+		
+		
 		#Compress(wavBytes, len(wavBytes))
 		
 		
@@ -644,10 +607,12 @@ class ITFile:
 		# also, if the sample is converted in any form during,,,, the import to openmpt 
 		# having to replicate that here might be a deadend
 	
-		wavFile = wave.open(sampleFilename)
+		#wavFile = wave.open(sampleFilename)
 		# shit var name, i should have this be a lot different from samplecount/samplefilenames, but im tired
-		fileSampleCount = wavFile.getnframes()
-		wavFile.close()
+		#fileSampleCount = wavFile.getnframes()
+		#wavFile.close()
+		
+		fileSampleCount = os.path.getsize(sampleFilename)
 	
 		# return the offset where we started writing
 		offsetRes = len(bytes)
@@ -672,7 +637,10 @@ class ITFile:
 		#bytes += struct.pack("B", 0x0B | 0x80 | 0x20) 
 		# ACTUALLY NO, BC THAT WILL FUCK UP THE END OF THE SONG,,, BUT DOES IT HELP?
 		# ya know what? im just going to ,,,, hope this doesnt happen.
-		bytes += struct.pack("B", 0x0B) 
+		#bytes += struct.pack("B", 0x0B) 
+		#bytes += struct.pack("B", 0x0B) 
+		#bytes += struct.pack("B", 0b1011) 
+		bytes += struct.pack("B", 0b1001) 
 		
 		# default vol 
 		bytes += struct.pack("B", 64)
@@ -686,6 +654,7 @@ class ITFile:
 		# convert flags
 		#bytes += struct.pack("B", 0x01)
 		bytes += struct.pack("B", 0x01 | 0x04)
+		#bytes += struct.pack("B", 0x00 | 0x04)
 		
 		# default pan
 		bytes += struct.pack("B", 32)
@@ -1075,8 +1044,8 @@ class ITFile:
 		f.write(bytes)
 		f.close()
 		
-		if os.path.isdir(self.filename):
-			shutil.rmtree(self.filename)
+		#if os.path.isdir(self.filename):
+		#	shutil.rmtree(self.filename)
 		
 		pass
 	
