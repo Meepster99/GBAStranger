@@ -354,6 +354,22 @@ def Compress(mptSampleData, maxLength):
 # https://github.com/devkitPro/mmutil/blob/8b0792e45852b58fda4def4d263e246d3a73662d/source/msl.c#L55
 # msl, not main, seems to have what i need 
 # TMP_SAMP is,,, the file whichsize i need to fix.
+# ok. 
+# the only feasable way this bs would ever occur is:
+# REMOVE ALL CALLS TO BN::CORE::UPDATE, EVERYTHING NEEDS TO GO THROUGH DOBUTANOUPDATE
+# inside dobutanoupdate, BEFORE we call a frame, we would decompress the pcm data, and 
+# then copy that over into maxmod somehow 
+# the issue?
+# 31000/60 ~= 516.66 bytes per frame.
+# i could write my own comp/decom algo, and have it be fast 
+# the issue then becomes,,, is that even how fucking sound works?
+# is maxmod called via interrupt behind the scenes???
+# will all this effort be worth it at all
+# ideally, instead of hijacking on maxmod, ill literally just rewrite maxmod's funcs.
+# but also,,, does maxmod run during vblank? bc ideally i would give my extra cpu cycles to doing decomp 
+# which also means,,, gods 
+# which means that my general performance levels now matter.
+
 
 #GBASAMPLERATE = 9000
 GBASAMPLERATE = 12000
@@ -1127,12 +1143,14 @@ def getNeededFiles():
 	refs = set()
 	
 	# NOT ALL SOUNDS START WITH SND
-	pattern1 = r'bn::music_items::\w+.play\(\)\;'		
+	#pattern1 = r'bn::music_items::\w+.play\(\)\;'		
+	pattern1 = r'bn::music_items::\w+'		
 	
 	for file in codeFiles:
 		with open(file, 'r', encoding='utf-8', errors='ignore') as f:
 			content = f.read()
-			matches = [ s.strip()[len("bn::music_items::"):-8] for s in re.findall(pattern1, content) ]
+			#matches = [ s.strip()[len("bn::music_items::"):-8] for s in re.findall(pattern1, content) ]
+			matches = [ s.strip()[len("bn::music_items::"):] for s in re.findall(pattern1, content) ]
 			refs.update(matches)
 		
 	#refs.add("metal_pipe_falling_sound_effect")

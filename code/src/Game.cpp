@@ -297,6 +297,16 @@ void Game::changeMusic() {
 	int index = 0;
 	int temp = 0;
 	
+	auto doPlay = [](const bn::music_item& item) -> void {
+		
+		if(bn::music::playing() && bn::music::playing_item() == item) {
+			return;
+		}
+		
+		item.play();
+		
+	};
+	
 	while(temp < 255) {
 		if(roomIndex == temp || roomIndex == temp + 1) {
 			bn::music::stop();
@@ -307,8 +317,8 @@ void Game::changeMusic() {
 	}
 	
 	if(roomIndex == 30) {
-		// tail
-		bn::music_items::msc_007.play();
+		// tail!
+		doPlay(bn::music_items::msc_007);
 		return;
 	}
 
@@ -324,30 +334,27 @@ void Game::changeMusic() {
 	*/
 		
 	if(roomIndex <= 28) {
-		bn::music_items::msc_001.play();
+		doPlay(bn::music_items::msc_001);
 	} else if(roomIndex <= 56) {
-		bn::music_items::msc_dungeon_wings.play();
+		doPlay(bn::music_items::msc_dungeon_wings);
 	} else if(roomIndex <= 84) {
-		bn::music_items::msc_beecircle.play();		
+		doPlay(bn::music_items::msc_beecircle);	
 	} else if(roomIndex <= 112) {
-		bn::music_items::msc_dungeongroove.play();
+		doPlay(bn::music_items::msc_dungeongroove);
 	} else if(roomIndex <= 140) {
-		bn::music_items::msc_013.play();
+		doPlay(bn::music_items::msc_013);
 	} else if(roomIndex <= 168) {
-		bn::music_items::msc_gorcircle_lo.play();
+		doPlay(bn::music_items::msc_gorcircle_lo);
 	} else if(roomIndex <= 196) {
-		bn::music_items::msc_levcircle.play();
+		doPlay(bn::music_items::msc_levcircle);
 	} else if(roomIndex <= 224) {
-		bn::music_items::msc_cifcircle.play();
+		doPlay(bn::music_items::msc_cifcircle);
 	} else {
 		bn::music::stop();
 	}
 	
 	// voided song is msc_voidsong
-	// mon secret area msc_monstrail
-	// bee music??? (is it msc_beesong)
-	// dis msc_endless
-	
+
 	
 }
 
