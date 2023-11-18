@@ -296,6 +296,36 @@ void Game::changeMusic() {
 
 	auto doPlay = [](const bn::music_item& item) -> void {
 		
+		/*
+		
+		an idea. 
+		build a whole different rom for each different song.
+		custom hardware(ill do something like writing to a certain rom address) 
+		(maybe theres a way to directly,,, get butano log calls?)
+		would switch the banks??
+		at which point, i can do whatever i want.
+		the issue? i hated the previous pcb software i used
+		
+		https://github.com/HDR/NintendoPCBs/tree/master/AGB-E02-20
+		
+		or,,, arduino? well for testing yes, but past that no
+		
+		fpga? i could do this with inline circuitry tho
+		maybe,,, depending on how this works i could clock(write) to a buffer 
+		which just has lines constantly going to the rom chip?
+		
+		lets be greedy and say i want every song.
+		thats 76. getting that down to 64 would be nice
+		but,,,, things arent always nice. 128 it is, and might as well just go up to 256 so i can 
+		say i need to track 8 bits
+		
+		this is going to need to be fpga, if i end up doing it 
+		and, considering that im basically done with the main game
+		and dont want this project to end, i probs will
+		
+		
+		*/
+		
 		if(bn::music::playing() && bn::music::playing_item() == item) {
 			return;
 		}
