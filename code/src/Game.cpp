@@ -304,6 +304,11 @@ void Game::changeMusic() {
 		
 	};
 	
+	if(roomIndex == 254 && mode == 2) {
+		doPlay(bn::music_items::msc_voidsong);
+		return;
+	}
+	
 	int index = 0;
 	int temp = 0;
 	

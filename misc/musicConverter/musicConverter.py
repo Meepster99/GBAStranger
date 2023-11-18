@@ -83,12 +83,18 @@ sampleConvertFunc = math.floor
 #sampleConvertFunc = math.ceil
 
 # sample rate of output
-GBASAMPLERATE = 9000
+GBASAMPLERATE = 8400
+#GBASAMPLERATE = 9000
 #GBASAMPLERATE = 14000
 #GBASAMPLERATE = 24000
 #GBASAMPLERATE = 21000
 #GBASAMPLERATE = 27000
 #GBASAMPLERATE = 31000
+
+# if you want a song to have a different sample rate, put it here
+customSampleRate = {
+	"msc_voidsong": 12000
+}
 
 #
 
@@ -148,6 +154,9 @@ class ITFile:
 			
 		samplesPerSegment = int(samplesPerSegment)
 		
+		if samplesPerSegment / GBASAMPLERATE > 2:
+			print(RED + "sample length is {:f} which may be to long, and might cause issues with playback!".format(samplesPerSegment / GBASAMPLERATE) + RESET)
+		
 		#ffmpeg -i input.wav -filter_complex "[0]atrim=start=0:end=9999[a]; [0]atrim=start=10000:end=19999[b]; [0]atrim=start=20000:end=29999[c]; ..." -map "[a]" output_1.wav -map "[b]" output_2.wav -map "[c]" output_3.wav ...
 		# do not ask.
 		
@@ -164,6 +173,8 @@ class ITFile:
 			start = i
 			#end = min(i+samplesPerSegment-1, frameCount)
 			end = min(i+samplesPerSegment, frameCount)
+		
+			#end += samplesPerSegment//4
 		
 			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, end, index))
 			
@@ -285,7 +296,10 @@ class ITFile:
 		sampleCount = wavFile.getnframes()
 		wavBytes = wavFile.readframes(sampleCount)
 		wavFile.close()
+		
 		bytes += struct.pack("H", len(wavBytes))
+		# why did doing this stop the version error from occuring when opening mpt????
+		#bytes += struct.pack("H", len(wavBytes) - 2)
 		
 		
 		if is8Bit:
@@ -307,6 +321,7 @@ class ITFile:
 		
 		else:
 			bytes += wavBytes
+		
 		
 		# stupid, why didnt i need to do this previously???
 		return offsetRes+2
@@ -617,15 +632,8 @@ class ITFile:
 		#bytes += struct.pack("H", 0x0214)
 		bytes += struct.pack("H", 0x0214)
 		
-		# flags. unsure tbh 
-		# most conserning one is for if this is mono or not. bc it should be! but 73 says it is 
-		# switching to 72 doesnt,,, seem to cause problems tho?
-		#bytes += struct.pack("H", 73)
-		#bytes += struct.pack("H", 72) # KILL YOU'RE SELF
-		bytes += struct.pack("H", 0b00001000) # KILL YOU'RE SELF
-		#bytes += struct.pack("H", 0b00001100) # KILL YOU'RE SELF
-		
-		# 72 = 0100 1000
+		# flags.
+		bytes += struct.pack("H", 0b00001000)
 		
 		# special 
 		bytes += struct.pack("H", 6)
@@ -769,6 +777,14 @@ class ITFile:
 	
 def doFile(filename):
 
+	global GBASAMPLERATE
+	
+	backup = GBASAMPLERATE
+	
+	if filename in customSampleRate:
+		GBASAMPLERATE = customSampleRate[filename]
+		print(CYAN + "running {:s} with {:d} as the samplerate".format(filename, GBASAMPLERATE) + RESET)
+	
 	print(WHITE + "cooking {:s}".format(filename) + RESET)
 
 	inputPath = os.path.join(audioFolder, filename)
@@ -777,6 +793,8 @@ def doFile(filename):
 	test.write()
 	
 	print(WHITE + "done cooking {:s}".format(filename) + RESET)
+	
+	GBASAMPLERATE = backup
 	
 	pass
 
