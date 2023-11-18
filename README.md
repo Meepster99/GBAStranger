@@ -24,3 +24,6 @@ code), use `cargo doc --open --document-private-items`.
 If you have mGBA installed, you can build and run code directly using `cargo run`. To run with optimizations,
 use `cargo run --release`. 
 
+## License
+
+You can do whatever you want, provided you provide credit to Meepster99
