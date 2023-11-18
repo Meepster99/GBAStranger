@@ -24,19 +24,6 @@ WHITE = Fore.WHITE + Style.BRIGHT
 
 RESET = Style.RESET_ALL
 
-"""
-
-mission objective: read a file, edit a file, write a () file.
-there is like,, no documentation on the IT format tho, and gods the pattern table is one thing, but having 
-to adjust the number of samples??
-
-this is the best thing i could find 
-
-https://fileformats.fandom.com/wiki/Impulse_tracker
-
-
-"""
-
 #
 
 def runCommand(cmd):
@@ -73,50 +60,16 @@ def removeFile(filePath):
 	if os.path.isfile(filePath):
 		os.remove(filePath)
 
+#
 
-# 
+# folder containing audio files.
+audioFolder = "../ExportData/Exported_Sounds/audiogroup_music/"
 
-#Compress(src_samples, len(src_samples))
-		
-# 
+# path to code(butano dir), i could,, maybe have the makefile pass this in?
+codeFolder = "../../code/"
 
-# THERE IS NO REASON FOR IT TO GO SO LOW 
-# IS,,, IS DEVKIT CONVERTING MY 8BIT SAMPLES TO 16???
-# WHY 
-# it seems to,,, yea be doing exactly that.
-# it,, is has something which says "adding instrument templates"
-# is it,,,,,,,, commiting some sort of fuckery with that?
-# the # of instruments is the same as samples
-# https://github.com/devkitPro/mmutil/blob/8b0792e45852b58fda4def4d263e246d3a73662d/source/it.c#L510
-# going to,,,, gods 
-# probs going to need to make modifications to mmutil
-# https://github.com/devkitPro/mmutil/blob/8b0792e45852b58fda4def4d263e246d3a73662d/source/msl.c#L55
-# msl, not main, seems to have what i need 
-# TMP_SAMP is,,, the file whichsize i need to fix.
-# ok. 
-# the only feasable way this bs would ever occur is:
-# REMOVE ALL CALLS TO BN::CORE::UPDATE, EVERYTHING NEEDS TO GO THROUGH DOBUTANOUPDATE
-# inside dobutanoupdate, BEFORE we call a frame, we would decompress the pcm data, and 
-# then copy that over into maxmod somehow 
-# the issue?
-# 31000/60 ~= 516.66 bytes per frame.
-# i could write my own comp/decom algo, and have it be fast 
-# the issue then becomes,,, is that even how fucking sound works?
-# is maxmod called via interrupt behind the scenes???
-# will all this effort be worth it at all
-# ideally, instead of hijacking on maxmod, ill literally just rewrite maxmod's funcs.
-# but also,,, does maxmod run during vblank? bc ideally i would give my extra cpu cycles to doing decomp 
-# which also means,,, gods 
-# which means that my general performance levels now matter.
-
-# does mmutil convert to 8bit samples on its own? lets find out
-
-#GBASAMPLERATE = 9000
-
-
-# set to false for 16 bit.
-# i am using signed pcm for both. i would be better to use unsigned for 8 bit bc ffmpeg easily supports it, 
-# but i have had a lot of issues with it
+srcFolder = os.path.join(codeFolder, "src/")
+outputFolder = os.path.join(codeFolder, "audio/")
 
 is8Bit = True 
 #is8Bit = False 
@@ -128,6 +81,7 @@ GBASAMPLERATE = 9000
 #GBASAMPLERATE = 27000
 #GBASAMPLERATE = 31000
 
+#
 
 class ITFile:
 
@@ -164,17 +118,11 @@ class ITFile:
 			self.filename + ".wav"
 			])
 		
-		# does,,, lowing the shit and playing it at 2x speed actually help my filesize at all???
-		# increaseing the duration also like,,, fucks me in terms of sample count 
-
-		
-		codecCommand = ["-acodec", "pcm_u8"] if is8Bit else ["-acodec", "pcm_s16le"]
-		
+	
 		runCommand([
 			'ffmpeg',
 			"-y", '-i', self.filename + ".wav",
 			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			#+ codecCommand + [
 			self.filename + "2.wav"
 			])
 		
@@ -324,6 +272,10 @@ class ITFile:
 			
 			# is this,,,, ok????
 			# im just doing this instead of some other form of quantization
+			# this def,,, is not ideal.
+			# actually,,,, it seems to,,, be better? in most cases? 
+			# espically tail's music?
+			# dis however, im getting heavy artifacting. but tbh it sounds rlly cool
 			for i in range(0, len(temp)):
 				bytes += struct.pack("b", temp[i] // 256)
 		
@@ -808,12 +760,6 @@ class ITFile:
 		pass
 	
 # 
-
-# folder containing audio files.
-audioFolder = "../ExportData/Exported_Sounds/audiogroup_music/"
-
-# path to code.
-codeFolder = "../../code/src/"
 	
 def doFile(filename):
 
@@ -860,15 +806,13 @@ def doFile(filename):
 def getNeededFiles():
 
 	
+	codeFiles = [os.path.join(srcFolder, f) for f in os.listdir(srcFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
 	
-	codeFiles = [os.path.join(codeFolder, f) for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
-	
-	codeFiles.remove("../../code/src/dataWinIncludes.h")
+	if "../../code/src/dataWinIncludes.h" in codeFiles:
+		codeFiles.remove("../../code/src/dataWinIncludes.h")
 	
 	refs = set()
-	
-	# NOT ALL SOUNDS START WITH SND
-	#pattern1 = r'bn::music_items::\w+.play\(\)\;'		
+
 	pattern1 = r'bn::music_items::\w+'		
 	
 	for file in codeFiles:
@@ -877,32 +821,21 @@ def getNeededFiles():
 			#matches = [ s.strip()[len("bn::music_items::"):-8] for s in re.findall(pattern1, content) ]
 			matches = [ s.strip()[len("bn::music_items::"):] for s in re.findall(pattern1, content) ]
 			refs.update(matches)
-		
-	#refs.add("metal_pipe_falling_sound_effect")
-	#refs.add("egg")
-	#refs.add("void_stranger_ost_56")
 
-	#if os.path.basename(filename) == "cifdream":
-	#	return
-	
 	refs.remove("cifdream")
-
-	#refs = ["msc_001"]
 	
 	return refs
 	
 def copyNeededMusic():
 
-	destPath = "../../code/audio/"
-
-	copyIfChanged("cifdream.xm", destPath)
+	copyIfChanged("cifdream.xm", outputFolder)
 	
 	files = getNeededFiles()
 	
 	for file in files:
 		if not os.path.isfile(os.path.join("./formattedOutput/", file + ".it")):
 			doFile(file)
-		res = copyIfChanged(os.path.join("./formattedOutput/", file + ".it"), destPath)
+		res = copyIfChanged(os.path.join("./formattedOutput/", file + ".it"), outputFolder)
 		if res:
 			print(CYAN + "copied over {:s}".format(file) + RESET)
 
