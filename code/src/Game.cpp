@@ -945,7 +945,13 @@ void Game::run() {
 	//while(true) { doButanoUpdate(); }
 	
 	//effectsManager.exitGlow(Pos(5, 4));
-		
+	
+	
+	
+	bn::music_items::msc_voidsong.play();
+	bn::music::set_pitch(2);
+	bn::music::set_tempo(0.5);
+
 	BN_LOG("starting main gameloop");
 	while(true) {
 		

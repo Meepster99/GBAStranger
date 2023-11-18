@@ -42,6 +42,20 @@ ROMCODE     :=  GBST
 # SAVE ME O3
 # https://www.coranac.com/tonc/text/first.htm#ssec-notes-bad
 #USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra
+#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+
+# overloading BN_CFG_AUDIO_MAX_MUSIC_CHANNELS has been told by,,, many to be a very bad idea.
+# and honestly, going to 32 from 16 is probs overkill
+#  * By default Butano supports up to 16 music channels,
+# * but this limit can be increased by overloading the definition of @ref BN_CFG_AUDIO_MAX_MUSIC_CHANNELS.
+# *
+# * However, if it is possible don't do this, don't make the poor GBA suffer.
+
+# ^^from docs
+# and tbh, it doesnt help the poor quality caused by,, overtones or something?
+
+
+#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 #USERFLAGS   :=  -O3 
 #USERFLAGS   := 

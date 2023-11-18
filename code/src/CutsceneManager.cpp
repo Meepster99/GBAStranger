@@ -345,6 +345,7 @@ void CutsceneManager::cifDream() {
 	delay(60 * 5);
 	
 	bn::music_items::cifdream.play();
+	bn::music::set_pitch(1);
 	
 	delay(60 * 5);
 	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 1);
