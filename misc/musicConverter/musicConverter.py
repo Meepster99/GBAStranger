@@ -345,8 +345,19 @@ def Compress(mptSampleData, maxLength):
 # IS,,, IS DEVKIT CONVERTING MY 8BIT SAMPLES TO 16???
 # WHY 
 # it seems to,,, yea be doing exactly that.
+# it,, is has something which says "adding instrument templates"
+# is it,,,,,,,, commiting some sort of fuckery with that?
+# the # of instruments is the same as samples
+# https://github.com/devkitPro/mmutil/blob/8b0792e45852b58fda4def4d263e246d3a73662d/source/it.c#L510
+# going to,,,, gods 
+# probs going to need to make modifications to mmutil
+# https://github.com/devkitPro/mmutil/blob/8b0792e45852b58fda4def4d263e246d3a73662d/source/msl.c#L55
+# msl, not main, seems to have what i need 
+# TMP_SAMP is,,, the file whichsize i need to fix.
 
-GBASAMPLERATE = 9000
+#GBASAMPLERATE = 9000
+GBASAMPLERATE = 12000
+#GBASAMPLERATE = 14000
 #GBASAMPLERATE = 24000
 
 #GBASAMPLERATE = 21000
@@ -901,7 +912,12 @@ class ITFile:
 		# flags. unsure tbh 
 		# most conserning one is for if this is mono or not. bc it should be! but 73 says it is 
 		# switching to 72 doesnt,,, seem to cause problems tho?
-		bytes += struct.pack("H", 73)
+		#bytes += struct.pack("H", 73)
+		#bytes += struct.pack("H", 72) # KILL YOU'RE SELF
+		bytes += struct.pack("H", 0b00001000) # KILL YOU'RE SELF
+		#bytes += struct.pack("H", 0b00001100) # KILL YOU'RE SELF
+		
+		# 72 = 0100 1000
 		
 		# special 
 		bytes += struct.pack("H", 6)
