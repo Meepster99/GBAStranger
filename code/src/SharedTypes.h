@@ -1003,4 +1003,32 @@ constexpr unsigned hashString(const char *str) {
     return hash;
 }
 
+inline char* strstrCustom(const char* haystack, const char* needle) {
+    if (*needle == '\0') {
+        return (char*)haystack;  // Empty needle is always found
+    }
+
+    while (*haystack != '\0') {
+        const char* h = haystack;
+        const char* n = needle;
+
+        // Check for substring match
+        while (*n != '\0' && *h == *n) {
+            h++;
+            n++;
+        }
+
+        // If the entire substring is found, return the starting address
+        if (*n == '\0') {
+            return (char*)haystack;
+        }
+
+        haystack++;  // Move to the next character in the haystack
+    }
+
+    return NULL;  // Substring not found
+}
+
+
+
 

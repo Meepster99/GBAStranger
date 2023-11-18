@@ -349,12 +349,23 @@ void Game::changeMusic() {
 		doPlay(bn::music_items::msc_levcircle);
 	} else if(roomIndex <= 224) {
 		doPlay(bn::music_items::msc_cifcircle);
+	} else if(strstrCustom(roomManager.currentRoomName(), "_bee_\0") != NULL ||
+			strstrCustom(roomManager.currentRoomName(), "_misc_\0") != NULL) {
+		doPlay(bn::music_items::msc_beesong);
+	} else if(strstrCustom(roomManager.currentRoomName(), "_e_\0") != NULL) {
+		doPlay(bn::music_items::msc_endless);
+	} else if(strstrCustom(roomManager.currentRoomName(), "_mon_0\0") != NULL ||
+			strstrCustom(roomManager.currentRoomName(), "_test_\0") != NULL) {	
+		doPlay(bn::music_items::msc_monstrail);
 	} else {
 		bn::music::stop();
 	}
 	
 	// voided song is msc_voidsong
-
+	// mon secret area bn::music_items::msc_monstrail
+	// bee music??? (is it bn::music_items::msc_beesong)
+	// dis bn::music_items::msc_endless
+	
 	
 }
 
@@ -1022,6 +1033,8 @@ void Game::run() {
 	
 	//bn::music::set_pitch(2);
 	//bn::music::set_tempo(0.5);
+	
+	changeMusic();
 
 	BN_LOG("starting main gameloop");
 	while(true) {
