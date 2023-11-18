@@ -341,11 +341,18 @@ def Compress(mptSampleData, maxLength):
 		
 # 
 
-#GBASAMPLERATE = 9000
+# THERE IS NO REASON FOR IT TO GO SO LOW 
+# IS,,, IS DEVKIT CONVERTING MY 8BIT SAMPLES TO 16???
+# WHY 
+# it seems to,,, yea be doing exactly that.
+
+GBASAMPLERATE = 9000
 #GBASAMPLERATE = 24000
 
+#GBASAMPLERATE = 21000
+
 # 31k might,, be a bit to high for the gba to handle? it started having some static "blips" occasionally
-GBASAMPLERATE = 31000
+#GBASAMPLERATE = 31000
 
 # 27k still has,, some,, but less(i think?) 
 # but is it worth the quality drop?
@@ -498,8 +505,8 @@ class ITFile:
 	
 		
 		
-		#removeFile(self.filename + ".wav")
-		#removeFile(self.filename + "2.wav")
+		removeFile(self.filename + ".wav")
+		removeFile(self.filename + "2.wav")
 		
 			
 		
@@ -1044,8 +1051,8 @@ class ITFile:
 		f.write(bytes)
 		f.close()
 		
-		#if os.path.isdir(self.filename):
-		#	shutil.rmtree(self.filename)
+		if os.path.isdir(self.filename):
+			shutil.rmtree(self.filename)
 		
 		pass
 	
