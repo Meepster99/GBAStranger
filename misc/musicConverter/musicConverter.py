@@ -9,9 +9,7 @@ import json
 import wave
 import math
 
-
 from pydub import AudioSegment
-
 
 from colorama import init, Fore, Back, Style
 
@@ -71,9 +69,20 @@ codeFolder = "../../code/"
 srcFolder = os.path.join(codeFolder, "src/")
 outputFolder = os.path.join(codeFolder, "audio/")
 
+# true for 8 bit export, false for 16 bit
 is8Bit = True 
-#is8Bit = False 
 
+# when converting the 16 samples bit to 8 bit, using an external 
+# tool either didnt work(ffmpeg) or was slow(pydub) 
+# this chooses how you want those values to be parsed 
+# i like floor tbh, but round also could,, work
+# you can also replace this with a lambda if desired 
+
+sampleConvertFunc = math.floor
+#sampleConvertFunc = round
+#sampleConvertFunc = math.ceil
+
+# sample rate of output
 GBASAMPLERATE = 9000
 #GBASAMPLERATE = 14000
 #GBASAMPLERATE = 24000
@@ -87,41 +96,19 @@ class ITFile:
 
 	def __init__(self, filename):
 	
+		# tbh this doesnt need to be a class, and i barely used any members, but,, yea
+	
 		self.filename = os.path.basename(filename)
-		
-		# not efficient
-		#self.bytes = []
-		
-		#self.samples = []
-		
-		#self.f = None
 		
 		if os.path.isdir(self.filename):
 			shutil.rmtree(self.filename)
 		createFolder(self.filename)
 		
-		
-		# TODO, REMOVE THIS STEP, NO POINT IN PIPING THROUGH GSM WHEN WE MURDER THE QUALITY ON OUR OWN LATER 
-		
+		# it would be ideal if i wasnt writing anything to disk here, and doing everythin in ram.
 	
-		
-		# looking back on things,,, does the bs im doing with freq changing even help at all??
-		
 		runCommand([
 			'ffmpeg',
 			"-y", '-i', filename + ".ogg",
-			#"-ac", "1", "-af", "aresample=18157",
-			#"-ac", "1", "-af", "aresample=8000",
-			#"-ac", "1", "-af", "aresample=18000",
-			#"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE*2),
-			#"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			self.filename + ".wav"
-			])
-		
-	
-		runCommand([
-			'ffmpeg',
-			"-y", '-i', self.filename + ".wav",
 			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
 			self.filename + "2.wav"
 			])
@@ -136,7 +123,7 @@ class ITFile:
 		self.tickValue = math.ceil( (1440/60) * ( (self.duration/254)/1))
 		# WAIT TICKVALUE CAN GO LIKE,, TO 1????
 		# WAS IT BEFORE I WAS ON THE IT FORMAT THAT I LIKE,,, THOUGHT IT COULDNT??
-		self.tickValue = max(self.tickValue, 1)
+		self.tickValue = min(max(self.tickValue, 1), 255)
 		
 		while self.tickValue < 64:
 		
@@ -145,16 +132,19 @@ class ITFile:
 			samplesPerSegment = self.segmentTime * GBASAMPLERATE
 			
 			if not samplesPerSegment.is_integer():
-				print(RED + "samplesPerSegment wasnt a integer! panic!" + RESET)
-				print("samplesperseg: ", samplesPerSegment)
-				print("segmenttime: ", self.segmentTime)
-				print("tickval: ", self.tickValue)
+				#print(RED + "samplesPerSegment wasnt a integer! panic!" + RESET)
+				#print("samplesperseg: ", samplesPerSegment)
+				#print("segmenttime: ", self.segmentTime)
+				#print("tickval: ", self.tickValue)
 				self.tickValue += 1
 				continue
 				#exit(1)
 				#print("or dont")
 				
 			break
+		else:
+			print(RED + "couldnt find a valid tickrate??? this should never happen!" + RESET)
+			exit(1)
 			
 		samplesPerSegment = int(samplesPerSegment)
 		
@@ -199,6 +189,38 @@ class ITFile:
 			print("idk what to do dumbass, either split the song, increase the segment time, or fix shit")
 			exit(1)
 		#print(self.sampleFilenames)
+		
+		# FURTHER OPTIMIZATION COULD(and should) be done by identifying 
+		# duplicated parts of songs. 
+		# however, due to the process of slicing being used, those duplicates will,,, basically never happen 
+		# ALSO, this should occur,, in the 8bit area if 8bit slicing is occuring
+		# weirdly enough, monstrail had a duplicate(even when 16 bit)
+		# funny 
+		# i could,,,, use tick commands to alter the playback speed live in order to,, 
+		# have different length samples.
+		# it would be so nice if there was a "play sample after previous one ends" thing
+		# also, being able to compare samples between,,, 2 different songs??
+		
+		"""
+		fileHashes = set()
+		for filename in self.sampleFilenames:
+		
+			wavFile = wave.open(filename)
+			wavBytes = wavFile.readframes(wavFile.getnframes())
+			wavFile.close()
+			
+			#if is8Bit:
+			temp = bytearray()		
+			for v in struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes):
+				temp += struct.pack("b", v // 256)
+		
+			tempHash = hashlib.md5(temp).hexdigest()
+			if tempHash in fileHashes:
+				print("holy shit, 2 samples were identical?")
+				continue
+			fileHashes.add(tempHash)
+		"""
+		
 		
 		"""
 		vals = []
@@ -276,8 +298,12 @@ class ITFile:
 			# actually,,,, it seems to,,, be better? in most cases? 
 			# espically tail's music?
 			# dis however, im getting heavy artifacting. but tbh it sounds rlly cool
+			# i should (probs) round here instead of just floor dividing.
 			for i in range(0, len(temp)):
-				bytes += struct.pack("b", temp[i] // 256)
+				#bytes += struct.pack("b", temp[i] // 256)
+				val = sampleConvertFunc(temp[i] / 256)
+				val = min(max(int(val), -128), 127)
+				bytes += struct.pack("b", val)
 		
 		else:
 			bytes += wavBytes
@@ -677,15 +703,8 @@ class ITFile:
 		patternOffsetStart = len(bytes)
 		bytes += struct.pack("I", 0xFFFFFFFF)
 		
-		
-		
-		
 		# AFTER WRITING HEADERS, WE NEED 2 BYTES TO 0 THE EDIT HIST
 		bytes += struct.pack("H", 0)
-		
-		#insoffs = struct.unpack('<%dL' % data[2], f.read(data[2] * 4))
-		#smpoffs = struct.unpack('<%dL' % data[3], f.read(data[3] * 4))
-		#patoffs = struct.unpack('<%dL' % data[4], f.read(data[4] * 4))
 		
 		sampleOffsets = []
 		sampleDataPointerOffsets = []
@@ -702,17 +721,6 @@ class ITFile:
 			sampleDataOffsetRes = self.writeSample(bytes, sampleFilename)
 			sampleDataOffsets.append(sampleDataOffsetRes)
 		
-	
-		#memoryView[0:0+4] = bytearray("fuck", "ascii")
-		
-		# the actual file seems to put my name in it at the end, even though i dont believe that is in the spec
-		# wait no! it is
-		
-		# sample vol is here, for some reason?
-		#bytes += struct.pack("B", 0xFF)
-		
-		
-		
 		# i have no clue, i wanted to set sample vol, which is down here for some reason
 		footerBytes = [
 		0x53, 0x54, 0x50, 0x4D, 0x2E, 0x2E, 0x2E, 0x43, 0x02, 0x00, 0x01, 0x00,
@@ -722,13 +730,11 @@ class ITFile:
 		0x00, 0x56, 0x54, 0x53, 0x56, 0x04, 0x00, 0x30, 0x00, 0x00, 0x00, 0x2E,
 		0x46, 0x53, 0x4D, 0x10, 0x00, 0x81, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x05,
 		0x00, 0x00, 0x00, 0x80, 0x01, 0xD0, 0x01, 0x88, 0x01, 0x43, 0x43, 0x4F,
-		0x4C, 0x04, 0x00, 0xFF, 0xA8, 0xA8, 0x00
+		0x4C, 0x04, 0x00, 0xFF, 0xA8, 0xA8, 0x00, 0x49, 0x4E, 0x41, 0x4E, 0x41
 		]
 		
 		for b in footerBytes:
 			bytes += struct.pack("B", b)
-		
-		bytes += bytearray("INANA", "ascii")
 		
 		memoryView = memoryview(bytes)
 		
@@ -763,43 +769,14 @@ class ITFile:
 	
 def doFile(filename):
 
-	
-
-	print(WHITE + "converting {:s}".format(filename) + RESET)
-	
-	
-	"""
-	# SOX might generate smaller files????
-	# figure it out
-	
-	# ffmpeg -i msc_voidsong.ogg -ac 1 -af 'aresample=18157' -strict unofficial -c:a gsm test2.gsm
-	# gsm is smaller
-	# can the gsm format be split? can it be used as a sample?
-	
-	# also, multiple segs like, might be bad for filesize
-	
-	# ffmpeg -i .\tempOutput.gsm -t 00:05:10.58 tempOutputFromGsm.wav
-	# seems to,,, work,,,??? smaller filesize, pitchshift down tho
-	"""
-	
-	
-	
-	# after all this, we set the pitch up by a factor of 2 ingame.
-	# having a lower max pitch lowers the filesize, and,,, ugh 
-	# it seems to have some sacrifice of quality though
-	# but ill try to get filewriting actually working first though
-	
-	#exit(0)
-	# SET SAMPLE RATE INSIDE OPENMPT TO 18157
-	
-	#removeFile("tempOutput.wav")
+	print(WHITE + "cooking {:s}".format(filename) + RESET)
 
 	inputPath = os.path.join(audioFolder, filename)
 	
 	test = ITFile(inputPath)
 	test.write()
 	
-	print(WHITE + "done converting {:s}".format(filename) + RESET)
+	print(WHITE + "done cooking {:s}".format(filename) + RESET)
 	
 	pass
 
@@ -818,7 +795,6 @@ def getNeededFiles():
 	for file in codeFiles:
 		with open(file, 'r', encoding='utf-8', errors='ignore') as f:
 			content = f.read()
-			#matches = [ s.strip()[len("bn::music_items::"):-8] for s in re.findall(pattern1, content) ]
 			matches = [ s.strip()[len("bn::music_items::"):] for s in re.findall(pattern1, content) ]
 			refs.update(matches)
 
@@ -856,20 +832,10 @@ def convertAllFiles():
 	os.mkdir("./formattedOutput/")
 	
 	files = getNeededFiles()
-	#print(files)
-	#exit(1)
-	#files = ["msc_voidsong.ogg", "msc_013.ogg"]
-	#files = ["msc_013.ogg"]
-	#files = ["msc_voidsong.ogg"]
-	
 	
 	for file in files:
 		doFile(file)
-		
-	#if os.path.isdir("tempFiles"):
-	#	shutil.rmtree("tempFiles")
-	#createFolder("tempFiles")
-
+	
 	copyNeededMusic()
 
 	pass
