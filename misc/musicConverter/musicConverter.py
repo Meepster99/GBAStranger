@@ -9,6 +9,14 @@ import json
 import wave
 import math
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
+
+from poolQueue import PoolQueue
+from multiprocessing import Queue, Pool, cpu_count, Event
+import queue
+import time 
+from threading import Thread
+
 
 from colorama import init, Fore, Back, Style
 
@@ -47,7 +55,7 @@ will also be helpful
 
 def runCommand(cmd):
 
-	res = subprocess.run(cmd)
+	res = subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 		
 	if res.returncode != 0:
 		print(RED + " ".join(cmd) + " failed!" + RESET)
@@ -240,7 +248,7 @@ def CompressBlock(data, offset, actualLength):
 	sampleData = [ data[i] for i in range(offset, offset+baseLength)]
 
 	deltafy(sampleData)
-	#deltafy(sampleData)
+	deltafy(sampleData)
 
 	SquishRecurse(defWidth, defWidth, defWidth, defWidth - 2, 0, baseLength, sampleData);	   
 
@@ -326,6 +334,12 @@ GBASAMPLERATE = 31000
 # but is it worth the quality drop?
 #GBASAMPLERATE = 27000
 
+# worst case scenario, i think we reduce the bitdepth to 8 bit, and keep samples high 
+# i think that that is more critical
+
+# 58505516
+
+
 class ITFile:
 
 	def __init__(self, filename):
@@ -339,9 +353,9 @@ class ITFile:
 		
 		#self.f = None
 		
-		if os.path.isdir("tempFiles"):
-			shutil.rmtree("tempFiles")
-		createFolder("tempFiles")
+		if os.path.isdir(self.filename):
+			shutil.rmtree(self.filename)
+		createFolder(self.filename)
 		
 		
 		# TODO, REMOVE THIS STEP, NO POINT IN PIPING THROUGH GSM WHEN WE MURDER THE QUALITY ON OUR OWN LATER 
@@ -369,7 +383,7 @@ class ITFile:
 			#"-ac", "1", "-af", "aresample=18000",
 			#"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE*2),
 			#"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			"tempOutput.wav"
+			self.filename + ".wav"
 			])
 		
 		# does,,, lowing the shit and playing it at 2x speed actually help my filesize at all???
@@ -447,9 +461,9 @@ class ITFile:
 		
 		runCommand([
 			'ffmpeg',
-			"-y", '-i', "tempOutput.wav",
+			"-y", '-i', self.filename + ".wav",
 			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			"tempOutput2.wav"
+			self.filename + "2.wav"
 			])
 		
 		#ffmpeg -i input_audio.wav -filter_complex "[0:a]asplit=n=2000[S1][S2][S3]..." -map "[S1]" output1.wav -map "[S2]" output2.wav -map "[S3]" output3.wav
@@ -467,7 +481,7 @@ class ITFile:
 			])
 		"""
 		
-		waveFile = wave.open("tempOutput2.wav")
+		waveFile = wave.open(self.filename + "2.wav")
 		#frameCount = waveFile.getnframes()
 		frameCount = waveFile.getnframes()
 		self.duration = waveFile.getnframes() / waveFile.getframerate()
@@ -505,7 +519,7 @@ class ITFile:
 		# do not ask.
 		
 		cmd = [
-			"ffmpeg", "-i", "tempOutput2.wav", "-filter_complex"
+			"ffmpeg", "-i", self.filename + "2.wav", "-filter_complex"
 		]
 		
 		filterString = []
@@ -522,7 +536,7 @@ class ITFile:
 			
 			mapCmds.append("-map")
 			mapCmds.append("[{:d}]".format(index))
-			mapCmds.append("tempFiles/output_{:03d}.wav".format(index))
+			mapCmds.append(self.filename + "/output_{:03d}.wav".format(index))
 			
 			index += 1
 		
@@ -545,15 +559,16 @@ class ITFile:
 	
 		
 		
-		removeFile("tempOutput.wav")
-		removeFile("tempOutput2.wav")
-		removeFile("tempOutput.gsm")
-		removeFile("tempOutputFromGsm.wav")
+		removeFile(self.filename + ".wav")
+		removeFile(self.filename + "2.wav")
+		#removeFile("tempOutput2.wav")
+		#removeFile("tempOutput.gsm")
+		#removeFile("tempOutputFromGsm.wav")
 		
 			
 		
 		
-		self.sampleFilenames = [os.path.join("./tempFiles", f) for f in os.listdir("./tempFiles") if os.path.isfile(os.path.join("./tempFiles", f))]
+		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
 		
 		self.sampleCount = len(self.sampleFilenames)
 		
@@ -582,7 +597,9 @@ class ITFile:
 		if secondsCount > 0.01:
 			print("somethings fucked")
 			exit(1)
-			
+		
+		print(GREEN + "marinating {:s}".format(self.filename) + RESET)
+		
 		#exit(1)
 		
 		
@@ -667,7 +684,8 @@ class ITFile:
 		bytes += temp
 	
 		# convert flags
-		bytes += struct.pack("B", 0x01)
+		#bytes += struct.pack("B", 0x01)
+		bytes += struct.pack("B", 0x01 | 0x04)
 		
 		# default pan
 		bytes += struct.pack("B", 32)
@@ -1057,6 +1075,9 @@ class ITFile:
 		f.write(bytes)
 		f.close()
 		
+		if os.path.isdir(self.filename):
+			shutil.rmtree(self.filename)
+		
 		pass
 	
 # 
@@ -1151,6 +1172,22 @@ def copyNeededMusic():
 
 	pass
 	
+def convertSongWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
+
+	while not shouldStop.is_set():
+			
+		try:
+			data = jobQueue.get(timeout = 0.5)
+		except queue.Empty:
+			time.sleep(0.001)
+			continue
+			
+		data = data[0]
+			
+		res = doFile(data)
+		
+		returnQueue.put([data, True])
+	
 def convertAllFiles():
 
 	os.chdir(os.path.dirname(__file__))
@@ -1171,11 +1208,19 @@ def convertAllFiles():
 	#files = ["msc_013.ogg"]
 	#files = ["msc_voidsong.ogg"]
 	
+	pool = PoolQueue(convertSongWorker, cpuPercent = 0.75)
+	
+	pool.start()
+	
 	for file in files:
-		doFile(file)
+		#doFile(file)
+		pool.send([file])
+	
+	print(CYAN + "WAITING ON POOL JOIN" + RESET)
+	resData = pool.join()
 		
-	if os.path.isdir("tempFiles"):
-		shutil.rmtree("tempFiles")
+	#if os.path.isdir("tempFiles"):
+	#	shutil.rmtree("tempFiles")
 	#createFolder("tempFiles")
 
 	copyNeededMusic()

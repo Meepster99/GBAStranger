@@ -290,6 +290,67 @@ void Game::findNextRoom() {
 	
 }
 
+void Game::changeMusic() {
+	
+	int roomIndex = roomManager.roomIndex;
+	
+	int index = 0;
+	int temp = 0;
+	
+	while(temp < 255) {
+		if(roomIndex == temp || roomIndex == temp + 1) {
+			bn::music::stop();
+			return;
+		}
+		index++;
+		temp = 28 * index; 
+	}
+	
+	if(roomIndex == 30) {
+		// tail
+		bn::music_items::msc_007.play();
+		return;
+	}
+
+	/*
+	1-28 add
+	29-56 eus
+	57-84 bee
+	84-112 mon
+	113-140 tan
+	141-168 gor
+	169-196 lev
+	196-224 cif
+	*/
+		
+	if(roomIndex <= 28) {
+		bn::music_items::msc_001.play();
+	} else if(roomIndex <= 56) {
+		bn::music_items::msc_dungeon_wings.play();
+	} else if(roomIndex <= 84) {
+		bn::music_items::msc_beecircle.play();		
+	} else if(roomIndex <= 112) {
+		bn::music_items::msc_dungeongroove.play();
+	} else if(roomIndex <= 140) {
+		bn::music_items::msc_013.play();
+	} else if(roomIndex <= 168) {
+		bn::music_items::msc_gorcircle_lo.play();
+	} else if(roomIndex <= 196) {
+		bn::music_items::msc_levcircle.play();
+	} else if(roomIndex <= 224) {
+		bn::music_items::msc_cifcircle.play();
+	} else {
+		bn::music::stop();
+	}
+	
+	// voided song is msc_voidsong
+	// mon secret area msc_monstrail
+	// bee music??? (is it msc_beesong)
+	// dis msc_endless
+	
+	
+}
+
 void Game::resetRoom(bool debug) {
 	
 	BN_LOG("entered reset room with debug=",debug);
@@ -344,6 +405,8 @@ void Game::resetRoom(bool debug) {
 	
 	// this hopefully wont slow down debug moving much
 	cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	
+	changeMusic();
 	
 	loadLevel(debug);
 	if(!debug) {
@@ -948,9 +1011,6 @@ void Game::run() {
 	//effectsManager.exitGlow(Pos(5, 4));
 	
 	
-	
-	bn::music_items::msc_voidsong.play();
-	//bn::music_items::msc_013.play();
 	
 	
 	//bn::music::set_pitch(2);

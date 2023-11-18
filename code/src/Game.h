@@ -213,6 +213,8 @@ public:
 	void fadePalette(const int index);
 	int fadePaletteIndex = -1;
 
+	void changeMusic();
+	
 	void doButanoUpdate();
 	void uncompressData(u8 res[126], u8* input);
 	
