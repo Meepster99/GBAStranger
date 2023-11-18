@@ -91,252 +91,6 @@ def removeFile(filePath):
 
 # 
 
-# gods this took forever 
-
-"""
-baseLength = 8 # wtf is this 
-defWidth = 17
-
-lowerTab= [0, -1, -3, -7, -15, -31, -56, -120, -248, -504, -1016, -2040, -4088, -8184, -16376, -32760, -32768];
-upperTab = [0, 1, 3, 7, 15, 31, 55, 119, 247, 503, 1015, 2039, 4087, 8183, 16375, 32759, 32767];
-fetchA = 4;
-lowerB = -8;
-upperB = 7;
-#defWidth = 17;
-mask = 0xFFFF;
-"""
-
-baseLength = 0
-
-lowerTab = [0, -1, -3, -7, -15, -31, -60, -124, -128];
-upperTab = [0, 1, 3, 7, 15, 31, 59, 123, 127];
-fetchA = 3;
-lowerB = -4;
-upperB = 3;
-defWidth = 9;
-mask = 0xFF;
-
-
-ITWidthChangeSize= [ 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ];
-
-bwt = []
-
-packedLength = 0
-packedTotalLength = 0
-packedData = []
-bufferSize =  2 + 0xFFFF
-remBits = 0
-bitPos = 0
-byteVal = 0
-
-def deltafy(src):
-	
-	prevVal = 0
-	
-	for i in range(0, len(src)):
-		newVal = src[i]
-		src[i] = newVal - prevVal
-		prevVal = newVal
-
-def WriteBits(width, v):
-	global remBits
-	global bitPos
-	global byteVal 
-	while(width > remBits):
-		byteVal |= (v << bitPos);
-		width -= remBits;
-		v >>= remBits;
-		bitPos = 0;
-		remBits = 8;
-		WriteByte(byteVal);
-		byteVal = 0;
-	
-
-	if(width > 0):
-		byteVal |= ((v & ((1 << width) - 1)) << bitPos);
-		remBits -= width;
-		bitPos += width;
-	   
-def WriteByte(v):
-	global packedLength
-	global packedData
-	if(packedLength < bufferSize):
-		packedData[packedLength] = (v & 0xFF);
-		packedLength += 1
-	else:
-		print("loook,,, this should like never happen")
-		exit(1)
-	
-def GetWidthChangeSize(w, is16):
-	wcs = ITWidthChangeSize[w - 1];
-	if(w <= 6 and is16):
-		wcs+=1;
-	return wcs;
-	
-def ConvertWidth(curWidth, newWidth):
-	curWidth-=1;
-	newWidth-=1;
-	#MPT_ASSERT(newWidth != curWidth);
-	if(newWidth > curWidth):
-		newWidth-=1;
-	return newWidth;
-
-def SquishRecurse(sWidth, lWidth, rWidth, width, offset, length, src):
-	global bwt
-	global defWidth
-	global baseLength
-
-	
-	if width + 1 < 1:
-		#for(SmpLength i = offset; i < offset + length; i++):
-		for i in range(offset, offset+length):
-			bwt[i] = sWidth;
-		return;
-	
-
-	#MPT_ASSERT(width >= 0 && static_cast<unsigned int>(width) < std::size(Properties::lowerTab));
-
-	i = offset;
-	end = offset + length;
-
-	while(i < end):
-		if(src[i] >= lowerTab[width] and src[i] <= upperTab[width]):
-			start = i;
-			#// Check for how long we can keep this bit width
-			while(i < end and src[i] >= lowerTab[width] and src[i] <= upperTab[width]):
-				i+=1;
-
-			blockLength = i - start;
-			#xlwidth = start == offset ? lWidth : sWidth;
-			xlwidth = lWidth if start == offset else sWidth;
-			#xrwidth = i == end ? rWidth : sWidth;
-			xrwidth = rWidth if i == end else sWidth;
-
-			#is16 = sizeof(typename sample_t) > 1;
-			#is16 = True
-			is16 = False
-			wcsl = GetWidthChangeSize(xlwidth, is16);
-			wcss = GetWidthChangeSize(sWidth, is16);
-			wcsw = GetWidthChangeSize(width + 1, is16);
-
-			comparison = False;
-			if(i == baseLength):
-				keepDown = wcsl + (width + 1) * blockLength;
-				levelLeft = wcsl + sWidth * blockLength;
-
-				if(xlwidth == sWidth):
-					levelLeft -= wcsl;
-
-				comparison = (keepDown <= levelLeft);
-			else:
-				keepDown = wcsl + (width + 1) * blockLength + wcsw;
-				levelLeft = wcsl + sWidth * blockLength + wcss;
-
-				if(xlwidth == sWidth):
-					levelLeft -= wcsl;
-				if(xrwidth == sWidth):
-					levelLeft -= wcss;
-
-				comparison = (keepDown <= levelLeft);
-			#SquishRecurse(comparison ? (width + 1) : sWidth, xlwidth, xrwidth, width - 1, start, blockLength, sampleData);
-			
-			temp = width + 1 if comparison else sWidth
-			SquishRecurse(temp, xlwidth, xrwidth, width - 1, start, blockLength, src);
-		else:
-			bwt[i] = sWidth;
-			i+=1;
-
-def CompressBlock(data, offset, actualLength):
-
-	global bwt
-	global defWidth
-	global baseLength
-
-	# CopySample<typename Properties::sample_t>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
-	# void ITCompression::CopySample(T *target, const T *source, SmpLength offset, SmpLength length, SmpLength skip)
-
-	blockSize = 0x8000
-	#baseLength = min(actualLength, blockSize // 2);
-	baseLength = min(actualLength, blockSize // 1);
-	
-	
-	bwt = [defWidth] * baseLength
-
-	sampleData = [ data[i] for i in range(offset, offset+baseLength)]
-
-	deltafy(sampleData)
-	deltafy(sampleData)
-
-	SquishRecurse(defWidth, defWidth, defWidth, defWidth - 2, 0, baseLength, sampleData);	   
-
-	width = defWidth
-	for i in range(0, baseLength):
-		if bwt[i] != width:
-			if width <= 6:
-				#// Mode A: 1 to 6 bits
-				#MPT_ASSERT(width);
-				WriteBits(width, (1 << (width - 1)));
-				WriteBits(fetchA, ConvertWidth(width, bwt[i]));
-			elif width < defWidth:
-				#// Mode B: 7 to 8 / 16 bits
-				xv = (1 << (width - 1)) + lowerB + ConvertWidth(width, bwt[i]);
-				WriteBits(width, xv);
-			else:
-				#// Mode C: 9 / 17 bits
-				#MPT_ASSERT((bwt[i] - 1) >= 0);
-				WriteBits(width, (1 << (width - 1)) + bwt[i] - 1);
-			width = bwt[i];
-		
-		WriteBits(width, (sampleData[i]) & mask);
-		
-	WriteByte(byteVal);
-	packedData[0] = ((packedLength - 2) & 0xFF);
-	packedData[1] = ((packedLength - 2) >> 8);
-
-def Compress(mptSampleData, maxLength):
-	
-	global packedLength 
-	global packedTotalLength
-	global packedData
-	global byteVal 
-	global remBits 
-	global bitPos
-	
-	packedData = [0] * bufferSize
-	
-	res = bytearray()
-
-	packedTotalLength = 0
-	offset = 0;
-	remain = maxLength;
-	while(remain > 0):
-		#// Initialise output buffer and bit writer positions
-		packedLength = 2;
-		bitPos = 0;
-		remBits = 8;
-		byteVal = 0;
-
-		CompressBlock(mptSampleData, offset, remain)
-
-		#if(file) mpt::IO::WriteRaw(*file, packedData.data(), packedLength);
-		
-		# why??? why,, why?? why?????
-		for i in range(0, packedLength):
-			if packedData[i] > 0xFF or packedData[i] < 0:
-				print("wtf")
-				exit(1)
-			res.append(packedData[i])
-		
-		
-		packedTotalLength += packedLength;
-
-		offset += baseLength;
-		remain -= baseLength;
-		
-	packedData = [0]
-	
-	return res
-
 #Compress(src_samples, len(src_samples))
 		
 # 
@@ -568,10 +322,9 @@ class ITFile:
 			print("somethings fucked")
 			exit(1)
 			
-			
+		
+		print(CYAN + "converting {:s} to pcm".format(self.filename))
 		for filename in self.sampleFilenames:
-			
-			
 			output = filename.rsplit(".", 1)[0] + ".pcm"
 			
 			temp = AudioSegment.from_wav(filename)
@@ -612,22 +365,22 @@ class ITFile:
 		
 		
 		#wavSamples = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)
-		
-		wavSignedBytes = struct.unpack('<' + 'b' * (len(wavBytes) // 1), wavBytes)
+		#wavSignedBytes = struct.unpack('<' + 'b' * (len(wavBytes) // 1), wavBytes)
 		
 		# https://github.com/OpenMPT/openmpt/blob/47fc65b7b01455021284e3a5251ef16736bcd077/soundlib/ITCompression.cpp
 		# this is going to suck.
 		# https://github.com/marmalade/tune4Airplay/blob/master/trunk/docs/ITTECH.TXT
 	
 		#res = Compress(wavSamples, sampleCount)
-		res = Compress(wavSignedBytes, sampleCount)
+		#res = Compress(wavSignedBytes, sampleCount)
+		#bytes += res
 		
-		
+		bytes += wavBytes
 		
 		#Compress(wavBytes, len(wavBytes))
 		
 		
-		bytes += res
+		
 		#bytes += wavBytes
 
 		return offsetRes
@@ -674,7 +427,8 @@ class ITFile:
 		#bytes += struct.pack("B", 0x0B) 
 		#bytes += struct.pack("B", 0x0B) 
 		#bytes += struct.pack("B", 0b1011) 
-		bytes += struct.pack("B", 0b1001) 
+		#bytes += struct.pack("B", 0b1001) 
+		bytes += struct.pack("B", 0b0001) 
 		
 		# default vol 
 		bytes += struct.pack("B", 64)
@@ -686,8 +440,8 @@ class ITFile:
 		bytes += temp
 	
 		# convert flags
-		#bytes += struct.pack("B", 0x01)
-		bytes += struct.pack("B", 0x01 | 0x04)
+		bytes += struct.pack("B", 0x01)
+		#bytes += struct.pack("B", 0x01 | 0x04)
 		#bytes += struct.pack("B", 0x00 | 0x04)
 		
 		# default pan

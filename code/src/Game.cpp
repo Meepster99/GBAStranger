@@ -293,10 +293,7 @@ void Game::findNextRoom() {
 void Game::changeMusic() {
 	
 	int roomIndex = roomManager.roomIndex;
-	
-	int index = 0;
-	int temp = 0;
-	
+
 	auto doPlay = [](const bn::music_item& item) -> void {
 		
 		if(bn::music::playing() && bn::music::playing_item() == item) {
@@ -306,6 +303,9 @@ void Game::changeMusic() {
 		item.play();
 		
 	};
+	
+	int index = 0;
+	int temp = 0;
 	
 	while(temp < 255) {
 		if(roomIndex == temp || roomIndex == temp + 1) {
