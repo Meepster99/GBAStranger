@@ -9,13 +9,6 @@ import json
 import wave
 import math
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
-
-from poolQueue import PoolQueue
-from multiprocessing import Queue, Pool, cpu_count, Event
-import queue
-import time 
-from threading import Thread
 
 from pydub import AudioSegment
 
@@ -27,7 +20,7 @@ init(convert=True)
 RED = Fore.RED 
 GREEN = Fore.GREEN 
 CYAN = Fore.CYAN
-WHITE = Fore.WHITE
+WHITE = Fore.WHITE + Style.BRIGHT
 
 RESET = Style.RESET_ALL
 
@@ -36,19 +29,10 @@ RESET = Style.RESET_ALL
 mission objective: read a file, edit a file, write a () file.
 there is like,, no documentation on the IT format tho, and gods the pattern table is one thing, but having 
 to adjust the number of samples??
-https://github.com/pr2502/ittech maybe its time to rust?
-nvm the writer isnt implimented yet
-im going to have to do this on my own. fuck 
 
 this is the best thing i could find 
 
 https://fileformats.fandom.com/wiki/Impulse_tracker
-
-BASICALLY ALL CREDIT TO:
-https://github.com/ramen/pytrax/blob/master/pytrax/impulsetracker.py 
-will also be helpful
-
-
 
 
 """
@@ -60,6 +44,7 @@ def runCommand(cmd):
 	res = subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 		
 	if res.returncode != 0:
+		res = subprocess.run(cmd)
 		print(RED + " ".join(cmd) + " failed!" + RESET)
 		exit(1)
 		
@@ -124,26 +109,24 @@ def removeFile(filePath):
 # which also means,,, gods 
 # which means that my general performance levels now matter.
 
+# does mmutil convert to 8bit samples on its own? lets find out
 
 #GBASAMPLERATE = 9000
+
+
+# set to false for 16 bit.
+# i am using signed pcm for both. i would be better to use unsigned for 8 bit bc ffmpeg easily supports it, 
+# but i have had a lot of issues with it
+
+is8Bit = True 
+#is8Bit = False 
+
 GBASAMPLERATE = 9000
 #GBASAMPLERATE = 14000
 #GBASAMPLERATE = 24000
-
 #GBASAMPLERATE = 21000
-
-# 31k might,, be a bit to high for the gba to handle? it started having some static "blips" occasionally
-#GBASAMPLERATE = 31000
-
-# 27k still has,, some,, but less(i think?) 
-# but is it worth the quality drop?
 #GBASAMPLERATE = 27000
-
-# worst case scenario, i think we reduce the bitdepth to 8 bit, and keep samples high 
-# i think that that is more critical
-
-# 58505516
-# 48861096
+#GBASAMPLERATE = 31000
 
 
 class ITFile:
@@ -183,36 +166,23 @@ class ITFile:
 		
 		# does,,, lowing the shit and playing it at 2x speed actually help my filesize at all???
 		# increaseing the duration also like,,, fucks me in terms of sample count 
+
 		
-		
-		
-		
+		codecCommand = ["-acodec", "pcm_u8"] if is8Bit else ["-acodec", "pcm_s16le"]
 		
 		runCommand([
 			'ffmpeg',
 			"-y", '-i', self.filename + ".wav",
 			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			#"-acodec", "pcm_s8",
+			#+ codecCommand + [
 			self.filename + "2.wav"
 			])
 		
-		
-		#temp = AudioSegment.from_wav(self.filename + "2.wav")
-		#temp.set_sample_width(1)
-		#temp.export(self.filename + "3.wav", "wav")
-		#temp.export(self.filename + "3.pcm", format='s8')
-		
-		#return
-		
-		#frameCount = os.path.getsize(self.filename + "3.pcm")
-		#self.duration = frameCount / GBASAMPLERATE
 		
 		waveFile = wave.open(self.filename + "2.wav")
 		frameCount = waveFile.getnframes()
 		self.duration = waveFile.getnframes() / waveFile.getframerate()
 		waveFile.close()
-		
-		#temp = AudioSegment.from_pcm(self.filename + "3.wav")
 		
 		
 		self.tickValue = math.ceil( (1440/60) * ( (self.duration/254)/1))
@@ -240,13 +210,11 @@ class ITFile:
 			
 		samplesPerSegment = int(samplesPerSegment)
 		
-		#print(samplesPerSegment)
-		
 		#ffmpeg -i input.wav -filter_complex "[0]atrim=start=0:end=9999[a]; [0]atrim=start=10000:end=19999[b]; [0]atrim=start=20000:end=29999[c]; ..." -map "[a]" output_1.wav -map "[b]" output_2.wav -map "[c]" output_3.wav ...
 		# do not ask.
 		
 		cmd = [
-			"ffmpeg", "-i", self.filename + "2.wav", "-filter_complex"
+			"ffmpeg", "-y", "-i", self.filename + "2.wav", "-filter_complex"
 		]
 		
 		filterString = []
@@ -263,34 +231,16 @@ class ITFile:
 			
 			mapCmds.append("-map")
 			mapCmds.append("[{:d}]".format(index))
+			#mapCmds += codecCommand
 			mapCmds.append(self.filename + "/output_{:03d}.wav".format(index))
 			
 			index += 1
-		
-		#print(filterString)
-		#filterString += "\""
+			
 		cmd.append("; ".join(filterString))
 		
 		cmd += mapCmds
-		
-		
-		
+
 		runCommand(cmd)
-		
-		#print(" ".join(cmd))
-		#print(frameCount)
-		
-		#exit(1)
-		
-		
-	
-		
-		
-		removeFile(self.filename + ".wav")
-		removeFile(self.filename + "2.wav")
-		
-			
-		
 		
 		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
 		
@@ -302,6 +252,7 @@ class ITFile:
 			exit(1)
 		#print(self.sampleFilenames)
 		
+		"""
 		vals = []
 		
 		for filename in self.sampleFilenames[:-1]:
@@ -334,12 +285,8 @@ class ITFile:
 			removeFile(filename)
 			
 		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
-
-		
-		print(GREEN + "marinating {:s}".format(self.filename) + RESET)
-		
-		#exit(1)
-		
+		"""
+	
 		
 		pass
 	
@@ -359,31 +306,32 @@ class ITFile:
 		#wavBytes = wavFile.readframes(sampleCount)
 		#wavFile.close()
 		
-		sampleCount = os.path.getsize(sampleFilename)
-		with open(sampleFilename, 'rb') as file:
-			wavBytes = bytearray(file.read())
+		#wavFile = wave.open(sampleFilename)
+		#sampleCount = wavFile.getnframes() # once again, var name duplication 
+		#wavBytes = wavFile.readframes(sampleCount)
+		#wavFile.close()
+		
+		wavFile = wave.open(sampleFilename)
+		sampleCount = wavFile.getnframes()
+		wavBytes = wavFile.readframes(sampleCount)
+		wavFile.close()
+		bytes += struct.pack("H", len(wavBytes))
 		
 		
-		#wavSamples = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)
-		#wavSignedBytes = struct.unpack('<' + 'b' * (len(wavBytes) // 1), wavBytes)
+		if is8Bit:
+				
+			temp = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)		
+			
+			# is this,,,, ok????
+			# im just doing this instead of some other form of quantization
+			for i in range(0, len(temp)):
+				bytes += struct.pack("b", temp[i] // 256)
 		
-		# https://github.com/OpenMPT/openmpt/blob/47fc65b7b01455021284e3a5251ef16736bcd077/soundlib/ITCompression.cpp
-		# this is going to suck.
-		# https://github.com/marmalade/tune4Airplay/blob/master/trunk/docs/ITTECH.TXT
-	
-		#res = Compress(wavSamples, sampleCount)
-		#res = Compress(wavSignedBytes, sampleCount)
-		#bytes += res
+		else:
+			bytes += wavBytes
 		
-		bytes += wavBytes
-		
-		#Compress(wavBytes, len(wavBytes))
-		
-		
-		
-		#bytes += wavBytes
-
-		return offsetRes
+		# stupid, why didnt i need to do this previously???
+		return offsetRes+2
 	
 	def writeSampleHeader(self, bytes, sampleFilename):
 	
@@ -394,12 +342,12 @@ class ITFile:
 		# also, if the sample is converted in any form during,,,, the import to openmpt 
 		# having to replicate that here might be a deadend
 	
-		#wavFile = wave.open(sampleFilename)
+		wavFile = wave.open(sampleFilename)
 		# shit var name, i should have this be a lot different from samplecount/samplefilenames, but im tired
-		#fileSampleCount = wavFile.getnframes()
-		#wavFile.close()
+		fileSampleCount = wavFile.getnframes()
+		wavFile.close()
 		
-		fileSampleCount = os.path.getsize(sampleFilename)
+		#fileSampleCount = os.path.getsize(sampleFilename)
 	
 		# return the offset where we started writing
 		offsetRes = len(bytes)
@@ -428,8 +376,18 @@ class ITFile:
 		#bytes += struct.pack("B", 0x0B) 
 		#bytes += struct.pack("B", 0b1011) 
 		#bytes += struct.pack("B", 0b1001) 
-		bytes += struct.pack("B", 0b0001) 
+		#bytes += struct.pack("B", 0b0001)
+		#bytes += struct.pack("B", 0b0011) 
 		
+		# val = ((not is8Bit) << 1) | 1
+		
+		if is8Bit:
+			val = 0b01
+		else:
+			val = 0b11
+		
+		bytes += struct.pack("B", val)
+
 		# default vol 
 		bytes += struct.pack("B", 64)
 		
@@ -440,7 +398,9 @@ class ITFile:
 		bytes += temp
 	
 		# convert flags
-		bytes += struct.pack("B", 0x01)
+		# 8bit uses unsigned 8 bit, 16 bit uses signed 16 bit
+		#bytes += struct.pack("B", not is8Bit)
+		bytes += struct.pack("B", 0b00000001)
 		#bytes += struct.pack("B", 0x01 | 0x04)
 		#bytes += struct.pack("B", 0x00 | 0x04)
 		
@@ -837,18 +797,29 @@ class ITFile:
 		f.write(bytes)
 		f.close()
 		
+		
 		if os.path.isdir(self.filename):
 			shutil.rmtree(self.filename)
+		removeFile(self.filename + ".wav")
+		removeFile(self.filename + "2.wav")
+		removeFile(self.filename + "3.wav")
+		
 		
 		pass
 	
 # 
+
+# folder containing audio files.
+audioFolder = "../ExportData/Exported_Sounds/audiogroup_music/"
+
+# path to code.
+codeFolder = "../../code/src/"
 	
 def doFile(filename):
 
 	
 
-	print("converting {:s}".format(filename))
+	print(WHITE + "converting {:s}".format(filename) + RESET)
 	
 	
 	"""
@@ -877,18 +848,18 @@ def doFile(filename):
 	
 	#removeFile("tempOutput.wav")
 
-	inputPath = os.path.join("../ExportData/Exported_Sounds/audiogroup_music/", filename)
+	inputPath = os.path.join(audioFolder, filename)
 	
 	test = ITFile(inputPath)
 	test.write()
 	
-	print("done converting {:s}".format(filename))
+	print(WHITE + "done converting {:s}".format(filename) + RESET)
 	
 	pass
 
 def getNeededFiles():
 
-	codeFolder = "../../code/src/"
+	
 	
 	codeFiles = [os.path.join(codeFolder, f) for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
 	
@@ -916,6 +887,8 @@ def getNeededFiles():
 	
 	refs.remove("cifdream")
 
+	#refs = ["msc_001"]
+	
 	return refs
 	
 def copyNeededMusic():
@@ -935,22 +908,6 @@ def copyNeededMusic():
 
 
 	pass
-	
-def convertSongWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
-
-	while not shouldStop.is_set():
-			
-		try:
-			data = jobQueue.get(timeout = 0.5)
-		except queue.Empty:
-			time.sleep(0.001)
-			continue
-			
-		data = data[0]
-			
-		res = doFile(data)
-		
-		returnQueue.put([data, True])
 	
 def convertAllFiles():
 
@@ -972,16 +929,9 @@ def convertAllFiles():
 	#files = ["msc_013.ogg"]
 	#files = ["msc_voidsong.ogg"]
 	
-	pool = PoolQueue(convertSongWorker, cpuPercent = 0.75)
-	
-	pool.start()
 	
 	for file in files:
-		#doFile(file)
-		pool.send([file])
-	
-	print(CYAN + "WAITING ON POOL JOIN" + RESET)
-	resData = pool.join()
+		doFile(file)
 		
 	#if os.path.isdir("tempFiles"):
 	#	shutil.rmtree("tempFiles")
