@@ -32,7 +32,14 @@ outputPath = "./formattedOutput/"
 # sound is played over gba at 31khz rn,,, so lowering this shouldnt be to big of a deal?
 # ALSO, make it only copy over,,, needed sound files?
 #convertParameters = ["-ar","44100"]
-convertParameters = ["-ar","31000"]
+#convertParameters = ["-ar","31000"]
+convertParameters = ["-ar","24000"]
+
+# things,,, didnt like 8 bit samples,, why???
+
+#formatParameters = "s8"
+formatParameters = "wav"
+#formatParameters = "u8"
 
 def createFolder(folderPath):
 	if not os.path.exists(folderPath):
@@ -102,7 +109,8 @@ def convertAllSounds():
 	
 		outputFilePath = os.path.join(outputPath, wav.rsplit(".", 1)[0] + ".wav")
 		#song.export(outputFilePath, format="wav", parameters=["-ar","22050"])
-		song.export(outputFilePath, format="wav", parameters=convertParameters)
+		#song.export(outputFilePath, format="wav", parameters=convertParameters)
+		song.export(outputFilePath, format=formatParameters, parameters=convertParameters)
 
 		
 		successCount += 1
@@ -155,7 +163,8 @@ def convertMisc():
 		song = song.set_channels(1)
 
 		outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
-		song.export(outputFilePath, format="wav", parameters=convertParameters)
+		#song.export(outputFilePath, format="wav", parameters=convertParameters)
+		song.export(outputFilePath, format=formatParameters, parameters=convertParameters)
 
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp3")
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp4")
@@ -165,7 +174,8 @@ def convertMisc():
 	song = AudioSegment.from_mp3(fileName.rsplit(".", 1)[0] + ".mp3")
 	song = song.set_channels(1)
 	outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
-	song.export(outputFilePath, format="wav", parameters=convertParameters)
+	#song.export(outputFilePath, format="wav", parameters=convertParameters)
+	song.export(outputFilePath, format=formatParameters, parameters=convertParameters)
 	
 	
 	pass

@@ -339,6 +339,11 @@ void Game::changeMusic() {
 		return;
 	}
 	
+	if(mode == 2) {
+		doPlay(bn::music_items::msc_themeofcif);
+		return;
+	}
+	
 	int index = 0;
 	int temp = 0;
 	

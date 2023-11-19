@@ -382,9 +382,54 @@ void BigSprite::loadBoobTrap() {
 	
 	for(int i=3 ; i<=8; i++) {
 		
-		Interactable* temp = new Interactable(Pos(i, 3),
+		Interactable* temp = new Interactable(Pos(i, 4),
 			[](void* obj) -> void { (void)obj; return; },
-			[](void* obj) -> bool { (void)obj; return true; },
+			[](void* obj) -> bool { 
+				(void)obj; 
+				
+				static int tailSpeedFrames = 0;
+				if(tailSpeedFrames == 0) {
+					globalGame->playSound(&bn::sound_items::snd_bounceimpact);
+				}
+				
+				// tails tail should speed up here. i have no easy method of getting a handler for it.
+				// ya know what?? for loop. i dont give a HECK  anymore. 
+				// at least making it static like,, yea
+				// altho, if you reset/change rooms in the middle of hitting tail,,,,,,,,,
+				// could i do something like i = int(1) in the captures???
+				tailSpeedFrames++;
+				
+				bn::vector<BigSprite*, 128>& allBigSprites = globalGame->effectsManager.bigSprites;
+				
+				static BigSprite* tailBigSprite = NULL;
+				
+				if(tailBigSprite == NULL) {
+					for(auto it = allBigSprites.begin(); it != allBigSprites.end(); ++it) {
+						if( (*it)->tiles == &bn::sprite_tiles_items::dw_spr_tail_tail ) {
+							tailBigSprite = *it;
+							break;
+						}
+					}
+					
+					tailBigSprite->autoAnimateFrames = 20;
+					
+					BN_ASSERT(tailBigSprite != NULL, "couldnt find tails tail sprite ptr???");
+				}	
+				
+				if(tailSpeedFrames % 5 == 0) {
+					tailBigSprite->animate();
+				}
+	
+				
+				if(tailSpeedFrames == 60) {
+					tailBigSprite = NULL;
+					tailSpeedFrames = 0;
+					return true;
+				}
+				
+				
+				return false; 
+			},
 			NULL,
 			NULL
 		);

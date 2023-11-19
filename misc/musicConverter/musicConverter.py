@@ -8,6 +8,7 @@ import struct
 import json
 import wave
 import math
+import time
 
 from pydub import AudioSegment
 
@@ -17,6 +18,7 @@ init(convert=True)
 
 RED = Fore.RED 
 GREEN = Fore.GREEN 
+YELLOW = Fore.YELLOW
 CYAN = Fore.CYAN
 WHITE = Fore.WHITE + Style.BRIGHT
 
@@ -83,7 +85,8 @@ sampleConvertFunc = math.floor
 #sampleConvertFunc = math.ceil
 
 # sample rate of output
-GBASAMPLERATE = 8400
+GBASAMPLERATE = 8000
+#GBASAMPLERATE = 8400
 #GBASAMPLERATE = 9000
 #GBASAMPLERATE = 14000
 #GBASAMPLERATE = 24000
@@ -93,13 +96,31 @@ GBASAMPLERATE = 8400
 
 # if you want a song to have a different sample rate, put it here
 customSampleRate = {
-	"msc_voidsong": 12000,
+	#"msc_voidsong": 12000,
+	
+	# bumping to 12k really fucked this over??
+	# also,,, the overtones in it are,, not ideal.
+	# maybe change the convert func?
+	"msc_voidsong": 14000, 
 	"msc_endless": 9000, # overtones were pretty with this
-	"msc_001": 8300,
+	#"msc_001": 8300,
+	"msc_001": 8000,
 	"msc_gorcircle_lo": 8300,
-	"msc_013": 8300,
-	"msc_levcircle": 8000, # sorry lev
+	#"msc_gorcircle_lo": 8000,
+	"msc_013": 8000,
+	"msc_007": 8000,
+	"msc_levcircle": 5000, # sorry lev (actually it sounds rlly cool)
 	#"msc_dungeon_wings": 8300, # to much high freq to, do this
+	#"msc_beesong": 7000,
+	"msc_beesong": 4000,
+	"msc_cifcircle": 8000,
+}
+
+
+customConvertFunc = {
+
+	"msc_voidsong": round,
+
 }
 
 #
@@ -308,26 +329,47 @@ class ITFile:
 		#bytes += struct.pack("H", len(wavBytes) - 2)
 		
 		
+		#start = time.time()
+		
 		if is8Bit:
-				
-			temp = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)		
 			
-			# is this,,,, ok????
-			# im just doing this instead of some other form of quantization
-			# this def,,, is not ideal.
-			# actually,,,, it seems to,,, be better? in most cases? 
-			# espically tail's music?
-			# dis however, im getting heavy artifacting. but tbh it sounds rlly cool
-			# i should (probs) round here instead of just floor dividing.
-			for i in range(0, len(temp)):
-				#bytes += struct.pack("b", temp[i] // 256)
-				val = sampleConvertFunc(temp[i] / 256)
-				val = min(max(int(val), -128), 127)
-				bytes += struct.pack("b", val)
+			if "msc_voidsong" in sampleFilename:
+				
+				print(YELLOW + "doing exception weird conversion" + RESET)
+				
+				output = sampleFilename.rsplit(".", 1)[0] + ".pcm"
+			
+				temp = AudioSegment.from_wav(sampleFilename)
+				temp.export(output, format='s8')
+				
+				sampleCount = os.path.getsize(output)
+				with open(sampleFilename, 'rb') as file:
+					wavBytes = bytearray(file.read())
+				
+				bytes += wavBytes
+			
+			else:
+			
+				temp = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)		
+				
+				# is this,,,, ok????
+				# im just doing this instead of some other form of quantization
+				# this def,,, is not ideal.
+				# actually,,,, it seems to,,, be better? in most cases? 
+				# espically tail's music?
+				# dis however, im getting heavy artifacting. but tbh it sounds rlly cool
+				# i should (probs) round here instead of just floor dividing.
+				for i in range(0, len(temp)):
+					#bytes += struct.pack("b", temp[i] // 256)
+					val = sampleConvertFunc(temp[i] / 256)
+					val = min(max(int(val), -128), 127)
+					bytes += struct.pack("b", val)
 		
 		else:
 			bytes += wavBytes
 		
+		#end = time.time()
+		#print(GREEN + "took {:f} seconds".format(end-start) +RESET)
 		
 		# stupid, why didnt i need to do this previously???
 		return offsetRes+2
@@ -784,12 +826,19 @@ class ITFile:
 def doFile(filename):
 
 	global GBASAMPLERATE
+	global sampleConvertFunc
 	
-	backup = GBASAMPLERATE
+	sampleBackup = GBASAMPLERATE
+	convertBackup = sampleConvertFunc
 	
 	if filename in customSampleRate:
 		GBASAMPLERATE = customSampleRate[filename]
 		print(CYAN + "running {:s} with {:d} as the samplerate".format(filename, GBASAMPLERATE) + RESET)
+	
+	if filename in customConvertFunc:
+		sampleConvertFunc = customConvertFunc[filename]
+		print(CYAN + "running {:s} with a custom convert func".format(filename) + RESET)
+	
 	
 	print(WHITE + "cooking {:s}".format(filename) + RESET)
 
@@ -800,7 +849,8 @@ def doFile(filename):
 	
 	print(WHITE + "done cooking {:s}".format(filename) + RESET)
 	
-	GBASAMPLERATE = backup
+	GBASAMPLERATE = sampleBackup
+	sampleConvertFunc = convertBackup
 	
 	pass
 
