@@ -103,6 +103,8 @@ clean:
 	rm -fr ../misc/musicConverter/formattedOutput
 	rm -fr ../misc/soundConverter/formattedOutput
 	rm -fr ../misc/roomConverter/AllRooms.h
+	rm -fr ./src/AllRooms.h
+	rm -fr ./src/dataWinIncludes.h
 	python  ../misc/convertAllAssets.py
 
 	
