@@ -72,9 +72,7 @@ if __name__ == "__main__":
 	"""
 	
 	os.chdir(os.path.dirname(__file__))
-	
 	if not os.path.exists("CLI-windows-latest-Release-isBundled-true"):
-		
 		print("couldnt find the undertalemodtool's cli, grabbing it.")
 	
 		res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip")

@@ -1595,7 +1595,8 @@ def main():
 	# run ExportAllFontData, copy that folder to this folder.
 	
 	# these removes are only called on a cleanrun, the makefile just runs genallincludes
-	shutil.rmtree("./formattedOutput/")
+	if os.path.isdir("./formattedOutput/"):
+		shutil.rmtree("./formattedOutput/")
 	# keeping this remove here as a sanitary measue
 	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	
