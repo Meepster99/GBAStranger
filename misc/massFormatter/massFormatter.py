@@ -61,7 +61,9 @@ def getNeededSprites(thisFile = False):
 	
 	codeFiles = [os.path.join(codeFolder, f) for f in os.listdir(codeFolder) if f.lower().endswith('.h') or f.lower().endswith('.cpp')]
 	
-	codeFiles.remove("../../code/src/dataWinIncludes.h")
+	if "../../code/src/dataWinIncludes.h" in codeFiles:
+		codeFiles.remove("../../code/src/dataWinIncludes.h")
+	
 	# this will also include our own file, for special things needed for customfloortiles 
 	#codeFiles.append(__file__)
 	
