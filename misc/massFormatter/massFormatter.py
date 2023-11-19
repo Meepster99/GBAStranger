@@ -1564,6 +1564,9 @@ def main():
 
 	os.chdir(os.path.dirname(__file__))
 	
+	if not os.path.isdir("../../code/graphics/"):
+		createFolder("../../code/graphics/")
+	
 	if len(sys.argv) != 1:
 		#generateCustomFloorBackground("./formattedOutput/customFloor/")
 
@@ -1597,6 +1600,7 @@ def main():
 	# these removes are only called on a cleanrun, the makefile just runs genallincludes
 	if os.path.isdir("./formattedOutput/"):
 		shutil.rmtree("./formattedOutput/")
+			
 	# keeping this remove here as a sanitary measue
 	[ os.remove(os.path.join("../../code/graphics/", f)) for f in os.listdir("../../code/graphics/") if f.endswith(".bmp") or f.endswith(".json") ]
 	
