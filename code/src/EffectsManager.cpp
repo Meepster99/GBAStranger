@@ -310,7 +310,9 @@ void BigSprite::loadBoobTrap() {
 		" my boobs, head, and tail.\r"
 		"I would say I appreciate it, but to be honest, its just borderlining on creepy now.\n"
 		"like, jesus christ. you dont even have music, or shortcuts working\r"
-		"but now you have boobs????\rwhy????????\0"},
+		"but now you have boobs????\rwhy????????\r"
+		"actually wait a minute, what is that jam in the background? i guess music is somehow in!"
+		"\0"},
 		{"anyway, you know the drill\rhead down the stairs, good luck\0"}
 		};
 		

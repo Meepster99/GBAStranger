@@ -93,7 +93,13 @@ GBASAMPLERATE = 8400
 
 # if you want a song to have a different sample rate, put it here
 customSampleRate = {
-	"msc_voidsong": 12000
+	"msc_voidsong": 12000,
+	"msc_endless": 9000, # overtones were pretty with this
+	"msc_001": 8300,
+	"msc_gorcircle_lo": 8300,
+	"msc_013": 8300,
+	"msc_levcircle": 8000, # sorry lev
+	#"msc_dungeon_wings": 8300, # to much high freq to, do this
 }
 
 #
