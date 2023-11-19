@@ -5,6 +5,8 @@
 
 install [devkitpro](https://devkitpro.org/) and [python](https://www.python.org/downloads/) >= 3.11
 
+purchase and install Void Stranger
+
 when installing devkitpro, make sure that the only option checked is for GBA. uncheck all others.
 
 clone the repo, and do `git submodule update --init --recursive`
