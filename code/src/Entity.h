@@ -208,7 +208,7 @@ public:
 	}
 	
 	
-	virtual void isDead() { return; } // needed for,,, lev statue falls?
+	virtual void isDead();// { return; } // needed for,,, lev statue falls?
 	
 	/*
 	virtual bool fallDeath() {

@@ -126,9 +126,13 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			
 				player = new Player(tempPos);
 				
+				// having duplicates causes so many problems
 				// i do not like that we set these vars here!
 				player->locustCount = game->saveData.locustCount;
 				player->isVoided = game->saveData.isVoided;
+				if(game->mode == 2) { // cif is always voided!
+					player->isVoided = true;
+				}
 				
 				player->hasMemory = game->saveData.hasMemory;
 				player->hasWings  = game->saveData.hasWings;

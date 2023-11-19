@@ -428,7 +428,7 @@ void Game::resetRoom(bool debug) {
 	
 	entityManager.player->locustCount = tileManager.getLocustCount();
 	if(!debug) {
-		if(!entityManager.player->isVoided) {
+		if(!entityManager.player->isVoided && !entityManager.playerWon()) {
 			if(entityManager.player->locustCount > 0) { 
 				entityManager.player->locustCount--;
 			} else {

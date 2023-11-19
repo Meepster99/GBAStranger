@@ -10,6 +10,14 @@ import wave
 import math
 import time
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
+
+from poolQueue import PoolQueue
+from multiprocessing import Queue, Pool, cpu_count, Event
+import queue
+import time 
+from threading import Thread
+
 from pydub import AudioSegment
 
 from colorama import init, Fore, Back, Style
@@ -372,7 +380,7 @@ class ITFile:
 			if "msc_voidsong" in sampleFilename:
 			#if False:
 				
-				print(YELLOW + "doing exception weird conversion" + RESET)
+				#print(YELLOW + "doing exception weird conversion" + RESET)
 				
 				output = sampleFilename.rsplit(".", 1)[0] + ".pcm"
 			
@@ -942,6 +950,22 @@ def copyNeededMusic():
 
 
 	pass
+
+def convertSongWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
+
+	while not shouldStop.is_set():
+			
+		try:
+			data = jobQueue.get(timeout = 0.5)
+		except queue.Empty:
+			time.sleep(0.001)
+			continue
+			
+		data = data[0]
+			
+		res = doFile(data)
+		
+		returnQueue.put([data, True])
 	
 def convertAllFiles():
 
@@ -960,8 +984,14 @@ def convertAllFiles():
 	
 	files = getNeededFiles()
 	
+	pool = PoolQueue(convertSongWorker, cpuPercent = 0.75)
+	pool.start()
+	
 	for file in files:
-		doFile(file)
+		#doFile(file)
+		pool.send([file])
+	#print(CYAN + "WAITING ON POOL JOIN" + RESET)
+	resData = pool.join()
 	
 	copyNeededMusic()
 

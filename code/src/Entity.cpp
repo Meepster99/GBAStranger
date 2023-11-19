@@ -19,6 +19,12 @@ Game* Entity::game = NULL;
 int LevStatue::rodUses = 0;
 int LevStatue::totalLev = 0;
 
+void Entity::isDead() {
+	if(tileManager->hasFloor(p)) {
+		tileManager->stepOff(p);
+	}
+}
+
 // Player
 
 //EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_question_black, 9)};

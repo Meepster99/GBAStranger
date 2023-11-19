@@ -97,11 +97,12 @@ include $(LIBBUTANOABS)/butano.mak
 
 # gives a warning, idc tho
 clean:
-	@rm -fr build GBAStranger.elf GBAStranger.elf.* GBAStranger.gba
-	@rm -fr audio graphics
-	@rm -fr ../misc/massFormatter/formattedOutput
-	@rm -fr ../misc/musicConverter/formattedOutput
-	@rm -fr ../misc/soundConverter/formattedOutput
+	rm -fr build GBAStranger.elf GBAStranger.elf.* GBAStranger.gba
+	rm -fr audio graphics
+	rm -fr ../misc/massFormatter/formattedOutput
+	rm -fr ../misc/musicConverter/formattedOutput
+	rm -fr ../misc/soundConverter/formattedOutput
+	rm -fr ../misc/roomConverter/AllRooms.h
 	python  ../misc/convertAllAssets.py
 
 	
