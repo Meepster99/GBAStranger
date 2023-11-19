@@ -161,6 +161,7 @@ if __name__ == "__main__":
 	import roomConverter.roomConverter 
 	import massFormatter.massFormatter
 	import soundConverter.soundConverter 
+	import musicConverter.musicConverter
 
 	
 	print("running massFormatter")
@@ -169,6 +170,8 @@ if __name__ == "__main__":
 	roomConverter.roomConverter.main()
 	print("running soundConverter")
 	soundConverter.soundConverter.main()
+	print("running musicConverter")
+	musicConverter.musicConverter.main()
 	
 	
 	print("")

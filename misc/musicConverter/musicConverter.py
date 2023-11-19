@@ -860,9 +860,12 @@ def convertAllFiles():
 
 	pass
 
+def main():
+	convertAllFiles()
+	
 if __name__ == "__main__":
 	
-	convertAllFiles()
+	main()
 	
 	pass
 
