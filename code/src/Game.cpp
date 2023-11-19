@@ -989,28 +989,6 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
-	/* 
-	i swear, i have had multiple confirmed cases where strings arent nulltermed.
-	is my dialogue func going one char to far, making me need the extra nullterm? or whats happening?
-	
-	const char* test1 = "test1111111111111111111111111111";
-	const char* test2 = "test2222222222222222222222222222";
-	const char* test3 = "test3333333333333333333333333333";
-
-	
-	BN_LOG("test1 = ", test1, " addr = ", (void*)test1);
-	BN_LOG("test2 = ", test2, " addr = ", (void*)test2);
-	BN_LOG("test3 = ", test3, " addr = ", (void*)test3);
-	
-	BN_LOG((int)test2[8], "char=", test2[8]);
-	*/
-	
-	//u8* test = reinterpret_cast<u8*>(0x00001000);
-	
-	// why does simply instantiating the game class cause frame drops?
-	// wont be much of an issue tho, i suppose
-	//doButanoUpdate(); 
-	
 	globalGame = this;
 	
 	roomManager.isCustomRooms();
@@ -1025,7 +1003,6 @@ void Game::run() {
 	
 	state = GameState::Loading;
 	
-	
 	bool brandBlank = true;
 	for(int i=0; i<6; i++) {
 		if(tileManager.playerBrand[i] != 0) {
@@ -1038,36 +1015,12 @@ void Game::run() {
 		cutsceneManager.brandInput();
 	}
 	
-	//while(true) { bn::core::update(); }
-	
 	loadLevel();
 	fullDraw();
 	
 	save();
 	
 	state = GameState::Normal;
-	
-	//effectsManager.doDialogue("Did you know every time you sigh, a little bit of happiness escapes?\0");
-		
-		
-	//doButanoUpdate();
-	//changePalette(1);
-	//cutsceneManager.introCutscene(); 
-	//cutsceneManager.cifDream();
-	
-	//bn::core::update(); 
-	
-	//cutsceneManager.testCutscene(); 
-	
-	//while(true) { doButanoUpdate(); }
-	
-	//effectsManager.exitGlow(Pos(5, 4));
-	
-	
-	
-	
-	//bn::music::set_pitch(2);
-	//bn::music::set_tempo(0.5);
 	
 	changeMusic();
 

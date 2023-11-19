@@ -49,7 +49,6 @@ def copyIfChanged(inputFile, outputPath):
 	
 	return False
 
-
 def getNeededSounds():
 	
 	codeFolder = "../../code/src/"
