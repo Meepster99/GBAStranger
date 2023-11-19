@@ -101,13 +101,18 @@ customSampleRate = {
 	# bumping to 12k really fucked this over??
 	# also,,, the overtones in it are,, not ideal.
 	# maybe change the convert func?
-	"msc_voidsong": 14000, 
+	#"msc_voidsong": 14000, 
+	#"msc_voidsong": 18000, 
+	"msc_voidsong": 21000, 
 	"msc_endless": 9000, # overtones were pretty with this
 	#"msc_001": 8300,
-	"msc_001": 8000,
-	"msc_gorcircle_lo": 8300,
+	#"msc_001": 8000,
+	"msc_001": 6000,
 	#"msc_gorcircle_lo": 8000,
-	"msc_013": 8000,
+	"msc_gorcircle_lo": 6000,
+	#"msc_gorcircle_lo": 8000,
+	#"msc_013": 8000,
+	"msc_013": 7000,
 	"msc_007": 8000,
 	"msc_levcircle": 5000, # sorry lev (actually it sounds rlly cool)
 	#"msc_dungeon_wings": 8300, # to much high freq to, do this
@@ -187,6 +192,9 @@ class ITFile:
 		#ffmpeg -i input.wav -filter_complex "[0]atrim=start=0:end=9999[a]; [0]atrim=start=10000:end=19999[b]; [0]atrim=start=20000:end=29999[c]; ..." -map "[a]" output_1.wav -map "[b]" output_2.wav -map "[c]" output_3.wav ...
 		# do not ask.
 		
+		
+		self.fileSampleCount = samplesPerSegment
+		
 		cmd = [
 			"ffmpeg", "-y", "-i", self.filename + "2.wav", "-filter_complex"
 		]
@@ -194,21 +202,38 @@ class ITFile:
 		filterString = []
 		mapCmds = []
 		
+		
+		start = 0
+		end = 0
+		
 		#frameCount = samplesPerSegment*4
 		index = 1
 		for i in range(0, frameCount, samplesPerSegment):
-			start = i
+			
+			
+			start = end
+			
+			end = start + samplesPerSegment
+			
+			# goofy ahh foresight couldnt do shit in this case
 			#end = min(i+samplesPerSegment-1, frameCount)
-			end = min(i+samplesPerSegment, frameCount)
+			#end = min(i+samplesPerSegment-1, frameCount)
+		
+			end = min(end, frameCount)
+		
+			#print(start, end)
 		
 			#end += samplesPerSegment//4
 		
-			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, end, index))
+			# +4 not needed, im just scared
+			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, end+4, index))
 			
 			mapCmds.append("-map")
 			mapCmds.append("[{:d}]".format(index))
 			#mapCmds += codecCommand
 			mapCmds.append(self.filename + "/output_{:03d}.wav".format(index))
+			
+			end += 1
 			
 			index += 1
 			
@@ -324,7 +349,7 @@ class ITFile:
 		wavBytes = wavFile.readframes(sampleCount)
 		wavFile.close()
 		
-		bytes += struct.pack("H", len(wavBytes))
+		#bytes += struct.pack("H", len(wavBytes))
 		# why did doing this stop the version error from occuring when opening mpt????
 		#bytes += struct.pack("H", len(wavBytes) - 2)
 		
@@ -340,13 +365,23 @@ class ITFile:
 				output = sampleFilename.rsplit(".", 1)[0] + ".pcm"
 			
 				temp = AudioSegment.from_wav(sampleFilename)
-				temp.export(output, format='s8')
+				temp.export(output, format='u8')
 				
 				sampleCount = os.path.getsize(output)
-				with open(sampleFilename, 'rb') as file:
+				
+				#with open(sampleFilename, 'rb') as file:
+				with open(output, 'rb') as file:
 					wavBytes = bytearray(file.read())
 				
-				bytes += wavBytes
+				#print(max(wavBytes), min(wavBytes))
+				
+				for i in range(0, len(wavBytes)):
+					#print(wavBytes[i])
+					bytes += struct.pack("b", wavBytes[i] - 128)
+					#wtf = bytearray([wavBytes[i]])
+					#bytes += struct.pack("b", struct.unpack("b", wtf)[0])
+				
+				#bytes += wavBytes
 			
 			else:
 			
@@ -372,7 +407,7 @@ class ITFile:
 		#print(GREEN + "took {:f} seconds".format(end-start) +RESET)
 		
 		# stupid, why didnt i need to do this previously???
-		return offsetRes+2
+		return offsetRes
 	
 	def writeSampleHeader(self, bytes, sampleFilename):
 	
@@ -383,10 +418,10 @@ class ITFile:
 		# also, if the sample is converted in any form during,,,, the import to openmpt 
 		# having to replicate that here might be a deadend
 	
-		wavFile = wave.open(sampleFilename)
-		# shit var name, i should have this be a lot different from samplecount/samplefilenames, but im tired
-		fileSampleCount = wavFile.getnframes()
-		wavFile.close()
+		#wavFile = wave.open(sampleFilename)
+		## shit var name, i should have this be a lot different from samplecount/samplefilenames, but im tired
+		#fileSampleCount = wavFile.getnframes()
+		#wavFile.close()
 		
 		#fileSampleCount = os.path.getsize(sampleFilename)
 	
@@ -449,7 +484,8 @@ class ITFile:
 		bytes += struct.pack("B", 32)
 		
 		# sample length
-		bytes += struct.pack("I", fileSampleCount)
+		#bytes += struct.pack("I", fileSampleCount)
+		bytes += struct.pack("I", self.fileSampleCount)
 		
 		# Loop beginning
 		bytes += struct.pack("I", 0)
@@ -465,7 +501,8 @@ class ITFile:
 		
 		# Sustain loop end
 		#bytes += struct.pack("I", 0)
-		bytes += struct.pack("I", fileSampleCount)
+		#bytes += struct.pack("I", fileSampleCount)
+		bytes += struct.pack("I", self.fileSampleCount)
 		
 		sampleDataOffset = len(bytes)
 		# Sample pointer
@@ -873,6 +910,8 @@ def getNeededFiles():
 			refs.update(matches)
 
 	refs.remove("cifdream")
+	
+	#refs = ["msc_voidsong"]
 	
 	return refs
 	
