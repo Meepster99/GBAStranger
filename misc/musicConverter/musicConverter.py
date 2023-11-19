@@ -823,7 +823,7 @@ def getNeededFiles():
 def copyNeededMusic():
 
 	copyIfChanged("cifdream.xm", outputFolder)
-	
+
 	files = getNeededFiles()
 	
 	for file in files:
@@ -839,6 +839,8 @@ def copyNeededMusic():
 def convertAllFiles():
 
 	os.chdir(os.path.dirname(__file__))
+	
+	createFolder("./formattedOutput")
 	
 	if len(sys.argv) != 1:
 		copyNeededMusic()
