@@ -103,7 +103,7 @@ customSampleRate = {
 	# maybe change the convert func?
 	#"msc_voidsong": 14000, 
 	#"msc_voidsong": 18000, 
-	"msc_voidsong": 21000, 
+	"msc_voidsong": 23000, 
 	"msc_endless": 9000, # overtones were pretty with this
 	#"msc_001": 8300,
 	#"msc_001": 8000,
@@ -118,7 +118,8 @@ customSampleRate = {
 	#"msc_dungeon_wings": 8300, # to much high freq to, do this
 	#"msc_beesong": 7000,
 	"msc_beesong": 4000,
-	"msc_cifcircle": 8000,
+	#"msc_cifcircle": 8000,
+	"msc_cifcircle": 6000,
 }
 
 
@@ -193,6 +194,7 @@ class ITFile:
 		# do not ask.
 		
 		
+		sampleOffsetDiff = 0
 		self.fileSampleCount = samplesPerSegment
 		
 		cmd = [
@@ -210,23 +212,30 @@ class ITFile:
 		index = 1
 		for i in range(0, frameCount, samplesPerSegment):
 			
-			
+			"""
 			start = end
 			
 			end = start + samplesPerSegment
 			
 			# goofy ahh foresight couldnt do shit in this case
 			#end = min(i+samplesPerSegment-1, frameCount)
-			#end = min(i+samplesPerSegment-1, frameCount)
-		
-			end = min(end, frameCount)
+			#end = min(i+samplesPerSegment, frameCount)
+			"""
+			
+			start = i
+			end = min(i+samplesPerSegment, frameCount)
+			
+			
+			
+			tempEnd = end + sampleOffsetDiff
+			tempEnd = min(tempEnd, frameCount)
 		
 			#print(start, end)
 		
 			#end += samplesPerSegment//4
 		
 			# +4 not needed, im just scared
-			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, end+4, index))
+			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, tempEnd, index))
 			
 			mapCmds.append("-map")
 			mapCmds.append("[{:d}]".format(index))
@@ -236,6 +245,8 @@ class ITFile:
 			end += 1
 			
 			index += 1
+			
+		self.fileSampleCount += sampleOffsetDiff
 			
 		cmd.append("; ".join(filterString))
 		
@@ -359,6 +370,7 @@ class ITFile:
 		if is8Bit:
 			
 			if "msc_voidsong" in sampleFilename:
+			#if False:
 				
 				print(YELLOW + "doing exception weird conversion" + RESET)
 				
@@ -500,9 +512,9 @@ class ITFile:
 		bytes += struct.pack("I", 0)
 		
 		# Sustain loop end
-		#bytes += struct.pack("I", 0)
+		bytes += struct.pack("I", 0)
 		#bytes += struct.pack("I", fileSampleCount)
-		bytes += struct.pack("I", self.fileSampleCount)
+		#bytes += struct.pack("I", self.fileSampleCount)
 		
 		sampleDataOffset = len(bytes)
 		# Sample pointer
