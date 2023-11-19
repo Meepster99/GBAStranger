@@ -34,6 +34,10 @@ outputPath = "./formattedOutput/"
 #convertParameters = ["-ar","44100"]
 convertParameters = ["-ar","31000"]
 
+def createFolder(folderPath):
+	if not os.path.exists(folderPath):
+		os.mkdir(folderPath)
+
 def copyIfChanged(inputFile, outputPath):
 	
 	if not os.path.isfile(os.path.join(outputPath, os.path.basename(inputFile))):
@@ -182,7 +186,9 @@ def copyNeededSounds():
 def main():
 
 	os.chdir(os.path.dirname(__file__))
-
+	
+	createFolder("../../code/audio/")
+	
 	if len(sys.argv) != 1:
 		copyNeededSounds()
 		exit(0)

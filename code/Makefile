@@ -71,6 +71,8 @@ DEFAULTLIBS :=  -static-libstdc++
 USERBUILD   :=  
 EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; python  ../misc/soundConverter/soundConverter.py regenIncludes; python  ../misc/musicConverter/musicConverter.py regenIncludes
 
+
+
 ifdef LOG
 	USERFLAGS += -DENABLELOGGING=true 
 endif
@@ -92,4 +94,17 @@ endif
 # Include main makefile:
 #---------------------------------------------------------------------------------------------------------------------
 include $(LIBBUTANOABS)/butano.mak
+
+# gives a warning, idc tho
+clean:
+	@rm -fr build GBAStranger.elf GBAStranger.elf.* GBAStranger.gba
+	@rm -fr audio graphics
+	@rm -fr ../misc/massFormatter/formattedOutput
+	@rm -fr ../misc/musicConverter/formattedOutput
+	@rm -fr ../misc/soundConverter/formattedOutput
+	python  ../misc/convertAllAssets.py
+
+	
+	
+
 

@@ -847,7 +847,7 @@ def convertAllFiles():
 	os.chdir(os.path.dirname(__file__))
 	
 	createFolder("./formattedOutput")
-	
+	createFolder(outputFolder)
 	if len(sys.argv) != 1:
 		copyNeededMusic()
 		exit(0)
