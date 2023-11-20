@@ -373,8 +373,8 @@ class ITFile:
 			#basicConvertFunc = lambda v : v // 256 
 			#basicConvertFunc = lambda v : v // 256 if v > 0 else -((-v) // 256)
 			
-			roundDown = lambda v : v // 256 if v > 0 else -((-v) // 256)
-			roundUp = lambda v : math.ceil(v / 256) if v > 0 else -math.ceil(-v / 256)
+			roundDown = lambda v : math.floor(v) if v > 0 else -math.floor(-v)
+			roundUp = lambda v : math.ceil(v) if v > 0 else -math.ceil(-v)
 			
 			def basicConvertFunc(index):
 				# only pass indicies 1- len-1 here 
@@ -394,18 +394,26 @@ class ITFile:
 				
 				temp = curr / 256
 				
+				# 0 clue if this is actually helpful
+				# might caus ea lot more background static???
+				# MORE RESEARCH NEEDS TO BE DONE HERE
+				# now that im converting the whole thing in one go, i could go back to the ffmpeg unsigned 8bit -128 solution??
+				# and do it in ram
+				
 				useFunc = round
 				
-				if abs(temp) > (0xFF * 0.9):
-					useFunc = roundDown if isNegative else roundUp
+				if abs(temp) > ((0xFF / 2) * 0.9):
+					useFunc = roundUp
+				elif abs(temp) < ((0xFF / 2) * 0.1):
+					useFunc = roundDown
 				
 				return useFunc(temp)
 			
 			for i in range(0, len(tempData)):
-				tempData[i] = basicConvertFunc(i)
 			
+				temp = basicConvertFunc(i)
 			
-			
+				tempData[i] = max(min(temp, 127), -128)
 			
 			self.sampleBytes = tempData
 			
@@ -599,6 +607,7 @@ class ITFile:
 		if sampleFilename == self.sampleFilenames[-1]:
 			bytes += struct.pack("I", self.lastSampleCount)
 		else:
+			# DOES THIS HELP AT ALL? 
 			bytes += struct.pack("I", self.fileSampleCount+16)
 		
 		# Loop beginning
@@ -1025,7 +1034,7 @@ def getNeededFiles():
 
 	refs.remove("cifdream")
 	
-	refs = ["msc_voidsong"]
+	#refs = ["msc_voidsong"]
 	
 	return refs
 	
