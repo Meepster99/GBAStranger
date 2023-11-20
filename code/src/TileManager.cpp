@@ -437,6 +437,9 @@ void TileManager::doFloorSteps() {
 	// this rlly should just call,,,, updatetile,, i think?
 	floorLayer.reloadCells();
 	
+	// IS THIS NEEDED 
+	game->collision.reloadCells();
+	
 	// calling this here may be excessive!
 	checkBrand();
 }

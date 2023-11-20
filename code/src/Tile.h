@@ -40,6 +40,8 @@ public:
 	// i rlly should try to do this with a const static.
 	virtual bool drawDropOff() const { return true; }
 	
+	virtual bool isTransparent() const { return false; }
+	
 	virtual void draw() {
 		u8 x = tilePos.x;
 		u8 y = tilePos.y;
@@ -50,20 +52,9 @@ public:
 		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
 	}
 	
-	static void drawPit(u8 x, u8 y) {
-		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
-	}
+	static void drawPit(u8 x, u8 y);
 	
-	static void drawDropOff(u8 x, u8 y) {
-		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
-		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
-	}
-	
+	static void drawDropOff(u8 x, u8 y);
 
 	virtual ~FloorTile() = default;
 	
@@ -102,6 +93,8 @@ public:
 	bool drawDropOff() const override { return false; }
 	
 	void isSteppedOnAnimation() override;
+	
+	bool isTransparent() const override { return true; }
 	
 };
 

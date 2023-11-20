@@ -19,6 +19,48 @@ int Switch::totalCount = 0;
 //EffectTypeArray glassAnimation[] = {EffectType(bn::sprite_tiles_items::dw_spr_glassfloor, 8)};
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
+void FloorTile::drawPit(u8 x, u8 y) {
+	rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+	rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+	rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+	rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
+	
+	if(game->collisionMap[x][y] == 12) {
+		drawDropOff(x, y);
+	} else if(game->detailsMap[x][y] == 0 && !game->entityManager.hasCollision(Pos(x, y))) {
+		
+		//,,,,, we need to avoid overwriting details?
+		
+		
+		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 1); 
+		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 1 + 1);
+		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 1 + 2);
+		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 1 + 3);
+	}
+	
+	
+}
+
+void FloorTile::drawDropOff(u8 x, u8 y) {
+	
+	// ,, this has REALLY stupid potential shit 
+	// basically, we only want to draw a pit if the tile here ISNT transparent, but depending on if we call this func before or after we do the transform,,, idek
+	 
+	if(tileManager->floorMap[x][y] == NULL || !tileManager->floorMap[x][y]->isTransparent()) {
+		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
+	}
+	
+	
+	globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 12); 
+	globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 12 + 1); 
+	globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 12 + 2); 
+	globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 12 + 3); 
+	
+}
+
 void Glass::stepOn() {
 	isSteppedOn = true;
 	game->playSound(&bn::sound_items::snd_stepglassfloor);

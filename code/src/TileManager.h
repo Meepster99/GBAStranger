@@ -42,11 +42,14 @@ public:
 					
 					// y < 7 here bc row 8 is for ui, and we dont want dropoffs going there,, do we?
 
-					if(floorMap[x][y]->drawDropOff() && y < 7 && floorMap[x][y+1] == NULL && collisionMap[x][y+1] < 3) {
-						rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 1, 4 * 2); 
-						rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 1, 4 * 2 + 1); 
-						rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 2, 4 * 2 + 2); 
-						rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 2, 4 * 2 + 3); 
+					if(floorMap[x][y]->drawDropOff() && y < 7 && 
+					(floorMap[x][y+1] == NULL || floorMap[x][y+1]->isTransparent()) &&
+					collisionMap[x][y+1] < 3) {
+						//rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 1, 4 * 2); 
+						//rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 1, 4 * 2 + 1); 
+						//rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 2, 4 * 2 + 2); 
+						//rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 2, 4 * 2 + 3); 
+						FloorTile::drawDropOff(x, y+1);
 					}
 				}
 				

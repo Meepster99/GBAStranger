@@ -399,13 +399,17 @@ class ITFile:
 				# MORE RESEARCH NEEDS TO BE DONE HERE
 				# now that im converting the whole thing in one go, i could go back to the ffmpeg unsigned 8bit -128 solution??
 				# and do it in ram
+				# ESP WITH TAILS THEME
+				# ughhhhh
 				
 				useFunc = round
 				
+				"""
 				if abs(temp) > ((0xFF / 2) * 0.9):
 					useFunc = roundUp
 				elif abs(temp) < ((0xFF / 2) * 0.1):
 					useFunc = roundDown
+				"""
 				
 				return useFunc(temp)
 			
@@ -413,7 +417,7 @@ class ITFile:
 			
 				temp = basicConvertFunc(i)
 			
-				tempData[i] = max(min(temp, 127), -128)
+				tempData[i] = int(max(min(temp, 127), -128))
 			
 			self.sampleBytes = tempData
 			
