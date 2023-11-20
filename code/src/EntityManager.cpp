@@ -1085,6 +1085,8 @@ void EntityManager::updateMap() {
 				// puttint this mon line after, the *it, is it a useafterfree?
 				
 				
+				updateScreen();
+				
 				// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
 				// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
 				effectsManager->monLightning((*it)->p, res.value());
