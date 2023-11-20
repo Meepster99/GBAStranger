@@ -3528,7 +3528,70 @@ void EffectsManager::entityFall(Entity* entity) {
 			
 			
 		},
-		[fallData](Effect* e) -> bool {
+		[fallData, p](Effect* e) -> bool {
+			
+			if(globalGame->tileManager.hasFloor(p)) {
+				
+				// at this point, you have to start wondering if im only doing this for the bit
+				
+				globalGame->playSound(&bn::sound_items::snd_reveal);
+				
+				auto createPlonk = [p](bool left) -> void {
+					globalGame->effectsManager.createEffect(
+						[p, left](Effect* e2) -> void {
+							
+							e2->tiles = &bn::sprite_tiles_items::dw_spr_plonk;
+							
+							e2->sprite = Sprite(*e2->tiles, bn::sprite_shape_size(32, 32));
+							
+							e2->graphicsIndex = 0;
+							e2->tempCounter = 0;
+							
+							e2->x = p.x * 16;
+							
+							e2->x += left ? 16 : -16;
+							
+							e2->y = p.y * 16 - 8;
+							e2->sprite.updateRawPosition(e2->x, e2->y);
+							
+							e2->sprite.spritePointer.set_horizontal_flip(!left);
+							
+							e2->sprite.spritePointer.set_tiles(
+								*e2->tiles,
+								e2->graphicsIndex
+							);
+							
+							
+						},
+						[](Effect* e2) -> bool {
+							
+							if(frame % 2 != 0) {
+								return false;
+							}
+						
+							e2->graphicsIndex++;	
+							
+							if(e2->graphicsIndex == e2->tiles->graphics_count()) {
+								return true;
+							}
+							
+							e2->sprite.spritePointer.set_tiles(
+								*e2->tiles,
+								e2->graphicsIndex
+							);
+							
+							
+							return false;
+						}
+					);
+				};
+				
+				createPlonk(false);
+				createPlonk(true);
+				
+				
+				return true;
+			}
 		
 			if(frame % 8 != 0) {
 				return false;
