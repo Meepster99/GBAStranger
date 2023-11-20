@@ -20,6 +20,8 @@ from threading import Thread
 
 from pydub import AudioSegment
 
+import io
+
 from colorama import init, Fore, Back, Style
 
 init(convert=True)
@@ -147,25 +149,46 @@ class ITFile:
 	
 		self.filename = os.path.basename(filename)
 		
-		if os.path.isdir(self.filename):
-			shutil.rmtree(self.filename)
-		createFolder(self.filename)
+		#if os.path.isdir(self.filename):
+		#	shutil.rmtree(self.filename)
+		#createFolder(self.filename)
 		
 		# it would be ideal if i wasnt writing anything to disk here, and doing everythin in ram.
-	
-		runCommand([
-			'ffmpeg',
-			"-y", '-i', filename + ".ogg",
-			"-ac", "1", "-af", "aresample={:d}".format(GBASAMPLERATE),
-			self.filename + "2.wav"
-			])
+		# but i,, trust ffmpeg more than pydub 
+		# actually, doesnt pydub use ffmpeg on the backend? i hope it isnt writing anything to disk
+		# YEP
+		# it does 
+		# raw ffmpeging this now
 		
 		
-		waveFile = wave.open(self.filename + "2.wav")
-		frameCount = waveFile.getnframes()
-		self.duration = waveFile.getnframes() / waveFile.getframerate()
-		waveFile.close()
+		tempBuffer = io.BytesIO()
 		
+		test = AudioSegment.from_file(filename + ".ogg")
+		
+		# ffmpeg -y -i ../ExportData/Exported_Sounds/audiogroup_music/msc_voidsong.ogg -map 0 -f s16le pipe:
+		cmd = ["ffmpeg", "-y", "-i", filename + ".ogg", 
+		"-ac", "1",
+		"-filter_complex",
+		"[0]aresample={:d}[1]".format(GBASAMPLERATE), 
+		
+		"-map", "[1]", "-f", "s16le", "pipe:"]
+		
+		res = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
+		
+		
+		if res.returncode != 0:
+			res = subprocess.run(cmd)
+			print(RED + " ".join(cmd) + " failed!" + RESET)
+			exit(1)
+		
+		
+		self.sampleBytes = struct.unpack('<' + 'h' * (len(res.stdout) // 2), res.stdout)		
+		
+		# div by 2 bc 16 bit
+		frameCount = len(self.sampleBytes)
+		self.duration = frameCount / GBASAMPLERATE
+		
+		self.frameCount = frameCount
 		
 		self.tickValue = math.ceil( (1440/60) * ( (self.duration/254)/1))
 		# WAIT TICKVALUE CAN GO LIKE,, TO 1????
@@ -198,9 +221,13 @@ class ITFile:
 		if samplesPerSegment / GBASAMPLERATE > 2:
 			print(RED + "sample length is {:f} which may be to long, and might cause issues with playback!".format(samplesPerSegment / GBASAMPLERATE) + RESET)
 		
+		self.samplesPerSegment = samplesPerSegment
+		self.fileSampleCount = samplesPerSegment
+		self.lastSampleCount = frameCount % samplesPerSegment # IS THIS CORRECT
+		
+		"""
 		#ffmpeg -i input.wav -filter_complex "[0]atrim=start=0:end=9999[a]; [0]atrim=start=10000:end=19999[b]; [0]atrim=start=20000:end=29999[c]; ..." -map "[a]" output_1.wav -map "[b]" output_2.wav -map "[c]" output_3.wav ...
 		# do not ask.
-		
 		
 		sampleOffsetDiff = 0
 		self.fileSampleCount = samplesPerSegment
@@ -219,17 +246,7 @@ class ITFile:
 		#frameCount = samplesPerSegment*4
 		index = 1
 		for i in range(0, frameCount, samplesPerSegment):
-			
-			"""
-			start = end
-			
-			end = start + samplesPerSegment
-			
-			# goofy ahh foresight couldnt do shit in this case
-			#end = min(i+samplesPerSegment-1, frameCount)
-			#end = min(i+samplesPerSegment, frameCount)
-			"""
-			
+		
 			start = i
 			end = min(i+samplesPerSegment, frameCount)
 			
@@ -261,12 +278,16 @@ class ITFile:
 		cmd += mapCmds
 
 		runCommand(cmd)
+		"""
 		
-		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
+		#self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
 		
-		self.sampleCount = len(self.sampleFilenames)
+		#self.sampleCount = len(self.sampleFilenames)
+		
+		self.sampleCount = int(math.ceil(frameCount / samplesPerSegment))
 		
 		if self.sampleCount > 255:
+		#if frameCount / samplesPerSegment > 255:
 			print("max samplecount of 255 exceded")
 			print("idk what to do dumbass, either split the song, increase the segment time, or fix shit")
 			exit(1)
@@ -338,7 +359,56 @@ class ITFile:
 			
 		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
 		"""
+		
+		self.sampleFilenames = [ "{:s}{:03d}".format(self.filename, i) for i in range(0, self.sampleCount) ]
+		
+		# convert the samples to 8bit if needed 
+		
+		if is8Bit:
+			
+			tempData = [ short for short in self.sampleBytes ]
+			
+			#tempData = [ short // 256 for short in tempData ]
+			
+			#basicConvertFunc = lambda v : v // 256 
+			#basicConvertFunc = lambda v : v // 256 if v > 0 else -((-v) // 256)
+			
+			roundDown = lambda v : v // 256 if v > 0 else -((-v) // 256)
+			roundUp = lambda v : math.ceil(v / 256) if v > 0 else -math.ceil(-v / 256)
+			
+			def basicConvertFunc(index):
+				# only pass indicies 1- len-1 here 
+				
+				curr = self.sampleBytes[index]
+				
+				if index == 0 or index == -1 or index == len(self.sampleBytes) - 1:
+					#return curr // 256 if curr > 0 else -((-curr) // 256)
+					return round(curr / 256)
+			
+				prev = self.sampleBytes[index-1]
+				next = self.sampleBytes[index+1]
+		
+				isNegative = curr < 0
 	
+				# unsigned short range: -32768 <= number <= 32767
+				
+				temp = curr / 256
+				
+				useFunc = round
+				
+				if abs(temp) > (0xFF * 0.9):
+					useFunc = roundDown if isNegative else roundUp
+				
+				return useFunc(temp)
+			
+			for i in range(0, len(tempData)):
+				tempData[i] = basicConvertFunc(i)
+			
+			
+			
+			
+			self.sampleBytes = tempData
+			
 		
 		pass
 	
@@ -363,10 +433,10 @@ class ITFile:
 		#wavBytes = wavFile.readframes(sampleCount)
 		#wavFile.close()
 		
-		wavFile = wave.open(sampleFilename)
-		sampleCount = wavFile.getnframes()
-		wavBytes = wavFile.readframes(sampleCount)
-		wavFile.close()
+		#wavFile = wave.open(sampleFilename)
+		#sampleCount = wavFile.getnframes()
+		#wavBytes = wavFile.readframes(sampleCount)
+		#wavFile.close()
 		
 		#bytes += struct.pack("H", len(wavBytes))
 		# why did doing this stop the version error from occuring when opening mpt????
@@ -374,6 +444,23 @@ class ITFile:
 		
 		
 		#start = time.time()
+		
+		# goofy 
+		index = self.sampleFilenames.index(sampleFilename)
+		
+		start = index * self.samplesPerSegment
+		end = (index + 1) * self.samplesPerSegment
+		#end += 1 # IS THIS OK?
+		end = min(end, self.frameCount)
+		
+		tempData = self.sampleBytes[start:end]
+		
+		if is8Bit:
+			bytes += struct.pack("{:d}b".format(len(tempData)), *tempData)
+		else:
+			bytes += struct.pack("{:d}h".format(len(tempData)), *tempData)
+		
+		"""
 		
 		if is8Bit:
 			
@@ -422,6 +509,8 @@ class ITFile:
 		
 		else:
 			bytes += wavBytes
+			
+		"""
 		
 		#end = time.time()
 		#print(GREEN + "took {:f} seconds".format(end-start) +RESET)
@@ -505,7 +594,12 @@ class ITFile:
 		
 		# sample length
 		#bytes += struct.pack("I", fileSampleCount)
-		bytes += struct.pack("I", self.fileSampleCount)
+		# THIS DOESNT OUTPUT THE RIGHT LENGTH FOR THE LAST SAMPLE!!
+		
+		if sampleFilename == self.sampleFilenames[-1]:
+			bytes += struct.pack("I", self.lastSampleCount)
+		else:
+			bytes += struct.pack("I", self.fileSampleCount+16)
 		
 		# Loop beginning
 		bytes += struct.pack("I", 0)
@@ -931,7 +1025,7 @@ def getNeededFiles():
 
 	refs.remove("cifdream")
 	
-	#refs = ["msc_voidsong"]
+	refs = ["msc_voidsong"]
 	
 	return refs
 	
