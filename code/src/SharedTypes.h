@@ -917,18 +917,15 @@ template <typename T, int maxVecSize>
 class SaneVector : public bn::vector<T, maxVecSize> { // war crime
 public:
 	
-	SaneVector(std::initializer_list<T> l) {
-		
+	SaneVector(std::initializer_list<T> l) {		
 		for(auto it = l.begin(); it != l.end(); ++it) {
 			this->push_back(*it);
 		}
-		
 	}
-	
-	
+
 };
 
-inline char *strcpy(char *dest, const char *src) {
+inline char* strcpy(char* dest, const char* src) {
 	char *original_dest = dest;
 
 	while (*src != '\0') {
@@ -942,7 +939,7 @@ inline char *strcpy(char *dest, const char *src) {
 	return original_dest;
 }
 
-inline char *strncpy_custom(char *dest, const char *src, size_t n) {
+inline char* strncpy_custom(char* dest, const char* src, size_t n) {
     char *dest_start = dest;
 
     while (*src != '\0' && n > 0) {
@@ -959,7 +956,7 @@ inline char *strncpy_custom(char *dest, const char *src, size_t n) {
     return dest_start;
 }
 
-inline void *memset(void *ptr, int value, size_t num) {
+inline void* memset(void* ptr, int value, size_t num) {
 	unsigned char *byte_ptr = (unsigned char *)ptr;
 	unsigned char byte_value = (unsigned char)value;
 
@@ -992,7 +989,7 @@ struct MessageStr {
 	const char idek = '\0'; // sanity
 };
 
-constexpr unsigned hashString(const char *str) {
+constexpr unsigned hashString(const char* str) {
     unsigned hash = 0;
 
     while(*str) {
