@@ -41,7 +41,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		loadBoobTrap();
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_tail_upperbody) {
 		loadTailHead();
-	} 
+	}
 	
 	if(width > 4 || height > 4) {
 		
@@ -105,6 +105,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_gor_hair) {
 		animationIndex = 1;
 		animate();
+	} else if(tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
+		loadStink();
 	}
 	
 }
@@ -1114,6 +1116,15 @@ void BigSprite::loadGorHead() {
 	tiles = &bn::sprite_tiles_items::dw_spr_gor_sleep;
 }
 
+void BigSprite::loadStink() {
+	autoAnimate = true;
+	xPos-=7;
+	yPos+=1;
+	autoAnimateFrames = 8;
+	sprites[0].updateRawPosition(xPos, yPos);
+	sprites[0].spritePointer.set_bg_priority(3);
+}
+
 // -----
 	
 EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font),
@@ -1553,7 +1564,13 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	effects++;
 	
 	for(int i=0; i<effectsCount; i++) {
-		if(effects->width == 1 && effects->height == 1) { // a smallsprite should be summoned as an effect
+		//if(effects->width == 1 && effects->height == 1) { 
+		if(false) {
+		
+			// a smallsprite should be summoned as an effect
+			
+			// what the fuck was past me smoking when i wrote that^^ 
+		
 			if(effects->tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
 				
 				//BN_LOG("kys", effects->x, " ", effects->y);

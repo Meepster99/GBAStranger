@@ -5,6 +5,8 @@
 
 #include "bn_hw_irq.h"
 
+// C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -C -D .\build\main.o > idk.txt
+
 // bash -c " git ls-files *.py *.cpp *.h | xargs cat | sed '/^\s*$/d' | wc -l"
 
 
@@ -291,15 +293,7 @@ int main() {
 	bn::core::init(); 
 	
 	BN_LOG("butano inited");
-	//BN_LOG(val.colorArray[0].red(), " ", val.colorArray[0].green(), " ", val.colorArray[0].blue());
-	//BN_LOG(test.red());
-	//int idek = REDPALETTE.colorArray[1].red();
-	
-	
-	//BN_LOG("ok,,, ", IDEK(20));
-	//bn::fixed wtf = (32 * (20 + 4))/256;
-	//BN_LOG("wtf ", wtf);
-	
+
 	bn::bg_tiles::set_allow_offset(true);
 
 	bn::hw::irq::set_isr(bn::hw::irq::id::GAMEPAK, _cartPull);

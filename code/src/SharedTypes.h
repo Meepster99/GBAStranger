@@ -560,10 +560,10 @@ public:
 class Pos {
 public:
 
-	signed char x;
-	signed char y;
+	int x;
+	int y;
 
-	Pos(signed char x_, signed char y_) : x(x_), y(y_) { 
+	Pos(int x_, int y_) : x(x_), y(y_) { 
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
 	

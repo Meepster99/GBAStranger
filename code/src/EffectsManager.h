@@ -250,6 +250,7 @@ public:
 	void loadChest();
 	void loadTree();
 	void loadGorHead();
+	void loadStink();
 	
 };
 

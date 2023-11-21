@@ -5,6 +5,10 @@
 #include "AllRooms.h"
 #include "RoomManager.h"
 
+// for checking the actual dump of the roomdata, 
+// C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -D .\build\RoomManager.o > idk.txt
+// more work needs to be done on the room exporter, and compressing it
+
 RoomManager::RoomManager() {
 	setMode(0);
 }
