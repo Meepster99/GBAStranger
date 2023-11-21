@@ -254,11 +254,6 @@ public:
 	
 };
 
-// these are defines instead of typedefs bc typedef doesnt allow for constexpr
-//#define EffectTypeArray constexpr bn::pair<const bn::sprite_tiles_item, int> 
-//#define EffectType bn::pair<const bn::sprite_tiles_item, int> 
-//#define EffectTypeCast bn::span<const bn::pair<const bn::sprite_tiles_item, int>>
-
 class MenuOption {
 public:
 
@@ -275,6 +270,8 @@ public:
 	const char* optionName = NULL;
 	const char* (*getOption)() = NULL;
 	void (*changeOption)(int) = NULL;
+	void (*bPress)() = NULL;
+	
 	int yDraw = 0;
 	int xDraw = 0;
 	

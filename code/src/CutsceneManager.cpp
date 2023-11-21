@@ -1,4 +1,4 @@
-
+//
 
 #include "EffectsManager.h"
 
@@ -1700,9 +1700,12 @@ void CutsceneManager::inputCustomPalette() {
 	
 	BN_LOG("entering custompalette input");
 	
-	
+	// TODO, THIS SHOULD FREE THE MENU SPRITES, OR MAYBE I 
+	// SHOULD MAKE SOME OF THE STATIONARY TEXT INTO THE BG?
+
 	effectsManager->setMenuVis(false);
 	
+	/*
 	bn::sprite_text_generator textGenerator(common::variable_8x8_sprite_font);
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> cursor;
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> instructions;
@@ -1723,52 +1726,87 @@ void CutsceneManager::inputCustomPalette() {
 		instructions[i].set_bg_priority(0);
 		instructions[i].set_palette(defaultPalette.getFontSpritePalette());
 	}
+	*/
 	
+	bn::sprite_text_generator textGenerator(common::variable_8x8_sprite_font);
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> colorDetails[4];
 	
 	const bn::sprite_item* tempItem = &bn::sprite_items::dw_default_sprite_32_32;
 	Sprite colorOptions[4] = {Sprite(*tempItem), Sprite(*tempItem), Sprite(*tempItem), Sprite(*tempItem)};
 	
 	for(int i=0; i<4; i++) {
 		colorOptions[i].spritePointer.set_bg_priority(0);
-		colorOptions[i].spritePointer.set_x(-32 + (i * 32));
+		colorOptions[i].spritePointer.set_x(-32);
+		colorOptions[i].spritePointer.set_y(-48 + (i * 33));
 	}
 	
+	Sprite cursor(bn::sprite_items::dw_default_sprite_32_32);
+	cursor.spritePointer.set_palette(defaultPalette.getWhiteSpritePalette());
+	cursor.spritePointer.set_bg_priority(0);
+	cursor.spritePointer.set_z_order(1);
+	//cursor.spritePointer.set_scale((bn::fixed)33.0/32.0);
+	//cursor.spritePointer.set_scale(1.05); // annoyed i cant have the pixel boundary be on all sides easily
+	
 	int currentSelector = 0;
-	int rgbSelector = 0;
-	bool selected = false;
+	int rgbSelector = -1;
+
+	constexpr int paletteLookup[4] = {1, 4, 3, 2};				
 	
-	
-	constexpr int paletteLookup[4] = {1, 4, 3, 2};
+	auto writeStatus = [paletteLookup, &textGenerator, &colorDetails, &currentSelector, &rgbSelector, &cursor]() mutable -> void {
+		
+		cursor.spritePointer.set_x(-32-1);
+		cursor.spritePointer.set_y(-48-1 + (currentSelector * 33));
+		
+		for(int i=0; i<4; i++) {
+			colorDetails[i].clear();
+		}
+		
+		for(int i=0; i<4; i++) {
+		
+			bn::string<64> string;
+			bn::ostringstream string_stream(string);
+			
+			bn::color& colorRef = globalGame->pal->colorArray[paletteLookup[i]];
+			
+			constexpr char channelNames[3] = {'R', 'G', 'B'};
+			int values[3] = {colorRef.red(), colorRef.green(), colorRef.blue()};
+		
+			textGenerator.set_one_sprite_per_character(i == currentSelector);
+			
+			for(int j=0; j<3; j++) {
+				string_stream << " ";
+			
+				if(j == rgbSelector && i == currentSelector) {
+					string_stream << channelNames[j];
+				} else {
+					string_stream << (char)((int)channelNames[j] + 0x20);
+				}
 				
+				string_stream << ":";
+				if(values[j] < 10) {
+					string_stream << '0';
+				}
+				string_stream << values[j];
 	
-	auto writeStatus = [paletteLookup, &textGenerator, &status, &currentSelector, &rgbSelector, &selected]() mutable -> void {
-		
-		status.clear();
-		
-		bn::string<64> string;
-		bn::ostringstream string_stream(string);
-		
-		bn::color& colorRef = globalGame->pal->colorArray[paletteLookup[currentSelector]];
-		
-		if(selected) {
-			if(rgbSelector == 0) {
-				string_stream << " R:" << colorRef.red() << " g:" << colorRef.green() << " b:" << colorRef.blue();
-			} else if(rgbSelector == 1) {
-				string_stream << " r:" << colorRef.red() << " G:" << colorRef.green() << " b:" << colorRef.blue();
-			} else {
-				string_stream << " r:" << colorRef.red() << " g:" << colorRef.green() << " B:" << colorRef.blue();
 			}
-		} else {
-			string_stream << "UNSELECTED";
-		}
-		
-		textGenerator.generate((bn::fixed)-104, (bn::fixed)-56, bn::string_view(string), status);
-		
-		
-		for(int i=0; i<status.size(); i++) {
-			status[i].set_bg_priority(0);
-			status[i].set_palette(defaultPalette.getFontSpritePalette());
-		}
+
+			textGenerator.generate((bn::fixed)0, (bn::fixed)-48 + (i * 32), bn::string_view(string), colorDetails[i]);
+			
+			for(int j=0; j<colorDetails[i].size(); j++) {
+				colorDetails[i][j].set_bg_priority(0);
+				if(i == currentSelector && j/4 == rgbSelector) {
+					if(rgbSelector == 0) {
+						colorDetails[i][j].set_palette(REDPALETTE.getFontSpritePalette().create_palette());
+					} else if(rgbSelector == 1) {
+						colorDetails[i][j].set_palette(GREENPALETTE.getFontSpritePalette().create_palette());
+					} else {
+						colorDetails[i][j].set_palette(BLUEPALETTE.getFontSpritePalette().create_palette());
+					}
+				} else {
+					colorDetails[i][j].set_palette(defaultPalette.getFontSpritePalette());
+				}	
+			}
+		}	 
 	};
 	
 	writeStatus();
@@ -1777,47 +1815,71 @@ void CutsceneManager::inputCustomPalette() {
 	
 	game->doButanoUpdate();
 	
+	/* 
+	
+	new plan, go up and down to choose/change colour
+	hitting right will put you into the rgb of that color, and then left/right will change which channel you have selected 
+	up and down change that channel. 
+	instead of using caps, maybe change the text's color 
+	and put a outline of white behind the selected color?
+	
+	
+	*/
+	
+	bool doUpdate = false;
+	
 	while(true) {
 		
 		colorOptions[0].spritePointer.set_palette(game->pal->getBlackSpritePalette());
 		colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
 		colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
 		colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
-		writeStatus();
+		
+		//writeStatus();
 		
 		if(bn::keypad::b_pressed()) {
 			break;
 		}
-		
-		if(!selected) {
-			if(bn::keypad::left_pressed()) {
-				currentSelector--;
-			} else if(bn::keypad::right_pressed()) {
-				currentSelector++;
-			}
+	
+		if(bn::keypad::up_pressed()) {
+			currentSelector--;
+			currentSelector = CLAMP(currentSelector, 0, 3);
+			doUpdate = true;
+		} else if(bn::keypad::down_pressed()) {
+			currentSelector++;
+			currentSelector = CLAMP(currentSelector, 0, 3);
+			doUpdate = true;
 		}
 			
-		currentSelector = CLAMP(currentSelector, 0, 3);
-		cursor[0].set_x(-32 + 8 + (currentSelector * 32));
-		cursor[0].set_y(-32);
-		
-		
-		if(bn::keypad::a_pressed()) {
-			selected = !selected;
+		if(bn::keypad::right_pressed()) {
 			game->doButanoUpdate();
+			rgbSelector++;
+			doUpdate = true;
 		}
 		
-		while(selected) {
+		while(rgbSelector != -1) {
 			
 			if(bn::keypad::left_pressed()) {
-				rgbSelector--;
+				rgbSelector--;				
+				doUpdate = true;
 			} else if(bn::keypad::right_pressed()) {
 				rgbSelector++;
-			}	
+				doUpdate = true;
+			}
+			
+			if(rgbSelector == -1) {
+				doUpdate = true;
+				break;
+			}
+				
+			if(bn::keypad::b_pressed()) {
+				rgbSelector = -1;
+				doUpdate = true;
+				break;
+			}
 			
 			rgbSelector = CLAMP(rgbSelector, 0, 2);
-
-						
+			
 			if(bn::keypad::up_held() || bn::keypad::down_held()) {
 				
 				int changeVal = bn::keypad::up_held() ? 1 : -1;
@@ -1837,30 +1899,44 @@ void CutsceneManager::inputCustomPalette() {
 				colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
 				colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
 		
+				doUpdate = true;
+				//writeStatus();
+				//delay(5);
+			
+			}
+			
+			if(doUpdate) {
+				doUpdate = false;
 				writeStatus();
 				delay(5);
-			
-			}
-	
-
-
-
-
-
-			if(bn::keypad::a_pressed()) {
-				selected = !selected;
 			}
 			
-			writeStatus();
+			//writeStatus();
 			game->doButanoUpdate();
+		}
+		
+		if(doUpdate) {
+			doUpdate = false;
+			writeStatus();
 		}
 	
 		game->doButanoUpdate();
 	}
 	
+	// WRITE THE ACTUAL PALETTE
+	BN_LOG("done0");
+	for(int i=0; i<4; i++) {
+		colorDetails[i].clear();
+	}
+	game->doButanoUpdate();
+	BN_LOG("done1");
+		
+	globalGame->changePalette(0);
+	game->doButanoUpdate();
+	BN_LOG("done2");
 	effectsManager->setMenuVis(true);
 	
-	
+	BN_LOG("done3");
 	
 }
 

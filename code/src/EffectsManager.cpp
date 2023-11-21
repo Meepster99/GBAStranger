@@ -2357,34 +2357,6 @@ void EffectsManager::doMenu() {
 		}
 	}
 	
-	
-	
-	/*
-	
-	bn::optional<bn::span<bn::tile>> tileRefOpt = tilesPointer.vram();
-	BN_ASSERT(tileRefOpt.has_value(), "wtf");
-	bn::span<bn::tile> tileRef = tileRefOpt.value();
-	
-	for(int i=0; i<6; i++) {
-		unsigned output = 0;
-		unsigned temp = tileManager->playerBrand[i];
-		for(int j=0; j<6; j++) {
-			if(temp & 1) {
-				output = (output << 4) | 0x2;
-			} else {
-				output = (output << 4) | 0x4;
-			}
-			temp >>=1;
-		}
-		tileRef[125].data[i] = output | 0x11000000;
-	}
-	tileRef[125].data[6] = 0x11111111;
-	tileRef[125].data[7] = 0x11111111;
-	
-	effectsLayer.rawMap.setTile(28, 1, 125);
-	*/
-	
-	
 	for(int i=0; i<6; i++) {
 		unsigned temp = tileManager->playerBrand[i];
 		for(int j=0; j<6; j++) {
@@ -2403,8 +2375,6 @@ void EffectsManager::doMenu() {
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
 	
-
-
 	#define VERMSG1 "made with love with:" 
 	const char* vermsgString1 = VERMSG1;
 	
@@ -2474,6 +2444,10 @@ void EffectsManager::doMenu() {
 		[](int val) { return globalGame->changePalette(val); }
 		)
 	);
+	
+	menuOptions[menuOptions.size() - 1].bPress = []() -> void {
+		globalGame->cutsceneManager.inputCustomPalette();
+	};
 	
 	menuOptions.push_back(
 		MenuOption("Memory: ", 
@@ -2633,7 +2607,11 @@ void EffectsManager::doMenu() {
 				if(selectedOption == menuOptions.size() - 1) {
 					break;
 				}
-				
+			// else if(isActive && bn::keypad::b_pressed()) {
+			} else if(bn::keypad::b_pressed()) {
+				if(menuOptions[selectedOption].bPress != NULL) {
+					menuOptions[selectedOption].bPress();
+				}
 			} else {
 				
 			}

@@ -28,7 +28,6 @@ int* stareTilesCount = 0;
 int* stareMapCount = 0;
 
 unsigned* glitchTiles = NULL;
-//unsigned short* glitchMap = NULL; // we dont actually care abt this
 int* glitchTilesCount = NULL;
 
 unsigned short* col0 = NULL;
@@ -36,7 +35,6 @@ unsigned short* col1 = NULL;
 unsigned short* col2 = NULL;
 unsigned short* col3 = NULL;
 unsigned short* col4 = NULL;
-
 
 void doNothing() {
 	
@@ -275,18 +273,6 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		}
 	}
 }
-
-/*
-#define IDEK(n) CLAMP( (32 * (n + 4)) / 256, 0, 0xFF)
-
-#define CONVERT5BIT(n) CLAMP( (32 * n) / 256, 0, 0xFF)
-
-#define BRUH(n) CONVERT5BIT(n+4)
-*/
-
-//bn::color test(200, 200, 200);
-
-	
 
 int main() {
 	

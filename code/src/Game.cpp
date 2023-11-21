@@ -735,10 +735,12 @@ void Game::changePalette(int offset) {
 	
 	pal = paletteList[paletteIndex];
 	
+	/*
 	if(paletteIndex == paletteListSize - 1) {
 		cutsceneManager.inputCustomPalette();
 	}
-
+	*/
+	
 	entityManager.updatePalette(paletteList[paletteIndex]);
 	effectsManager.updatePalette(paletteList[paletteIndex]);
 
