@@ -1306,6 +1306,21 @@ def generateCustomFloorBackground(outputPath):
 	nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
 	tiles.append(nextTile)
 	
+	# this should be above, but im scared ok 
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_sword_flash.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp[0:16, 0:16])
+	tiles.append(temp[16:32, 0:16])
+	tiles.append(temp[32:48, 0:16])
+	tiles.append(temp[48:64, 0:16])
+	
+	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_sword_flash_cif.bmp"))
+	temp[temp == 0] = 2
+	tiles.append(temp[0:16, 0:16])
+	tiles.append(temp[16:32, 0:16])
+	tiles.append(temp[32:48, 0:16])
+	tiles.append(temp[48:64, 0:16])
+	
 	stackedTiles = np.vstack(tiles).tolist()
 	
 	reversePalette = {

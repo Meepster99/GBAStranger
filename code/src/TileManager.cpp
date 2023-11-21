@@ -161,6 +161,10 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 		
 		if(player->hasSword) {
+			Pos tempPos = player->p;
+			if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
+				return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
+			}
 			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
 		}
 		
@@ -478,6 +482,7 @@ void TileManager::updateTile(const Pos& p) {
 			FloorTile::drawDropOff(x, y+1);
 		}
 	}
+
 	
 }
 
@@ -648,6 +653,16 @@ void TileManager::doVBlank() { profileFunction();
 			}
 		}
 	}
+	
+	// i wonder/hope this is ok 
+	// sword tile needs to be updated every,, frame for flashing?
+	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
+		//updateTile(swordTile->tilePos);
+		swordTile->draw();
+		floorLayer.reloadCells(); // might cause horrid lag
+	}
+	
+	
 	
 	
 	
