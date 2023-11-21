@@ -500,7 +500,7 @@ void EntityManager::doMoves() {
 	
 	if(prevHasWingsTile && !player->inRod(tileManager->wingsTile)) {
 		player->hasWingsTile = false;
-		player->wingsUse = 0;
+		//player->wingsUse = 0;
 	}
 	
 	if(!playerRes.first) {
