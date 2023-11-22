@@ -202,7 +202,12 @@ void Game::findNextRoom() {
 		}
 		
 		if(tileManagerRoomIndex != -1 && tileManagerRoomIndex != startRoomIndex) {
-			roomManager.gotoRoom(tileManagerRoomIndex);
+			if(tileManagerRoomIndex >= 256) {
+				// goto the white rooms 
+				roomManager.gotoRoom("rm_u_0001\0");
+			} else {
+				roomManager.gotoRoom(tileManagerRoomIndex);
+			}
 			return;
 		}
 		

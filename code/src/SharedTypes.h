@@ -563,6 +563,11 @@ public:
 	int y;
 
 	Pos(int x_, int y_) : x(x_), y(y_) { 
+
+		if(!(x >= 0 && y >= 0 && x < 14 && y < 9)) {
+			BN_LOG("bruh");
+		}
+
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
 	

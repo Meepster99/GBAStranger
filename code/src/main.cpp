@@ -7,6 +7,10 @@
 
 // C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -C -D .\build\main.o > idk.txt
 
+// C:\devkitPro\devkitARM\bin\arm-none-eabi-gdb.exe
+// file GBAStranger.elf
+// target remote localhost:2345
+
 // bash -c " git ls-files *.py *.cpp *.h | xargs cat | sed '/^\s*$/d' | wc -l"
 
 

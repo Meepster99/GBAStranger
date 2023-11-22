@@ -39,6 +39,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	swordTile  = NULL;
 	floorTile1 = NULL;
 	floorTile2 = NULL;
+	voidTile1 = NULL;
+	voidTile2 = NULL;
 	
 	int switchTracker = 0;
 
@@ -101,95 +103,97 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	// i could add funcs for pickup and putdown, and have the tiles possess effectswhich draw them out?
 	// ugh, tbh it looks fine except for the D in void. maybe thats a manual fix.
 	
-	floorMap[0][8] = new WordTile(Pos(0, 8));
+	if(strstrCustom(game->roomManager.currentRoomName(), "_u_00\0") == NULL) {
 	
-	floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
-	floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
-	// we now have a special tile for the 'ID'
-	//floorMap[2][8] = new WordTile(Pos(2, 8), '~' + 1, '~' + 2);
-	
-	voidTile1 = static_cast<WordTile*>(floorMap[1][8]);
-	voidTile2 = static_cast<WordTile*>(floorMap[2][8]);
-	
-	floorMap[3][8] = new WordTile(Pos(3, 8));
-	//floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
-	floorMap[4][8] = new LocustTile(Pos(4, 8));
-	locustTile = static_cast<LocustTile*>(floorMap[4][8]);
-	
-	//floorMap[5][8] = new WordTile(Pos(5, 8), '4', '2');
-	floorMap[5][8] = new WordTile(Pos(5, 8), ' ', ' ');
-	locustCounterTile = static_cast<WordTile*>(floorMap[5][8]);
-	
-	//floorMap[6][8] = new WordTile(Pos(6, 8), 'R', 'D');
-	floorMap[6][8] = new RodTile(Pos(6, 8));
-	rodTile = static_cast<RodTile*>(floorMap[6][8]);
-	
-	
-	
-	floorMap[7][8] = new WordTile(Pos(7, 8));
-	
-	// rodtile, and everything else should maybe(in the future) be replaced with spritetiles with custom lambdas?
-	memoryTile = new SpriteTile(Pos(8, 8), []() -> int {
-		Player* player = globalGame->entityManager.player;
+		floorMap[0][8] = new WordTile(Pos(0, 8));
 		
-		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+		floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
+		floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
+		// we now have a special tile for the 'ID'
+		//floorMap[2][8] = new WordTile(Pos(2, 8), '~' + 1, '~' + 2);
 		
-		if(player->hasMemory) {
-			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 0;
-		}
+		voidTile1 = static_cast<WordTile*>(floorMap[1][8]);
+		voidTile2 = static_cast<WordTile*>(floorMap[2][8]);
 		
-		return 57;
-	});
-	floorMap[8][8] = memoryTile;
-	
-	wingsTile = new SpriteTile(Pos(9, 8), []() -> int {
-		Player* player = globalGame->entityManager.player;
+		floorMap[3][8] = new WordTile(Pos(3, 8));
+		//floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
+		floorMap[4][8] = new LocustTile(Pos(4, 8));
+		locustTile = static_cast<LocustTile*>(floorMap[4][8]);
 		
-		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+		//floorMap[5][8] = new WordTile(Pos(5, 8), '4', '2');
+		floorMap[5][8] = new WordTile(Pos(5, 8), ' ', ' ');
+		locustCounterTile = static_cast<WordTile*>(floorMap[5][8]);
 		
-		if(player->hasWings) {
-			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 1;
-		}
+		//floorMap[6][8] = new WordTile(Pos(6, 8), 'R', 'D');
+		floorMap[6][8] = new RodTile(Pos(6, 8));
+		rodTile = static_cast<RodTile*>(floorMap[6][8]);
 		
-		return 57;
-	});
-	floorMap[9][8] = wingsTile;
-	
-	swordTile = new SpriteTile(Pos(10, 8), []() -> int {
-		Player* player = globalGame->entityManager.player;
 		
-		BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 		
-		if(player->hasSword) {
-			Pos tempPos = player->p;
-			if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
-				return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
+		floorMap[7][8] = new WordTile(Pos(7, 8));
+		
+		// rodtile, and everything else should maybe(in the future) be replaced with spritetiles with custom lambdas?
+		memoryTile = new SpriteTile(Pos(8, 8), []() -> int {
+			Player* player = globalGame->entityManager.player;
+			
+			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+			
+			if(player->hasMemory) {
+				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 0;
 			}
-			return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
+			
+			return 57;
+		});
+		floorMap[8][8] = memoryTile;
+		
+		wingsTile = new SpriteTile(Pos(9, 8), []() -> int {
+			Player* player = globalGame->entityManager.player;
+			
+			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+			
+			if(player->hasWings) {
+				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 1;
+			}
+			
+			return 57;
+		});
+		floorMap[9][8] = wingsTile;
+		
+		swordTile = new SpriteTile(Pos(10, 8), []() -> int {
+			Player* player = globalGame->entityManager.player;
+			
+			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+			
+			if(player->hasSword) {
+				Pos tempPos = player->p;
+				if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
+					return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
+				}
+				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
+			}
+			
+			return 57;
+		});
+		floorMap[10][8] = swordTile;
+		
+		floorMap[11][8] = new WordTile(Pos(11, 8));
+		
+		// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed(or ???)
+		int roomIndex = game->roomManager.roomIndex;
+		
+		BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
+		
+		if(roomIndex <= 256) {
+			floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
+			floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
+		} else {
+			floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '?');
+			floorMap[13][8] = new WordTile(Pos(13, 8), '?', '?');
 		}
 		
-		return 57;
-	});
-	floorMap[10][8] = swordTile;
-	
-	floorMap[11][8] = new WordTile(Pos(11, 8));
-	
-	// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed(or ???)
-	int roomIndex = game->roomManager.roomIndex;
-	
-	BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
-	
-	if(roomIndex <= 256) {
-		floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
-		floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
-	} else {
-		floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '?');
-		floorMap[13][8] = new WordTile(Pos(13, 8), '?', '?');
+		floorTile1 = static_cast<WordTile*>(floorMap[12][8]);
+		floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
 	}
-	
-	floorTile1 = static_cast<WordTile*>(floorMap[12][8]);
-	floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
-	
 	
 	exitDestination = exitDest;
 	secretDestinations.clear();
@@ -510,11 +514,11 @@ void TileManager::updateRod() {
 
 void TileManager::updateLocust() {
 
-	if(!entityManager->player->inRod(locustTile)) {
+	if(locustTile != NULL && !entityManager->player->inRod(locustTile)) {
 		updateTile(locustTile->tilePos);
 	}
 	
-	if(!entityManager->player->inRod(locustCounterTile)) {
+	if(locustCounterTile != NULL && !entityManager->player->inRod(locustCounterTile)) {
 		
 		//if(entityManager->player->locustCount != 0) {
 		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
@@ -530,7 +534,7 @@ void TileManager::updateVoidTiles() {
 	
 	bool isVoided = entityManager->player->isVoided;
 	//BN_LOG("brrhuasdiofhsjkfsl, ", isVoided);
-	if(!entityManager->player->inRod(voidTile1)) {
+	if(voidTile1 != NULL && !entityManager->player->inRod(voidTile1)) {
 		
 		voidTile1->first = isVoided ? 'V' : 'H';
 		voidTile1->second = isVoided ? 'O' : 'P';
@@ -538,7 +542,7 @@ void TileManager::updateVoidTiles() {
 		updateTile(voidTile1->tilePos);
 	}
 	
-	if(!entityManager->player->inRod(voidTile2)) {
+	if(voidTile2 != NULL && !entityManager->player->inRod(voidTile2)) {
 		
 		voidTile2->first = isVoided ? 'I' : '0';
 		voidTile2->second = isVoided ? 'D' : '7';
@@ -551,21 +555,25 @@ void TileManager::updateVoidTiles() {
 
 void TileManager::updateBurdenTiles() {
 	
-	if(!entityManager->player->inRod(memoryTile)) {
+	if(memoryTile != NULL && !entityManager->player->inRod(memoryTile)) {
 		updateTile(memoryTile->tilePos);
 	}
 	
-	if(!entityManager->player->inRod(wingsTile)) {
+	if(wingsTile != NULL && !entityManager->player->inRod(wingsTile)) {
 		updateTile(wingsTile->tilePos);
 	}
 	
-	if(!entityManager->player->inRod(swordTile)) {
+	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);
 	}
 	
 }
 
 int TileManager::getLocustCount() {
+	
+	if(locustCounterTile == NULL) {
+		return 0;
+	}
 	
 	if(entityManager->player->inRod(locustCounterTile) || 
 		entityManager->player->inRod(locustTile)) {
@@ -585,6 +593,10 @@ int TileManager::getLocustCount() {
 }
 
 int TileManager::getRoomIndex() {
+	
+	if(floorTile2 == NULL) {
+		return -1;
+	}
 	
 	if(entityManager->player->inRod(floorTile2)) {
 		return -1;

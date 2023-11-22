@@ -73,6 +73,10 @@ void Player::popRod(Pos tilePos) {
 bool Player::inRod(FloorTile* tile) {
 	// trashCode
 	
+	if(tile == NULL) {
+		return false;
+	}
+	
 	BN_ASSERT(tile != NULL, "you should never be calling inRod with a null tile");
 	
 	for(int i=0; i<rod.size(); i++) {

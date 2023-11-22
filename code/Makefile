@@ -55,7 +55,8 @@ ROMCODE     :=  GBST
 # and tbh, it doesnt help the poor quality caused by,, overtones or something?
 
 
-USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+USERFLAGS   :=  -ggdb3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 #USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 #USERFLAGS   :=  -O3 
 #USERFLAGS   := 
@@ -96,7 +97,7 @@ endif
 include $(LIBBUTANOABS)/butano.mak
 
 # gives a warning, idc tho
-clean:
+fullClean:
 	rm -fr build GBAStranger.elf GBAStranger.elf.* GBAStranger.gba
 	rm -fr audio graphics
 	rm -fr ../misc/massFormatter/formattedOutput
