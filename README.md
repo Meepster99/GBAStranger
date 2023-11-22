@@ -5,16 +5,15 @@
 
 install [devkitpro](https://devkitpro.org/) and [python](https://www.python.org/downloads/) >= 3.11
 
-purchase and install Void Stranger
-
 when installing devkitpro, make sure that the only option checked is for GBA. uncheck all others.
 
-clone the repo, and do `git submodule update --init --recursive`
+purchase and install Void Stranger on [itch](https://system-erasure.itch.io/void-stranger) or [steam](https://store.steampowered.com/app/2121980/Void_Stranger/)
+
+clone the repo, and do `git submodule update --init --recursive` in the repo's root directory
 
 run convertAllAssets.py, located in the misc folder
 
 make the makefile in code/ preferably with -j8 or -j16 and LOG=1 or PROFILE=1
-
 
 ## Instructions to build rust code.
 
@@ -30,4 +29,4 @@ use `cargo run --release`.
 
 ## License
 
-You can do whatever you want, provided you provide credit to Meepster99
+You can do whatever you want, provided you provide credit to Meepster99, Madeline Celestia, or Inana, and do not use any material here for the purpose of piracy.
