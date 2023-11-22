@@ -223,9 +223,7 @@ enum class EntityType {
 	Interactable,
 	
 	// i am not sure if this is the best way to do this, but I am going with it 
-	EmptyChest,
-	
-	OtherPlayer
+	EmptyChest
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {
@@ -254,8 +252,7 @@ static const char *EntityTypeToString[] ={
 	"LevStatue",
 	"CifStatue",
 	"Interactable",
-	"EmptyChest",
-	"OtherPlayer"
+	"EmptyChest"
 };
 
 	stream << EntityTypeToString[static_cast<int>(e)];

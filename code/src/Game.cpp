@@ -326,21 +326,31 @@ void Game::changeMusic() {
 		
 		*/
 		
-		if(bn::music::playing() && bn::music::playing_item() == item) {
+		static int prevMode = globalGame->mode;
+		
+		if(bn::music::playing() && bn::music::playing_item() == item && prevMode == globalGame->mode) {
 			return;
 		}
 		
+		prevMode = globalGame->mode;
+		
+		bn::fixed adjustVal = 1.0;
+		
+		if(globalGame->mode == 2 && item != bn::music_items::msc_voidsong) {
+			adjustVal = 0.96;
+		}
+		
 		item.play();
+		
+		bn::music::set_pitch(adjustVal);
+		bn::music::set_tempo(adjustVal);
+		
+		
 		
 	};
 	
 	if(roomIndex == 254 && mode == 2) {
 		doPlay(bn::music_items::msc_voidsong);
-		return;
-	}
-	
-	if(mode == 2) {
-		doPlay(bn::music_items::msc_themeofcif);
 		return;
 	}
 	
@@ -374,7 +384,11 @@ void Game::changeMusic() {
 	*/
 		
 	if(roomIndex <= 28) {
-		doPlay(bn::music_items::msc_001);
+		if(mode == 2) {
+			doPlay(bn::music_items::msc_themeofcif);
+		} else {
+			doPlay(bn::music_items::msc_001);
+		}
 	} else if(roomIndex <= 56) {
 		doPlay(bn::music_items::msc_dungeon_wings);
 	} else if(roomIndex <= 84) {
