@@ -1024,6 +1024,8 @@ void Game::run() {
 	
 	state = GameState::Loading;
 	
+	//cutsceneManager.titleScreen();
+	
 	bool brandBlank = true;
 	for(int i=0; i<6; i++) {
 		if(tileManager.playerBrand[i] != 0) {
@@ -1033,6 +1035,9 @@ void Game::run() {
 	}
 	
 	if(brandBlank && !roomManager.isCustom) {
+		
+		cutsceneManager.titleScreen();
+		
 		cutsceneManager.brandInput();
 	}
 	
@@ -1191,6 +1196,9 @@ uint64_t Game::getSaveHash() {
 		rotateHash(sizeof(saveData.playerBrand[i]) * 8);
 	}
 	
+	hash ^= saveData.randomSeed;
+	rotateHash(sizeof(saveData.randomSeed) * 8);
+	
 	return hash;
 }
 
@@ -1220,6 +1228,8 @@ void Game::save() {
 	for(int i=0; i<6; i++) {
 		saveData.playerBrand[i] = tileManager.playerBrand[i];
 	}
+	
+	saveData.randomSeed = bruhRand();
 	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);

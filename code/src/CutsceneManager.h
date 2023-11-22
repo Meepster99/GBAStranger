@@ -72,6 +72,8 @@ public:
 	
 	void inputCustomPalette();
 	
+	void titleScreen();
+	
 	// -----
 	
 	void backupLayer(int i);

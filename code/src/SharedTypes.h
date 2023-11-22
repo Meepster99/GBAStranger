@@ -52,6 +52,8 @@
 // danger zone, again 
 #include "bn_bg_blocks_manager.h"
 
+#include "bn_green_swap.h"
+
 #ifdef ENABLELOGGING
 #include "bn_log.h"
 #else 

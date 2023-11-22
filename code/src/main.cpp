@@ -40,15 +40,22 @@ void doNothing() {
 	
 }
 
+// i swear to the gods. this func was not supposed to become my default rand func. what am i smoking?
 __attribute__((section(".iwram"))) unsigned short bruhRand() {
 	const uint64_t a = 6364136223846793005;
 	static uint64_t seed = 1;
     seed = a * seed + 1;
 	
-	unsigned short res = (seed >> 48);
-	res ^= ((seed >> 32) & 0xFFFF);
-	return res;
+	//unsigned short res = (seed >> 48);
+	//res ^= ((seed >> 32) & 0xFFFF);
+	//return res;
     //return (unsigned short)(seed >> 32);
+	unsigned res = 0;
+	res ^= ((seed & 0xFFFF) >> 0);
+	//res ^= ((seed & 0xFFFF0000) >> 16);
+	res ^= ((seed & 0xFFFF00000000) >> 32);
+	res ^= ((seed & 0xFFFF000000000000) >> 48);
+	return res;
 }
 
 // cheese and rice, at least i dont have to write asm
@@ -279,7 +286,7 @@ int main() {
 	bn::core::init(); 
 	
 	BN_LOG("butano inited");
-
+	
 	bn::bg_tiles::set_allow_offset(true);
 
 	bn::hw::irq::set_isr(bn::hw::irq::id::GAMEPAK, _cartPull);

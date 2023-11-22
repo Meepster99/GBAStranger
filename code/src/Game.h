@@ -97,6 +97,14 @@ struct GameSave {
 	int col3Save = 25368;
 	int col4Save = 16912;
 	
+	// this variable is very stupid 
+	// essentially, on boot, for displaying the splash screen, we need a source of initial randomness before any player input 
+	// however, i like deadass like,,,,, because the title occurs before any randomness, (playerinput) 
+	// we need this. 
+	// i could also use rtc, but when i put this on a real cart, i dont want to have to rely on any sort of battery 
+	// (ill be using fram, instead of sram too)
+	unsigned short randomSeed = 0; 
+	
 	uint64_t hash = 0;
 };
 

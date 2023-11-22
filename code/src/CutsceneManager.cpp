@@ -34,6 +34,7 @@ void CutsceneManager::doVBlank() {
 }
 
 void CutsceneManager::resetRoom() {
+	vBlankFuncs.clear();
 	disOsTextSprites.clear();
 	for(int i=0; i<disTextSprites.size(); i++) {
 		disTextSprites[i].clear();
@@ -1011,6 +1012,8 @@ void CutsceneManager::brandInput() {
 
 void CutsceneManager::createPlayerBrandRoom() {
 
+	vBlankFuncs.clear();
+
 	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
 	cutsceneLayer.rawMap.bgPointer.set_x(16);
 	cutsceneLayer.rawMap.bgPointer.set_y(64-8);
@@ -1139,6 +1142,8 @@ void CutsceneManager::createPlayerBrandRoom() {
 }
 
 void CutsceneManager::crashGame() {
+	
+	vBlankFuncs.clear();
 	
 	// totally use some of the hacky (curse) you learned from writing the cart thing to 
 	// corrupt stuff here
@@ -1334,6 +1339,8 @@ void CutsceneManager::crashGame() {
 
 void CutsceneManager::carcusEnding() {
 	
+	vBlankFuncs.clear();
+	
 	for(int i=0; i<60; i++) {
 		game->doButanoUpdate();
 	}
@@ -1346,6 +1353,8 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 	// it is critical that we pass a ref of the pointer to do proper comparisons
 	// wait no is it?
 	// the bool isPickup isnt neccessary, but will reduce lookups
+	
+	vBlankFuncs.clear();
 	
 	/*
 	
@@ -1693,6 +1702,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 
 void CutsceneManager::inputCustomPalette() {
 	
+	vBlankFuncs.clear();
 	
 	if(effectsManager->menuOptions.size() == 0) {
 		return;
@@ -1937,6 +1947,224 @@ void CutsceneManager::inputCustomPalette() {
 	effectsManager->setMenuVis(true);
 	
 	BN_LOG("done3");
+	
+}
+
+void CutsceneManager::titleScreen() {
+	
+	backupAllButEffects();
+	game->doButanoUpdate();
+	
+	vBlankFuncs.clear();
+	
+	GameState restoreState = game->state;
+	game->state = GameState::Cutscene;
+	
+	
+	
+	// dance_milkyway  index 0 and 1 are just palette swaps.
+	
+	maps[0]->create(bn::regular_bg_items::dw_default_black_bg, 3);
+	maps[1]->create(bn::regular_bg_items::dw_spr_dance_milkyway_001_index0, 0);
+	maps[3]->create(bn::regular_bg_items::dw_spr_dance_milkyway_002_index1, 1);
+	
+	maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(0, false));
+	maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(0, false));
+	delay(60);	
+	
+	Sprite idrk(bn::sprite_items::dw_idrk);
+	// the amount of times ive wrote this syntax instead of just fixing this god forsaken issue is insane.
+	idrk.spritePointer.set_bg_priority(0);
+	idrk.spritePointer.set_position(0 + (120-20), 0 - (80 - 16));
+	
+	for(int i=0; i<=4; i++) {
+		idrk.spritePointer.set_palette(game->pal->getSpritePaletteFade(i, false));
+		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i, false));
+		maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(i, false));
+		delay(5);
+	}
+	
+	vBlankFuncs.push_back(
+		// THIS MAKES LAMBDAS ACTUALLY GOOD, WHY DIDNT I LEARN THIS EARLIER??!!
+		[this, flicker = 0, wait = 0]() mutable -> void {
+			
+			if(flicker) {
+				flicker--;
+				if(flicker == 0) {
+					wait = 15;
+					bn::green_swap::set_enabled(false);
+					maps[3]->create(bn::regular_bg_items::dw_spr_dance_milkyway_002_index1, 1);
+				}
+				return;
+			}
+			
+			if(wait) {
+				wait--;
+				return;
+			}
+
+			if((bruhRand() & 0xFF) == 0) {
+				maps[3]->create(bn::regular_bg_items::dw_spr_dance_milkyway_002_index0, 1);
+				flicker = 10;
+				if((bruhRand() & 0b1) == 0) {
+					bn::green_swap::set_enabled(true);
+				}
+			} else {
+				maps[3]->create(bn::regular_bg_items::dw_spr_dance_milkyway_002_index1, 1);
+			}
+		}
+	);
+	
+	
+	const char* titleMessage = "GBASTRANGER\0";
+	
+	bn::sprite_text_generator textGenerator(dw_fnt_text_12_sprite_font);
+	
+	bn::vector<bn::vector<bn::sprite_ptr, 4>, 5> textSprites(5, bn::vector<bn::sprite_ptr, 4>());
+	
+	auto activeTextPalette = game->pal->getWhiteSpritePalette().create_palette();
+	auto blackTextPalette = game->pal->getBlackSpritePalette().create_palette();
+	
+	int restX = 0;
+	int restY = 0;
+	
+	for(int j=0; j<5; j++) {
+		
+		bn::fixed x = restX;
+		bn::fixed y = restY;
+		
+		// stupid way of doing this but i dont want to write a switch case
+		Pos dif = Pos(1, 1);
+		if(j != 0) {
+			dif.move(static_cast<Direction>(j-1));
+		}
+		
+		x += (dif.x - 1);
+		y += (dif.y - 1);
+		
+		textGenerator.generate(x, y-100, bn::string_view(titleMessage), textSprites[j]);
+		
+		for(int i=0; i<textSprites[j].size(); i++) {
+			textSprites[j][i].set_bg_priority(0);
+			textSprites[j][i].set_z_order(j != 0);
+			//textSprites[j][i].set_scale(2);
+			if(j == 0) {
+				textSprites[j][i].set_palette(activeTextPalette);
+			} else {
+				textSprites[j][i].set_palette(blackTextPalette);
+			}	
+		}
+	}
+	
+	vBlankFuncs.push_back(
+		// THIS MAKES LAMBDAS ACTUALLY GOOD, WHY DIDNT I LEARN THIS EARLIER??!!
+		[this, 
+		x = 0,
+		y = -100,
+		angle = 0,
+		textSprites = bn::move(textSprites)
+		]() mutable -> void {
+			
+			angle++;
+			
+			constexpr int radii[4] = {30, -2, -28, -51};
+			
+			y+=2;
+			y = MIN(y, 0);
+			 
+			for(int i=0; i<5; i++) {
+				for(int j=0; j<textSprites[i].size(); j++) {
+					 
+					 textSprites[i][j].set_rotation_angle(angle % 360);
+					 
+					 int tempX = x;
+					 int tempY = y;
+					 
+					 constexpr int offset = 3;
+					 
+					 switch(i) {
+						default:
+						case 0:
+							break;
+						case 1:
+							tempX += offset;
+							break;
+						case 2:
+							tempY += offset;
+							break;
+						case 3:
+							tempX += -offset;
+							break;
+						case 4:
+							tempY += -offset;
+							break;
+						 
+					}
+		
+					textSprites[i][j].set_x(tempX + 0 + (bn::fixed)(radii[j]) * sinTable[ (angle + 270) % 360 ] );
+					textSprites[i][j].set_y(tempY + 0 + (bn::fixed)(radii[j]) * sinTable[ (angle + 0) % 360 ] );
+				}
+			}
+		}
+	);
+	
+	
+	// ok, passing text to the sprite_text_generator, or maybe string view? is what causes my nullterm problem??
+	constexpr const char* idek[] = {
+		"Welcome!\0",
+		"ugh\0",
+		"UGH\0",
+		"now with 50% less diamond bugs\0"
+		"now with 150% more shadow bugs\0",
+		"uwu\0",
+		"i should be sleeping\0",
+		"i need to have to remove all these\0",
+		"<3\0"
+		
+		
+	};
+	
+	constexpr int idekSize = sizeof(idek)/sizeof(idek[0]);
+	
+	bn::vector<bn::sprite_ptr, 64> splashTextSprites;
+	BN_LOG(randomGenerator.get_int(1));
+	textGenerator.set_center_alignment();
+	//textGenerator.generate(0, 100, bn::string_view(idek[randomGenerator.get_int(0, sizeof(idek)/sizeof(idek[0]))]), splashTextSprites);
+	textGenerator.generate(0, 100, bn::string_view(
+		idek[game->saveData.randomSeed % idekSize]
+	), splashTextSprites);
+	textGenerator.set_left_alignment();
+	
+	bn::sprite_text_generator otherTextGenerator(common::variable_8x8_sprite_font);
+	otherTextGenerator.set_center_alignment();
+	otherTextGenerator.generate(0, 100 + 16, bn::string_view(
+		"press a"
+	), splashTextSprites);
+	
+	for(int j=0; j<splashTextSprites.size(); j++) {
+		splashTextSprites[j].set_bg_priority(0);
+	}
+	
+	for(int i=0; i<40; i++) {
+		for(int j=0; j<splashTextSprites.size(); j++) {
+			splashTextSprites[j].set_y(splashTextSprites[j].y() - 1);
+		}
+		game->doButanoUpdate();
+	}
+	
+	while(true) { 
+		if(bn::keypad::a_pressed()) {
+			break;
+		}
+		game->doButanoUpdate(); 
+	}
+	
+	vBlankFuncs.clear();
+	bn::green_swap::set_enabled(false);
+	
+	restoreAllButEffects();
+	game->state = restoreState;
+	game->doButanoUpdate();
 	
 }
 
