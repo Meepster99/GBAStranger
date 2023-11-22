@@ -538,11 +538,13 @@ void EntityManager::doMoves() {
 	
 	
 	
-	/*res = updateMap();
-	if(res) {
-		return res;
-	}
-	player->doUpdate();*/
+	// UNSURE IF THIS SHOULD BE HERE
+	//updateMap();
+	//if(hasKills()) {
+	//	return;
+	//
+	
+	//player->doUpdate();*/
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			entityMap[x][y] = futureEntityMap[x][y];
@@ -605,6 +607,14 @@ void EntityManager::doMoves() {
 				//BN_LOG("diamond pathing with player current pos ", player->p, " dir=", temp->nextMove.has_value());
 			}
 		}
+	}
+	
+	
+	// THIS MIGHT BE FUCKING BAD
+	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
+	updateMap(); 
+	if(hasKills()) {
+		return;
 	}
 
 	// TODO when you have a shadow, and go from being onto a shadow tile to falling(with wings) it spawns the default gray sprite, fix that

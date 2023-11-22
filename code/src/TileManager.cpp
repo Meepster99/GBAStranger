@@ -637,6 +637,8 @@ void TileManager::doVBlank() { profileFunction();
 	
 	// i PRAY that this doesnt kill performance. something sorta similar to this may have (curse)ed performance back when i was trying to get death tiles working?
 	
+	bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
+	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			if(floorMap[x][y] == NULL) {
@@ -650,6 +652,8 @@ void TileManager::doVBlank() { profileFunction();
 			} 
 			if(floorMap[x][y]->tileType() == TileType::Exit) { // not ideal code.
 				static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
+			} else if(doDeathTileAnim && floorMap[x][y]->tileType() == TileType::Death) { // not ideal code.
+				effectsManager->deathTileAnimate(Pos(x, y));
 			}
 		}
 	}

@@ -4870,5 +4870,104 @@ void EffectsManager::smokeCloud(Pos p, const Direction dir) {
 	
 }
 
+void EffectsManager::deathTile(Pos p) {
+	
+	// i REALLY dont want to be using a whole ass bg layer for this lightning sprite 
+	
+	auto createFunc = [p](Effect* obj) mutable -> void {
+			
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_judgment_small;
+	
+		obj->tempCounter = 0;
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(-32, -32);
+		
+	};
+	
+	bn::vector<Sprite, 8> sprites;
+	
+	for(int i=0; i<8; i++) {
+		sprites.push_back(Sprite(bn::sprite_tiles_items::dw_spr_judgment_small, bn::sprite_shape_size(16, 16)));
+		sprites[i].updateRawPosition(16 * p.x, 16 * (p.y - (7-i)));
+		sprites[i].spritePointer.set_bg_priority(0);
+	}
+	
+	auto tickFunc = [sprites = bn::move(sprites)](Effect* obj) mutable -> bool {
+		
+		if(obj->tempCounter == 5) {
+			return true;
+		}
+		
+		for(int i=0; i<8; i++) {
+			sprites[i].spritePointer.set_tiles(
+				bn::sprite_tiles_items::dw_spr_judgment_small,
+				i + (obj->tempCounter * 8)
+			);
+		}
+		
+		if(frame % 2 == 0) {
+			obj->tempCounter++;
+		}
 
 
+		return false;
+	};
+
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);
+	
+	
+	
+}
+
+void EffectsManager::deathTileAnimate(Pos p) {
+	
+	// should,,, this also be done for the sword anim??
+
+	
+	auto createFunc = [p](Effect* obj) mutable -> void {
+			
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_deathfloor;
+		
+		obj->sprite.spritePointer.set_bg_priority(2);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->tempCounter
+		);
+		
+		obj->tempCounter = 0;
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+		
+		if(obj->tempCounter == 4) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->tempCounter
+		);
+		
+		if(frame % 16 == 0) {
+			obj->tempCounter++;
+		}
+
+
+		return false;
+	};
+
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);
+
+}

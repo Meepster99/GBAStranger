@@ -410,7 +410,8 @@ public:
 	void shadowCreate(const Pos& p);
 	void shadowDeath(Shadow* shadow);
 	void smokeCloud(Pos p, const Direction dir);
-	
+	void deathTile(Pos p);
+	void deathTileAnimate(Pos p);
 };
 
 class Dialogue {

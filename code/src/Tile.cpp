@@ -119,6 +119,9 @@ void Bomb::stepOn() {
 
 void Death::stepOn() {
 	isSteppedOn = true;
+	
+	effectsManager->deathTile(tilePos);
+	
 	// this needs to call updatemap as well. gods(maybe?)
 	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
 	
