@@ -606,6 +606,16 @@ void EntityManager::doMoves() {
 				temp->nextMove = canPathToPlayer(temp, player->p);
 				//BN_LOG("diamond pathing with player current pos ", player->p, " dir=", temp->nextMove.has_value());
 			}
+			
+			// i swear to the gods, none of this makes any sense
+			for(int i=0; i<4; i++) {
+				Pos tempPos = temp->p;
+				if(tempPos.move(static_cast<Direction>(i)) && tempPos == player->p) {
+					temp->idle = false;
+					temp->tileIndex = 0;
+					addKill(temp);
+				}
+			}
 		}
 	}
 	
