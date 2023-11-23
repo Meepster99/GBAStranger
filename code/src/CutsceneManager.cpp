@@ -1165,6 +1165,62 @@ void CutsceneManager::createResetRoom() {
 	cutsceneLayer.rawMap.bgPointer.set_position(bgX, bgY);
 	backgroundLayer.rawMap.bgPointer.set_position(bgX + 32, bgY + 32);
 	
+	auto interactFunc = [](void* obj) -> void {
+		(void)obj;
+		
+		
+		
+	};
+	
+	auto kickFunc = [](void* obj) -> bool {
+			
+			BN_ASSERT(obj != NULL, "WTF IN kickedfunc ");
+			
+			Interactable* inter = static_cast<Interactable*>(obj);
+
+			if(ABS(playerIdleFrame - inter->playerIdleStart) > 60) {
+				inter->specialBumpCount = 0;
+			}
+			
+			inter->playerIdleStart = playerIdleFrame;
+			
+			inter->specialBumpCount++;
+			
+			// should generate spr_soulstar_spark_b
+			// and also some fuzzys from her head
+			
+			globalGame->effectsManager.corpseSparks();
+			globalGame->effectsManager.corpseFuzz();
+			
+			
+			return true;
+		};
+		
+	auto specialBumpFunc = [](void* obj) mutable -> void {
+	
+		BN_ASSERT(obj != NULL, "WTF IN SPECIAL BUMP FUNC");
+	
+		Interactable* inter = static_cast<Interactable*>(obj);
+	
+		if(inter->specialBumpCount == 6 && playerIdleFrame == inter->playerIdleStart && (frame - inter->playerIdleStart) >= 60 * 6) {
+			inter->specialBumpCount = 0;
+			globalGame->effectsManager.doDialogue("Reset?\0");
+		}
+		
+	};
+	
+	Interactable* temp = new Interactable(Pos(6, 5),
+		interactFunc,
+		kickFunc,
+		NULL,
+		NULL,
+		NULL,
+		specialBumpFunc
+	);
+	
+	game->entityManager.addEntity(temp);
+	
+	
 }
 
 void CutsceneManager::crashGame() {

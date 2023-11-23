@@ -413,6 +413,8 @@ public:
 	void smokeCloud(Pos p, const Direction dir);
 	void deathTile(Pos p);
 	void deathTileAnimate(Pos p);
+	void corpseSparks();
+	void corpseFuzz();
 };
 
 class Dialogue {

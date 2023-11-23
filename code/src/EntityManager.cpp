@@ -719,7 +719,7 @@ void EntityManager::moveObstacles() {
 	moveEntities(obstacleList.begin(), obstacleList.end());
 }
 
-void EntityManager::doMoves() {
+void EntityManager::doMoves() { profileFunction();
 	
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -857,6 +857,7 @@ void EntityManager::doMoves() {
 	
 	// THIS MIGHT BE FUCKING BAD
 	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
+	// having this extra call here is bad
 	updateMap(); 
 	if(hasKills()) {
 		return;
@@ -957,6 +958,17 @@ void EntityManager::doMoves() {
 	// copy over new entityMap to old, and update all subarrays.
 	// delete anything which needs to be killed
 	
+	// WARNING, SHIT CODE ALERT
+	// there aint a easy way for me to do this, im just going to see if this works 
+	// and if it does work(without lag), ill be pissed bc that means my overly complex tile system was for nothing
+	// it does, and it doesnt drop. 
+	// why the fuck did i end up going with the system i have? i mean it is good tbh, but still 
+	// it was probs just other areas of unoptimized code that were actally causing the lag.
+	// ok nvm, now its lagging(now that i had it properly erase old tiles? 
+	// which for some reason, makes me happy
+	if(game->roomManager.isWhiteRooms()) {
+		tileManager->fullDraw();
+	}
 			
 	sanity();
 	
@@ -1183,7 +1195,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	
 }
 
-void EntityManager::updateMap() { 
+void EntityManager::updateMap() {  profileFunction();
 
 	// return an entity if we died an need a reset
 
@@ -1199,11 +1211,7 @@ void EntityManager::updateMap() {
 	// CHECK IF PLAYER IS ON EXIT, AND EXIT IS OPEN HERE.
 	
 	// TODO: THIS CODE SHOULD DO STATUE CHECKS!!!!!!!!!!!!!!!!!!
-	
-	
-	
-	
-	
+
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			entityMap[x][y] = futureEntityMap[x][y];
@@ -1223,6 +1231,14 @@ void EntityManager::updateMap() {
 	// do the rest.
 	
 	Shadow* doShadowDeath = NULL;
+
+	// this could most likely be optimized if i have a,, SET of positions which need to be checked.
+	// instead of doing the whole map.
+	// im starting to have frame drops again, and while ik its ok, having framedrops in vblank due to my shitty effects classes, is rlly rlly bad 
+	// ugh 
+	// if i could,, easily put the computation parts for effects inside 
+	// of cpu cycles, and just have vblank do drawing, but ugh 
+	// i should of had a more event based system for the timings of event ticks.
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1943,7 +1959,7 @@ void EntityManager::sanity() const {
 	// i could easily let saneset have indexing(and tbh, why didnt i earlier?)
 	// well, if i want to remove i sorta need iterators.
 	
-	//return;
+	return;
 	
 	// check that all data structures are holding up
 	

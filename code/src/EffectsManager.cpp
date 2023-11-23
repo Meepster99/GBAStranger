@@ -1667,11 +1667,12 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		case hashString("rm_rest_area_7\0"):
 		case hashString("rm_rest_area_8\0"):
 		case hashString("rm_rest_area_9\0"):
+			roomDust();
 			break;
 		default:
 			if(game->roomManager.isWhiteRooms()) {
 				roomDust();
-			}
+			} 
 			break;
 	}
 	
@@ -2411,6 +2412,8 @@ void EffectsManager::doMenu() {
 	// also show compile time, date, and butano version 
 	// BN_VERSION_STRING   __DATE__   __TIME__
 	
+	setBorderColor();
+	
 	GameState restoreState = game->state;
 	game->state = GameState::Paused;
 	
@@ -2705,6 +2708,8 @@ void EffectsManager::doMenu() {
 			effectsLayer.setBigTile(x, y, 0);
 		}
 	}
+	setBorderColor(!game->roomManager.isWhiteRooms());
+	
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
 	
@@ -3032,7 +3037,7 @@ void EffectsManager::wings() {
 		return createFunc;
 	};
 	
-	auto wingTickFunc = [player](Effect* obj) mutable -> bool {
+	auto wingTickFunc = [player](Effect* obj) -> bool {
 		
 		
 		if(globalGame->entityManager.player->wingsUse == 0) {
@@ -3050,7 +3055,7 @@ void EffectsManager::wings() {
 				}
 			}
 			
-			auto dissipateCreateFunc = [xPos, yPos, horizontalFlip](Effect* obj2) mutable -> void {
+			auto dissipateCreateFunc = [xPos, yPos, horizontalFlip](Effect* obj2) -> void {
 				
 				obj2->tiles = globalGame->mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_dissipate_cif : &bn::sprite_tiles_items::dw_spr_void_wings_dissipate;
 				
@@ -3064,7 +3069,7 @@ void EffectsManager::wings() {
 				
 			};
 			
-			auto dissipateTickFunc = [](Effect* obj2) mutable -> bool {
+			auto dissipateTickFunc = [](Effect* obj2) -> bool {
 				obj2->graphicsIndex++;
 				
 				if(obj2->graphicsIndex == 13) {
@@ -3460,10 +3465,7 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 		}
 		
 		if(image_speed > 9) {
-			
 			freezeFrames = randomGenerator.get_int(0, 60 + 1);
-			
-			
 		}
 		
 
@@ -5036,3 +5038,175 @@ void EffectsManager::deathTileAnimate(Pos p) {
 	effectList.push_back(e1);
 
 }
+
+void EffectsManager::corpseSparks() {
+	
+	//Pos p = Pos(6, 5);
+	
+	// spr_soulstar_spark_b
+	
+	
+	auto createEffect = [this](bn::fixed xDir, bn::fixed yDir) -> void {
+		
+		auto createFunc = [xDir, yDir](Effect* obj) mutable -> void {
+
+
+			//obj->x = 6 * 16 + (8 * xDir);
+			//obj->y = 5 * 16 + (8 * yDir);
+
+			obj->sprite.updateRawPosition(-32, -32);
+		
+			obj->tiles = &bn::sprite_tiles_items::dw_spr_soulstar_spark_b;
+
+			obj->sprite.spritePointer.set_bg_priority(0);
+			
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				obj->graphicsIndex % 3
+			);
+			
+		};
+		
+		// gods being able to do count = 0,, so many other effects would of been so much more simple
+		auto tickFunc = [
+		xPos = (bn::fixed)6 * 16 + (8 * xDir),
+		yPos = (bn::fixed)5 * 16 + (8 * yDir),
+		count = 0, xDir, yDir](Effect* obj) mutable -> bool {
+			
+			if(count == 8) {
+				return true;
+			}
+			
+			count++;
+			obj->graphicsIndex++;
+			
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				obj->graphicsIndex % 3
+			);
+			
+			xPos += 2*xDir;
+			yPos += 2*yDir;
+			obj->sprite.spritePointer.set_position(xPos - (224/2)+8+4, yPos - (144/2)+8);
+			
+			return false;
+		};
+		
+		effectList.push_back(new Effect(createFunc, tickFunc));
+	
+	};
+	
+	createEffect(-0.707, 0.707);
+	createEffect(-1, 0);
+	createEffect(-0.707, -0.707);
+	
+	createEffect(0.707, 0.707);
+	createEffect(1, 0);
+	createEffect(0.707, -0.707);
+	
+	createEffect(0, 1);
+	createEffect(0, -1);
+	
+}
+
+void EffectsManager::corpseFuzz() {
+	
+	//Pos p = Pos(6, 4);
+	
+	
+	auto createEffect = [](int tileSelector) -> Effect* {
+		
+		auto createFunc = [tileSelector](Effect* obj) mutable -> void {
+
+			obj->x = 6 * 16;
+			obj->y = 4 * 16;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			//tileSelector = randomGenerator.get_int(0, 5);
+				
+			const bn::sprite_tiles_item* spriteTiles[5] = {
+				&bn::sprite_tiles_items::dw_spr_soulglow_big,
+				&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
+				&bn::sprite_tiles_items::dw_spr_soulglow_med,
+				&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
+				&bn::sprite_tiles_items::dw_spr_soulglow_sma,
+			};
+			
+			const bn::sprite_shape_size spriteShapes[5] = {
+				bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
+			};
+		
+			obj->tiles = spriteTiles[tileSelector];
+			
+			obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
+		
+			obj->sprite.spritePointer.set_bg_priority(3);
+			
+		};
+		
+		auto tickFunc = [
+			x = (bn::fixed)6 * 16 + (randomGenerator.get_int(0, 16) - 8),
+			y = (bn::fixed)4 * 16 + (randomGenerator.get_int(0, 16) - 8),
+			image_speed = (bn::fixed)0,
+			t = 0,
+			y_speedup = 4 + randomGenerator.get_int(2, 6 + 1),
+			freezeFrames = randomGenerator.get_int(0, 60 + 1),
+			graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 5 + 1),
+			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20
+		](Effect* obj) mutable -> bool {
+			
+			if(y < -16) {
+				return true;
+			}
+			
+			image_speed += 0.02;
+			
+			
+			
+			t = ((t + 1) % 360);
+			x = (x + (amplitude * sinTable[t]));
+		
+			y -= 0.75 * (0.095 * y_speedup);
+			x += 0.75 * (0.065 * y_speedup);
+		
+			BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
+			
+			//graphicsIndex += image_speed / 60;
+			graphicsIndex += image_speed / 20;
+			
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				graphicsIndex.integer() % 5
+			);
+			
+			obj->x = x.integer();
+			obj->y = y.integer();
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			
+			return false;
+		};
+		
+		return new Effect(createFunc, tickFunc);
+	};
+	
+	int count = randomGenerator.get_int(1, 3 + 1);
+	for(int i=0; i<count; i++) {
+		effectList.push_back(createEffect(randomGenerator.get_int(0, 5)));
+	}
+
+	
+	// have them move upright
+	// should be on layer 3 
+	//,,, i should REALLLY try to reuse the fuzz code i already have
+	
+}
+
+
+
+
+
+

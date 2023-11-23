@@ -66,10 +66,16 @@ void FloorTile::drawDropOff(u8 x, u8 y) {
 	}
 	
 	
-	globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 12); 
-	globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 12 + 1); 
-	globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 12 + 2); 
-	globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 12 + 3); 
+	//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 12); 
+	//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 12 + 1); 
+	//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 12 + 2); 
+	//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 12 + 3); 
+	
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
+	
 	
 }
 

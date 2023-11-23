@@ -175,6 +175,8 @@ public:
 	
 	bool exitRoom(); // just in here as a temporary measure
 	bool enterRoom(); // just in here as a temporary measure
+	
+	//bool needUpdate = false;
 	void doVBlank();
 };
 

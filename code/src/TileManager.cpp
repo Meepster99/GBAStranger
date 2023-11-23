@@ -24,6 +24,14 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 	// THIS COULD, AND SHOULD BE OPTIMIZED INTO ONE LOOP OVER THE THING.
 	// also the whole background doesnt need a redraw, only the stuff that changed
 	
+	// gods, is this like, if i didnt 
+	// does settings this here vs calling it in the func like 
+	// does putting it in the loop cause repeat calls?
+	// the more i look at the compiler the more i realize im bad 
+	
+	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
+	const Pos& playerPos = globalGame->entityManager.player->p; // and now im doing const refs like this omg
+	
 	for(int x=0; x<14; x++) {
 		// we now do this in reverse to preserve the dropoffs
 		//for(int y=0; y<9; y++) {
@@ -42,10 +50,19 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 				continue;
 			}
 			
+			
+			if(isWhiteRooms) {
+				if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {
+					FloorTile::drawPit(x, y);
+					continue;
+				}
+			}
+			
 			// i pray this doesnt (curse) my performance.
 			if(floorMap[x][y] == NULL) {
 				FloorTile::drawPit(x, y);
 			} else {
+				
 				floorMap[x][y]->draw();
 				
 				// y < 7 here bc row 8 is for ui, and we dont want dropoffs going there,, do we?
@@ -59,7 +76,7 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 					//rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 2, 4 * 2 + 2); 
 					//rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 2, 4 * 2 + 3); 
 					FloorTile::drawDropOff(x, y+1);
-				}
+				}	
 			}
 			
 		}
@@ -170,9 +187,12 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	// i could add funcs for pickup and putdown, and have the tiles possess effectswhich draw them out?
 	// ugh, tbh it looks fine except for the D in void. maybe thats a manual fix.
 	
-	if((strstrCustom(game->roomManager.currentRoomName(), "_u_00\0") == NULL) &&
-		(strstrCustom(game->roomManager.currentRoomName(), "_u_en\0") == NULL)) {
+	//if((strstrCustom(game->roomManager.currentRoomName(), "_u_00\0") == NULL) &&
+	//	(strstrCustom(game->roomManager.currentRoomName(), "_u_en\0") == NULL)) {
 	
+	BN_LOG("whiteroomstatus is ", game->roomManager.isWhiteRooms());
+	
+	if(!game->roomManager.isWhiteRooms()) {
 		floorMap[0][8] = new WordTile(Pos(0, 8));
 		
 		floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
@@ -311,7 +331,7 @@ int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
 	return matchIndex;
 }
 
-const char* TileManager::checkBrand() {
+const char* TileManager::checkBrand() { profileFunction();
 
 	static int prevMatchIndex = -1;
 
@@ -439,7 +459,7 @@ TileManager::~TileManager() {
 
 // ----- 
 
-void TileManager::doFloorSteps() { 
+void TileManager::doFloorSteps() { profileFunction();
 	
 	// rlly should of made a tilemanager
 	
@@ -513,24 +533,40 @@ void TileManager::doFloorSteps() {
 	// this does not need to be called every time
 	// if it causes slowdown, fix it
 	// this rlly should just call,,,, updatetile,, i think?
-	floorLayer.reloadCells();
+	//floorLayer.reloadCells();
 	
 	// IS THIS NEEDED 
-	game->collision.reloadCells();
+	//game->collision.reloadCells();
 	
 	// calling this here may be excessive!
 	checkBrand();
 }
 
-void TileManager::updateTile(const Pos& p) { 
+void TileManager::updateTile(const Pos& p) { profileFunction();
 	
-	const u8 x = p.x;
-	const u8 y = p.y;
+	const int x = p.x;
+	const int y = p.y;
 
 	if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
 		delete floorMap[x][y];
 		floorMap[x][y] = NULL;
 	}
+	
+	/*
+	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
+	const Pos& playerPos = globalGame->entityManager.player->p; // and now im doing const refs like this omg
+	
+	
+	if(isWhiteRooms) {
+		if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {
+			FloorTile::drawPit(x, y);
+			//if(y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
+			//	FloorTile::drawPit(x, y+1);
+			//}
+			return;
+		}
+	}
+	*/
 	
 	if(floorMap[x][y] == NULL) {
 		// the collision check isnt needed, but im keeping it here just in case
@@ -550,6 +586,7 @@ void TileManager::updateTile(const Pos& p) {
 		}
 		
 	} else {
+
 		floorMap[x][y]->draw();
 		
 		if(floorMap[x][y]->drawDropOff() && y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
@@ -557,6 +594,8 @@ void TileManager::updateTile(const Pos& p) {
 		}
 	}
 
+
+	floorLayer.reloadCells();
 	
 }
 
@@ -743,11 +782,22 @@ void TileManager::doVBlank() { profileFunction();
 	// i wonder/hope this is ok 
 	// sword tile needs to be updated every,, frame for flashing?
 	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
-		//updateTile(swordTile->tilePos);
-		swordTile->draw();
-		floorLayer.reloadCells(); // might cause horrid lag
+		updateTile(swordTile->tilePos);
+		
+		//swordTile->draw();
+		//needUpdate = true;
+		//floorLayer.reloadCells(); // might cause horrid lag
 	}
 
+	/*
+	if(needUpdate) {
+		needUpdate = false;
+		floorLayer.reloadCells();
+	}
+	*/
+	
+	//floorLayer.reloadCells();
+	
 	return;
 }
 

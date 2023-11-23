@@ -79,7 +79,9 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
-#define ABS(v) ( v < 0 ? -v : v )
+//#define ABS(v) ( v < 0 ? -v : v )
+// gods this is dumb, and one of the most ANNOYING bugs ive had to find recently
+#define ABS(v) ( (v) < 0 ? -(v) : (v) )
 
 #define CLAMP(value, min_val, max_val) MAX(MIN((value), (max_val)), (min_val))
 

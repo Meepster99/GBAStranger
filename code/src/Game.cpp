@@ -565,16 +565,43 @@ void Game::loadTiles() {
 		tileRef[i + collisionTileCount].data[7] = detailsTiles->tiles_ref()[i].data[7];
 	}
 	
-	for(int i=0; i<floorTileCount; i++) {
-		tileRef[i + detailsTileCount + collisionTileCount].data[0] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[0];
-		tileRef[i + detailsTileCount + collisionTileCount].data[1] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[1];
-		tileRef[i + detailsTileCount + collisionTileCount].data[2] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[2];
-		tileRef[i + detailsTileCount + collisionTileCount].data[3] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[3];
-		tileRef[i + detailsTileCount + collisionTileCount].data[4] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[4];
-		tileRef[i + detailsTileCount + collisionTileCount].data[5] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[5];
-		tileRef[i + detailsTileCount + collisionTileCount].data[6] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[6];
-		tileRef[i + detailsTileCount + collisionTileCount].data[7] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[7];
+	if(roomManager.isWhiteRooms()) {
 		
+		unsigned dataBuffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+		
+		for(int i=0; i<floorTileCount; i++) {
+			
+			if(i/4 == 1) {
+				memcpy(dataBuffer, bn::sprite_tiles_items::dw_spr_floor_unknown.tiles_ref()[i-4].data, 8 * sizeof(unsigned));
+			} else if(i/4 == 2) {
+				memcpy(dataBuffer, bn::sprite_tiles_items::dw_spr_floor_unknown.tiles_ref()[i-4].data, 8 * sizeof(unsigned));
+			} else if(i/4 == 19) {
+				memcpy(dataBuffer, bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data, 8 * sizeof(unsigned));
+			} else {
+				memset(dataBuffer, 0x00000000, 8 * sizeof(unsigned));
+			}
+			
+			tileRef[i + detailsTileCount + collisionTileCount].data[0] = dataBuffer[0];
+			tileRef[i + detailsTileCount + collisionTileCount].data[1] = dataBuffer[1];
+			tileRef[i + detailsTileCount + collisionTileCount].data[2] = dataBuffer[2];
+			tileRef[i + detailsTileCount + collisionTileCount].data[3] = dataBuffer[3];
+			tileRef[i + detailsTileCount + collisionTileCount].data[4] = dataBuffer[4];
+			tileRef[i + detailsTileCount + collisionTileCount].data[5] = dataBuffer[5];
+			tileRef[i + detailsTileCount + collisionTileCount].data[6] = dataBuffer[6];
+			tileRef[i + detailsTileCount + collisionTileCount].data[7] = dataBuffer[7];
+		}
+	
+	} else {
+		for(int i=0; i<floorTileCount; i++) {
+			tileRef[i + detailsTileCount + collisionTileCount].data[0] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[0];
+			tileRef[i + detailsTileCount + collisionTileCount].data[1] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[1];
+			tileRef[i + detailsTileCount + collisionTileCount].data[2] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[2];
+			tileRef[i + detailsTileCount + collisionTileCount].data[3] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[3];
+			tileRef[i + detailsTileCount + collisionTileCount].data[4] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[4];
+			tileRef[i + detailsTileCount + collisionTileCount].data[5] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[5];
+			tileRef[i + detailsTileCount + collisionTileCount].data[6] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[6];
+			tileRef[i + detailsTileCount + collisionTileCount].data[7] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[7];
+		}
 	}
 	
 	details.collisionTileCount = collisionTileCount;
