@@ -962,13 +962,13 @@ void Game::doVBlank() { profileFunction();
 	switch(state) {
 		default:
 		case GameState::Normal:
-			BN_LOG("entityManager.doVBlank();");
+			//BN_LOG("entityManager.doVBlank();");
 			entityManager.doVBlank();
-			BN_LOG("effectsManager.doVBlank();");
+			//BN_LOG("effectsManager.doVBlank();");
 			effectsManager.doVBlank();
-			BN_LOG("tileManager.doVBlank();");
+			//BN_LOG("tileManager.doVBlank();");
 			tileManager.doVBlank();
-			BN_LOG("done");
+			//BN_LOG("done");
 			break;
 		case GameState::Exiting:
 			if(!a) { a = entityManager.exitRoom(); }

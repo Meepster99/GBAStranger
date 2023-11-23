@@ -1018,8 +1018,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	}*/
 	
 	// this may be horrid
-	e->isDead();
-	
+
 	if(!hasFloor(tempPos)) {
 		effectsManager->entityFall(e);
 	} else {
@@ -1027,6 +1026,9 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 		e->sprite.setVisible(false);
 		effectsManager->explosion(tempPos);
 	}
+	
+	e->isDead();
+	
 	
 	return res;
 }
@@ -1664,30 +1666,21 @@ bool EntityManager::hasNonPlayerEntity(const Pos& p) const {
 	
 bool EntityManager::hasEnemy(const Pos& p) const {
 	
-	BN_LOG("entry");
-	
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 	
-	BN_LOG("entry2");
-	
 	if(temp.size() == 0) {
-		BN_LOG("exit");
 		return false;
 	}
-	
-	BN_LOG("entry3");
 	
 	for(auto it = temp.cbegin(); it != temp.cend(); ++it) {
 		//BN_LOG("loop");
 		// this assert shouldnt be needed, but my god have i been having some whack ass bugs
-		BN_ASSERT(*it != NULL, "in hasenemy, a NULL was found???? how????");
+		//BN_ASSERT(*it != NULL, "in hasenemy, a NULL was found???? how????");
 		if((*it)->isEnemy()) {
-			BN_LOG("exit");
 			return true;
 		}
 	}
-	
-	BN_LOG("exit");
+
 	return false;
 }
 
