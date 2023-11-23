@@ -1804,7 +1804,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		
 	}
 	
-	tileManager->floorLayer.rawMap.reloadCells();
+	//tileManager->floorLayer.rawMap.reloadCells();
 	game->collision.reloadCells();
 	//game->details.reloadCells();
 	

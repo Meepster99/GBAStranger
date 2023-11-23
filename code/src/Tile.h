@@ -13,7 +13,7 @@ public:
 
 	static EffectsManager* effectsManager;
 	static TileManager* tileManager;
-	static BackgroundMap* rawMap;
+	//static BackgroundMap* rawMap;
 	static EntityManager* entityManager;
 	static Game* game;
 
@@ -42,15 +42,7 @@ public:
 	
 	virtual bool isTransparent() const { return false; }
 	
-	virtual void draw() {
-		u8 x = tilePos.x;
-		u8 y = tilePos.y;
-		int tile = getTileValue();
-		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
-		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
-	}
+	virtual void draw();
 	
 	static void drawPit(u8 x, u8 y);
 	

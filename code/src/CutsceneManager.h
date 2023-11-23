@@ -24,11 +24,26 @@ public:
 	
 };
 
+class BackgroundLayer : public Layer {
+public:
+
+	// spr_vd_gray is a good start
+
+	BackgroundLayer() : Layer(bn::regular_bg_items::dw_default_black_bg, 3) 
+	//BackgroundLayer() : Layer(bn::regular_bg_items::dw_default_white_bg, 3) 
+	{ 
+		
+	}
+	
+};
+
 class CutsceneManager {
 public:
 	
 	Game* game; 
 	CutsceneLayer cutsceneLayer;
+	BackgroundLayer backgroundLayer;
+	
 	EffectsManager* effectsManager;
 	TileManager* tileManager;
 	

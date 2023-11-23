@@ -7,12 +7,14 @@ class Game;
 class EffectsManager;
 class EntityManager;
 class CutsceneManager;
+class Collision;
 
-class Floor : public Layer {
+class Floor {
 public: 
 
 	// Floor overrides the draw method. 
 
+	/*
 	Floor() :
 	Layer(bn::regular_bg_tiles_items::dw_customfloortiles, 2) 
 	{}
@@ -58,6 +60,22 @@ public:
 		
 		rawMap.reloadCells();
 	}
+	*/
+	
+	Collision* collisionPointer = NULL;
+
+	int collisionTileCount = 0;
+	
+	// this class is now legacy, but im going to reimpliment funcs in here and pass them off to collision
+	Floor(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
+	
+	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false);
+	
+	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
+
+	void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
+	
+	void reloadCells();
 
 };
 
@@ -113,8 +131,8 @@ public:
 	// should i instead pass the entity* into here so that death tiles can properly kill?
 	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
 	
-	TileManager(Game* game_) : game(game_), 
-	floorLayer()
+	TileManager(Game* game_, Collision* col) : game(game_), 
+	floorLayer(col)
 	{
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {

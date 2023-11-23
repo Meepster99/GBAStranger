@@ -15,13 +15,12 @@ extern bn::fixed sinTable[360];
 
 
 // collision and details should REALLY be on the same layer. this is just legacy bs
-
 class Collision : public Layer {
 public:
 
 	// collision uses default everything
 	Collision() :
-	Layer(bn::regular_bg_tiles_items::dw_default_bg_tiles, 3) 
+	Layer(bn::regular_bg_tiles_items::dw_default_bg_tiles, 2) 
 	{}
 	
 };
@@ -50,6 +49,7 @@ public:
 		
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
+				//if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
 				if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
 					u8 tile = detailsMap[x][y];
 					if(tile != 0) {
@@ -145,7 +145,7 @@ public:
 	details(&collision),
 	entityManager(this),
 	effectsManager(this),
-	tileManager(this),
+	tileManager(this, &collision),
 	cutsceneManager(this)
 	//linkManager(this)
 	{
@@ -168,7 +168,7 @@ public:
 		FloorTile::effectsManager = &effectsManager;
 		FloorTile::tileManager = &tileManager;
 		FloorTile::entityManager = &entityManager;
-		FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
+		//FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
 	
 		FloorTile::game = this;
 		Entity::game = this;
@@ -180,7 +180,8 @@ public:
 		
 		MenuOption::effectsManager = &effectsManager;
 	
-		bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4); 
+		//bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4); 
+		bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4); 
 		
 		collision.rawMap.bgPointer.set_tiles(backgroundTiles);
 	

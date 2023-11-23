@@ -503,6 +503,17 @@ def convertTiles(outputPath):
 	}
 	with open(os.path.join(outputPath, "dw_" + "default_black_bg" + ".json"), "w") as f:
 		json.dump(outputJson, f)
+		
+	#
+	
+	temp = Image.new("RGB", (256, 256), (255, 255, 255))
+	writeBitmap(temp, os.path.join(outputPath, "default_white_bg" + ".bmp"))
+	outputJson = {
+		"type": "regular_bg",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join(outputPath, "dw_" + "default_white_bg" + ".json"), "w") as f:
+		json.dump(outputJson, f)
 	
 	# 
 	

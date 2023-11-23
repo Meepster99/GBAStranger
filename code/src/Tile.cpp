@@ -7,7 +7,7 @@
 
 EffectsManager* FloorTile::effectsManager = NULL;
 TileManager* FloorTile::tileManager = NULL;
-BackgroundMap* FloorTile::rawMap = NULL;
+//BackgroundMap* FloorTile::rawMap = NULL;
 EntityManager* FloorTile::entityManager = NULL;
 Game* FloorTile::game = NULL;
 
@@ -19,11 +19,21 @@ int Switch::totalCount = 0;
 //EffectTypeArray glassAnimation[] = {EffectType(bn::sprite_tiles_items::dw_spr_glassfloor, 8)};
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
+void FloorTile::draw() {
+	u8 x = tilePos.x;
+	u8 y = tilePos.y;
+	int tile = getTileValue();
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+}
+
 void FloorTile::drawPit(u8 x, u8 y) {
-	rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-	rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-	rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
-	rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
 	
 	if(game->collisionMap[x][y] == 12) {
 		drawDropOff(x, y);
@@ -32,10 +42,10 @@ void FloorTile::drawPit(u8 x, u8 y) {
 		//,,,,, we need to avoid overwriting details?
 		
 		
-		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 1); 
-		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 1 + 1);
-		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 1 + 2);
-		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 1 + 3);
+		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1);
+		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2);
+		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
 	}
 	
 	
@@ -47,10 +57,10 @@ void FloorTile::drawDropOff(u8 x, u8 y) {
 	// basically, we only want to draw a pit if the tile here ISNT transparent, but depending on if we call this func before or after we do the transform,,, idek
 	 
 	if(tileManager->floorMap[x][y] == NULL || !tileManager->floorMap[x][y]->isTransparent()) {
-		rawMap->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-		rawMap->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
-		rawMap->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
 	}
 	
 	
@@ -281,11 +291,11 @@ void WordTile::draw() {
 	temp = getWordTileIndex(second);
 	int secondTile = 228 + (((temp >> 1) << 2) | (temp & 1));
 	
-	rawMap->setTile(x * 2 + 1, y * 2 + 1, firstTile); 
-	rawMap->setTile(x * 2 + 1, y * 2 + 2, firstTile + 2); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, firstTile); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, firstTile + 2); 
 	
-	rawMap->setTile(x * 2 + 2, y * 2 + 1, secondTile); 
-	rawMap->setTile(x * 2 + 2, y * 2 + 2, secondTile + 2); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, secondTile); 
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, secondTile + 2); 
 }
 
 void Exit::isSteppedOnAnimation() {

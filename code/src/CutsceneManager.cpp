@@ -9,7 +9,8 @@
 CutsceneManager::CutsceneManager(Game* game_) : game(game_), disTextGenerator(dw_fnt_etext_12_sprite_font) {
 	
 	maps[0] = &game->collision.rawMap;
-	maps[1] = &game->tileManager.floorLayer.rawMap;
+	//maps[1] = &game->tileManager.floorLayer.rawMap;
+	maps[1] = &backgroundLayer.rawMap;	
 	maps[2] = &game->effectsManager.effectsLayer.rawMap;
 	maps[3] = &cutsceneLayer.rawMap;
 	
@@ -1023,7 +1024,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 
 	//collision.rawMap.bgPointer.set_visible(false);
 	// this seems to bump the prio up even with equal prios?
-	game->tileManager.floorLayer.rawMap.bgPointer.set_priority(1);
+	//game->tileManager.floorLayer.rawMap.bgPointer.set_priority(1);
 
 	auto func1 = [this](void* obj) -> void {
 		(void)obj;
@@ -2214,10 +2215,10 @@ void CutsceneManager::restoreLayer(int i) {
 	// weirdly enough, the map MUST be set before the tiles here, why?
 
 	if(i == 0) {
-		globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(512, bn::bpp_mode::BPP_4));
+		globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
 		globalGame->loadTiles();
 	} else if(i == 1) {
-		globalGame->tileManager.floorLayer.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_customfloortiles);
+		//globalGame->tileManager.floorLayer.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_customfloortiles);
 	}
 	
 	maps[i]->bgPointer.set_z_order(zIndexBackup[i]);

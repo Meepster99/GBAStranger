@@ -515,11 +515,11 @@ void Game::loadTiles() {
 	const bn::regular_bg_tiles_item* collisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
 	const bn::regular_bg_tiles_item* detailsTiles = (const bn::regular_bg_tiles_item*)idek.detailsTiles;
 	
+	int floorTileCount = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref().size();
 	int collisionTileCount = collisionTiles->tiles_ref().size();
 	int detailsTileCount = detailsTiles->tiles_ref().size();
 	
-	details.collisionTileCount = collisionTileCount;
-	
+	details.collisionTileCount = floorTileCount + collisionTileCount;
 	
 	bn::regular_bg_tiles_ptr backgroundTiles = collision.rawMap.bgPointer.tiles();
 		
@@ -530,9 +530,11 @@ void Game::loadTiles() {
 	// copying to vram(directly) will cause issues when like,,,, going bull(curse)ery relating to 
 	// swapping via debug keys, but thats fine, its debug
 	
+	// i REALLLLY should use memcpy here
+	
+	BN_ASSERT( floorTileCount + collisionTileCount + detailsTileCount < tileRef.size(), "didnt have enough alloc for tiles, need at least ", floorTileCount + collisionTileCount + detailsTileCount);
+	
 	for(int i=0; i<collisionTileCount; i++) {
-		
-		BN_ASSERT(i < tileRef.size(), "out of bounds when copying tiles");
 		
 		tileRef[i].data[0] = collisionTiles->tiles_ref()[i].data[0];
 		tileRef[i].data[1] = collisionTiles->tiles_ref()[i].data[1];
@@ -547,9 +549,6 @@ void Game::loadTiles() {
 	
 	for(int i=0; i<detailsTileCount; i++) {
 		
-		
-		BN_ASSERT((i + collisionTileCount) < tileRef.size(), "out of bounds when copying tiles");
-		
 		tileRef[i + collisionTileCount].data[0] = detailsTiles->tiles_ref()[i].data[0];
 		tileRef[i + collisionTileCount].data[1] = detailsTiles->tiles_ref()[i].data[1];
 		tileRef[i + collisionTileCount].data[2] = detailsTiles->tiles_ref()[i].data[2];
@@ -560,7 +559,20 @@ void Game::loadTiles() {
 		tileRef[i + collisionTileCount].data[7] = detailsTiles->tiles_ref()[i].data[7];
 	}
 	
+	for(int i=0; i<floorTileCount; i++) {
+		tileRef[i + detailsTileCount + collisionTileCount].data[0] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[0];
+		tileRef[i + detailsTileCount + collisionTileCount].data[1] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[1];
+		tileRef[i + detailsTileCount + collisionTileCount].data[2] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[2];
+		tileRef[i + detailsTileCount + collisionTileCount].data[3] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[3];
+		tileRef[i + detailsTileCount + collisionTileCount].data[4] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[4];
+		tileRef[i + detailsTileCount + collisionTileCount].data[5] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[5];
+		tileRef[i + detailsTileCount + collisionTileCount].data[6] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[6];
+		tileRef[i + detailsTileCount + collisionTileCount].data[7] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[7];
+		
+	}
+	
 	details.collisionTileCount = collisionTileCount;
+	tileManager.floorLayer.collisionTileCount = collisionTileCount + detailsTileCount;
 }
 
 void Game::loadLevel(bool debug) {
@@ -613,7 +625,7 @@ void Game::loadLevel(bool debug) {
 	
 	if(needRestore) {
 		cutsceneManager.restoreAllButEffectsAndFloor();
-		tileManager.floorLayer.rawMap.bgPointer.set_priority(2);
+		//tileManager.floorLayer.rawMap.bgPointer.set_priority(2);
 		needRestore = false;
 	}
 	
@@ -671,7 +683,7 @@ void Game::loadLevel(bool debug) {
 			// would be transparent when they shouldnt be? this hopefully fixes that
 		
 			if(collisionMap[x][y] == 0) {
-				collisionMap[x][y] = 1;
+				//collisionMap[x][y] = 1;
 			}
 		}
 	}
@@ -727,10 +739,12 @@ void Game::fullDraw() {
 	
 	BN_LOG("entering fulldraw");
 	
+
 	collision.draw(collisionMap);
 	details.draw(detailsMap, collisionMap);
-
 	tileManager.fullDraw();
+	
+
 	
 	entityManager.fullUpdate();
 	
@@ -774,10 +788,11 @@ void Game::changePalette(int offset) {
 	
 	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	//tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	
 	cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
