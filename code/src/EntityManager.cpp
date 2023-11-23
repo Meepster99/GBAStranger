@@ -367,6 +367,8 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		
 		interactFunc = [interactCount = 0](void* obj) mutable -> void {
 			//(void)unused;
+			BN_ASSERT(obj != NULL, "WTF IN interactfunc ");
+			
 			Interactable* inter = static_cast<Interactable*>(obj);
 			
 			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
@@ -398,6 +400,8 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		};
 		
 		kickFunc = [](void* obj) -> bool {
+			
+			BN_ASSERT(obj != NULL, "WTF IN kickedfunc ");
 			
 			Interactable* inter = static_cast<Interactable*>(obj);
 
