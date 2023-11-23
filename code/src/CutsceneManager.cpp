@@ -1167,8 +1167,7 @@ void CutsceneManager::createResetRoom() {
 	
 	auto interactFunc = [](void* obj) -> void {
 		(void)obj;
-		
-		
+	
 		
 	};
 	
@@ -1204,7 +1203,41 @@ void CutsceneManager::createResetRoom() {
 	
 		if(inter->specialBumpCount == 6 && playerIdleFrame == inter->playerIdleStart && (frame - inter->playerIdleStart) >= 60 * 6) {
 			inter->specialBumpCount = 0;
-			globalGame->effectsManager.doDialogue("Reset?\0");
+			
+			
+			bool res = globalGame->effectsManager.restRequest("Reset?\0");
+			
+			if(!res) {
+				res = globalGame->effectsManager.restRequest("Understood.\0", false);
+				return;
+			}
+			
+			for(int i=0; i<60*1; i++) {
+				globalGame->doButanoUpdate();
+			}
+			
+			res = globalGame->effectsManager.restRequest("Are you sure?\0");
+			
+			if(!res) {
+				res = globalGame->effectsManager.restRequest("Understood.\0", false);
+				return;
+			}
+			
+			for(int i=0; i<60*1; i++) {
+				globalGame->doButanoUpdate();
+			}
+			
+			res = globalGame->effectsManager.restRequest("<3.\0", false);
+			
+			globalGame->saveData.hash = 0;
+			bn::sram::write(globalGame->saveData);
+			
+			for(int i=0; i<60*1; i++) {
+				globalGame->doButanoUpdate();
+			}
+			
+			globalGame->cutsceneManager.crashGame();
+			
 		}
 		
 	};

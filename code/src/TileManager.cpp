@@ -53,7 +53,13 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 			
 			if(isWhiteRooms) {
 				if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {
-					FloorTile::drawPit(x, y);
+					if( (ABS(x - playerPos.x) <= 2) && 
+					(ABS(y - (playerPos.y + 1)) <= 2) && 
+					(y > 0 && floorMap[x][y-1] != NULL && floorMap[x][y-1]->drawDropOff())) {
+						FloorTile::drawDropOff(x, y);
+					} else {
+						FloorTile::drawPit(x, y);
+					}
 					continue;
 				}
 			}

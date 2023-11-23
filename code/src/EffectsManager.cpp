@@ -2140,7 +2140,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 
 }
 
-bool EffectsManager::restRequest(const char* questionString) {
+bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	
 	// TODO, THIS TEXT HAS A RDER AROUND IT!!!!
 	//probs,,,, oh gods 
@@ -2151,13 +2151,22 @@ bool EffectsManager::restRequest(const char* questionString) {
 	GameState restoreState = game->state;
 	game->state = GameState::Dialogue;
 	
-	bn::vector<bn::sprite_ptr, 32> restSprites;
+	bn::vector<bn::sprite_ptr, 64> restSprites;
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
 	bn::vector<bn::sprite_ptr, 4> noSprites;
+	
+	textGenerator.set_one_sprite_per_character(false);
 	
 	auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
 	auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
 	auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
+	
+	if(game->roomManager.isWhiteRooms()) {
+		
+		activeTextPalette = spritePalette->getLightGraySpritePalette().create_palette();
+		alternateTextPalette = spritePalette->getDarkGraySpritePalette().create_palette();
+		
+	}
 	
 	for(int i=0; i<60; i++) {
 		game->doButanoUpdate();
@@ -2178,7 +2187,7 @@ bool EffectsManager::restRequest(const char* questionString) {
 		restSprites[i].set_palette(activeTextPalette);
 	}
 	
-	bn::vector<bn::vector<bn::sprite_ptr, 32>, 4> restSpritesOutline;
+	bn::vector<bn::vector<bn::sprite_ptr, 64>, 4> restSpritesOutline;
 	
 	
 	for(int j=0; j<4; j++) {
@@ -2203,57 +2212,68 @@ bool EffectsManager::restRequest(const char* questionString) {
 		}
 	}
 	
-	
-	for(int i=0; i<60; i++) {
-		game->doButanoUpdate();
-	}
-	
-	textGenerator.generate((bn::fixed)-70, (bn::fixed)-10, bn::string_view("[Yes]\0"), yesSprites);
-	textGenerator.generate((bn::fixed)40, (bn::fixed)-10, bn::string_view("[No]\0"), noSprites);
-	
-	for(int i=0; i<yesSprites.size(); i++) {
-		yesSprites[i].set_bg_priority(0);
-		yesSprites[i].set_palette(alternateTextPalette);
-	}
-	for(int i=0; i<noSprites.size(); i++) {
-		noSprites[i].set_bg_priority(0);
-		noSprites[i].set_palette(alternateTextPalette);
-	}
-	
 	int res = 0;
 	
-	while(true) { 
+	if(getOption) {
 	
-		if(res != 0 && bn::keypad::a_pressed()) {
-			break;
+		for(int i=0; i<60; i++) {
+			game->doButanoUpdate();
 		}
 		
-		if(bn::keypad::left_pressed()) {
-			res = 2;
-			for(int i=0; i<yesSprites.size(); i++) {
-				yesSprites[i].set_bg_priority(0);
-				yesSprites[i].set_palette(activeTextPalette);
-			}
-			for(int i=0; i<noSprites.size(); i++) {
-				noSprites[i].set_bg_priority(0);
-				noSprites[i].set_palette(alternateTextPalette);
-			}			
-		} else if(bn::keypad::right_pressed()) {
-			res = 1;
-			for(int i=0; i<yesSprites.size(); i++) {
-				yesSprites[i].set_bg_priority(0);
-				yesSprites[i].set_palette(alternateTextPalette);
-			}
-			for(int i=0; i<noSprites.size(); i++) {
-				noSprites[i].set_bg_priority(0);
-				noSprites[i].set_palette(activeTextPalette);
-			}
+		textGenerator.generate((bn::fixed)-70, (bn::fixed)-10, bn::string_view("[Yes]\0"), yesSprites);
+		textGenerator.generate((bn::fixed)40, (bn::fixed)-10, bn::string_view("[No]\0"), noSprites);
+		
+		for(int i=0; i<yesSprites.size(); i++) {
+			yesSprites[i].set_bg_priority(0);
+			yesSprites[i].set_palette(alternateTextPalette);
+		}
+		for(int i=0; i<noSprites.size(); i++) {
+			noSprites[i].set_bg_priority(0);
+			noSprites[i].set_palette(alternateTextPalette);
 		}
 		
+		while(true) { 
 		
-		game->doButanoUpdate(); 
-	
+			if(res != 0 && bn::keypad::a_pressed()) {
+				break;
+			}
+			
+			if(bn::keypad::left_pressed()) {
+				res = 2;
+				for(int i=0; i<yesSprites.size(); i++) {
+					yesSprites[i].set_bg_priority(0);
+					yesSprites[i].set_palette(activeTextPalette);
+				}
+				for(int i=0; i<noSprites.size(); i++) {
+					noSprites[i].set_bg_priority(0);
+					noSprites[i].set_palette(alternateTextPalette);
+				}			
+			} else if(bn::keypad::right_pressed()) {
+				res = 1;
+				for(int i=0; i<yesSprites.size(); i++) {
+					yesSprites[i].set_bg_priority(0);
+					yesSprites[i].set_palette(alternateTextPalette);
+				}
+				for(int i=0; i<noSprites.size(); i++) {
+					noSprites[i].set_bg_priority(0);
+					noSprites[i].set_palette(activeTextPalette);
+				}
+			}
+			
+			
+			game->doButanoUpdate(); 
+		
+		}
+	} else {
+		while(true) {
+			if(bn::keypad::a_pressed()) {
+				break;
+			}
+			game->doButanoUpdate(); 
+		}
 	}
+	
+	
 	for(int i=0; i<4; i++) {
 		restSpritesOutline[i].clear();
 	}

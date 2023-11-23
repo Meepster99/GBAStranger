@@ -379,7 +379,7 @@ public:
 	
 	void setMenuVis(bool vis);
 	
-	bool restRequest(const char* questionString = "Rest?\0");
+	bool restRequest(const char* questionString = "Rest?\0", bool getOption = true);
 	
 	
 	void glassBreak(Pos p);
