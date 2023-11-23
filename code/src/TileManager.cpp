@@ -552,7 +552,7 @@ void TileManager::updateTile(const Pos& p) {
 	} else {
 		floorMap[x][y]->draw();
 		
-		if(floorMap[x][y]->drawDropOff() && y < 7 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
+		if(floorMap[x][y]->drawDropOff() && y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
 			FloorTile::drawDropOff(x, y+1);
 		}
 	}

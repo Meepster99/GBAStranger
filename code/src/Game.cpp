@@ -670,11 +670,13 @@ void Game::loadLevel(bool debug) {
 		//for(int y=0; y<9; y++) {
 		for(int y=0; y<9; y++) {
 			
+			/*
 			if(y == 8) {
 				collisionMap[x][y] = 1;
 				detailsMap[x][y] = 0;
 				continue;
 			}
+			*/
 			
 			collisionMap[x][y] = uncompressedCollision[x + 14 * y];
 			detailsMap[x][y] = uncompressedDetails[x + 14 * y];
@@ -711,6 +713,7 @@ void Game::loadLevel(bool debug) {
 	
 	effectsManager.loadEffects(effectsPointer, effectsCount);
 	
+	// should probs put the below into the cutscene file
 	
 	// this code actually rlly should of been in effects, omfg
 	if(strcmp(roomManager.currentRoomName(), "rm_rm4\0") == 0 || strcmp(roomManager.currentRoomName(), "hard_rm_rm4\0") == 0) {
@@ -730,6 +733,13 @@ void Game::loadLevel(bool debug) {
 		
 		
 		cutsceneManager.createResetRoom();
+	}
+	
+	if((strstrCustom(roomManager.currentRoomName(), "_u_00\0") == NULL) &&
+		(strstrCustom(roomManager.currentRoomName(), "_u_en\0") == NULL)) {	
+		cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
+	} else {
+		cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
 	}
 	
 	BN_LOG("loadlevel completed");

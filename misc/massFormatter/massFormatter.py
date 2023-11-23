@@ -863,7 +863,7 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 		
 		cyan_background = Image.new("RGBA", (w, h), (0, 255, 255, 255))
 		
-		blackBackgroundNames = set(["spr_vd_bg", "spr_ex_vm2", "spr_dr_ab___on"])	
+		blackBackgroundNames = set(["spr_vd_bg", "spr_ex_vm2"])	
 		
 		if "_index" in spriteName:
 			tempName = spriteName.rsplit("_index", 1)[0]

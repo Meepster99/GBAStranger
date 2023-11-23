@@ -41,11 +41,12 @@ void FloorTile::drawPit(u8 x, u8 y) {
 		
 		//,,,,, we need to avoid overwriting details?
 		
+		//drawDropOff(x, y);
 		
-		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1);
-		globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2);
-		globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
+		//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1);
+		//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2);
+		//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
 	}
 	
 	
@@ -56,11 +57,12 @@ void FloorTile::drawDropOff(u8 x, u8 y) {
 	// ,, this has REALLY stupid potential shit 
 	// basically, we only want to draw a pit if the tile here ISNT transparent, but depending on if we call this func before or after we do the transform,,, idek
 	 
-	if(tileManager->floorMap[x][y] == NULL || !tileManager->floorMap[x][y]->isTransparent()) {
-		globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-		globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
-		globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
+	//if(tileManager->floorMap[x][y] == NULL || !tileManager->floorMap[x][y]->isTransparent()) {
+	if(tileManager->floorMap[x][y] == NULL) {
+		//globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		//globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+		//globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+		//globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
 	}
 	
 	
