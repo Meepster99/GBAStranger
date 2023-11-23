@@ -1557,7 +1557,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	removeEffectsList.clear();
 	
 	if(effectsCount == 1) { // the first effect is just a dummy to avoid 0 length arrays
-		return;
+		//return;
 	}
 	
 	effectsCount--;
@@ -1608,6 +1608,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		case hashString("rm_rest_area_7\0"):
 		case hashString("rm_rest_area_8\0"):
 		case hashString("rm_rest_area_9\0"):
+		case hashString("rm_u_end\0"):
 			roomDust();
 			break;
 		default:
@@ -3451,6 +3452,8 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 void EffectsManager::roomDust() {
 
 	// gml_Object_obj_dustparticle2_Step_0 seems to have the code 
+	
+	BN_LOG("CREATING ROOMDUST");
 	
 	for(int unused = 0; unused<16; unused++) {
 	

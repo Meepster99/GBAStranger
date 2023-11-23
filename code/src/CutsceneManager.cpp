@@ -1141,6 +1141,23 @@ void CutsceneManager::createPlayerBrandRoom() {
 	
 }
 
+void CutsceneManager::createResetRoom() {
+	
+	vBlankFuncs.clear();
+	
+	// spr_dr_ab___on
+	// spr_dr_abbadon
+	// HOLY FUCKING SHIT HOLY FUCKING SHIT 
+	// IT MAKES SO MUCH SENSE 
+	
+	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index0, 3);
+	//cutsceneLayer.rawMap.bgPointer.put_below(); // i hope this doesnt fuck shit up
+	
+	cutsceneLayer.rawMap.bgPointer.set_position(8 + 32 + 8, 48 + 24);
+
+	
+}
+
 void CutsceneManager::crashGame() {
 	
 	vBlankFuncs.clear();

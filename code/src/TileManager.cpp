@@ -103,7 +103,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	// i could add funcs for pickup and putdown, and have the tiles possess effectswhich draw them out?
 	// ugh, tbh it looks fine except for the D in void. maybe thats a manual fix.
 	
-	if(strstrCustom(game->roomManager.currentRoomName(), "_u_00\0") == NULL) {
+	if((strstrCustom(game->roomManager.currentRoomName(), "_u_00\0") == NULL) &&
+		(strstrCustom(game->roomManager.currentRoomName(), "_u_en\0") == NULL)) {
 	
 		floorMap[0][8] = new WordTile(Pos(0, 8));
 		

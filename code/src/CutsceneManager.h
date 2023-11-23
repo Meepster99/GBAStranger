@@ -64,6 +64,8 @@ public:
 	
 	void createPlayerBrandRoom();
 	
+	void createResetRoom();
+	
 	void disCrash(FloorTile* testTile, bool isPickup);
 	
 	void crashGame();

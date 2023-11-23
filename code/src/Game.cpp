@@ -712,6 +712,14 @@ void Game::loadLevel(bool debug) {
 
 	}
 	
+	if(roomManager.currentRoomHash() == hashString("rm_u_end\0")) {
+		//needRestore = true;
+		//cutsceneManager.backupAllButEffectsAndFloor();
+		
+		
+		cutsceneManager.createResetRoom();
+	}
+	
 	BN_LOG("loadlevel completed");
 }
 
