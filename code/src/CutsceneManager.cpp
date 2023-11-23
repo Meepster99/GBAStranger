@@ -1151,11 +1151,19 @@ void CutsceneManager::createResetRoom() {
 	// HOLY FUCKING SHIT HOLY FUCKING SHIT 
 	// IT MAKES SO MUCH SENSE 
 	
-	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index0, 3);
+	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index0, 2);
+	cutsceneLayer.rawMap.bgPointer.put_below();
 	//cutsceneLayer.rawMap.bgPointer.put_below(); // i hope this doesnt fuck shit up
 	
-	cutsceneLayer.rawMap.bgPointer.set_position(8 + 32 + 8, 48 + 24);
-
+	backgroundLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index1, 3);
+	
+	//cutsceneLayer.rawMap.bgPointer.set_position(8 + 32 + 8, 48 + 24);
+	
+	constexpr int bgX = 16;
+	constexpr int bgY = 40;
+	
+	cutsceneLayer.rawMap.bgPointer.set_position(bgX, bgY);
+	backgroundLayer.rawMap.bgPointer.set_position(bgX + 32, bgY + 32);
 	
 }
 
@@ -1494,8 +1502,11 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 		}
 	} else if((void*)testTile == (void*)tileManager->floorTile1) {
 		// carcus ending
+		
 		if(tileManager->floorTile1->second == '?') {
 			//crashGame("
+			errorLine = ">FATAL ERROR: BR NULL\0";
+			doCrashGame = true;
 		} else {
 			doCarcusEnding = true;
 			errorLine = ">FATAL ERROR : BR NULL";

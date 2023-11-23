@@ -213,7 +213,13 @@ void Game::findNextRoom() {
 		
 		bn::sound_items::snd_stairs.play();
 		return;
-	} 
+	} else {
+		if(roomManager.isWhiteRooms()) {
+			roomManager.roomIndex = 256; // this is bad 
+			save();
+			cutsceneManager.crashGame();
+		}
+	}
 	
 	// do a check for if we are doing a bee statue shortcut (or in the future, a shortcut shortcut)((or in the future future, brands???))
 	// because of the goofy ahh way this is written, this is going to get called every time until the falling anim finishes?, i dont like that tbh, but i cannot do anything
@@ -725,21 +731,25 @@ void Game::loadLevel(bool debug) {
 		// this should of been programmed in as a bigsprite, but now that i know that i shouldnt use those, its going as a bg
 		// the floor rlly should be combined onto the same layer as collision
 
-	}
-	
-	if(roomManager.currentRoomHash() == hashString("rm_u_end\0")) {
+	} else if(roomManager.currentRoomHash() == hashString("rm_u_end\0")) {
 		//needRestore = true;
 		//cutsceneManager.backupAllButEffectsAndFloor();
 		
 		
 		cutsceneManager.createResetRoom();
+	} else {
+		if((strstrCustom(roomManager.currentRoomName(), "_u_00\0") == NULL) &&
+			(strstrCustom(roomManager.currentRoomName(), "_u_en\0") == NULL)) {	
+			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
+			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		} else {
+			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
+			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+		}
 	}
 	
-	if((strstrCustom(roomManager.currentRoomName(), "_u_00\0") == NULL) &&
-		(strstrCustom(roomManager.currentRoomName(), "_u_en\0") == NULL)) {	
-		cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
-	} else {
-		cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
+	if(debug) {
+		effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	}
 	
 	BN_LOG("loadlevel completed");
@@ -1053,6 +1063,7 @@ void Game::run() {
 	roomManager.isCustomRooms();
 	
 	load();
+	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 	

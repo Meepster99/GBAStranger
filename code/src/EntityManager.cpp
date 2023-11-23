@@ -150,7 +150,11 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new Maggot(tempPos));
 				break;
 			case EntityType::Eye:
-				entityList.insert(new Eye(tempPos));
+				if(game->roomManager.currentRoomHash() == hashString("rm_secret_005")) {
+					entityList.insert(new Eye(tempPos + Pos(0, 1)));
+				} else {
+					entityList.insert(new Eye(tempPos));
+				}
 				break;
 			case EntityType::Bull:
 				entityList.insert(new Bull(tempPos));

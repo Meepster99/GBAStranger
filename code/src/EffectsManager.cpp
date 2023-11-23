@@ -1184,12 +1184,14 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 		tileRef[127].data[i] = 0x11111111;
 	}
 		
-	for(int i=0+1; i<30-1; i++) {
+	//for(int i=0+1; i<30-1; i++) {
+	for(int i=0; i<30; i++) {
 		effectsLayer.rawMap.setTile(i, 0, 127, false, true);
 		effectsLayer.rawMap.setTile(i, 19, 127, true, false);
 	}
 
-	for(int i=0+1; i<20-1; i++) {
+	//for(int i=0+1; i<20-1; i++) {
+	for(int i=0; i<20; i++) {
 		effectsLayer.rawMap.setTile(0, i, 126, true, false);
 		effectsLayer.rawMap.setTile(29, i, 126, false, true);
 	}
@@ -1263,23 +1265,28 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	static int layer = 0;
 	if(firstRun) {
 		firstRun = false;
-		layer = inward ? 13 : 0;
+		layer = inward ? 30 : 0;
 	}
 	
 	//if(autoSpeed && frame % 5 != 0) {
-	if(autoSpeed && frame % 3 != 0) {
+	//if(autoSpeed && frame % 3 != 0) {
+	if(autoSpeed && frame % 2 != 0) {
 		return false;
 	}
 	
 	Pos p = entityManager->player->p;
 	
+	int xPos = (p.x * 2) + 1;
+	int yPos = (p.y * 2) + 1;
+	
 	int increment = inward ? -1 : 1;
-	int stopIndex = inward ? -1 : 14;
+	int stopIndex = inward ? -1 : 30;
+	
 	
 	if(layer != stopIndex) {
 		
 		// loop until we willdraw at least one thing 
-		while(p.x-layer < 0 && p.y-layer < 0 && p.x+layer >= 14 && p.y+layer >= 9) {
+		while(xPos-layer < 0 && yPos-layer < 0 && xPos+layer >= 30 && yPos+layer >= 20) {
 			layer += increment;
 			if(layer == stopIndex) {
 				// breaking my static vars at bottom rule.
@@ -1288,35 +1295,65 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 			}
 		}
 		
-
+		/*
 		Pos topLeft = safePos(p.x-layer, p.y-layer);
 		Pos bottomRight = safePos(p.x+layer, p.y+layer);
 		
 		for(int x = topLeft.x; x<=bottomRight.x; x++) {
 			if(p.y-layer >= 0) {
-				effectsLayer.setBigTile(x, topLeft.y, inward);
+				//effectsLayer.setBigTile(x, topLeft.y, inward);
+				effectsLayer.setTile(x, topLeft.y, 4*inward);
 			}
-			if(p.y+layer < 9) {
-				effectsLayer.setBigTile(x, bottomRight.y, inward);
+			if(p.y+layer < 20) {
+				//effectsLayer.setBigTile(x, bottomRight.y, inward);
+				effectsLayer.setTile(x, bottomRight.y, 4*inward);
 			}
 		}
 		
 	
 		for(int y = topLeft.y; y<=bottomRight.y; y++) {
 			if(p.x-layer >= 0) {
-				effectsLayer.setBigTile(topLeft.x, y, inward);
+				//effectsLayer.setBigTile(topLeft.x, y, inward);
+				effectsLayer.setTile(topLeft.x, y, 4*inward);
 			}
-			if(p.x+layer < 14) {
-				effectsLayer.setBigTile(bottomRight.x, y, inward);
+			if(p.x+layer < 30) {
+				//effectsLayer.setBigTile(bottomRight.x, y, inward);
+				effectsLayer.setTile(bottomRight.x, y, 4*inward);
 			}
 		}
+		*/
+		
+		int topLeftX = CLAMP(xPos - layer, -1, 30);
+		int topLeftY = CLAMP(yPos - layer, -1, 30);
+		int bottomRightX = CLAMP(xPos + layer, -1, 30);
+		int bottomRightY = CLAMP(yPos + layer, -1, 30);
+		
+		
+		for(int x = topLeftX; x<=bottomRightX; x++) {
+			if(topLeftY >= 0 && x >= 0) {
+				effectsLayer.setTile(x, topLeftY, 4*inward);
+			}
+			if(bottomRightY < 20 && x >= 0) {
+				effectsLayer.setTile(x, bottomRightY, 4*inward);
+			}
+		}
+		
 	
+		for(int y = topLeftY; y<=bottomRightY; y++) {
+			if(topLeftX >= 0 && y >= 0) {
+				effectsLayer.setTile(topLeftX, y, 4*inward);
+			}
+			if(bottomRightX < 30 && y >= 0) {
+				effectsLayer.setTile(bottomRightX, y, 4*inward);
+			}
+		}
 			
 		layer += increment;
 		
 		effectsLayer.update();
 		return false;
 	}
+	
 		
 	
 	
@@ -1354,6 +1391,24 @@ bool EffectsManager::topDownEffect(bool downward) {
 	return true;
 }
 
+void EffectsManager::setBorderColor(bool black) {
+	
+	bn::span<bn::tile> tileRef = tilesPointer.vram().value();
+	
+	//unsigned borderVal = game->roomManager.isWhiteRooms() ? 0x22222222 : 0x11111111;
+	unsigned borderVal = black ? 0x11111111 : 0x22222222;
+	
+	for(int i=0; i<8; i++) {
+		tileRef[122].data[i] = borderVal;
+		tileRef[123].data[i] = borderVal;
+		tileRef[124].data[i] = borderVal;
+		tileRef[125].data[i] = borderVal;
+		tileRef[126].data[i] = borderVal;
+		tileRef[127].data[i] = borderVal;
+	}
+
+}
+
 bool EffectsManager::exitRoom() {
 	
 	// if we have a locusts death, flash to white 
@@ -1375,6 +1430,7 @@ bool EffectsManager::exitRoom() {
 	if(firstRun) {
 		firstRun = false;
 		firstFrame = frame;
+	
 		return false;
 	}
 	
@@ -1382,6 +1438,8 @@ bool EffectsManager::exitRoom() {
 	if(frame - firstFrame < 45 * 1) {
 		return false;
 	}
+	
+	//setBorderColor();
 	
 	bool res = entityManager->playerWon() ? zoomEffect(true) : topDownEffect(true);
 
@@ -1413,6 +1471,7 @@ bool EffectsManager::enterRoom() {
 
 	if(res) {
 		firstRun = true;
+		//setBorderColor(!game->roomManager.isWhiteRooms());
 		return true;
 	}
 	
@@ -1608,13 +1667,16 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		case hashString("rm_rest_area_7\0"):
 		case hashString("rm_rest_area_8\0"):
 		case hashString("rm_rest_area_9\0"):
-		case hashString("rm_u_end\0"):
-			roomDust();
 			break;
 		default:
+			if(game->roomManager.isWhiteRooms()) {
+				roomDust();
+			}
 			break;
 	}
-
+	
+	
+	
 }
 
 // -----

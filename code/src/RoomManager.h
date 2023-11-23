@@ -33,6 +33,8 @@ public:
 	void initCustomRooms();
 	Room loadCustomRoom();
 	
+	bool isWhiteRooms();
+	
 	~RoomManager();
 
 private:

@@ -168,6 +168,16 @@ void RoomManager::gotoRoom(int newIndex) {
 	BN_LOG("roomIndex gotoed to ", roomIndex);
 }
 
+bool RoomManager::isWhiteRooms() {
+	
+	if((strstrCustom(currentRoomName(), "_u_00\0") == NULL) &&
+		(strstrCustom(currentRoomName(), "_u_en\0") == NULL)) {	
+		return false;
+	}
+	
+	return true;
+}
+
 // -----
 
 RoomManager::~RoomManager() {

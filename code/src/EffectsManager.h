@@ -356,6 +356,7 @@ public:
 	bool zoomEffect(bool inward, bool autoSpeed = true);
 	bool topDownEffect(bool downward);
 	
+	void setBorderColor(bool black = true);
 	bool exitRoom();
 	bool enterRoom();
 	void doVBlank();

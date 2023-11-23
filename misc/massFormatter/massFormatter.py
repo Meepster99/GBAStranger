@@ -870,6 +870,12 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 			if tempName in blackBackgroundNames:
 				cyan_background = Image.new("RGBA", (w, h), (0, 0, 0, 255))
 		
+		whiteBackgroundNames = set(["spr_dr_ab___on"])
+		
+		if "_index" in spriteName:
+			tempName = spriteName.rsplit("_index", 1)[0]
+			if tempName in whiteBackgroundNames:
+				cyan_background = Image.new("RGBA", (w, h), (255, 255, 255, 255))
 		
 			
 		# these are a special case, need to be flipped
@@ -892,6 +898,22 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 			
 		
 		cyan_background.paste(image, (0, 0), image)
+			
+		if "spr_dr_ab___on" in spriteName and "spr_dr_ab___on_b" not in spriteName and spriteIndex == 0:
+			# spr_dr_ab___on_b and spr_dr_ab___on index 0 should be combined into one, bc like,,,, it makes shit easier
+			# they are on the same layer, 
+			# spr_dr_ab___on index 1 is the one below.
+			
+			tempIm = Image.open("../ExportData/Export_Textures_Padded/spr_dr_ab___on_b_0.png").convert("RGBA")
+			
+			cyan_background = Image.new("RGBA", (w, h), (0, 255, 255, 255))
+			cyan_background.paste(image, (32, 32), image)
+			cyan_background.paste(tempIm, (128, 16), tempIm)
+			
+			#cyan_background.show()
+			
+			pass
+		
 	
 		cyan_background = cyan_background.convert("RGB")
 		#tempImage = np.array(cyan_background)
@@ -1650,6 +1672,7 @@ def main():
 	
 	
 	#genSprite("dw_spr_puumerkki_bigframe_index0", True)
+	#genSprite("dw_spr_dr_ab___on_index0", True)
 	#exit(1)
 	
 	

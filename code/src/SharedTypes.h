@@ -433,7 +433,7 @@ public:
 	}
 	
 	void setTile(int x, int y, int tileIndex) {
-		
+	
 		bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
 
