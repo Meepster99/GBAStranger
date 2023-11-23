@@ -269,6 +269,7 @@ public:
 	TileType tileType() const override { return TileType::SpriteTile; }
 	
 	int getTileValue() const override {
+		BN_ASSERT(tileFunc != NULL, "spritetile tilefunc was null??????");
 		return tileFunc();
 	}
 	

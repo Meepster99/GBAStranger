@@ -162,13 +162,18 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		swordTile = new SpriteTile(Pos(10, 8), []() -> int {
 			Player* player = globalGame->entityManager.player;
 			
+			
+			
 			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 			
 			if(player->hasSword) {
 				Pos tempPos = player->p;
+				BN_LOG("hello");
 				if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
+					BN_LOG("hello2");
 					return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
 				}
+				BN_LOG("hello3");
 				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
 			}
 			
@@ -651,6 +656,8 @@ void TileManager::doVBlank() { profileFunction();
 	
 	bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
 	
+	BN_LOG("tilemanager check 1");
+	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			if(floorMap[x][y] == NULL) {
@@ -670,15 +677,20 @@ void TileManager::doVBlank() { profileFunction();
 		}
 	}
 	
+	BN_LOG("tilemanager check 2");
+	
 	// i wonder/hope this is ok 
 	// sword tile needs to be updated every,, frame for flashing?
 	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
 		//updateTile(swordTile->tilePos);
+		
+		BN_LOG("wtf1");
 		swordTile->draw();
+		BN_LOG("wtf2");
 		floorLayer.reloadCells(); // might cause horrid lag
 	}
 	
-	
+	BN_LOG("tilemanager check 3");
 	
 	
 	

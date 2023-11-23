@@ -850,6 +850,7 @@ void EntityManager::doMoves() {
 	}
 	
 	
+	
 	// THIS MIGHT BE FUCKING BAD
 	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
 	updateMap(); 
@@ -988,7 +989,8 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	}
 	*/
 	
-	
+	// IS THIS CALL NEEDED/OK??? WHAT THE FUCK
+	futureEntityMap[tempPos.x][tempPos.y].erase(e);
 	
 	bn::vector<Entity*, 4>::iterator res = entityMap[tempPos.x][tempPos.y].erase(e);
 	entityList.erase(e);
@@ -1030,14 +1032,35 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 }
 
 void EntityManager::killAllAddStatues() {
-	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
-		BN_ASSERT(*it != NULL, "WHAT THE FUCK.");
-		if( (*it)->entityType() == EntityType::AddStatue ) {
+	
+	// SHOULD THIS CHECK BE HERE??? BC LIKE,,, UGHH GODS 
+	// it was previously in vblank, but like, it seems like killing entities in vblank fucks shit up 
+	// i also was probs not updating the entitymaps properly.
+	
+	// i,,,, i 
+	// look you wouldnt believe the amount of issues this func has caused. 
+	// i still think it might 
+	// if any crashes without asserts occur, it was probs this
+	// im fucking stupid and dont understand iterators no matter  
+	// i,, ugh 
+	// this is why i am trash
+	
+	
+	
+	//killAllAddStatues();
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
+		BN_ASSERT(*it != NULL, "wtf in killalladdstatues");
+		if((*it)->entityType() == EntityType::AddStatue) {
 			killEntity(*it);
-			// shit code 
-			it = obstacleList.begin();
+			it = obstacleList.begin(); // trash code, killentity only returns the getpos index, this needs to be fixed, TODO
+		} else {
+			++it;
 		}
 	}
+	
+	// is this call needed????? is this call extremely stupid??? will this call fix this stupid bug???
+	//updateMap();
+
 }
 
 void EntityManager::manageShadows(bn::optional<Direction> playerDir) { 
@@ -1170,7 +1193,11 @@ void EntityManager::updateMap() {
 	// CHECK IF PLAYER IS ON EXIT, AND EXIT IS OPEN HERE.
 	
 	// TODO: THIS CODE SHOULD DO STATUE CHECKS!!!!!!!!!!!!!!!!!!
-		
+	
+	
+	
+	
+	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			entityMap[x][y] = futureEntityMap[x][y];
@@ -1526,18 +1553,6 @@ bool EntityManager::enterRoom() {
 
 void EntityManager::doVBlank() { profileFunction();
 	
-	
-	
-	if(needKillAllAddStatues) {
-		// i,,,, i 
-		// look you wouldnt believe the amount of issues this func has caused. 
-		// i still think it might 
-		// if any crashes without asserts occur, it was probs this
-		needKillAllAddStatues = false;
-		killAllAddStatues();
-	}
-	
-	
 	// is modulo expensive???
 	if(frame % 33 == 0) { // ticks should occur at roughly 110bpm
 		//BN_LOG("TICKS");
@@ -1553,6 +1568,11 @@ void EntityManager::doVBlank() { profileFunction();
 			}
 			player->doUpdate();
 		}
+	}
+	
+	if(needKillAllAddStatues) {
+		needKillAllAddStatues = false;
+		killAllAddStatues();
 	}
 	
 	if(kickedList.size() != 0) {	
@@ -1588,6 +1608,8 @@ void EntityManager::doVBlank() { profileFunction();
 		}
 	}
 	
+	
+	
 	// deaths is done last bc in case something is both dead, and kicked, we dont want a use after free.
 	// this is a MASSIVE bug, how did i only just catch it now 
 	// hell, under what circumstances do i want something to like,,, not be removed from the kicklist on the same tick its added?
@@ -1600,6 +1622,8 @@ void EntityManager::doVBlank() { profileFunction();
 	//BN_LOG("DEATHS");
 	
 	doDeaths();
+	
+	
 	
 	
 	//BN_LOG("DONE ENTITYMANAGER VBLANK");
@@ -1640,18 +1664,30 @@ bool EntityManager::hasNonPlayerEntity(const Pos& p) const {
 	
 bool EntityManager::hasEnemy(const Pos& p) const {
 	
+	BN_LOG("entry");
+	
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 	
+	BN_LOG("entry2");
+	
 	if(temp.size() == 0) {
+		BN_LOG("exit");
 		return false;
 	}
 	
+	BN_LOG("entry3");
+	
 	for(auto it = temp.cbegin(); it != temp.cend(); ++it) {
+		//BN_LOG("loop");
+		// this assert shouldnt be needed, but my god have i been having some whack ass bugs
+		BN_ASSERT(*it != NULL, "in hasenemy, a NULL was found???? how????");
 		if((*it)->isEnemy()) {
+			BN_LOG("exit");
 			return true;
 		}
 	}
 	
+	BN_LOG("exit");
 	return false;
 }
 
@@ -1909,7 +1945,7 @@ void EntityManager::sanity() const {
 	// i could easily let saneset have indexing(and tbh, why didnt i earlier?)
 	// well, if i want to remove i sorta need iterators.
 	
-	return;
+	//return;
 	
 	// check that all data structures are holding up
 	
