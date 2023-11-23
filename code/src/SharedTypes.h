@@ -565,6 +565,7 @@ public:
 	Pos(int x_, int y_) : x(x_), y(y_) { 
 
 		if(!(x >= 0 && y >= 0 && x < 14 && y < 9)) {
+			// this is a remnant of the one time i had to use vscode for debugging.
 			BN_LOG("bruh");
 		}
 

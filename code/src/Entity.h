@@ -749,7 +749,7 @@ public:
 	int interactCount = 0;
 	void interact() override; // spr_textbox_extra
 	
-	void specialBumpFunction() override; 
+	void specialBumpFunction() override;
 	
 };
 
@@ -914,18 +914,36 @@ public:
 	
 	void* interactFuncParams;
 	void* kickFuncParams;
+	
+	std::function<void(Interactable*)> specialBumpFunc = NULL;
 
 	// i dont like this naming convention at all
 	
 	// now that i have access to functional, i rlly should rewrite this.(if i can?)
-	Interactable(Pos p_, std::function<void(void*)> interactFunc_, std::function<bool(void*)> kickFunc_, void* interactFuncParams_, void* kickFuncParams_) : 
+	// could i,,, instead of passing shit in seperately like,,, just have lambda captures capture the param 
+	// omfg, thats what i should of done
+	Interactable(Pos p_, std::function<void(void*)> interactFunc_, std::function<bool(void*)> kickFunc_, void* interactFuncParams_, void* kickFuncParams_, 
+		std::function<void(Interactable*)> initFunc = NULL,
+		std::function<void(Interactable*)> specialBumpFunc_ = NULL
+		) : 
 		Obstacle(p_), 
 		interactFunc(interactFunc_), kickFunc(kickFunc_),
-		interactFuncParams(interactFuncParams_), kickFuncParams(kickFuncParams_)
+		interactFuncParams(interactFuncParams_), kickFuncParams(kickFuncParams_), specialBumpFunc(specialBumpFunc_)
 		{
+			
+			if(interactFuncParams == NULL) {
+				interactFuncParams = this;
+			}
+			if(kickFuncParams == NULL) {
+				kickFuncParams = this;
+			}
+			
 		//sprite.setVisible(true);
 		sprite.setVisible(false);
-		sprite.spritePointer.set_bg_priority(0);
+		//sprite.spritePointer.set_bg_priority(0);
+		if(initFunc != NULL) {
+			initFunc(this);
+		}
 	}
 	
 	// i think this func should be depracated by now right?
@@ -933,6 +951,9 @@ public:
 	
 	EntityType entityType() const override { return EntityType::Interactable; }
 	
+	// this might be stupid. but should i make it pass this if the params r null? 
+	// this func was originally here to interact with things like bigsprites,,,idek
+	//,,,, fuck it. we ball
 	void interact() override { bumpDirections.clear(); return interactFunc(interactFuncParams); }
 	bool kicked() override { bumpDirections.clear(); return kickFunc(kickFuncParams); }
 	
@@ -941,4 +962,14 @@ public:
 		return bn::optional<Direction>(); 
 	}
 	
+	void specialBumpFunction() {
+		if(specialBumpFunc != NULL) {
+			specialBumpFunc(this);
+		}
+		return; 
+	}
+	
 };
+
+
+

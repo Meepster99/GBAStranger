@@ -191,7 +191,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new Chest(tempPos));
 				break;
 			case EntityType::EmptyChest:
-				entityList.insert(new Chest(tempPos, true));
+				//entityList.insert(new Chest(tempPos, true));
+				// emptychests are becoming interactables
+				entityList.insert(getEmptyChest(tempPos));
 				break;
 			case EntityType::AddStatue:
 				entityList.insert(new AddStatue(tempPos));
@@ -223,8 +225,6 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		}
 		
 	}
-
-
 	
 	BN_ASSERT(entityList.size() == entitiesCount, "why does the entitylist size not equal entity count?? size=",entityList.size(), " count=",entitiesCount);
 	
@@ -292,8 +292,234 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	}
 	
 	updateMap();
+	
 }
 
+Interactable* EntityManager::getEmptyChest(Pos p) {
+	
+	// reassignment doesnt work here when its auto, but does for defining the type??
+	std::function<void(void*)> interactFunc = [](void* unused) mutable -> void {
+		(void)unused;
+	};
+	
+	std::function<bool(void*)> kickFunc = [](void* unused) mutable -> bool {
+		(void)unused;
+		return true;
+	};
+	
+	std::function<void(Interactable*)> initFunc = [](Interactable* inter) mutable -> void {
+		inter->sprite.setVisible(true);
+		inter->spriteTilesArray.clear();
+		inter->spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_regular);
+		inter->animationIndex = 1;
+	};
+	
+	std::function<void(Interactable*)> specialBumpFunc = [](Interactable* inter) mutable -> void {
+		(void)inter;
+	};
+	
+	int roomIndex = game->roomManager.roomIndex;
+	unsigned roomHash = game->roomManager.currentRoomHash();
+	
+	if(roomIndex == 83 && p == Pos(3, 2)) {
+		interactFunc = [interactCount = 0](void* unused) mutable -> void {
+			(void)unused;
+			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			// GOOFY WARNING
+			if(globalGame->entityManager.player->p == Pos(3, 2+1)) {
+				// shortcut chest;
+				
+				interactCount++;
+				
+				switch(interactCount) {
+					case 1:
+						globalGame->effectsManager.doDialogue("It's empty\0");
+						break;
+					case 2:
+						globalGame->effectsManager.doDialogue("It's empty\0");
+						break;
+					case 3:
+						globalGame->effectsManager.doDialogue("It's empty\0");
+						break;
+					default:
+						globalGame->effectsManager.doDialogue("?? ??? ?\0");
+						globalGame->entityManager.addKill(NULL);
+						globalGame->tileManager.exitDestination = "rm_mon_shortcut_003\0";
+						break;
+				}
+				
+				return;
+			}
+		};
+		
+	} else if(roomHash == hashString("rm_secret_001\0")) {
+	
+		// i would(in the past) put this type of code into the roomconv file, but i am TIRED.
+		// these chests should also use the special chest sprite
+	
+		// memory room.
+		// chest just gives it to you
+		// [You aquired a strange feeling]
+		// [Your mind feels heavier]
+		// [You don't know what to make of it]
+		
+		// rock tells you to hit the chest 6 times, wait 6sec, add statue dissapear
+		
+		interactFunc = [interactCount = 0](void* obj) mutable -> void {
+			//(void)unused;
+			Interactable* inter = static_cast<Interactable*>(obj);
+			
+			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			// GOOFY WARNING
+			
+			if(globalGame->entityManager.player->p == Pos(6, 2+1)) {
+				if(interactCount == 0 && !globalGame->entityManager.player->hasMemory) {
+					globalGame->effectsManager.doDialogue(""
+					"[You aquired a strange feeling]\n"
+					"[Your mind feels heavier]\n"
+					"[You don't know what to make of it]\0");
+					interactCount++;
+					globalGame->entityManager.player->hasMemory = true;
+					globalGame->tileManager.fullDraw();
+					
+					inter->animationIndex = 1;
+					inter->doUpdate();
+				} else {
+					globalGame->effectsManager.doDialogue("It's empty\0");
+				}
+			}
+		};
+		
+		initFunc = [hasMemory = player->hasMemory](Interactable* inter) mutable -> void {
+			inter->sprite.setVisible(true);
+			inter->spriteTilesArray.clear();
+			inter->spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+			inter->animationIndex = hasMemory;
+		};
+		
+		kickFunc = [](void* obj) -> bool {
+			
+			Interactable* inter = static_cast<Interactable*>(obj);
+
+			if(ABS(playerIdleFrame - inter->playerIdleStart) > 60) {
+				inter->specialBumpCount = 0;
+			}
+			
+			inter->playerIdleStart = playerIdleFrame;
+			
+			inter->specialBumpCount++;
+			
+			return true;
+		};
+		
+		// this is bad,, how do i detect the 6sec wait 
+		// godssssssssssss
+		// i suppose i could return false?
+		//.... i could overload specialBumpFunction???
+		specialBumpFunc = [trig = false](void* obj) mutable -> void {
+		
+			BN_ASSERT(obj != NULL, "WTF IN SPECIAL BUMP FUNC");
+		
+			Interactable* inter = static_cast<Interactable*>(obj);
+		
+			if(!trig && inter->specialBumpCount == 6 && playerIdleFrame == inter->playerIdleStart && (frame - inter->playerIdleStart) >= 60 * 6) {
+				trig = true;
+				//globalGame->entityManager.killAllAddStatues();
+				globalGame->entityManager.needKillAllAddStatues = true;
+			}
+			
+		};
+		
+	} else if(roomHash == hashString("rm_secret_003\0")) {
+		// wings room
+		// straight up just gives you wings 
+		
+		interactFunc = [interactCount = 0](void* obj) mutable -> void {
+			//(void)unused;
+			Interactable* inter = static_cast<Interactable*>(obj);
+			
+			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			// GOOFY WARNING
+			
+			if(globalGame->entityManager.player->p == Pos(6, 2+1)) {
+				if(interactCount == 0 && !globalGame->entityManager.player->hasWings) {
+					globalGame->effectsManager.doDialogue(""
+					"[Wings wings wings, yeet]"
+					"\0");
+					interactCount++;
+					globalGame->entityManager.player->hasWings = true;
+					globalGame->tileManager.fullDraw();
+					
+					inter->animationIndex = 1;
+					inter->doUpdate();
+				} else {
+					globalGame->effectsManager.doDialogue("It's empty\0");
+				}
+			}
+		};
+		
+		initFunc = [hasWings = player->hasWings](Interactable* inter) mutable -> void {
+			inter->sprite.setVisible(true);
+			inter->spriteTilesArray.clear();
+			inter->spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+			inter->animationIndex = hasWings;
+		};
+		
+		
+	} else if(roomHash == hashString("rm_secret_005\0")) {
+		// sword room
+		// straight up just gives you sword(well,,, tan fight). also, make sure to prekill the eyes in here. it aint possibe to solve the room 
+		// without the wings bc we arent doing tan
+		
+		interactFunc = [interactCount = 0](void* obj) mutable -> void {
+			//(void)unused;
+			Interactable* inter = static_cast<Interactable*>(obj);
+			
+			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			// GOOFY WARNING
+			
+			if(globalGame->entityManager.player->p == Pos(7, 5+1)) {
+				if(interactCount == 0 && !globalGame->entityManager.player->hasSword) {
+					globalGame->effectsManager.doDialogue(""
+					"[Swords swords swords, yeet]"
+					"\0");
+					interactCount++;
+					globalGame->entityManager.player->hasSword = true;
+					globalGame->tileManager.fullDraw();
+					
+					inter->animationIndex = 1;
+					inter->doUpdate();
+				} else {
+					globalGame->effectsManager.doDialogue("It's empty\0");
+				}
+			}
+		};
+		
+		initFunc = [hasSword = player->hasSword](Interactable* inter) mutable -> void {
+			inter->sprite.setVisible(true);
+			inter->spriteTilesArray.clear();
+			inter->spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+			inter->animationIndex = hasSword;
+		};
+		
+		
+	}
+	
+	
+	
+	
+	Interactable* res = new Interactable(p, 
+		interactFunc,
+		kickFunc,
+		NULL,
+		NULL,
+		initFunc,
+		specialBumpFunc
+	);
+	
+	return res;
+}
+	
 void EntityManager::updatePalette(Palette* pal) {
 	
 	
@@ -733,6 +959,8 @@ void EntityManager::doMoves() {
 
 bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	
+	BN_ASSERT(e != NULL, "killentity tried to kill a null??");
+	
 	// this func really needs to be rewritten to just work with killing players tbh, also its return value is scuffed af.
 	
 	if(e->entityType() == EntityType::Player || e->entityType() == EntityType::Shadow) {
@@ -741,6 +969,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	
 	if(e->entityType() == EntityType::Interactable) {
 		// hopefully this doesnt (curse) anything up
+		// YOU DUMBASS I THINK IT DID???
 		return entityMap[e->p.x][e->p.y].end();
 	}
 	
@@ -794,6 +1023,17 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 	}
 	
 	return res;
+}
+
+void EntityManager::killAllAddStatues() {
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+		BN_ASSERT(*it != NULL, "WHAT THE FUCK.");
+		if( (*it)->entityType() == EntityType::AddStatue ) {
+			killEntity(*it);
+			// shit code 
+			it = obstacleList.begin();
+		}
+	}
 }
 
 void EntityManager::manageShadows(bn::optional<Direction> playerDir) { 
@@ -1282,9 +1522,19 @@ bool EntityManager::enterRoom() {
 
 void EntityManager::doVBlank() { profileFunction();
 	
+	
+	
+	if(needKillAllAddStatues) {
+		// i,,,, i 
+		// look you wouldnt believe the amount of issues this func has caused. 
+		// i still think it might 
+		// if any crashes without asserts occur, it was probs this
+		needKillAllAddStatues = false;
+		killAllAddStatues();
+	}
+	
+	
 	// is modulo expensive???
-	
-	
 	if(frame % 33 == 0) { // ticks should occur at roughly 110bpm
 		//BN_LOG("TICKS");
 		doTicks();
@@ -1321,8 +1571,15 @@ void EntityManager::doVBlank() { profileFunction();
 		}
 	}
 	
+	
+	// i despise this code
 	if(obstacleList.size() != 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+			//BN_LOG("SPECIALBUMP");
+			BN_ASSERT(*it != NULL, "a specialbump was somehow null. how??? why???");
+			// THIS FUNCTION CAN,, AS IN IF IT DELETES OBSTACLES INSIDE OF IT, I AM FUCKED?????
+			// ITS PATHETIC I DIDNT SEE THIS EARLIER
+			
 			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}
 	}
@@ -1337,6 +1594,7 @@ void EntityManager::doVBlank() { profileFunction();
 	// it doesnt need to only be called once every 8 frames
 	//if(frame % 8 == 0) {
 	//BN_LOG("DEATHS");
+	
 	doDeaths();
 	
 	

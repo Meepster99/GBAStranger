@@ -169,7 +169,7 @@ public:
 			sprite.setVisible(true);
 			return false;
 		}
-		
+	
 		bool res = animateFunc(this);
 		if(res) {
 			sprite.setVisible(false);

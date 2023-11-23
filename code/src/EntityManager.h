@@ -46,6 +46,7 @@ public:
 	~EntityManager();
 	
 	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
+	Interactable* getEmptyChest(Pos p);
 	
 	void updatePalette(Palette* pal);
 	
@@ -128,6 +129,9 @@ public:
 		}
 		return customKill;
 	}
+
+	bool needKillAllAddStatues = false;
+	void killAllAddStatues();
 	
 	bool killAtPos(const Pos& p) const { 
 		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {

@@ -606,6 +606,8 @@ void Chest::interact() {
 	// to be 100% real is that i need to go convert all that (curse) into namespaces, but i 
 	// (curse)ing hate namespaces, and if i have to rewrite a bunch of my h files i will freak
 	
+	// ALL OF THESE FUNCS SHOULD OF BEEN LAMBDAS OMFG
+	
 	if(game->roomManager.roomIndex > 3) {
 		// this if statement is here on purpose for a very stupid easter egg, see the random boulder msgs
 		// its 2 just in case, for future room ordering changes
@@ -617,29 +619,6 @@ void Chest::interact() {
 	}
 	
 	interactCount++;
-	
-	if(game->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
-		// shortcut chest;
-		
-		switch(interactCount) {
-			case 1:
-				effectsManager->doDialogue("It's empty\0");
-				break;
-			case 2:
-				effectsManager->doDialogue("It's empty\0");
-				break;
-			case 3:
-				effectsManager->doDialogue("It's empty\0");
-				break;
-			default:
-				effectsManager->doDialogue("?? ??? ?\0");
-				entityManager->addKill(NULL);
-				tileManager->exitDestination = "rm_mon_shortcut_003\0";
-				break;
-		}
-		
-		return;
-	}
 	
 	if(animationIndex == 0) {
 		animationIndex = 1;
@@ -664,15 +643,12 @@ void Chest::interact() {
 }
 
 void Chest::specialBumpFunction() {
-	
-	//BN_LOG(specialBumpCount, " ", playerIdleFrame, " ", playerIdleStart);
 	if(!gotBonus && animationIndex == 0 && specialBumpCount == 3 && playerIdleFrame == playerIdleStart && (frame - playerIdleStart) >= 60 * 3) {
 		specialBumpCount = 0;
 		gotBonus = true;
 		effectsManager->chestBonus(this);
 	}
-	
-}
+}; 
 
 // why doesnt this work??
 //const char* const randomBoulderMessages[] = {"jfdklsafs", "a", "123124", "VOID look heres a bunch of  text wow we even have scrolling\nbruh1\nbruh2"};
