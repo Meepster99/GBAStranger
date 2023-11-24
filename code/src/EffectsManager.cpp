@@ -1267,12 +1267,13 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 		firstRun = false;
 		layer = inward ? 30 : 0;
 	}
-	
+	(void)autoSpeed;
 	//if(autoSpeed && frame % 5 != 0) {
 	//if(autoSpeed && frame % 3 != 0) {
-	if(autoSpeed && frame % 2 != 0) {
-		return false;
-	}
+	//if(autoSpeed && frame % 2 != 0) {
+	//if(autoSpeed && frame % 2 != 0) {
+	//	return false;
+	//
 	
 	Pos p = entityManager->player->p;
 	
@@ -1281,6 +1282,12 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	
 	int increment = inward ? -1 : 1;
 	int stopIndex = inward ? -1 : 30;
+	
+	int tileIndex = inward;
+	
+	if(inward && game->roomManager.isWhiteRooms()) {
+		tileIndex = 31;
+	}
 	
 	
 	if(layer != stopIndex) {
@@ -1331,20 +1338,20 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 		
 		for(int x = topLeftX; x<=bottomRightX; x++) {
 			if(topLeftY >= 0 && x >= 0) {
-				effectsLayer.setTile(x, topLeftY, 4*inward);
+				effectsLayer.setTile(x, topLeftY, 4*tileIndex);
 			}
 			if(bottomRightY < 20 && x >= 0) {
-				effectsLayer.setTile(x, bottomRightY, 4*inward);
+				effectsLayer.setTile(x, bottomRightY, 4*tileIndex);
 			}
 		}
 		
 	
 		for(int y = topLeftY; y<=bottomRightY; y++) {
 			if(topLeftX >= 0 && y >= 0) {
-				effectsLayer.setTile(topLeftX, y, 4*inward);
+				effectsLayer.setTile(topLeftX, y, 4*tileIndex);
 			}
 			if(bottomRightX < 30 && y >= 0) {
-				effectsLayer.setTile(bottomRightX, y, 4*inward);
+				effectsLayer.setTile(bottomRightX, y, 4*tileIndex);
 			}
 		}
 			
@@ -5168,16 +5175,23 @@ void EffectsManager::corpseFuzz() {
 			
 		};
 		
+		int tempOffset = randomGenerator.get_int(0, 16) - 8;
 		auto tickFunc = [
-			x = (bn::fixed)6 * 16 + (randomGenerator.get_int(0, 16) - 8),
-			y = (bn::fixed)4 * 16 + (randomGenerator.get_int(0, 16) - 8),
+			x = (bn::fixed)6 * 16 + tempOffset,
+			y = (bn::fixed)4 * 16 + tempOffset,
 			image_speed = (bn::fixed)0,
 			t = 0,
 			y_speedup = 4 + randomGenerator.get_int(2, 6 + 1),
 			freezeFrames = randomGenerator.get_int(0, 60 + 1),
 			graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 5 + 1),
-			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20
+			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
+			delayFrames = 15 + randomGenerator.get_int(0, 45)
 		](Effect* obj) mutable -> bool {
+			
+			if(delayFrames) {
+				delayFrames--;
+				return false;
+			}
 			
 			if(y < -16) {
 				return true;

@@ -786,7 +786,7 @@ void Game::fullDraw() {
 	
 	BN_LOG("entering fulldraw");
 	
-
+	// THESE 3 CALLS SHOULD BE MERGED INTO ONE FUCKHEAD
 	collision.draw(collisionMap);
 	details.draw(detailsMap, collisionMap);
 	tileManager.fullDraw();
