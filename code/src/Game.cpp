@@ -775,9 +775,7 @@ void Game::loadLevel(bool debug) {
 		}
 	}
 	
-	if(debug) {
-		effectsManager.setBorderColor(!roomManager.isWhiteRooms());
-	}
+	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	BN_LOG("loadlevel completed");
 }

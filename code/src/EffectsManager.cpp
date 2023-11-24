@@ -1174,6 +1174,7 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	
 	effectsLayer.rawMap.bgPointer.set_tiles(tilesPointer);
 	
+	/*
 	for(int i=0; i<8; i++) {
 		tileRef[122].data[i] = 0x11111111;
 		tileRef[123].data[i] = 0x11111111;
@@ -1194,6 +1195,19 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	for(int i=0; i<20; i++) {
 		effectsLayer.rawMap.setTile(0, i, 126, true, false);
 		effectsLayer.rawMap.setTile(29, i, 126, false, true);
+	}
+	*/
+	
+	for(int i=0; i<8; i++) {
+		tileRef[120].data[i] = 0x11111111;
+		tileRef[121].data[i] = 0x11111111;
+		tileRef[122].data[i] = 0x11111111;
+		tileRef[123].data[i] = 0x11111111;
+		
+		tileRef[124].data[i] = 0x22222222;
+		tileRef[125].data[i] = 0x22222222;
+		tileRef[126].data[i] = 0x22222222;
+		tileRef[127].data[i] = 0x22222222;
 	}
 		
 	effectsLayer.reloadCells();
@@ -1288,7 +1302,6 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	if(inward && game->roomManager.isWhiteRooms()) {
 		tileIndex = 31;
 	}
-	
 	
 	if(layer != stopIndex) {
 		
@@ -1400,19 +1413,25 @@ bool EffectsManager::topDownEffect(bool downward) {
 
 void EffectsManager::setBorderColor(bool black) {
 	
-	bn::span<bn::tile> tileRef = tilesPointer.vram().value();
+	//bn::span<bn::tile> tileRef = tilesPointer.vram().value();
 	
 	//unsigned borderVal = game->roomManager.isWhiteRooms() ? 0x22222222 : 0x11111111;
-	unsigned borderVal = black ? 0x11111111 : 0x22222222;
+	unsigned borderVal = black ? 120 : 124;
 	
-	for(int i=0; i<8; i++) {
-		tileRef[122].data[i] = borderVal;
-		tileRef[123].data[i] = borderVal;
-		tileRef[124].data[i] = borderVal;
-		tileRef[125].data[i] = borderVal;
-		tileRef[126].data[i] = borderVal;
-		tileRef[127].data[i] = borderVal;
+	for(int i=0; i<30; i++) {
+		effectsLayer.rawMap.setTile(i, 0, borderVal, false, true);
+		effectsLayer.rawMap.setTile(i, 19, borderVal, true, false);
 	}
+
+	//for(int i=0+1; i<20-1; i++) {
+	for(int i=0; i<20; i++) {
+		effectsLayer.rawMap.setTile(0, i, borderVal, true, false);
+		effectsLayer.rawMap.setTile(29, i, borderVal, false, true);
+	}
+	
+	effectsLayer.reloadCells();
+	
+	
 
 }
 

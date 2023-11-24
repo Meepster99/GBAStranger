@@ -675,6 +675,13 @@ const MessageStr randomBoulderMessages[] = {
 	MSGSTR("i felt like there should be more messages here, but idk what to write\0"),
 	MSGSTR("borerlining???\rboderlining???\rborderlining???\0"),
 	MSGSTR("you should pay attention to the trees.\rtheres some eggs to be ate!\0"),
+	MSGSTR("to this day, i swear that the compiler doesnt properly nullterm strings. or maybe its the string_view thingy in sprite_text_generator????? makes no sense\0"),
+	MSGSTR("Play the milk games!\0"),
+	MSGSTR("Play Celeste!\0"),
+	MSGSTR("Watch the monogatari series!\0"),
+	MSGSTR("Watch(and read, its getting super good, but ending soon) yofukashi no uta!\0"),
+	MSGSTR("Listen to Bloody Mercury, i rlly like their music. Also Vafi, both are on spotify and youtube.\0"),
+	MSGSTR("I really am sitting here typing messages no one will ever read.\nlol\0")
 };
 
 void Boulder::interact() {
@@ -682,13 +689,35 @@ void Boulder::interact() {
 	static int lastIndex = -1;
 	
 	int index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
-	if(game->roomManager.roomIndex  == 3 && lastIndex == -1) {
+	if(game->roomManager.roomIndex == 3 && lastIndex == -1) {
 		index = 8;
+		lastIndex = index;
+
+		const char* temp = randomBoulderMessages[index].str;
+			
+		effectsManager->doDialogue(temp);
+		return;
 	}
 	
-	while(lastIndex == index) {
-		index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
+	constexpr int prevMsgStackSize = 8;
+	static bn::vector<int, prevMsgStackSize> prevMsgStack(prevMsgStackSize, -1);
+	
+	int i=0;
+
+	retry:
+	
+	index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
+	
+	i=0;
+	for(; i<prevMsgStackSize; i++) {
+		if(prevMsgStack[i] == index) {
+			goto retry;
+		}
 	}
+	
+	prevMsgStack.erase(prevMsgStack.cbegin());
+	prevMsgStack.push_back(index);
+	
 	lastIndex = index;
 
 	const char* temp = randomBoulderMessages[index].str;
