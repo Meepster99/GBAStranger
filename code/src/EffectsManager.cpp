@@ -1204,10 +1204,11 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 		tileRef[122].data[i] = 0x11111111;
 		tileRef[123].data[i] = 0x11111111;
 		
-		tileRef[124].data[i] = 0x22222222;
-		tileRef[125].data[i] = 0x22222222;
+		tileRef[124].data[i] = 0x11111111;
+		tileRef[125].data[i] = 0x11111111;
+		
 		tileRef[126].data[i] = 0x22222222;
-		tileRef[127].data[i] = 0x22222222;
+		tileRef[127].data[i] = 0x11111111;
 	}
 		
 	effectsLayer.reloadCells();
@@ -1416,7 +1417,7 @@ void EffectsManager::setBorderColor(bool black) {
 	//bn::span<bn::tile> tileRef = tilesPointer.vram().value();
 	
 	//unsigned borderVal = game->roomManager.isWhiteRooms() ? 0x22222222 : 0x11111111;
-	unsigned borderVal = black ? 120 : 124;
+	unsigned borderVal = black ? 127 : 126;
 	
 	for(int i=0; i<30; i++) {
 		effectsLayer.rawMap.setTile(i, 0, borderVal, false, true);
@@ -1878,6 +1879,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		game->state = GameState::Dialogue;
 	}
 	
+	/*
 	for(int x=0; x<14; x++) {
 		tileManager->floorLayer.setBigTile(x, 6, 0);
 		tileManager->floorLayer.setBigTile(x, 7, 0);
@@ -1892,9 +1894,10 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		game->collision.setBigTile(x, 8, 0);
 		
 	}
+	*/
 	
 	//tileManager->floorLayer.rawMap.reloadCells();
-	game->collision.reloadCells();
+	//game->collision.reloadCells();
 	//game->details.reloadCells();
 	
 	effectsLayer.setBigTile(0, 6, 19);
@@ -2351,7 +2354,6 @@ MenuOption::MenuOption(const char* optionName_, const char* (*getOption_)(), voi
 			xDraw = xVal;
 		}
 	}
-
 
 void MenuOption::fullDraw(bool isActive) { // use white color for active, use darkest ver for non active
 	isActiveState = isActive;
@@ -4377,7 +4379,7 @@ void EffectsManager::levKill() {
 	
 	*/
 	
-	game->cutsceneManager.backupLayer(3);
+	//game->cutsceneManager.backupLayer(3);
 	
 	entityManager->shouldTickPlayer = false;
 
@@ -4461,7 +4463,7 @@ void EffectsManager::levKill() {
 	}
 	
 	// i PRAY this works
-	game->cutsceneManager.restoreLayer(3);
+	//game->cutsceneManager.restoreLayer(3);
 	
 	game->cutsceneManager.delay(15);
 	
@@ -5090,8 +5092,7 @@ void EffectsManager::corpseSparks() {
 	//Pos p = Pos(6, 5);
 	
 	// spr_soulstar_spark_b
-	
-	
+
 	auto createEffect = [this](bn::fixed xDir, bn::fixed yDir) -> void {
 		
 		auto createFunc = [xDir, yDir](Effect* obj) mutable -> void {

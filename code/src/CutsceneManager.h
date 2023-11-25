@@ -29,7 +29,7 @@ public:
 
 	// spr_vd_gray is a good start
 
-	BackgroundLayer() : Layer(bn::regular_bg_items::dw_default_black_bg, 3) 
+	BackgroundLayer() : Layer(bn::regular_bg_items::dw_default_bg, 3) 
 	//BackgroundLayer() : Layer(bn::regular_bg_items::dw_default_white_bg, 3) 
 	{ 
 		
@@ -71,7 +71,7 @@ public:
 	
 	void resetRoom();
 	
-	void introCutscene();
+	__attribute__((optimize("O2"))) void introCutscene();
 	
 	void cifDream();
 	
@@ -93,21 +93,11 @@ public:
 	
 	// -----
 	
-	void backupLayer(int i);
-
-	void restoreLayer(int i);
-	
 //private:
-	
-	void freeLayer(int i);
 
-	void backupAllButEffects();
+	void backup();
 	
-	void restoreAllButEffects();
-	
-	void backupAllButEffectsAndFloor();
-	
-	void restoreAllButEffectsAndFloor();
+	void restore();
 	
 	void delay(int delayFrameCount);
 

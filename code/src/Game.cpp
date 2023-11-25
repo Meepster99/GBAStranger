@@ -657,7 +657,7 @@ void Game::loadLevel(bool debug) {
 	static bool needRestore = false;
 	
 	if(needRestore) {
-		cutsceneManager.restoreAllButEffectsAndFloor();
+		//cutsceneManager.restoreAllButEffectsAndFloor();
 		//tileManager.floorLayer.rawMap.bgPointer.set_priority(2);
 		needRestore = false;
 	}
@@ -751,7 +751,7 @@ void Game::loadLevel(bool debug) {
 	// this code actually rlly should of been in effects, omfg
 	if(strcmp(roomManager.currentRoomName(), "rm_rm4\0") == 0 || strcmp(roomManager.currentRoomName(), "hard_rm_rm4\0") == 0) {
 		needRestore = true;
-		cutsceneManager.backupAllButEffectsAndFloor();
+		//cutsceneManager.backupAllButEffectsAndFloor();
 		
 		cutsceneManager.createPlayerBrandRoom();
 		

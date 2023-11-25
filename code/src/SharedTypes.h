@@ -382,8 +382,6 @@ public:
 		reloadCells();
 		
 	}
-	
-	
 		
 	void init(int zIndex) {
 		//bgPointer.set_z_order(zIndex);

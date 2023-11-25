@@ -580,6 +580,17 @@ def convertTiles(outputPath):
 	}
 	with open(os.path.join(outputPath, "dw_" + "default_sprite_tiles_transparent" + ".json"), "w") as f:
 		json.dump(outputJson, f)
+		
+	# 
+
+	temp = Image.new("RGB", (16, 16), (0, 255, 255))
+	writeBitmap(temp, os.path.join(outputPath, "default_background_tiles_transparent" + ".bmp"))
+	outputJson = {
+		"type": "regular_bg_tiles",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join(outputPath, "dw_" + "default_background_tiles_transparent" + ".json"), "w") as f:
+		json.dump(outputJson, f)
 
 	# 
 	

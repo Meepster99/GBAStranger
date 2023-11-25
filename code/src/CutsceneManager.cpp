@@ -46,14 +46,34 @@ void CutsceneManager::resetRoom() {
 
 void CutsceneManager::introCutscene() {
 	
+	/*
+	
+	WEE WOO WEE WOO 
+	CONSPIRACY SECTION
+	
+	i swear. 
+	some bs with optimization is messing with	the bgtiles refrence counter.
+	i think?
+	
+	why does gray cutscens work but lily doesnt? is it a small difference in the vram? idek
+	
+	__attribute__ is in the h file
+	
+	
+	
+	*/
+	
+	//BN_LOG("bg_tiles status");
+	//bn::bg_tiles::log_status();
+	//BN_LOG("-----");
 	
 	vBlankFuncs.clear();
 	
 	GameState restoreState = game->state;
 	game->state = GameState::Cutscene;
 
-	backupAllButEffects();
-
+	//backupAllButEffects();
+	backup();
 	
 	// this should REWALLLLY be passed in,, but im tired ok
 	int mode = game->mode;
@@ -103,7 +123,15 @@ void CutsceneManager::introCutscene() {
 	Sprite face(*faceItem, spriteShape);
 	face.updateRawPosition(xPos, yPos);
 	
+	
 	maps[0]->create(bn::regular_bg_items::dw_spr_vd_bg_index0, 3);
+	
+	
+	//maps[0]->create(bn::regular_bg_items::dw_default_bg, 3);
+	//maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_bg_tiles);
+	//maps[0]->bgPointer.set_map(mapBackup[0]);
+	//freeLayer(0);
+	
 	maps[1]->create(bn::regular_bg_items::dw_spr_vd_bg2_index0, 2);
 	//maps[3]->create(*map3Items[2 * mode + isSuperRodChest], 3);
 	//maps[3]->create(*map3Items[2], 3);
@@ -126,8 +154,9 @@ void CutsceneManager::introCutscene() {
 	} else if(temp == 5) {
 		maps[3]->create(bn::regular_bg_items::dw_spr_vd_gray_index5, 1);
 	} else {
-		
+		BN_ERROR("WHAT");
 	}
+	
 	
 	maps[1]->bgPointer.set_y(maps[1]->bgPointer.y() + 16 + 32);
 	//maps[1]->reloadCells();
@@ -209,13 +238,19 @@ void CutsceneManager::introCutscene() {
 		bn::core::update();
 	}
 	
-	restoreAllButEffects();
+	restore();
+	
+	
+	////restoreAllButEffects();
 	
 	game->effectsManager.hideForDialogueBox(true, true);
 	face.setVisible(false);
 	bn::core::update();
 	
-	
+	//BN_LOG("bg_tiles status");
+	//bn::bg_tiles::log_status();
+	//BN_LOG("-----");
+
 	game->state = restoreState;
 
 	
@@ -293,8 +328,8 @@ void CutsceneManager::cifDream() {
 	game->state = GameState::Cutscene;
 	
 	game->effectsManager.hideForDialogueBox(false, true);
-	backupAllButEffects();
-
+	//backupAllButEffects();
+	backup();
 	
 	
 	/*
@@ -707,7 +742,8 @@ void CutsceneManager::cifDream() {
 	game->effectsManager.bigSprites[0]->animate();
 	
 	game->effectsManager.hideForDialogueBox(true, true);
-	restoreAllButEffects();
+	////restoreAllButEffects();
+	restore();
 	
 	game->state = restoreState;
 	
@@ -722,7 +758,7 @@ void CutsceneManager::brandInput() {
 
 	maps[2]->bgPointer.set_priority(3);
 	
-	backupAllButEffects();
+	//backupAllButEffects();
 	
 	Sprite* brandState[6][6];
 	
@@ -1005,7 +1041,7 @@ void CutsceneManager::brandInput() {
 	// if this flag isnt cleared and then would cause issues in the future like, yea 
 	// and i would prefer to not have to reset this flag on every sprite init(altho that wouldnt be to expensive)
 	
-	restoreAllButEffects();
+	////restoreAllButEffects();
 	maps[2]->bgPointer.set_priority(0);
 
 	game->state = restoreState;
@@ -1060,9 +1096,9 @@ void CutsceneManager::createPlayerBrandRoom() {
 			for(int i=0; i<game->effectsManager.effectList.size(); i++) {
 				game->effectsManager.effectList[i]->sprite.setVisible(false);
 			}
-			restoreAllButEffects();
+			////restoreAllButEffects();
 			game->doButanoUpdate();
-			backupAllButEffects();
+			//backupAllButEffects();
 			game->doButanoUpdate();
 			
 			
@@ -1075,7 +1111,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 			maps[1]->create(bn::regular_bg_items::dw_spr_un_stare_index0, 0);
 			maps[1]->bgPointer.set_y(48 + 16);
 			
-			restoreLayer(0);
+			//restoreLayer(0);
 			
 			globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			globalGame->collision.rawMap.bgPointer.set_priority(1);
@@ -2070,7 +2106,7 @@ void CutsceneManager::inputCustomPalette() {
 
 void CutsceneManager::titleScreen() {
 	
-	backupAllButEffects();
+	//backupAllButEffects();
 	game->doButanoUpdate();
 	
 	vBlankFuncs.clear();
@@ -2280,7 +2316,7 @@ void CutsceneManager::titleScreen() {
 	vBlankFuncs.clear();
 	bn::green_swap::set_enabled(false);
 	
-	restoreAllButEffects();
+	////restoreAllButEffects();
 	game->state = restoreState;
 	game->doButanoUpdate();
 	
@@ -2288,80 +2324,64 @@ void CutsceneManager::titleScreen() {
 
 // -----
 
-void CutsceneManager::freeLayer(int i) {
-	maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_bg_tiles);
-	maps[i]->bgPointer.set_map(mapBackup[i]);
+void CutsceneManager::backup() {
 	
-	// causes some intial corrupion, but prevents fringe crashes
-	// if possible, im only going to call this after ALL frees are called. hopefully that reduces buffer?
-	// actually, i dont want to risk taht
-	bn::bg_blocks_manager::update();
-}
-
-void CutsceneManager::backupLayer(int i) {
-
-	mapBackup[i] = maps[i]->bgPointer.map();
-	
-	zIndexBackup[i] = maps[i]->bgPointer.z_order();
-	priorityBackup[i] = maps[i]->bgPointer.priority();
-	
-	xPosBackup[i] = maps[i]->bgPointer.x();
-	yPosBackup[i] = maps[i]->bgPointer.y();
-	
-	freeLayer(i);
-}
-
-void CutsceneManager::restoreLayer(int i) {
-	// weirdly enough, the map MUST be set before the tiles here, why?
-
-	if(i == 0) {
-		globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
-		globalGame->loadTiles();
-	} else if(i == 1) {
-		//globalGame->tileManager.floorLayer.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_customfloortiles);
+	for(int i=0; i<4; i++) {
+		
+		if(i == 2) {
+			continue;
+		}
+		
+		zIndexBackup[i] = maps[i]->bgPointer.z_order();
+		priorityBackup[i] = maps[i]->bgPointer.priority();
+		
+		xPosBackup[i] = maps[i]->bgPointer.x();
+		yPosBackup[i] = maps[i]->bgPointer.y();
+		
+		mapBackup[i] = maps[i]->bgPointer.map();
 	}
 	
-	maps[i]->bgPointer.set_z_order(zIndexBackup[i]);
-	maps[i]->bgPointer.set_priority(priorityBackup[i]);
 	
-	maps[i]->bgPointer.set_x(xPosBackup[i]);
-	maps[i]->bgPointer.set_y(yPosBackup[i]);
-	
-	maps[i]->bgPointer.set_map(mapBackup[i]);
-	
-	maps[i]->reloadCells();
 	
 }
 
-void CutsceneManager::backupAllButEffects() {
-	backupLayer(0);
-	backupLayer(1);
-	backupLayer(3);
-}
-
-void CutsceneManager::restoreAllButEffects() {
+void CutsceneManager::restore() {
 	
-	freeLayer(0);
-	freeLayer(1);
-	freeLayer(3);
+	// bn::bg_blocks_manager::update();
 	
-	restoreLayer(1);
-	restoreLayer(0);
-	restoreLayer(3);
+	for(int i=3; i>=0; i--) {
+		
+		if(i == 2) {
+			continue;
+		}
+		
+		maps[i]->bgPointer.set_z_order(zIndexBackup[i]);
+		maps[i]->bgPointer.set_priority(priorityBackup[i]);
+		                                       
+		maps[i]->bgPointer.set_x(xPosBackup[i]);
+		maps[i]->bgPointer.set_y(yPosBackup[i]);
+		
+		//maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
+		
+		//maps[i]->create(bn::regular_bg_items::dw_default_bg);
+		
+		
+		// map MUST BE BEFORE TILES, WHY???
+		maps[i]->bgPointer.set_map(mapBackup[i]);		
+		maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
 
-}
-
-void CutsceneManager::backupAllButEffectsAndFloor() {
-	backupLayer(0);
-	backupLayer(3);
-}
-
-void CutsceneManager::restoreAllButEffectsAndFloor() {
-	freeLayer(0);
-	freeLayer(3);
+		
+		maps[i]->reloadCells();
+		
+		bn::bg_blocks_manager::update();
+	}
 	
-	restoreLayer(0);
-	restoreLayer(3);
+	bn::core::update();
+	
+	maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
+	
+	globalGame->loadTiles();
+	
 }
 
 void CutsceneManager::delay(int delayFrameCount) {

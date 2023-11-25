@@ -298,7 +298,10 @@ int main() {
 
 	// copy bs into memory 
 
-	col0 = new unsigned short(0x7FE0);
+	// copy colors into memory (5bitperchanel)
+	// gba stores 
+	//						  011111 11111 00000
+	col0 = new unsigned short(0b0111111111100000);
 	col1 = new unsigned short(0x0000);
 	col2 = new unsigned short(0x7FFF);
 	col3 = new unsigned short(0x6318);
