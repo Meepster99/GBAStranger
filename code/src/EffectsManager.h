@@ -393,6 +393,7 @@ public:
 	void roomDust();
 	void entityKill(Entity* entity);
 	void entityFall(Entity* entity);
+	void entityFall(EntityType t, Pos p);
 	void playerBrandRoomBackground();
 	Effect* generateSweatEffect(Entity* sweatEntity = NULL);
 	Effect* generateDialogueEndpointer();

@@ -359,7 +359,7 @@ public:
 		tileIndex = 0;
 	}
 	
-	void doTick() override {}
+	void doTick() override { return; }
 	
 	//void startFall() override;
 	

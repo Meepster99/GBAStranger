@@ -3298,11 +3298,17 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	// spr_mon_shock_small for when it kills you
 	
 	// i dont believe this is the right sound 
-	game->playSound(&bn::sound_items::snd_player_damage);
+	game->playSound(&bn::sound_items::snd_lockdamage);
+	
+	Entity* ent = *(entityManager->getMap(p).begin());
+	
+	BN_ASSERT(ent->entityType() == EntityType::MonStatue, "wtf, oh gods wtf");
+	
+	MonStatue* monStatue = static_cast<MonStatue*>(ent);
 	
 	p.move(dir);
 	
-	bn::vector<Effect*, 16> shockEffects;
+	//bn::vector<Effect*, 32> allEffects;
 	
 	// wow; wtf
 	while(p != globalGame->entityManager.player->p) {
@@ -3345,22 +3351,10 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		Effect* e = new Effect(createFunc, tickFunc, 2);
 		effectList.push_back(e);
 	
-		shockEffects.push_back(e);
+		//allEffects.push_back(e);
 	
 		p.move(dir);
 	}
-	
-	game->cutsceneManager.delay(60);
-	
-	for(int i=0; i<shockEffects.size(); i++) {
-		removeEffect(shockEffects[i]);
-	}
-	
-	shockEffects.clear();
-	
-	game->cutsceneManager.delay(60);
-	
-	/*
 	
 	// dw_spr_mon_shock
 	
@@ -3398,7 +3392,14 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		return false;
 	};
 	
-	createEffect(shockCreateFunc, shockTickFunc, 2);
+	//createEffect(shockCreateFunc, shockTickFunc, 2);
+	Effect* e = new Effect(shockCreateFunc, shockTickFunc, 2);
+	effectList.push_back(e);
+	
+	//allEffects.push_back(e);
+	
+	
+	
 	
 	// initing this outside of the lambdas will cause char to not swap if someone pauses while dying 
 	// but tbh actually, they cant pause while dying anyway 
@@ -3429,26 +3430,29 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		obj->y = p.y * 16;
 		
 		obj->sprite.updateRawPosition(obj->x, obj->y);
+		obj->sprite.spritePointer.set_bg_priority(0);
 		obj->sprite.spritePointer.set_z_order(-2); // this is above the player right?
 		
 	};
 	
+	const bn::sprite_tiles_item& tilesItem = monStatue->spriteTilesArray[monStatue->tileIndex];
 	
-	auto blinkTickFunc = [p, useTile](Effect* obj) mutable -> bool {
+	auto blinkTickFunc = [monStatue, tilesItem, p, useTile](Effect* obj) mutable -> bool {
+		
+		monStatue->sprite.spritePointer.set_tiles(
+			tilesItem,
+			(obj->tempCounter % 6) / 2
+		);
 		
 		obj->tempCounter++;
 		if(obj->tempCounter >= 60) {
-			if(obj->tempCounter == 60) {
-				globalGame->playSound(&bn::sound_items::snd_golden);
-				obj->sprite.spritePointer.set_tiles(
-					*useTile,
-					4
-				);
-				// this looks ugly, but im tired
-				globalGame->effectsManager.sparkle(p, 24);
-			}
 			
-			return false;
+			monStatue->sprite.spritePointer.set_tiles(
+				tilesItem,
+				0
+			);
+			
+			return true;
 		}
 		
 		obj->graphicsIndex = (obj->graphicsIndex + 1) % 4;
@@ -3461,8 +3465,107 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		return false;
 	};
 	
-	createEffect(blinkCreateFunc, blinkTickFunc);
+	//createEffect(blinkCreateFunc, blinkTickFunc);
+	e = new Effect(blinkCreateFunc, blinkTickFunc);
+	effectList.push_back(e);
+	
+	//allEffects.push_back(e);
+	
+	game->cutsceneManager.delay(60);
+	
+	game->playSound(&bn::sound_items::snd_golden);
+	
+	if(entityManager->hasFloor(entityManager->player->p)) {
+	
+		auto createFuncGolden = [p, useTile](Effect* obj) mutable -> void {
+				
+				obj->sprite.spritePointer.set_tiles(
+					*useTile,
+					4
+				);
+				
+				obj->x = p.x * 16;
+				obj->y = p.y * 16;
+				
+				obj->sprite.updateRawPosition(obj->x, obj->y);
+				obj->sprite.spritePointer.set_z_order(-2);
+				
+			};
+			
+			auto tickFuncGolden = [](Effect* obj) mutable -> bool {
+				(void)obj;
+				return false;
+			};
+			
+			e = new Effect(createFuncGolden, tickFuncGolden, 2);
+			effectList.push_back(e);
+	
+	
+		for(int unused=0; unused<8; unused++) {
+			
+			// spr_flash
+			
+			auto createFunc = [ 
+			xVal = (16 * p.x) + randomGenerator.get_int(-16, 16+1),
+			yVal = (16 * p.y) + randomGenerator.get_int(-16, 16+1)
+			](Effect* obj) mutable -> void {
+				
+				obj->sprite.spritePointer.set_tiles(
+					bn::sprite_tiles_items::dw_spr_flash,
+					obj->graphicsIndex
+				);
+				
+				obj->x = xVal;
+				obj->y = yVal;
+				
+				obj->sprite.updateRawPosition(obj->x, obj->y);
+				obj->sprite.spritePointer.set_z_order(-2);
+				
+			};
+			
+			auto tickFunc = [](Effect* obj) mutable -> bool {
+		
+		
+				obj->sprite.spritePointer.set_tiles(
+					bn::sprite_tiles_items::dw_spr_flash,
+					obj->graphicsIndex
+				);
+				
+				obj->graphicsIndex++;
+				
+				if(obj->graphicsIndex == 4) {
+					return true;
+				}
+				
+				return false;
+			};
+			
+			e = new Effect(createFunc, tickFunc, 2);
+			effectList.push_back(e);
+			
+			game->cutsceneManager.delay(4);
+			
+		}
+	} else {
+		
+		entityManager->player->wingsUse = 0;
+		
+		entityFall(EntityType::Boulder, entityManager->player->p);
+		
+		
+		
+	}
+	
+	/*
+	for(int i=0; i<allEffects.size(); i++) {
+		removeEffect(allEffects[i]);
+	}
+	allEffects.clear();
 	*/
+	
+	//game->cutsceneManager.delay(60 - 4 * 8);
+	
+	
 	
 }
 
@@ -3731,29 +3834,18 @@ void EffectsManager::entityKill(Entity* entity) {
 	
 }
 
-void EffectsManager::entityFall(Entity* entity) {
-
+void EffectsManager::entityFall(EntityType t, Pos p) {
+	
 	struct fallFrame {
 		const bn::sprite_tiles_item* spriteTiles = NULL;
 		int frameCount = 0;
 	};
 	
-	entity->sprite.setVisible(false);
 	
-	EntityType t = entity->entityType();
-	Pos p = entity->p;
-	
-	if(t == EntityType::Player && p != entity->sprite.getCurrentScreenPos()) {
-		p = entity->sprite.getCurrentScreenPos();
-	}
-	
-	bn::fixed entityX = entity->sprite.screenx;
-	bn::fixed entityY = entity->sprite.screeny;
-	
-	auto createFallEffect = [p, entityX, entityY](SaneVector<fallFrame, 8> fallData) -> Effect* {
+	auto createFallEffect = [p](SaneVector<fallFrame, 8> fallData) -> Effect* {
 		
 		return new Effect(
-		[fallData, p, entityX, entityY](Effect* e) -> void {
+		[fallData, p](Effect* e) -> void {
 			
 			e->graphicsIndex = 0;
 			e->tempCounter = 0;
@@ -3761,8 +3853,6 @@ void EffectsManager::entityFall(Entity* entity) {
 			e->x = p.x * 16;
 			e->y = p.y * 16;
 			e->sprite.updateRawPosition(e->x, e->y);
-			//e->sprite.spritePointer.set_x(entityX);
-			//e->sprite.spritePointer.set_y(entityY);
 			
 			e->sprite.spritePointer.set_tiles(
 				*fallData[e->tempCounter].spriteTiles,
@@ -3928,6 +4018,22 @@ void EffectsManager::entityFall(Entity* entity) {
 			BN_ERROR("unknown entitytype passed into entityFall, wtf");
 			break;
 	}
+	
+}
+
+void EffectsManager::entityFall(Entity* entity) {
+
+	entity->sprite.setVisible(false);
+	
+	EntityType t = entity->entityType();
+	Pos p = entity->p;
+	
+	if(t == EntityType::Player && p != entity->sprite.getCurrentScreenPos()) {
+		p = entity->sprite.getCurrentScreenPos();
+	}
+	
+	entityFall(t, p);
+	
 }
 
 void EffectsManager::playerBrandRoomBackground() {

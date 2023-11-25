@@ -109,7 +109,7 @@ void Game::createExitEffects() {
 	
 	// determines if something(like a mon or lev statue) has killed the player
 	// may cause issues if the player dies to multiple things at once??
-	bool customKill = entityManager.obstacleKill();
+	//bool customKill = entityManager.obstacleKill();
 	
 	// if a custom kill handler(like for mon or tan statues)
 	// but tbh, instead of calling those effects inside the domoves func, they really should be called here.
@@ -145,6 +145,15 @@ void Game::createExitEffects() {
 	
 	if(entityManager.playerWon()) {
 		
+	} else if(entityManager.monKill()) {
+		
+		BN_LOG("killing player via mon! special goofy case!");
+		entityManager.addKill(entityManager.player);
+		//entityManager.
+		
+		// some weird shit happens,,,, with mon statue kills 
+		// the player fall anim is replaced with, the defaullt fall???	
+	
 	} else if(entityManager.hasFloor(playerPos)) {
 		BN_LOG("killing player via enemy");
 		// unsure if this is a good idea, but it will make other calls to fallKill work
@@ -152,6 +161,8 @@ void Game::createExitEffects() {
 		effectsManager.entityKill(entityManager.player);
 	} else {
 		BN_LOG("killing player via fall");
+		
+		
 		entityManager.addKill(entityManager.player);
 		effectsManager.entityFall(entityManager.player);
 	}

@@ -1568,7 +1568,7 @@ void EntityManager::createKillEffects() const {
 		if(*it == NULL) {
 			continue;
 		}
-		if((*it)->entityType() != EntityType::Player && (*it)->entityType() != EntityType::LevStatue && (*it)->entityType() != EntityType::Shadow) {
+		if((*it)->entityType() != EntityType::Player && (*it)->entityType() != EntityType::LevStatue && (*it)->entityType() != EntityType::MonStatue && (*it)->entityType() != EntityType::Shadow) {
 			effectsManager->entityKill(*it);
 		}
 	}

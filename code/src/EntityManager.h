@@ -130,6 +130,21 @@ public:
 		return customKill;
 	}
 
+	// goofy!
+	bool monKill() const { 
+		bool customKill = false;
+		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+			if(*it == NULL) {
+				continue;
+			}
+			if((*it)->entityType() == EntityType::MonStatue) {
+				customKill = true;
+				break;
+			}
+		}
+		return customKill;
+	}
+
 	bool needKillAllAddStatues = false;
 	void killAllAddStatues();
 	
