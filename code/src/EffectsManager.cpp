@@ -1125,6 +1125,7 @@ void BigSprite::loadStink() {
 	
 	// BEE STINK NEEDS A EFFECT FUNC 
 	sprites[0].spritePointer.set_bg_priority(3);
+	
 }
 
 // -----
@@ -1653,24 +1654,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	
 	for(int i=0; i<effectsCount; i++) {
 		//if(effects->width == 1 && effects->height == 1) { 
-		if(false) {
-		
-			// a smallsprite should be summoned as an effect
-			
-			// what the fuck was past me smoking when i wrote that^^ 
-		
-			if(effects->tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
-				
-				//BN_LOG("kys", effects->x, " ", effects->y);
-				
-				// minus 1 to play infinitely?
-				// nvm, gods idek what im doing 
-				//EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_stinklines, 9999999)};
-				//createEffect(Pos(effects->x / 16, effects->y / 16), EffectTypeCast(questionMark));
-				
-			} else {
-				BN_ERROR("you are a idiot(not you, but me)");
-			}
+		if(effects->tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
+			stinkLines(Pos(effects->x/16, effects->y/16));
 		} else {
 			
 			BN_LOG("loading bigsprite in Room: ", game->roomManager.currentRoomName(), " id index: ", i);
@@ -5406,7 +5391,62 @@ void EffectsManager::corpseFuzz() {
 	
 }
 
+void EffectsManager::stinkLines(const Pos p) {
+	
+	
+	auto createFunc = [p](Effect* obj) mutable -> void {
+			
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_stinklines;
+		
+		obj->sprite.spritePointer.set_bg_priority(2);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->tempCounter
+		);
+		
+		obj->tempCounter = 0;
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(-32, -32);
+		
+	};
+	
+	auto tickFunc = [state = -1, p](Effect* obj) mutable -> bool {
+		
+		bool tempState = globalGame->entityManager.hasFloor(p).has_value();
+		
+		if(tempState != state) {
+			state = tempState;
+		
+			if(state) {
+				obj->sprite.updateRawPosition(-32, -32);
+			} else {
+				obj->sprite.updateRawPosition(obj->x, obj->y);
+			}
+		
+		}
+		
+		if(state == 0 && (frame % 8) == 0) {
+		
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				obj->graphicsIndex % 7
+			);
+		
+			obj->graphicsIndex++;
+		}
+		
+	
+		return false;
+	};
 
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);
+	
+}
 
 
 

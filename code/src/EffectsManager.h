@@ -413,6 +413,8 @@ public:
 	void deathTileAnimate(Pos p);
 	void corpseSparks();
 	void corpseFuzz();
+	void stinkLines(const Pos p);
+	
 };
 
 class Dialogue {
