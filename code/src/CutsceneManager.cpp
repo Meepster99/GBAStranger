@@ -2366,7 +2366,7 @@ void CutsceneManager::restore() {
 		//maps[i]->create(bn::regular_bg_items::dw_default_bg);
 		
 		
-		// map MUST BE BEFORE TILES, WHY???
+		// map MUST BE BEFORE TILES, WHY??? ( this is the second time ive had this issue)
 		maps[i]->bgPointer.set_map(mapBackup[i]);		
 		maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
 

@@ -193,11 +193,17 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				break;
 			case EntityType::Chest:
 				entityList.insert(new Chest(tempPos));
+				if(tileManager->floorMap[tempPos.x][tempPos.y] == NULL) {
+					tileManager->floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
+				}
 				break;
 			case EntityType::EmptyChest:
 				//entityList.insert(new Chest(tempPos, true));
 				// emptychests are becoming interactables
 				entityList.insert(getEmptyChest(tempPos));
+				if(tileManager->floorMap[tempPos.x][tempPos.y] == NULL) {
+					tileManager->floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
+				}
 				break;
 			case EntityType::AddStatue:
 				entityList.insert(new AddStatue(tempPos));
