@@ -1825,6 +1825,7 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	int compareVal = isCutscene ? 0 : 6;
 	compareVal = (compareVal * 16) - 8;
 	
+	/*
 	for(auto it = effectList.cbegin(); it != effectList.cend(); ++it) {
 		if((*it) == NULL) {
 			continue;
@@ -1833,6 +1834,7 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
+	*/
 	
 	if(isCutscene) {
 		for(auto it = bigSprites.cbegin(); it != bigSprites.cend(); ++it) {
@@ -1841,6 +1843,14 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 			}
 			(*it)->setVis(vis);
 		}
+		
+		for(auto it = effectList.cbegin(); it != effectList.cend(); ++it) {
+			if((*it) == NULL) {
+				continue;
+			}
+			(*it)->sprite.spritePointer.set_visible(vis);
+		}
+		
 	}
 }
 

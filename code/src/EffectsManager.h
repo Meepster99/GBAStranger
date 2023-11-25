@@ -183,10 +183,7 @@ public:
 	/*Pos getPos() {
 		return Pos( (x + 8) / 16, (y + 8) / 16 );
 	}*/
-	int getY() {
-		return y;
-	}
-	
+
 };
 
 class BigSprite {
