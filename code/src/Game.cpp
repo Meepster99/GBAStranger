@@ -362,8 +362,17 @@ void Game::changeMusic() {
 		
 		bn::fixed adjustVal = 1.0;
 		
-		if(globalGame->mode == 2 && item != bn::music_items::msc_voidsong) {
-			adjustVal = 0.96;
+		if((globalGame->mode == 2 || globalGame->entityManager.player->isVoided) && 
+			(item == bn::music_items::msc_dungeon_wings || 
+			item == bn::music_items::msc_beecircle || 
+			item == bn::music_items::msc_dungeongroove || 
+			item == bn::music_items::msc_013 || 
+			item == bn::music_items::msc_gorcircle_lo || 
+			item == bn::music_items::msc_levcircle || 
+			item == bn::music_items::msc_cifcircle
+			)) {
+			
+			adjustVal = 0.965;
 		}
 		
 		item.play();
