@@ -1213,6 +1213,8 @@ void CutsceneManager::createResetRoom() {
 			
 			BN_ASSERT(obj != NULL, "WTF IN kickedfunc ");
 			
+			bn::sound_items::snd_beginningbell.play();
+			
 			Interactable* inter = static_cast<Interactable*>(obj);
 
 			if(ABS(playerIdleFrame - inter->playerIdleStart) > 60) {

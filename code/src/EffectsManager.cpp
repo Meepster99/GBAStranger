@@ -2527,6 +2527,10 @@ void EffectsManager::doMenu() {
 	#define VERMSG6 "pls msg meepster99 on disc 2 report bugs"
 	const char* vermsgString6 = VERMSG6;
 	
+	// why the fuck is it like this?? now that im coming back to this
+	#define VERMSG7 "KyuuMetis & gooeyphantasm for bugtesting"
+	const char* vermsgString7 = VERMSG7;
+	
 	verTextSprites.clear();
 	
 	// these sprites are STATIC and should be put into a bg layer(perhaps the cutscene layer?) to keep 
@@ -2536,7 +2540,8 @@ void EffectsManager::doMenu() {
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view(vermsgString3), verTextSprites);
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view(vermsgString4), verTextSprites);
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view(vermsgString5), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString6), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString7), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view(vermsgString6), verTextSprites);
 
 
 	for(int i=0; i<verTextSprites.size(); i++) {
