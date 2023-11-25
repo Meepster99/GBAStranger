@@ -112,6 +112,8 @@ void Bomb::stepOn() {
 	if(charge == 2) {
 		isAlive = false;
 	
+		game->effectsManager.bombTileAnimate(tilePos);
+	
 		game->playSound(&bn::sound_items::snd_vanish);
 		
 		// this may be bad 

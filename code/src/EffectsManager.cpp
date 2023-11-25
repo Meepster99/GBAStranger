@@ -5219,6 +5219,53 @@ void EffectsManager::deathTileAnimate(Pos p) {
 
 }
 
+void EffectsManager::bombTileAnimate(Pos p) {
+	
+	auto createFunc = [p](Effect* obj) mutable -> void {
+			
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_explofloor_vanish;
+		
+		obj->sprite.spritePointer.set_bg_priority(2);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->tempCounter
+		);
+		
+		obj->tempCounter = 0;
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+		
+	};
+	
+	auto tickFunc = [p](Effect* obj) mutable -> bool {
+		
+		if(globalGame->entityManager.hasFloor(p)) {
+			return true;
+		}
+		
+		if(obj->tempCounter == 6 * 5) {
+			return true;
+		}
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->tempCounter % 6
+		);
+		
+		obj->tempCounter++;
+
+		return false;
+	};
+
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);
+	
+}
+
 void EffectsManager::corpseSparks() {
 	
 	//Pos p = Pos(6, 5);
