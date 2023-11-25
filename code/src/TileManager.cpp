@@ -480,10 +480,6 @@ void TileManager::doFloorSteps() { profileFunction();
 	bn::optional<Entity*> res;
 	
 	// horrid memory usage
-	static SaneSet<Pos, MAXENTITYSPRITES> stepOns;
-	static SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
-	stepOns.clear();
-	stepOffs.clear();
 	
 	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
 		

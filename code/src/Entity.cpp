@@ -20,9 +20,22 @@ int LevStatue::rodUses = 0;
 int LevStatue::totalLev = 0;
 
 void Entity::isDead() {
+	
+	// more needs to be researched here 
+	
+	// obstacle and enemy collide, no stepoff,,,
+	// enemy and enemy collide, no stepoff. 
+	// in updatemap, should i,,,, oh gods. 
+	// handle doFloorSteps AFTER the actual updatemap occurs?
+	// or maybe i should remove updates for,, tiles under enemies who die?
+	// UGH
+	
+	
+	/*
 	if(tileManager->hasFloor(p)) {
 		tileManager->stepOff(p);
 	}
+	*/
 }
 
 // Player
@@ -135,6 +148,9 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				Entity* tempEntity = *(entityManager->getMap(tilePos).begin());
 				if(tempEntity->entityType() != EntityType::Shadow) {
 					entityManager->killEntity(tempEntity);
+					
+					// ADD STEPOFF HERE?
+					tileManager->stepOffs.insert(tilePos);
 					
 					effectsManager->sword(tilePos, currentDir);
 					

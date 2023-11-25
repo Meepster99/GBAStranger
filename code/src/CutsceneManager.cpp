@@ -2369,14 +2369,13 @@ void CutsceneManager::restore() {
 		// map MUST BE BEFORE TILES, WHY??? ( this is the second time ive had this issue)
 		maps[i]->bgPointer.set_map(mapBackup[i]);		
 		maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
-
 		
 		maps[i]->reloadCells();
 		
 		bn::bg_blocks_manager::update();
 	}
 	
-	bn::core::update();
+	//bn::core::update();
 	
 	maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
 	

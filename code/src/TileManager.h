@@ -131,6 +131,9 @@ public:
 	// should i instead pass the entity* into here so that death tiles can properly kill?
 	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
 	
+	SaneSet<Pos, MAXENTITYSPRITES> stepOns;
+	SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
+	
 	TileManager(Game* game_, Collision* col) : game(game_), 
 	floorLayer(col)
 	{

@@ -1122,6 +1122,8 @@ void BigSprite::loadStink() {
 	yPos+=1;
 	autoAnimateFrames = 8;
 	sprites[0].updateRawPosition(xPos, yPos);
+	
+	// BEE STINK NEEDS A EFFECT FUNC 
 	sprites[0].spritePointer.set_bg_priority(3);
 }
 
@@ -1298,10 +1300,10 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	int increment = inward ? -1 : 1;
 	int stopIndex = inward ? -1 : 30;
 	
-	int tileIndex = inward;
+	int tileIndex = 4 * inward;
 	
 	if(inward && game->roomManager.isWhiteRooms()) {
-		tileIndex = 31;
+		tileIndex = 126;
 	}
 	
 	if(layer != stopIndex) {
@@ -1352,20 +1354,20 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 		
 		for(int x = topLeftX; x<=bottomRightX; x++) {
 			if(topLeftY >= 0 && x >= 0) {
-				effectsLayer.setTile(x, topLeftY, 4*tileIndex);
+				effectsLayer.setTile(x, topLeftY, tileIndex);
 			}
 			if(bottomRightY < 20 && x >= 0) {
-				effectsLayer.setTile(x, bottomRightY, 4*tileIndex);
+				effectsLayer.setTile(x, bottomRightY, tileIndex);
 			}
 		}
 		
 	
 		for(int y = topLeftY; y<=bottomRightY; y++) {
 			if(topLeftX >= 0 && y >= 0) {
-				effectsLayer.setTile(topLeftX, y, 4*tileIndex);
+				effectsLayer.setTile(topLeftX, y, tileIndex);
 			}
 			if(bottomRightX < 30 && y >= 0) {
-				effectsLayer.setTile(bottomRightX, y, 4*tileIndex);
+				effectsLayer.setTile(bottomRightX, y, tileIndex);
 			}
 		}
 			
@@ -3447,6 +3449,8 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 
 Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 	
+	// this REALLLLY needs to be optimized.
+	
 	auto createFunc = [](Effect* obj) mutable -> void {
 
 		if(randomGenerator.get() & 1) {
@@ -5205,7 +5209,7 @@ void EffectsManager::corpseFuzz() {
 			freezeFrames = randomGenerator.get_int(0, 60 + 1),
 			graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 5 + 1),
 			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 20,
-			delayFrames = 15 + randomGenerator.get_int(0, 45)
+			delayFrames = randomGenerator.get_int(5, 15)
 		](Effect* obj) mutable -> bool {
 			
 			if(delayFrames) {
