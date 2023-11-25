@@ -5259,6 +5259,8 @@ void EffectsManager::bombTileAnimate(Pos p) {
 
 		return false;
 	};
+	
+	// THIS SHOULD ALSO FLICKER THE DROPOFF, IF THERE WAS ONE
 
 	Effect* e1 = new Effect(createFunc, tickFunc);
 	

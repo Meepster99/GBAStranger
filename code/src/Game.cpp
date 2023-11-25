@@ -263,7 +263,8 @@ void Game::findNextRoom() {
 		}
 	}
 	
-	if(entityManager.fallKill()) {
+	// isnt,,, every kill now a fall kill??? or some shit???
+	if(entityManager.fallKill() && !entityManager.hasFloor(entityManager.player->p)) {
 		bool foundGlass = false;
 		const char* res = NULL;
 		switch(roomManager.roomIndex) {
