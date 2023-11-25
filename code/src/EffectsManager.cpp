@@ -3302,6 +3302,8 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	
 	p.move(dir);
 	
+	bn::vector<Effect*, 16> shockEffects;
+	
 	// wow; wtf
 	while(p != globalGame->entityManager.player->p) {
 		auto createFunc = [p, dir](Effect* obj) mutable -> void {
@@ -3339,10 +3341,26 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 			return false;
 		};
 		
-		createEffect(createFunc, tickFunc, 2);
+		//createEffect(createFunc, tickFunc, 2);
+		Effect* e = new Effect(createFunc, tickFunc, 2);
+		effectList.push_back(e);
+	
+		shockEffects.push_back(e);
 	
 		p.move(dir);
 	}
+	
+	game->cutsceneManager.delay(60);
+	
+	for(int i=0; i<shockEffects.size(); i++) {
+		removeEffect(shockEffects[i]);
+	}
+	
+	shockEffects.clear();
+	
+	game->cutsceneManager.delay(60);
+	
+	/*
 	
 	// dw_spr_mon_shock
 	
@@ -3444,6 +3462,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	};
 	
 	createEffect(blinkCreateFunc, blinkTickFunc);
+	*/
 	
 }
 
@@ -4385,6 +4404,8 @@ void EffectsManager::levKill() {
 	
 	//game->cutsceneManager.backupLayer(3);
 	
+	game->cutsceneManager.backup(1);
+	
 	entityManager->shouldTickPlayer = false;
 
 	unsigned startFrame = frame;
@@ -4456,11 +4477,11 @@ void EffectsManager::levKill() {
 	bn::sound_items::snd_judgment.play();
 	
 	for(int i=0; i<5; i++) {
-		game->cutsceneManager.cutsceneLayer.rawMap.create(*judgementBackgrounds[i]);
+		game->cutsceneManager.backgroundLayer.rawMap.create(*judgementBackgrounds[i]);
 		
-		game->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
-		game->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
-		game->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
+		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
+		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
+		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
 		
 		// why do i not make this func global omfg 
 		game->cutsceneManager.delay(4);
@@ -4468,6 +4489,7 @@ void EffectsManager::levKill() {
 	
 	// i PRAY this works
 	//game->cutsceneManager.restoreLayer(3);
+	game->cutsceneManager.restore(1);
 	
 	game->cutsceneManager.delay(15);
 	
@@ -4476,7 +4498,7 @@ void EffectsManager::levKill() {
 	
 	entityManager->player->sprite.spritePointer.set_bg_priority(1);
 	
-	entityKill(entityManager->player);
+	//entityKill(entityManager->player);
 	
 	
 }

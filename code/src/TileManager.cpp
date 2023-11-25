@@ -107,6 +107,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	u8 uncompressedFloor[126];
 	game->uncompressData(uncompressedFloor, floorPointer);
 	
+	stepOns.clear();
+	stepOffs.clear();
 	floorSteps.clear();
 	
 	if(entityManager->player != NULL) {

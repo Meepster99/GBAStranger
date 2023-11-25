@@ -113,10 +113,12 @@ void Game::createExitEffects() {
 	
 	// if a custom kill handler(like for mon or tan statues)
 	// but tbh, instead of calling those effects inside the domoves func, they really should be called here.
+	
+	/*
 	if(customKill) {
 		return;
 	}
-	
+	*/
 	
 	// tbh this if statement is legacy now that im having death effects get drawn
 	// at sprite's screen poses, instead of their game coords, but im leaving it here bc im scaredas
@@ -150,6 +152,7 @@ void Game::createExitEffects() {
 		effectsManager.entityKill(entityManager.player);
 	} else {
 		BN_LOG("killing player via fall");
+		entityManager.addKill(entityManager.player);
 		effectsManager.entityFall(entityManager.player);
 	}
 	
@@ -850,10 +853,10 @@ void Game::changePalette(int offset) {
 	*col3 = pal->colorArray[3].data();
 	*col4 = pal->colorArray[4].data();
 	
-	BN_LOG(*col1);
-	BN_LOG(*col2);
-	BN_LOG(*col3);
-	BN_LOG(*col4);
+	//BN_LOG(*col1);
+	//BN_LOG(*col2);
+	//BN_LOG(*col3);
+	//BN_LOG(*col4);
 	
 	saveData.col1Save = *col1;
 	saveData.col2Save = *col2;

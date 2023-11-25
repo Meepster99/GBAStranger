@@ -55,7 +55,25 @@
 #include "bn_green_swap.h"
 
 #ifdef ENABLELOGGING
+
 #include "bn_log.h"
+
+/*
+#undef BN_LOG
+
+#define BN_LOG_MOD(...) \
+        do \
+        { \
+            char _bn_string[BN_CFG_LOG_MAX_SIZE]; \
+            bn::istring_base _bn_istring(_bn_string); \
+            bn::ostringstream _bn_string_stream(_bn_istring); \
+            _bn_string_stream.append_args(__VA_ARGS__); \
+            bn::log(_bn_istring); \
+        } while(false)
+			
+#define BN_LOG(...) do { BN_LOG_MOD(__FILE__, " ", __LINE__);  BN_LOG_MOD(__VA_ARGS__); } while(false)
+*/
+
 #else 
 #define BN_LOG(...) do {} while (false)
 #endif

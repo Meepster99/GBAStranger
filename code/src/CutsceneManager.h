@@ -95,6 +95,10 @@ public:
 	
 //private:
 
+	void backup(int i);
+	
+	void restore(int i);
+
 	void backup();
 	
 	void restore();

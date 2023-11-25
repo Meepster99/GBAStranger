@@ -759,6 +759,7 @@ void CutsceneManager::brandInput() {
 	maps[2]->bgPointer.set_priority(3);
 	
 	//backupAllButEffects();
+	backup();
 	
 	Sprite* brandState[6][6];
 	
@@ -1042,6 +1043,7 @@ void CutsceneManager::brandInput() {
 	// and i would prefer to not have to reset this flag on every sprite init(altho that wouldnt be to expensive)
 	
 	////restoreAllButEffects();
+	restore();
 	maps[2]->bgPointer.set_priority(0);
 
 	game->state = restoreState;
@@ -2088,25 +2090,24 @@ void CutsceneManager::inputCustomPalette() {
 	}
 	
 	// WRITE THE ACTUAL PALETTE
-	BN_LOG("done0");
+	
 	for(int i=0; i<4; i++) {
 		colorDetails[i].clear();
 	}
 	game->doButanoUpdate();
-	BN_LOG("done1");
+	
 		
 	globalGame->changePalette(0);
 	game->doButanoUpdate();
-	BN_LOG("done2");
 	effectsManager->setMenuVis(true);
-	
-	BN_LOG("done3");
+
 	
 }
 
 void CutsceneManager::titleScreen() {
 	
 	//backupAllButEffects();
+	backup();
 	game->doButanoUpdate();
 	
 	vBlankFuncs.clear();
@@ -2317,6 +2318,7 @@ void CutsceneManager::titleScreen() {
 	bn::green_swap::set_enabled(false);
 	
 	////restoreAllButEffects();
+	restore();
 	game->state = restoreState;
 	game->doButanoUpdate();
 	
@@ -2324,62 +2326,62 @@ void CutsceneManager::titleScreen() {
 
 // -----
 
-void CutsceneManager::backup() {
+void CutsceneManager::backup(int i) {
 	
-	for(int i=0; i<4; i++) {
-		
-		if(i == 2) {
-			continue;
-		}
-		
-		zIndexBackup[i] = maps[i]->bgPointer.z_order();
-		priorityBackup[i] = maps[i]->bgPointer.priority();
-		
-		xPosBackup[i] = maps[i]->bgPointer.x();
-		yPosBackup[i] = maps[i]->bgPointer.y();
-		
-		mapBackup[i] = maps[i]->bgPointer.map();
+	
+	zIndexBackup[i] = maps[i]->bgPointer.z_order();
+	priorityBackup[i] = maps[i]->bgPointer.priority();
+	
+	xPosBackup[i] = maps[i]->bgPointer.x();
+	yPosBackup[i] = maps[i]->bgPointer.y();
+	
+	mapBackup[i] = maps[i]->bgPointer.map();
+	
+}
+
+void CutsceneManager::restore(int i) {
+	
+
+	maps[i]->bgPointer.set_z_order(zIndexBackup[i]);
+	maps[i]->bgPointer.set_priority(priorityBackup[i]);
+										   
+	maps[i]->bgPointer.set_x(xPosBackup[i]);
+	maps[i]->bgPointer.set_y(yPosBackup[i]);
+	
+	//maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
+	
+	//maps[i]->create(bn::regular_bg_items::dw_default_bg);
+	
+	
+	// map MUST BE BEFORE TILES, WHY??? ( this is the second time ive had this issue)
+	maps[i]->bgPointer.set_map(mapBackup[i]);		
+	maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
+	
+	maps[i]->reloadCells();
+	
+	bn::bg_blocks_manager::update();
+	
+	if(i == 0) {
+		maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
+		globalGame->loadTiles();
 	}
 	
+}
+
+void CutsceneManager::backup() {
 	
+	backup(0);
+	backup(1);
+	backup(3);
 	
 }
 
 void CutsceneManager::restore() {
 	
-	// bn::bg_blocks_manager::update();
+	restore(3);
+	restore(1);
+	restore(0);
 	
-	for(int i=3; i>=0; i--) {
-		
-		if(i == 2) {
-			continue;
-		}
-		
-		maps[i]->bgPointer.set_z_order(zIndexBackup[i]);
-		maps[i]->bgPointer.set_priority(priorityBackup[i]);
-		                                       
-		maps[i]->bgPointer.set_x(xPosBackup[i]);
-		maps[i]->bgPointer.set_y(yPosBackup[i]);
-		
-		//maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
-		
-		//maps[i]->create(bn::regular_bg_items::dw_default_bg);
-		
-		
-		// map MUST BE BEFORE TILES, WHY??? ( this is the second time ive had this issue)
-		maps[i]->bgPointer.set_map(mapBackup[i]);		
-		maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
-		
-		maps[i]->reloadCells();
-		
-		bn::bg_blocks_manager::update();
-	}
-	
-	//bn::core::update();
-	
-	maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
-	
-	globalGame->loadTiles();
 	
 }
 
