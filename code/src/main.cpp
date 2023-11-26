@@ -288,8 +288,9 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 }
 
 unsigned biosHash = 0;
+volatile unsigned biosPointer = 0;
 
-__attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) unsigned getBiosHash() {
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getBiosHash() {
 	
 	
 	// wee woo wee woo 
@@ -301,97 +302,21 @@ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) unsi
 	// unsigned test = i-(((i & 3)+1) | 3);
 	
 	// ,,,,, dont ask.
-	
-	/*
-	unsigned res = 0;
-	
-    //unsigned test = 4294967293;
-	unsigned test = 0xFFFFFFFD;
-	
-    unsigned temp;
-	
-	//for(unsigned i=0; i<0x4000; i++) {
-	for(unsigned i=0; i<0x4000; i++) {
-		
-		//u8 temp = getBiosByte(i);
-		
-		test = i-(((i & 3)+1) | 3);
-		
-		asm(
-            "mov r0, %[addr];"
-            "mov r1, #168;"
-            "mov r2, #0;"
-            "swi 0x1F << 16;"
-            "mov %[result], r0;"
-            : [result] "=r" (temp)
-            : [addr] "r" (test)
-        );
-		
-		res += temp;
-		res += (temp << 10);
-		res ^= (temp >> 6);
-	}
-	
-	res += (res << 3);
-	res ^= (res >> 11);
-	res += (res << 15);
-	*/
-	
-	/*
-	"and r2, r0, #3                                   ;"
-	"add r2, r2, #1                                   ;"
-	"orr r2, r2, #3                                   ;"
-	"sub r2, r0, r2                                   ;"
-	"add r0, r0, #1                                   ;"
-	"mov r0, r2                                       ;"
-	"mov r1, #168                                     ;"
-	"mov r2, #0                                       ;"
-	"svc #2031616                                     ;"
-		"mov r2, r0                                       ;"
-		"add r1, r2, r1                                   ;"
-		"add r1, r1, r2, lsl #10                          ;"
-		"eor r1, r1, r2, lsr #6                           ;"
-	
-	
-	
-	*/
+	// i could of, should of, and previously did this in a much easier way. but here i am now
 	
 	asm(
 	
 	// PRAY
-	// fucking O3 kept on trying to optimize the INSIDE of my gods forsaken asm, im talking it would slap an instruction 
-	// inside the middle of it, or just flat out reorder the whole ass thing, even with volatile. 
-	// so now i get to do this all in asm 
-	// tbh tho, i rlly missed asm, so yay 
 	
-	// ok, now that i think abt it,,, this is 100% my fault lmao, i was fucking with registers that the for loop was using and pissing my pants when the for loop pissed its pants, when i was the one pissing its pants
-	// computer science.
-	
-	// i dont have,,, as specific knoweledge of arm as i do with z80,,, ugh
-	// how many registers do i even have to work with?
-	//,,, oh my gods i have a ton  
-	// are lower index registers faster
-	// they all have the same speed.
-	// yeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-	// i find it weird that,,, hmm 
-	// idek 
-	
-	// ALSO, selecting skip bios anim, changes this??
-	
-	
-	
-	
-	// r0 used as input(and output) of bios call 
-	"mov r1, #168;" // const
-	"mov r2, #0;" // const
 	
 	// why r7 you might be asking? bc 3,4,5,6, and 15 didnt work?
-	"mov r7, #0;" // iterator
+	// "mov r7, #0;"  // iterator 
 	
+	"ldr r7, %[biosPointerAddr];"  // iterator (global)
 	"mov r6, #0;" // result
+	"mov r5, #0;" // local iterator
 	
 	"LOOP:;"
-	
 	
 	// test = i-(((i & 3)+1) | 3);
 	
@@ -401,14 +326,9 @@ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) unsi
 	"orr r0, r0, #3;"
 	"sub r0, r7, r0;"
 	
-	
-	// these regs arent const, and are modified in the syscall 
-	// however, counterpoint, who gives a fuck?
-	// it will get me what i need regardless.
-	//"mov r1, #168;" // const
-	//"mov r2, #0;" // const
-	
 	// i have like,,, 0 guarentee that this wont fuck all my registers up. (it does, i just dont care)
+	"mov r1, #168;" 
+	"mov r2, #0;"
 	"swi 0x1F << 16;"
 
 
@@ -423,9 +343,23 @@ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) unsi
 	
 
 	//"add r7, r7, #1;"
-	"add r7, r7, #16;"
+	"add r7, r7, #1;"
+	"add r5, r5, #1;"
+	
+	
+	
 	"cmp r7, $0x4000;"
+	"bne CONT;"
+	
+	"mov r7, #0;"
+	
+	"CONT:;"
+	"cmp r5, $0x10;"
 	"bne LOOP;"
+	
+	
+	//"ldr r0, %[biosPointerAddr];"
+	"str r7, %[biosPointerAddr];"
 	
 	"add r6, r6, r6, lsl #3;"
 	"eor r6, r6, r6, lsr #11;"
@@ -433,11 +367,66 @@ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) unsi
 	
 	"mov r0, r6;"
 	
-	"bx lr;"	
+	"bx lr;"
+	
+	: [biosPointerAddr] "=m" (biosPointer)
+	
 	);
 	
 	unsigned res = 0;
 	return res;
+}
+
+
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void WHAT() {
+	
+	BN_LOG("biosPointer is ", (unsigned)biosPointer);
+	
+	biosHash = getBiosHash();
+		
+	
+	for(int i=0; i<4; i++) {
+
+		bn::string<64> string;
+	
+		bn::ostringstream string_stream(string);
+		
+		//BN_LOG((unsigned)tempBiosHash[i], " ");
+		
+		u8 idrk = 0x80;
+		
+		u8 val = ((u8*)&biosHash)[i];
+	
+		BN_LOG(val);
+	}
+	
+	BN_LOG("biosPointer is ", (unsigned)biosPointer);
+	
+	
+	//BN_LOG(biosHash[0], " ", biosHash[1], " ", biosHash[2], " ", biosHash[3], " ", biosHash[4], " ", biosHash[5], " ", biosHash[6], " ", biosHash[7]);
+	
+	
+	
+}
+
+__attribute__((noinline, target("arm"))) unsigned IDEK() {
+	
+    
+    asm (
+       
+
+
+        
+        "ldr r0,  %[addr];"
+        "add r0, r0, #1;"
+        "str r0, %[addr];"
+
+        "bx lr;"
+        : [addr] "=m" (biosPointer)
+    );
+    
+    unsigned res = 0;
+    return res;
 }
 
 int main() {
@@ -446,37 +435,12 @@ int main() {
 	
 	BN_LOG("butano inited");
 	
-	biosHash = getBiosHash();
 	
-	u8 tempBiosHash[4];
-	
-	memcpy(tempBiosHash, &biosHash, 4);
-	
-	for(int i=0; i<4; i++) {
-		
-		//BN_LOG((unsigned)tempBiosHash[i], " ");
-		
-		u8 idrk = 0x80;
-		
-		bn::string<64> string;
-		bn::ostringstream string_stream(string);
-		
-		string_stream << (unsigned)tempBiosHash[i];
-		string_stream << ' ';
-		
-		for(int j=0; j<8; j++) {
-			if(tempBiosHash[i] & idrk) {
-				string_stream << '1';
-			} else {
-				string_stream << '0';
-			}
-			idrk >>= 1;
-		}
-			
-		BN_LOG(string);
-	}
-	
-	//BN_LOG(biosHash[0], " ", biosHash[1], " ", biosHash[2], " ", biosHash[3], " ", biosHash[4], " ", biosHash[5], " ", biosHash[6], " ", biosHash[7]);
+	BN_LOG("val is ", biosPointer);
+	IDEK();
+	BN_LOG("val is ", biosPointer);
+	WHAT();
+	BN_LOG("val is ", biosPointer);
 	
 	bn::bg_tiles::set_allow_offset(true);
 
