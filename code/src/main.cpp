@@ -287,7 +287,6 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 }
 
-unsigned biosHash = 0;
 volatile unsigned biosPointer = 0;
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getBiosHash() {
@@ -303,130 +302,88 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsi
 	
 	// ,,,,, dont ask.
 	// i could of, should of, and previously did this in a much easier way. but here i am now
-	
-	asm(
-	
-	// PRAY
-	
-	
-	// why r7 you might be asking? bc 3,4,5,6, and 15 didnt work?
-	// "mov r7, #0;"  // iterator 
-	
-	"ldr r7, %[biosPointerAddr];"  // iterator (global)
-	"mov r6, #0;" // result
-	"mov r5, #0;" // local iterator
-	
-	"LOOP:;"
-	
-	// test = i-(((i & 3)+1) | 3);
-	
-	// can save a mov instr by just, anding r7 right into r0
-	"and r0, r7, #3;"
-	"add r0, r0, #1;"
-	"orr r0, r0, #3;"
-	"sub r0, r7, r0;"
-	
-	// i have like,,, 0 guarentee that this wont fuck all my registers up. (it does, i just dont care)
-	"mov r1, #168;" 
-	"mov r2, #0;"
-	"swi 0x1F << 16;"
+	// this was originally all in asm, but OMFG does shit just not want to work 
+	// what i needed to do whas,, omfg "r0", "r1", "memory"
+	// and a RANDOM SEMICOLON NOWHERE, AND NEWLINES INSTEAD OF SEMICOLONS????
+	// GODS
 
-
-	// res += temp;
-	"add r6, r6, r0;"
 	
-	// res += (temp << 10);
-	"add r6, r6, r0, lsl #10;"
-	
-	// res ^= (temp >> 5);
-	"add r6, r6, r0, lsr #5;"
-	
-
-	//"add r7, r7, #1;"
-	"add r7, r7, #1;"
-	"add r5, r5, #1;"
-	
-	
-	
-	"cmp r7, $0x4000;"
-	"bne CONT;"
-	
-	"mov r7, #0;"
-	
-	"CONT:;"
-	"cmp r5, $0x10;"
-	"bne LOOP;"
-	
-	
-	//"ldr r0, %[biosPointerAddr];"
-	"str r7, %[biosPointerAddr];"
-	
-	"add r6, r6, r6, lsl #3;"
-	"eor r6, r6, r6, lsr #11;"
-	"add r6, r6, r6, lsl #15;"
-	
-	"mov r0, r6;"
-	
-	"bx lr;"
-	
-	: [biosPointerAddr] "=m" (biosPointer)
-	
-	);
+	// ,,,,, dont ask.
+	// i could of, should of, and previously did this in a much easier way. but here i am now
 	
 	unsigned res = 0;
+	
+	asm volatile(
+   
+	// PRAY
+	
+	// why r7 you might be asking? bc 3,4,5,6, and 15 didnt work?
+	// "mov r7, #0\n"  // iterator 
+	
+	"ldr r7, %[biosPointerAddr]\n"  // iterator (global)
+	"mov r6, #0\n" // result
+	"mov r5, #0\n" // local iterator
+	
+	"LOOP:\n"
+	
+	// test = i-(((i & 3)+1) | 3)\n
+	
+	// can save a mov instr by just, anding r7 right into r0
+	"and r0, r7, #3\n"
+	"add r0, r0, #1\n"
+	"orr r0, r0, #3\n"
+	"sub r0, r7, r0\n"
+	
+	// i have like,,, 0 guarentee that this wont fuck all my registers up. (it does, i just dont care)
+	"mov r1, #168\n" 
+	"mov r2, #0\n"
+	"swi 0x1F << 16\n"
+
+	"add r0, r0, #1\n"
+	
+	// res += temp\n
+	"add r6, r6, r0\n"
+	
+	// res += (temp << 10)\n
+	"add r6, r6, r0, lsl #10\n"
+	
+	// res ^= (temp >> 5)
+	"add r6, r6, r0, lsr #5\n"
+	
+
+	//"add r7, r7, #1\n"
+	"add r7, r7, #1\n"
+	"add r5, r5, #1\n"
+	
+	
+	
+	"cmp r7, $0x4000\n"
+	"bne CONT\n"
+	
+	"mov r7, #0\n"
+	
+	"CONT:\n"
+	"cmp r5, #36\n" // <3
+	"bne LOOP\n"
+	
+	
+	//"ldr r0, %[biosPointerAddr]\n"
+	//"mov r7, #6\n"
+	"str r7, %[biosPointerAddr]\n"
+	
+	"add r6, r6, r6, lsl #3\n"
+	"eor r6, r6, r6, lsr #11\n"
+	"add r6, r6, r6, lsl #15\n"
+	
+	"str r6, %[result]\n"
+	
+	
+    : // WHAT IS THIS???? THIS HAS TO BE THE DUMBEST SYNTAX OF ALL TIME?? // why does semicolon vs newline matter???
+    : [result] "m" (res), [biosPointerAddr] "m" (biosPointer)
+    : "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"
+	);
+	
 	return res;
-}
-
-
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void WHAT() {
-	
-	BN_LOG("biosPointer is ", (unsigned)biosPointer);
-	
-	biosHash = getBiosHash();
-		
-	
-	for(int i=0; i<4; i++) {
-
-		bn::string<64> string;
-	
-		bn::ostringstream string_stream(string);
-		
-		//BN_LOG((unsigned)tempBiosHash[i], " ");
-		
-		u8 idrk = 0x80;
-		
-		u8 val = ((u8*)&biosHash)[i];
-	
-		BN_LOG(val);
-	}
-	
-	BN_LOG("biosPointer is ", (unsigned)biosPointer);
-	
-	
-	//BN_LOG(biosHash[0], " ", biosHash[1], " ", biosHash[2], " ", biosHash[3], " ", biosHash[4], " ", biosHash[5], " ", biosHash[6], " ", biosHash[7]);
-	
-	
-	
-}
-
-__attribute__((noinline, target("arm"))) unsigned IDEK() {
-	
-    
-    asm (
-       
-
-
-        
-        "ldr r0,  %[addr];"
-        "add r0, r0, #1;"
-        "str r0, %[addr];"
-
-        "bx lr;"
-        : [addr] "=m" (biosPointer)
-    );
-    
-    unsigned res = 0;
-    return res;
 }
 
 int main() {
@@ -434,13 +391,6 @@ int main() {
 	bn::core::init(); 
 	
 	BN_LOG("butano inited");
-	
-	
-	BN_LOG("val is ", biosPointer);
-	IDEK();
-	BN_LOG("val is ", biosPointer);
-	WHAT();
-	BN_LOG("val is ", biosPointer);
 	
 	bn::bg_tiles::set_allow_offset(true);
 

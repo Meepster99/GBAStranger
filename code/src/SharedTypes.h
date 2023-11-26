@@ -135,9 +135,6 @@ extern bool isVblank;
 extern unsigned boobaCount;
 extern unsigned playerMoveCount;
 
-//extern u8 biosHash[8];
-extern unsigned biosHash;
-
 extern bn::random randomGenerator;
 
 extern void delay(int delayFrameCount);
@@ -169,6 +166,8 @@ extern int* glitchTilesCount;
 : 12)
 
 __attribute__((section(".iwram"))) unsigned short bruhRand();
+
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getBiosHash();
 
 void doNothing();
 
