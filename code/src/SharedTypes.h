@@ -94,6 +94,9 @@
 
 #include "fontData.h"
 
+#include "bn_time.h"
+#include "bn_date.h"
+
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
@@ -131,6 +134,9 @@ extern int playerIdleFrame;
 extern bool isVblank;
 extern unsigned boobaCount;
 extern unsigned playerMoveCount;
+
+//extern u8 biosHash[8];
+extern unsigned biosHash;
 
 extern bn::random randomGenerator;
 

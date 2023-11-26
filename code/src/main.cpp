@@ -26,6 +26,8 @@
 // I AM ACTUALLY SO (curse)ING PISSED.
 // moving the func to game.cpp(actually maybe not)
 
+// now that i think abt it,,, these things didnt have to be pointers,,, since globals are stored in ram.
+
 unsigned* stareTiles = NULL;
 unsigned short* stareMap = NULL;
 int* stareTilesCount = 0;
@@ -285,11 +287,196 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 }
 
+unsigned biosHash = 0;
+
+__attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) unsigned getBiosHash() {
+	
+	
+	// wee woo wee woo 
+	// https://problemkaputt.de/gbabios.htm
+	// x = (MidiKey2Freq(y-(((y AND 3)+1)OR 3), 168, 0) * 2) SHR 24
+	// https://problemkaputt.de/gbatek-bios-sound-functions.htm
+	// getbiosbyte used to be a function, but to be 100000% sure that,,, it wasnt (guarenteed) being inlined, its in here now
+	
+	// unsigned test = i-(((i & 3)+1) | 3);
+	
+	// ,,,,, dont ask.
+	
+	/*
+	unsigned res = 0;
+	
+    //unsigned test = 4294967293;
+	unsigned test = 0xFFFFFFFD;
+	
+    unsigned temp;
+	
+	//for(unsigned i=0; i<0x4000; i++) {
+	for(unsigned i=0; i<0x4000; i++) {
+		
+		//u8 temp = getBiosByte(i);
+		
+		test = i-(((i & 3)+1) | 3);
+		
+		asm(
+            "mov r0, %[addr];"
+            "mov r1, #168;"
+            "mov r2, #0;"
+            "swi 0x1F << 16;"
+            "mov %[result], r0;"
+            : [result] "=r" (temp)
+            : [addr] "r" (test)
+        );
+		
+		res += temp;
+		res += (temp << 10);
+		res ^= (temp >> 6);
+	}
+	
+	res += (res << 3);
+	res ^= (res >> 11);
+	res += (res << 15);
+	*/
+	
+	/*
+	"and r2, r0, #3                                   ;"
+	"add r2, r2, #1                                   ;"
+	"orr r2, r2, #3                                   ;"
+	"sub r2, r0, r2                                   ;"
+	"add r0, r0, #1                                   ;"
+	"mov r0, r2                                       ;"
+	"mov r1, #168                                     ;"
+	"mov r2, #0                                       ;"
+	"svc #2031616                                     ;"
+		"mov r2, r0                                       ;"
+		"add r1, r2, r1                                   ;"
+		"add r1, r1, r2, lsl #10                          ;"
+		"eor r1, r1, r2, lsr #6                           ;"
+	
+	
+	
+	*/
+	
+	asm(
+	
+	// PRAY
+	// fucking O3 kept on trying to optimize the INSIDE of my gods forsaken asm, im talking it would slap an instruction 
+	// inside the middle of it, or just flat out reorder the whole ass thing, even with volatile. 
+	// so now i get to do this all in asm 
+	// tbh tho, i rlly missed asm, so yay 
+	
+	// ok, now that i think abt it,,, this is 100% my fault lmao, i was fucking with registers that the for loop was using and pissing my pants when the for loop pissed its pants, when i was the one pissing its pants
+	// computer science.
+	
+	// i dont have,,, as specific knoweledge of arm as i do with z80,,, ugh
+	// how many registers do i even have to work with?
+	//,,, oh my gods i have a ton  
+	// are lower index registers faster
+	// they all have the same speed.
+	// yeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	// i find it weird that,,, hmm 
+	// idek 
+	
+	// ALSO, selecting skip bios anim, changes this??
+	
+	
+	
+	
+	// r0 used as input(and output) of bios call 
+	"mov r1, #168;" // const
+	"mov r2, #0;" // const
+	
+	// why r7 you might be asking? bc 3,4,5,6, and 15 didnt work?
+	"mov r7, #0;" // iterator
+	
+	"mov r6, #0;" // result
+	
+	"LOOP:;"
+	
+	
+	// test = i-(((i & 3)+1) | 3);
+	
+	// can save a mov instr by just, anding r7 right into r0
+	"and r0, r7, #3;"
+	"add r0, r0, #1;"
+	"orr r0, r0, #3;"
+	"sub r0, r7, r0;"
+	
+	
+	// these regs arent const, and are modified in the syscall 
+	// however, counterpoint, who gives a fuck?
+	// it will get me what i need regardless.
+	//"mov r1, #168;" // const
+	//"mov r2, #0;" // const
+	
+	// i have like,,, 0 guarentee that this wont fuck all my registers up. (it does, i just dont care)
+	"swi 0x1F << 16;"
+
+
+	// res += temp;
+	"add r6, r6, r0;"
+	
+	// res += (temp << 10);
+	"add r6, r6, r0, lsl #10;"
+	
+	// res ^= (temp >> 5);
+	"add r6, r6, r0, lsr #5;"
+	
+
+	//"add r7, r7, #1;"
+	"add r7, r7, #16;"
+	"cmp r7, $0x4000;"
+	"bne LOOP;"
+	
+	"add r6, r6, r6, lsl #3;"
+	"eor r6, r6, r6, lsr #11;"
+	"add r6, r6, r6, lsl #15;"
+	
+	"mov r0, r6;"
+	
+	"bx lr;"	
+	);
+	
+	unsigned res = 0;
+	return res;
+}
+
 int main() {
 	
 	bn::core::init(); 
 	
 	BN_LOG("butano inited");
+	
+	biosHash = getBiosHash();
+	
+	u8 tempBiosHash[4];
+	
+	memcpy(tempBiosHash, &biosHash, 4);
+	
+	for(int i=0; i<4; i++) {
+		
+		//BN_LOG((unsigned)tempBiosHash[i], " ");
+		
+		u8 idrk = 0x80;
+		
+		bn::string<64> string;
+		bn::ostringstream string_stream(string);
+		
+		string_stream << (unsigned)tempBiosHash[i];
+		string_stream << ' ';
+		
+		for(int j=0; j<8; j++) {
+			if(tempBiosHash[i] & idrk) {
+				string_stream << '1';
+			} else {
+				string_stream << '0';
+			}
+			idrk >>= 1;
+		}
+			
+		BN_LOG(string);
+	}
+	
+	//BN_LOG(biosHash[0], " ", biosHash[1], " ", biosHash[2], " ", biosHash[3], " ", biosHash[4], " ", biosHash[5], " ", biosHash[6], " ", biosHash[7]);
 	
 	bn::bg_tiles::set_allow_offset(true);
 

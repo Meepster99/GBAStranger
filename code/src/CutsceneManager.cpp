@@ -1053,12 +1053,16 @@ void CutsceneManager::createPlayerBrandRoom() {
 
 	vBlankFuncs.clear();
 
-	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
-	cutsceneLayer.rawMap.bgPointer.set_x(16);
-	cutsceneLayer.rawMap.bgPointer.set_y(64-8);
+	backgroundLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
+	backgroundLayer.rawMap.bgPointer.set_x(16);
+	backgroundLayer.rawMap.bgPointer.set_y(64-8);
 
-	game->collision.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index1, 2);
-	game->collision.rawMap.bgPointer.set_y(64-8-16);
+	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index1, 2);
+	cutsceneLayer.rawMap.bgPointer.set_y(64-8-16);
+
+	cutsceneLayer.rawMap.bgPointer.put_below();
+	backgroundLayer.rawMap.bgPointer.put_below();
+	
 
 	//collision.rawMap.bgPointer.set_visible(false);
 	// this seems to bump the prio up even with equal prios?
@@ -1095,6 +1099,12 @@ void CutsceneManager::createPlayerBrandRoom() {
 		count++;
 		if(count == 24) {
 			globalGame->state = GameState::Paused;
+			
+			
+			bn::sound::stop_all();
+			bn::core::set_vblank_callback(doNothing);
+			
+			
 			for(int i=0; i<game->effectsManager.effectList.size(); i++) {
 				game->effectsManager.effectList[i]->sprite.setVisible(false);
 			}
@@ -1102,6 +1112,10 @@ void CutsceneManager::createPlayerBrandRoom() {
 			game->doButanoUpdate();
 			//backupAllButEffects();
 			game->doButanoUpdate();
+			
+			
+			bn::sound::stop_all();
+			
 			
 			
 			
@@ -1128,8 +1142,6 @@ void CutsceneManager::createPlayerBrandRoom() {
 			maps[0]->bgPointer.set_palette(game->pal->getBGPalette());
 			
 			int n = globalGame->collision.rawMap.bgPointer.tiles().tiles_count();
-			
-			bn::sound::stop_all();
 			
 			for(int x=0; x<32; x++) {
 				for(int y=0; y<32; y++) {
