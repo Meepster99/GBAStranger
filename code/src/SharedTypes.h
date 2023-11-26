@@ -167,7 +167,7 @@ extern int* glitchTilesCount;
 
 __attribute__((section(".iwram"))) unsigned short bruhRand();
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getBiosHash();
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData();
 
 void doNothing();
 

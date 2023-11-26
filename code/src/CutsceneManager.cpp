@@ -1096,7 +1096,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 				if(SINS) {
 					break;
 				}
-				unsigned temp = getBiosHash();
+				unsigned temp = getMiscData();
 				for(int j=0; j<4; j++) {
 					u8 val = temp & 0xFF;
 
@@ -1104,7 +1104,6 @@ void CutsceneManager::createPlayerBrandRoom() {
 					
 					if((tempVal >= 128 || tempVal < 32) && tempVal != 0 && tempVal != 10 && tempVal != 13) {
 						SINS = true;
-						BN_LOG("FUK ", tempVal);
 						break;
 					}
 

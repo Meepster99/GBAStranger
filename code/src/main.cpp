@@ -287,26 +287,10 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 }
 
-volatile unsigned biosPointer = 0;
+volatile unsigned miscPointer = 0;
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getBiosHash() {
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData() {
 	
-	
-	// wee woo wee woo 
-	// https://problemkaputt.de/gbabios.htm
-	// x = (MidiKey2Freq(y-(((y AND 3)+1)OR 3), 168, 0) * 2) SHR 24
-	// https://problemkaputt.de/gbatek-bios-sound-functions.htm
-	// getbiosbyte used to be a function, but to be 100000% sure that,,, it wasnt (guarenteed) being inlined, its in here now
-	
-	// unsigned test = i-(((i & 3)+1) | 3);
-	
-	// ,,,,, dont ask.
-	// i could of, should of, and previously did this in a much easier way. but here i am now
-	// this was originally all in asm, but OMFG does shit just not want to work 
-	// what i needed to do whas,, omfg "r0", "r1", "memory"
-	// and a RANDOM SEMICOLON NOWHERE, AND NEWLINES INSTEAD OF SEMICOLONS????
-	// GODS
-
 	
 	// ,,,,, dont ask.
 	// i could of, should of, and previously did this in a much easier way. but here i am now
@@ -317,46 +301,34 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsi
    
 	// PRAY
 	
-	// why r7 you might be asking? bc 3,4,5,6, and 15 didnt work?
-	// "mov r7, #0\n"  // iterator 
-	
-	"ldr r7, %[biosPointerAddr]\n"  // iterator (global)
-	"mov r6, #0\n" // result
-	"mov r5, #0\n" // local iterator
+	"ldr r7, %[miscPointerAddr]\n" 
+	"mov r6, #0\n"
+	"mov r5, #0\n"
 	
 	"LOOP:\n"
-	
-	// test = i-(((i & 3)+1) | 3)\n
 	
 	// can save a mov instr by just, anding r7 right into r0
 	"and r0, r7, #3\n"
 	"add r0, r0, #1\n"
 	"orr r0, r0, #3\n"
 	"sub r0, r7, r0\n"
-	
-	// i have like,,, 0 guarentee that this wont fuck all my registers up. (it does, i just dont care)
+
 	"mov r1, #168\n" 
 	"mov r2, #0\n"
 	"swi 0x1F << 16\n"
 
 	"add r0, r0, #1\n"
 	
-	// res += temp\n
 	"add r6, r6, r0\n"
 	
-	// res += (temp << 10)\n
 	"add r6, r6, r0, lsl #10\n"
 	
-	// res ^= (temp >> 5)
 	"add r6, r6, r0, lsr #5\n"
 	
 
-	//"add r7, r7, #1\n"
 	"add r7, r7, #1\n"
 	"add r5, r5, #1\n"
-	
-	
-	
+
 	"cmp r7, $0x4000\n"
 	"bne CONT\n"
 	
@@ -365,11 +337,8 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsi
 	"CONT:\n"
 	"cmp r5, #36\n" // <3
 	"bne LOOP\n"
-	
-	
-	//"ldr r0, %[biosPointerAddr]\n"
-	//"mov r7, #6\n"
-	"str r7, %[biosPointerAddr]\n"
+
+	"str r7, %[miscPointerAddr]\n"
 	
 	"add r6, r6, r6, lsl #3\n"
 	"eor r6, r6, r6, lsr #11\n"
@@ -379,7 +348,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsi
 	
 	
     : // WHAT IS THIS???? THIS HAS TO BE THE DUMBEST SYNTAX OF ALL TIME?? // why does semicolon vs newline matter???
-    : [result] "m" (res), [biosPointerAddr] "m" (biosPointer)
+    : [result] "m" (res), [miscPointerAddr] "m" (miscPointer)
     : "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"
 	);
 	
