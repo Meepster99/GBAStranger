@@ -1049,6 +1049,8 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
 		effectsManager->explosion(tempPos);
 	}
 	
+	effectsManager->rotateTanStatues();
+	
 	e->isDead();
 	
 	

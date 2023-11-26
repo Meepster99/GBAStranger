@@ -1064,11 +1064,6 @@ void CutsceneManager::createPlayerBrandRoom() {
 
 	cutsceneLayer.rawMap.bgPointer.put_below();
 	backgroundLayer.rawMap.bgPointer.put_below();
-	
-
-	//collision.rawMap.bgPointer.set_visible(false);
-	// this seems to bump the prio up even with equal prios?
-	//game->tileManager.floorLayer.rawMap.bgPointer.set_priority(1);	
 
 	auto func1 = [this](void* obj) -> void {
 		(void)obj;

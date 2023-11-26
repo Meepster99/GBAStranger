@@ -1619,6 +1619,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 
 	questionMarkCount = 0;
 	exitGlowCount = 0;
+	rotateTanStatuesCount = 0;
 	
 	for(int i=0; i<effectList.size(); i++) {
 		if(effectList[i] != NULL) {
@@ -5497,6 +5498,94 @@ void EffectsManager::stinkLines(const Pos p) {
 	
 }
 
+void EffectsManager::rotateTanStatues() {
+
+	// spr_killer
+	
+	if(rotateTanStatuesCount != 0) {
+		return;
+	}
+	
+	bool foundTanStatue = false;
+	
+	for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
+		
+		if( (*it)->entityType() != EntityType::TanStatue ) {
+			foundTanStatue = true;
+			break;
+		}
+	}
+	
+	if(!foundTanStatue) {
+		return;
+	}
+	
+	auto createFunc = [](Effect* obj) mutable -> void {
+		obj->sprite.updateRawPosition(-32, -32);
+	};
+	
+	auto tickFunc = [count = 0](Effect* obj) mutable -> bool {
+	
+		(void)obj;
+	
+		if(frame % 2 != 0) {
+			return false;
+		}
+		
+		count++;
+		
+		if(count == 24) {
+			
+			for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+				if(*it == NULL) {
+					continue;
+				}
+				
+				if( (*it)->entityType() != EntityType::TanStatue ) {
+					continue;
+				}
+				
+				(*it)->sprite.spritePointer.set_tiles(
+					bn::sprite_tiles_items::dw_spr_killer,
+					0
+				);
+			}
+			
+			
+			
+			globalGame->effectsManager.rotateTanStatuesCount--;
+			return true;
+		}
+		
+		const int val = count % 3;
+		for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+			if(*it == NULL) {
+				continue;
+			}
+			
+			if( (*it)->entityType() != EntityType::TanStatue ) {
+				continue;
+			}
+			
+			(*it)->sprite.spritePointer.set_tiles(
+				bn::sprite_tiles_items::dw_spr_killer,
+				val
+			);
+		}
+		
+	
+		return false;
+	};
+
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);	
+	
+	rotateTanStatuesCount++;
+}
 
 
 

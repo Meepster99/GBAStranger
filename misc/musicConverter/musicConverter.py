@@ -93,7 +93,7 @@ is8Bit = True
 sampleConvertFunc = math.floor
 #sampleConvertFunc = round
 #sampleConvertFunc = math.ceil
-
+	
 # sample rate of output
 GBASAMPLERATE = 8000
 #GBASAMPLERATE = 8400
@@ -114,7 +114,8 @@ customSampleRate = {
 	#"msc_voidsong": 14000, 
 	#"msc_voidsong": 18000, 
 	"msc_voidsong": 23000, 
-	"msc_endless": 9000, # overtones were pretty with this
+	#"msc_endless": 9000, # overtones were pretty with this,,, but gods tails music needs more bits
+	"msc_endless": 8000, # overtones were pretty with this,,, but gods tails music needs more bits
 	#"msc_001": 8300,
 	#"msc_001": 8000,
 	"msc_001": 6000,
@@ -123,13 +124,16 @@ customSampleRate = {
 	#"msc_gorcircle_lo": 8000,
 	#"msc_013": 8000,
 	"msc_013": 7000,
-	"msc_007": 8000,
+	#"msc_007": 8000,
+	"msc_007": 9000,
 	"msc_levcircle": 5000, # sorry lev (actually it sounds rlly cool)
 	#"msc_dungeon_wings": 8300, # to much high freq to, do this
 	#"msc_beesong": 7000,
 	"msc_beesong": 4000,
 	#"msc_cifcircle": 8000,
 	"msc_cifcircle": 6000,
+	
+	"msc_beecircle": 9000,
 }
 
 

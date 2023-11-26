@@ -1418,9 +1418,11 @@ void Game::doSoundVBlank() {
 		}
 	}	
 	
+	/*
 	if(playedSounds != 0) {
 		BN_LOG("played ", playedSounds, " sound(s) (from the priority soundhandler)");
 	}
+	*/
 	
 	queuedSounds.clear();
 	removedSounds.clear();

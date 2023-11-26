@@ -415,6 +415,8 @@ public:
 	void corpseSparks();
 	void corpseFuzz();
 	void stinkLines(const Pos p);
+	int rotateTanStatuesCount = 0;
+	void rotateTanStatues();
 	
 };
 

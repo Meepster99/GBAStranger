@@ -291,7 +291,6 @@ volatile unsigned miscPointer = 0;
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData() {
 	
-	
 	// ,,,,, dont ask.
 	// i could of, should of, and previously did this in a much easier way. but here i am now
 	
