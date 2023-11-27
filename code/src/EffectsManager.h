@@ -380,6 +380,7 @@ public:
 	
 	
 	void glassBreak(Pos p);
+	int rodNumber = 0;
 	void voidRod(Pos p, Direction dir);
 	void superRodNumber();
 	void wings();

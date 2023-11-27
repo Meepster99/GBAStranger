@@ -1621,6 +1621,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	exitGlowCount = 0;
 	rotateTanStatuesCount = 0;
 	rotateTanStatuesFrames = 0;
+	rodNumber = 0;
 	
 	for(int i=0; i<effectList.size(); i++) {
 		if(effectList[i] != NULL) {
@@ -2849,6 +2850,11 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	
 	*/
 	
+	if(rodNumber != 0) {
+		// having multiple rods on screen is cool, but only rlly visible when going frame by frame, and causes lag
+		return;
+	}
+	
 	// swipe
 	createEffect(
 	[p, dir](Effect* obj) mutable -> void {
@@ -2949,6 +2955,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	[](Effect* obj) -> bool {
 		obj->tempCounter++;
 		if(obj->tempCounter == 12) {
+			globalGame->effectsManager.rodNumber--;
 			return true;
 		}
 		return false;
@@ -2958,6 +2965,8 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	if(globalGame->entityManager.player->hasSuperRod) {
 		superRodNumber();
 	}
+	
+	rodNumber++;
 		
 		
 }
@@ -2991,10 +3000,30 @@ void EffectsManager::superRodNumber() { profileFunction();
 	Pos playerPos = globalGame->entityManager.player->p;
 	int val = globalGame->entityManager.player->rod.size();
 	
+	/*
 	bn::string<4> string;
 	bn::ostringstream stream(string);
-	
 	stream << val;
+	*/
+	
+	char string[4] = {'0', 0, 0, 0};
+
+    int index = 0;
+    
+    constexpr int vals[3] = {99, 9, 0};
+    
+	for(int i=0; i<3; i++) {
+		if(val > vals[i] || index != 0) {
+			int temp = 0;
+			while(val > vals[i]) {
+				val -= (vals[i] + 1);
+				temp++;
+			}
+			string[index] = '0' + temp;
+			index++;
+		}
+	}
+    string[3] = '\0';
 	
 	int xVal = (16 * playerPos.x) - 240/2 + 12;
 	int yVal = (16 * playerPos.y) - 160/2 + 8;
@@ -3604,6 +3633,7 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 		);
 	
 		//obj->sprite.spritePointer.set_z_order(1);
+		//obj->sprite.spritePointer.set_z_order(0);
 		obj->sprite.spritePointer.set_bg_priority(3);
 	
 		obj->x = -32;
@@ -3622,8 +3652,30 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 		freezeFrames = randomGenerator.get_int(0, 60 + 1),
 		isCutscene
 		](Effect* obj) mutable -> bool {
+			
+		static unsigned lastResetFrame = -1;
 		
 		if(y < -16) {
+			
+			// this might be,,, weird. 
+			// basically, check what scanline we are at in vblank, and if its late enough, delay updating this dust 
+			// of course,,, i dont know where exactly in vblank my stuff is executed,,, ugh 
+			// i could,,, also maybe do something for,,, only allowing one thing to update per frame?
+			
+			// https://problemkaputt.de/gbatek-lcd-i-o-interrupts-and-status.htm
+			if(*reinterpret_cast<unsigned short*>(0x04000006) > 210) {
+				return false;
+			}
+			
+			
+			if(frame == lastResetFrame) {
+				return false;
+			}
+			
+			lastResetFrame = frame;
+			
+			
+			
 			if(randomGenerator.get() & 1) {
 				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
 			} else {
@@ -3654,7 +3706,7 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 9 + 1);
 			freezeFrames = randomGenerator.get_int(0, 60 + 1);
 			
-			randomGenerator.update();
+			//randomGenerator.update();
 		}
 		
 		if(image_speed > 9) {
