@@ -1241,26 +1241,7 @@ void Game::run() {
 			}
 			*/
 		}
-		
-		if(frame - playerIdleFrame > 60 * 60) {
-			// no movement for a minute, sleep.
-			
-			// i despise this syntax.
-			// this should be constexpr, but the compiler throws a fit
-			
-			//const bn::keypad::key_type ugh1[2] = {bn::keypad::key_type::A, bn::keypad::key_type::B};
-			//bn::span<const bn::keypad::key_type> ugh2(ugh1, 2);
-			
-			//GameState restoreState = state;
-			//state = GameState::Sleep;
-			
-			//bn::core::sleep(ugh2);
-			//bn::core::update();
-			//bn::core::sleep(bn::keypad::key_type::START);
-			//state = restoreState;
-			
-		}
-		
+	
 		doButanoUpdate();
 	}
 }
