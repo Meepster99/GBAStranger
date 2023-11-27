@@ -2957,22 +2957,27 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	
 	if(globalGame->entityManager.player->hasSuperRod) {
 		
+		// THIS NEEDS TO BE MADE LESS EXPENSIVE! IS IT THE CREATEPALETTE CALLS?
+		// or just the way to many stack allocs,,,, or the use of the string stream?
+		// i really also could use a method of defering the call of the creation of an effect for n frames.
+		// i should REALLY pregenerate a font with outline
+		
 		// do the super rods effect anim 
 		// the issue? using 4 sprites for the outline like i am rn is,,, ugh 
 		
 		auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
-		auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
+		//auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
 		auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
 		
-		bn::vector<bn::sprite_ptr, 16> mainNumberSprites;
+		bn::vector<bn::sprite_ptr, 4> mainNumberSprites;
 		//bn::vector<bn::sprite_ptr, 16> outlineNumberSprites[4];
 		// a basic array didnt seem to want to work with bn::move, valid tho
-		bn::vector<bn::vector<bn::sprite_ptr, 16>, 4> outlineNumberSprites(4, bn::vector<bn::sprite_ptr, 16>());
+		bn::vector<bn::vector<bn::sprite_ptr, 4>, 4> outlineNumberSprites(4, bn::vector<bn::sprite_ptr, 4>());
 		
 		Pos playerPos = globalGame->entityManager.player->p;
 		int val = globalGame->entityManager.player->rod.size();
 		
-		bn::string<16> string;
+		bn::string<4> string;
 		bn::ostringstream stream(string);
 		
 		stream << val;

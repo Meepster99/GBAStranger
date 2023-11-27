@@ -624,7 +624,7 @@ EntityManager::~EntityManager() {
 
 // ----- 
 
-bool EntityManager::moveEntity(Entity* e, bool dontSet) { 
+bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	
 	bn::optional<Direction> nextMove = e->getNextMove();
 	
@@ -749,21 +749,20 @@ void EntityManager::doMoves() { profileFunction();
 	
 	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
 		
-		// intsert mimics move into its func 	
-		if((*it)->entityType() == EntityType::WhiteMimic ||
-			(*it)->entityType() == EntityType::GrayMimic ||
-			(*it)->entityType() == EntityType::BlackMimic) {
-			// not ideal.
-			Mimic* temp = static_cast<Mimic*>(*it);
-			temp->nextMove = playerRes.second;
-			continue;
+		switch((*it)->entityType()) {
+			case EntityType::WhiteMimic:
+			case EntityType::GrayMimic:
+			case EntityType::BlackMimic:
+				static_cast<Mimic*>(*it)->nextMove = playerRes.second;
+				break;
+			default:
+				break;
 		}
-		
+	
 		// diamonds will be inserted AFTER obstacles move.
 		// (maybe) insert diamonds move into its func? (MORE NEEDS TO BE DONE ON THIS)
 		// nvm we gon be goofy here and do this twice.
-		// nvm x2, gods that sounds horrid for efficiency. 
-		
+		// nvm x2, gods that sounds horrid for efficiency.	
 	}
 	
 	// (maybe) insert shadows move into its func? (MORE NEEDS TO BE DONE ON THIS)
@@ -863,7 +862,7 @@ void EntityManager::doMoves() { profileFunction();
 	
 	// THIS MIGHT BE FUCKING BAD
 	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
-	// having this extra call here is bad
+	// having this extra call here is bad, and wastes time. omfg
 	updateMap(); 
 	if(hasKills()) {
 		return;
@@ -905,25 +904,34 @@ void EntityManager::doMoves() { profileFunction();
 	// then move all obstacles
 	// if that obstacle kills something, remove it from all sublists.
 	
+	Mimic* tempMimic = NULL;
+	bn::optional<Direction> tempMimicNextMove;
+	
 	// obstacle collision is done via: if (not obstacle) and (not collision), do move
 	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
-		if((*it)->entityType() == EntityType::WhiteMimic ||
-			(*it)->entityType() == EntityType::GrayMimic ||
-			(*it)->entityType() == EntityType::BlackMimic) {
-			// i only want the obstacle updates here, so im reseting the pos after
+		switch((*it)->entityType()) {
+			case EntityType::WhiteMimic:
+			case EntityType::GrayMimic:
+			case EntityType::BlackMimic:
 			
-			Mimic* temp = static_cast<Mimic*>(*it);
-			bn::optional<Direction> tempNextMove = temp->nextMove;
-			
-			bool mimicResult = moveEntity(temp, true);
-			// if the mimics move resulted in a obstacle being pushed, or just in general failed 
-			// we DONT want to give it the direction back
-			// if true, we do
-			if(mimicResult) {
-				temp->nextMove = tempNextMove;
-			}
+				// i only want the obstacle updates here, so im reseting the pos after
+				
+				tempMimic = static_cast<Mimic*>(*it);
+				tempMimicNextMove = tempMimic->nextMove;
+				
+				// if the mimics move resulted in a obstacle being pushed, or just in general failed 
+				// we DONT want to give it the direction back
+				// if true, we do
+				if(moveEntity(tempMimic, true)) {
+					tempMimic->nextMove = tempMimicNextMove;
+				}
+				
+				break;
+			default:
+				break;	
 		}
 	}
+	
 	updateMap();
 	if(hasKills()) {
 		return;
@@ -1382,6 +1390,7 @@ void EntityManager::updateMap() {  profileFunction();
 		player->wingsUse = 0;
 	}
 	
+	
 	// should this loop be here, or in domove
 	if(enemyList.size() == 0 && shadowList.size() == 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
@@ -1396,33 +1405,40 @@ void EntityManager::updateMap() {  profileFunction();
 	
 	int levcount = 0;
 	
+	bn::optional<Direction> tempDir;
+	
 	LevStatue* hasLevStatue = NULL;
 	// critical levels of goofyness
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
-		if((*it)->entityType() == EntityType::MonStatue) { 
-			// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
-			bn::optional<Direction> res = canSeePlayer((*it)->p);
-			if(res.has_value()) {
-				// puttint this mon line after, the *it, is it a useafterfree?
-				
-				
-				updateScreen();
-				
-				// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
-				// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
-				effectsManager->monLightning((*it)->p, res.value());
-				
-				for(int i=0; i<30; i++)  {
-					game->doButanoUpdate();
+		switch((*it)->entityType()) {
+			case EntityType::MonStatue:
+				// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
+				tempDir = canSeePlayer((*it)->p);
+				if(tempDir.has_value()) {
+					// puttint this mon line after, the *it, is it a useafterfree?
+					
+					
+					updateScreen();
+					
+					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
+					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
+					effectsManager->monLightning((*it)->p, tempDir.value());
+					
+					for(int i=0; i<30; i++)  {
+						game->doButanoUpdate();
+					}
+					
+					
+					addKill(*it);
 				}
-				
-				
-				addKill(*it);
-			}
-		} else if((*it)->entityType() == EntityType::LevStatue) { 
-			++levcount;
-			//BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
-			hasLevStatue = static_cast<LevStatue*>(*it);
+				break;
+			case EntityType::LevStatue:
+				++levcount;
+				//BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
+				hasLevStatue = static_cast<LevStatue*>(*it);
+				break;
+			default:
+				break;
 		}
 	}
 	
@@ -1438,10 +1454,11 @@ void EntityManager::updateMap() {  profileFunction();
 	}
 	
 	if(doLevKill) {
-		
 		effectsManager->levKill();
 		addKill(hasLevStatue);
 	}
+	
+	
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1764,7 +1781,7 @@ bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {
 	return tileManager->hasFloor(p);
 }
 
-bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { 
+bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profileFunction();
 	
 	Pos playerPos = player->p;
 	

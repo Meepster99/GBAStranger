@@ -170,11 +170,22 @@ void RoomManager::gotoRoom(int newIndex) {
 
 bool RoomManager::isWhiteRooms() {
 	
+	static int prevRoomIndex = -1;
+	static bool prevRes = false;
+	
+	if(roomIndex == prevRoomIndex) {
+		return prevRes;
+	}
+	
+	prevRoomIndex = roomIndex;
+	
 	if((strstrCustom(currentRoomName(), "_u_00\0") == NULL) &&
 		(strstrCustom(currentRoomName(), "_u_en\0") == NULL)) {	
+		prevRes = false;
 		return false;
 	}
 	
+	prevRes = true;
 	return true;
 }
 
