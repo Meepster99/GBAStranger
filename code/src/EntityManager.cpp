@@ -965,6 +965,75 @@ void EntityManager::doMoves() { profileFunction();
 		return;
 	}
 	
+	
+	
+	// should this loop be here, or in domove
+	if(enemyList.size() == 0 && shadowList.size() == 0) {
+		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
+			if((*it)->entityType() == EntityType::TanStatue) {
+				killEntity(*it);
+				it = obstacleList.begin(); // trash code, killentity only returns the getpos index, this needs to be fixed, TODO
+			} else {
+				++it;
+			}
+		}
+	}
+	
+	int levcount = 0;
+	
+	bn::optional<Direction> tempDir;
+	
+	LevStatue* hasLevStatue = NULL;
+	// critical levels of goofyness
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+		switch((*it)->entityType()) {
+			case EntityType::MonStatue:
+				// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
+				tempDir = canSeePlayer((*it)->p);
+				if(tempDir.has_value()) {
+					// puttint this mon line after, the *it, is it a useafterfree?
+					
+					
+					updateScreen();
+					
+					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
+					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
+					effectsManager->monLightning((*it)->p, tempDir.value());
+					
+					for(int i=0; i<30; i++)  {
+						game->doButanoUpdate();
+					}
+					
+					
+					addKill(*it);
+				}
+				break;
+			case EntityType::LevStatue:
+				++levcount;
+				//BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
+				hasLevStatue = static_cast<LevStatue*>(*it);
+				break;
+			default:
+				break;
+		}
+	}
+	
+	BN_ASSERT(LevStatue::totalLev == levcount, "lev statue count was somehow off??", LevStatue::totalLev, "!=", levcount);
+	
+	bool doLevKill = false;
+	if(levKill) {
+		BN_LOG("levkill");
+		if(hasLevStatue != NULL) {
+			doLevKill = true;
+		}
+		levKill = false;
+	}
+	
+	if(doLevKill) {
+		effectsManager->levKill();
+		addKill(hasLevStatue);
+	}
+	
 	//player->hasWingsTile = player->inRod(tileManager->wingsTile);
 	// DO STATUE CHECKS
 	// THIS STILL AINT DONE
@@ -1246,7 +1315,7 @@ void EntityManager::updateMap() {  profileFunction();
 	
 	// do the rest.
 	
-	Shadow* doShadowDeath = NULL;
+	//Shadow* doShadowDeath = NULL;
 
 	// this could most likely be optimized if i have a,, SET of positions which need to be checked.
 	// instead of doing the whole map.
@@ -1275,7 +1344,7 @@ void EntityManager::updateMap() {  profileFunction();
 					if(!hasFloor(Pos(x, y)) && !hasCollision(Pos(x, y))) {
 						if(temp->entityType() == EntityType::Shadow) {
 							//effectsManager->shadowDeath(static_cast<Shadow*>(temp));
-							doShadowDeath = static_cast<Shadow*>(temp);
+							//doShadowDeath = static_cast<Shadow*>(temp);
 							//doShadowDeath = true;
 							addKill(temp);
 						} else if(temp->entityType() == EntityType::Player) {
@@ -1381,84 +1450,14 @@ void EntityManager::updateMap() {  profileFunction();
 		}
 	}
 	
-	if(doShadowDeath != NULL) {
-		// SHOULD 100% BE IN DOKILLEFFECTS
-		//effectsManager->shadowDeath(doShadowDeath);
-	}
-	
 	if(hasFloor(player->p)) {
 		player->wingsUse = 0;
 	}
 	
 	
-	// should this loop be here, or in domove
-	if(enemyList.size() == 0 && shadowList.size() == 0) {
-		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
-			if((*it)->entityType() == EntityType::TanStatue) {
-				killEntity(*it);
-				it = obstacleList.begin(); // trash code, killentity only returns the getpos index, this needs to be fixed, TODO
-			} else {
-				++it;
-			}
-		}
-	}
-	
-	int levcount = 0;
-	
-	bn::optional<Direction> tempDir;
-	
-	LevStatue* hasLevStatue = NULL;
-	// critical levels of goofyness
-	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
-		switch((*it)->entityType()) {
-			case EntityType::MonStatue:
-				// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
-				tempDir = canSeePlayer((*it)->p);
-				if(tempDir.has_value()) {
-					// puttint this mon line after, the *it, is it a useafterfree?
-					
-					
-					updateScreen();
-					
-					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
-					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
-					effectsManager->monLightning((*it)->p, tempDir.value());
-					
-					for(int i=0; i<30; i++)  {
-						game->doButanoUpdate();
-					}
-					
-					
-					addKill(*it);
-				}
-				break;
-			case EntityType::LevStatue:
-				++levcount;
-				//BN_LOG("levcount = ", ++levcount, "rodUses = ", LevStatue::rodUses);
-				hasLevStatue = static_cast<LevStatue*>(*it);
-				break;
-			default:
-				break;
-		}
-	}
-	
-	BN_ASSERT(LevStatue::totalLev == levcount, "lev statue count was somehow off??", LevStatue::totalLev, "!=", levcount);
-	
-	bool doLevKill = false;
-	if(levKill) {
-		BN_LOG("levkill");
-		if(hasLevStatue != NULL) {
-			doLevKill = true;
-		}
-		levKill = false;
-	}
-	
-	if(doLevKill) {
-		effectsManager->levKill();
-		addKill(hasLevStatue);
-	}
-	
-	
+	// all the following code could(and probs should) be called once at the end of the domove func,,,,, but 
+	// ugh i am so scared to touch all this but i have to.
+	// im keeping the wings check here tho
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1643,7 +1642,7 @@ void EntityManager::doVBlank() { profileFunction();
 	}
 	
 	
-	// i despise this code
+	// i despise this code. it also is DEF the thing contributing to slowdown in vblank!
 	if(obstacleList.size() != 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 			//BN_LOG("SPECIALBUMP");

@@ -1236,14 +1236,15 @@ void Game::run() {
 			
 			playerIdleFrame = frame;
 			
-			/*
+			
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
 			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
-			if(tickCount > FRAMETICKS) {
+			//if(tickCount > FRAMETICKS) {
+			if(true) {
 				BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
 			}
-			*/
+			
 		}
 	
 		doButanoUpdate();
