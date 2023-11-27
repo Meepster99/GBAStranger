@@ -14,6 +14,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 	LevStatue::rodUses = 0;
 	LevStatue::totalLev = 0;
+	
+	levKill = false;
 
 	// delete old data 
 	// conspiricy time, NULL EVERYTHING.
@@ -1654,7 +1656,7 @@ void EntityManager::doVBlank() { profileFunction();
 			// THIS FUNCTION CAN,, AS IN IF IT DELETES OBSTACLES INSIDE OF IT, I AM FUCKED?????
 			// ITS PATHETIC I DIDNT SEE THIS EARLIER
 			
-			if( (*it)->entityType() != EntityType::Interactable ) {
+			if( (*it)->entityType() != EntityType::Interactable ) { // pathetic half fix
 				continue;
 			}
 			

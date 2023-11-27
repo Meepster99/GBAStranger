@@ -1158,6 +1158,8 @@ void Game::run() {
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
+		//BN_LOG("start frame ", frame);
+		
 		if(bn::keypad::any_held()) {
 			if(bn::keypad::l_held() || bn::keypad::r_held()) {
 				
@@ -1246,7 +1248,9 @@ void Game::run() {
 			}
 			
 		}
-	
+
+		//BN_LOG("end frame ", frame);
+		
 		doButanoUpdate();
 	}
 }

@@ -5568,10 +5568,14 @@ void EffectsManager::stinkLines(const Pos p) {
 		
 			obj->sprite.spritePointer.set_tiles(
 				*obj->tiles,
-				obj->graphicsIndex % 7
+				obj->graphicsIndex
 			);
 		
 			obj->graphicsIndex++;
+			
+			if(obj->graphicsIndex == 7) {
+				obj->graphicsIndex = 0;
+			}
 		}
 		
 	
