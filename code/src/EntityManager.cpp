@@ -833,30 +833,71 @@ void EntityManager::doMoves() { profileFunction();
 		shadowMove.reset();
 	}
 	
+	Diamond* tempDiamond;
+	Bull* tempBull;
+	Chester* tempChester;
 	
 	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
-		if((*it)->entityType() == EntityType::Diamond) {	
-			Diamond* temp = static_cast<Diamond*>(*it);
-			// account for the goofy ahh edge case in which a diamond is one move away from 
-			// the player, have it move to the players previous position
-			// nvm turned out to be less goofy than i thought(no if statements at least)
-			if(!hasFloor(player->p)) {
-				temp->nextMove = canPathToPlayer(temp, playerStart);
-				//BN_LOG("diamond pathing with player start pos ", playerStart, " dir=", temp->nextMove.has_value());
-			} else {
-				temp->nextMove = canPathToPlayer(temp, player->p);
-				//BN_LOG("diamond pathing with player current pos ", player->p, " dir=", temp->nextMove.has_value());
-			}
-			
-			// i swear to the gods, none of this makes any sense
-			for(int i=0; i<4; i++) {
-				Pos tempPos = temp->p;
-				if(tempPos.move(static_cast<Direction>(i)) && tempPos == player->p) {
-					temp->idle = false;
-					temp->tileIndex = 0;
-					addKill(temp);
+		switch((*it)->entityType()) {
+			case EntityType::Diamond:
+				tempDiamond = static_cast<Diamond*>(*it);
+				// account for the goofy ahh edge case in which a diamond is one move away from 
+				// the player, have it move to the players previous position
+				// nvm turned out to be less goofy than i thought(no if statements at least)
+				if(!hasFloor(player->p)) {
+					tempDiamond->nextMove = canPathToPlayer(tempDiamond, playerStart);
+					//BN_LOG("diamond pathing with player start pos ", playerStart, " dir=", temp->nextMove.has_value());
+				} else {
+					tempDiamond->nextMove = canPathToPlayer(tempDiamond, player->p);
+					//BN_LOG("diamond pathing with player current pos ", player->p, " dir=", temp->nextMove.has_value());
 				}
-			}
+				
+				// i swear to the gods, none of this makes any sense
+				for(int i=0; i<4; i++) {
+					Pos tempPos = tempDiamond->p;
+					if(tempPos.move(static_cast<Direction>(i)) && tempPos == player->p) {
+						tempDiamond->idle = false;
+						tempDiamond->tileIndex = 0;
+						addKill(tempDiamond);
+					}
+				}
+				break;
+			case EntityType::Bull:
+				// this code was originally in the actual entity area. maybe,, i should have a queuemove func for each entity? idek
+				// having it in here is ugly af, but,, it be like that
+				
+				tempBull = static_cast<Bull*>(*it);
+		
+				if(tempBull->idle) {
+					// perform LOS check
+					
+					bn::optional<Direction> playerDir = canSeePlayer(tempBull->p);
+					
+					if(playerDir) {
+						tempBull->nextMove = playerDir.value();
+						tempBull->currentDir = tempBull->nextMove.value();
+						tempBull->idle = false;
+					} else {
+						// if we are still idle, return, if not, kachow
+						tempBull->nextMove = bn::optional<Direction>();
+					}
+				} else {
+					tempBull->nextMove = tempBull->currentDir;
+				}					
+			
+				break;
+			case EntityType::Chester:
+				
+				tempChester = static_cast<Chester*>(*it);
+				
+				tempChester->nextMove = canSeePlayer(tempChester->p);
+				if(tempChester->nextMove.has_value()) {
+					tempChester->currentDir = tempChester->nextMove.value();
+				}
+		
+				break;
+			default:
+				break;
 		}
 	}
 	
@@ -1792,9 +1833,13 @@ bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {
 
 bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profileFunction();
 	
-	Pos playerPos = player->p;
+	// ISSUE, DOES THIS GO OFF OF THE PLAYERS POS, OR START POS?? UGH
+	// this totally means that just like diamonds, chesters and bulls are going to have weird shit
+	// and need to have their moves queued at the,,, start with,,, mimics and diamonds?
 	
-	BN_ASSERT(getMap(player->p).contains(player), "wtf");
+	Pos playerPos = player->p;
+	//Pos playerPos = playerStart;
+	//BN_ASSERT(getMap(player->p).contains(player), "wtf");
 	
 	// first, do some inexpensive checks
 	if(!(playerPos.x == p.x || playerPos.y == p.y)) {
@@ -1805,6 +1850,9 @@ bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profil
 	//bool checkX = playerPos.y == p.y;
 	
 	int sharedValue = checkY ? p.x : p.y;
+	//int startValue = checkY ? MIN(playerPos.y, p.y) + 1 : MIN(playerPos.x, p.x) + 1;
+	//int stopValue = checkY ? MAX(playerPos.y, p.y) - 1 : MAX(playerPos.x, p.x) - 1;
+	
 	int startValue = checkY ? MIN(playerPos.y, p.y) + 1 : MIN(playerPos.x, p.x) + 1;
 	int stopValue = checkY ? MAX(playerPos.y, p.y) - 1 : MAX(playerPos.x, p.x) - 1;
 

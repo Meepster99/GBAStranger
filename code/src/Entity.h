@@ -457,6 +457,8 @@ public:
 
 	}
 	
+	bn::optional<Direction> nextMove;
+	
 	bool idle = true;
 
 	Bull* clone() const override { return new Bull(*this); }
@@ -497,6 +499,8 @@ public:
 		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cs_falling, 6));
 		
 	}
+	
+	bn::optional<Direction> nextMove;
 
 	Chester* clone() const override { return new Chester(*this); }
 

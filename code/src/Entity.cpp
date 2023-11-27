@@ -460,21 +460,11 @@ bn::optional<Direction> Enemy::getNextMove() {
 
 bn::optional<Direction> Bull::getNextMove() {
 	
-	if(idle) {
-		// perform LOS check
-		
-		bn::optional<Direction> playerDir = entityManager->canSeePlayer(p);
-		
-		if(playerDir) {
-			currentDir = playerDir.value();
-			idle = false;
-		} else {
-			// if we are still idle, return, if not, kachow
-			return bn::optional<Direction>();
-		}
-	}
+	bn::optional<Direction> temp = nextMove;
+	
+	nextMove.reset();
 
-	return bn::optional<Direction>(currentDir);
+	return temp;
 }
 
 void Bull::moveFailed() {
@@ -483,7 +473,13 @@ void Bull::moveFailed() {
 
 bn::optional<Direction> Chester::getNextMove() {
 	// wow. it really is that simple.
-	return entityManager->canSeePlayer(p);
+	//return entityManager->canSeePlayer(p);
+	
+	bn::optional<Direction> temp = nextMove;
+	
+	nextMove.reset();
+
+	return temp;
 }
 
 bn::optional<Direction> Mimic::getNextMove() {
