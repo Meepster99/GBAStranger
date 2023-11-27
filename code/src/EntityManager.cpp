@@ -1602,7 +1602,8 @@ bool EntityManager::enterRoom() {
 void EntityManager::doVBlank() { profileFunction();
 	
 	// is modulo expensive???
-	if(frame % 33 == 0) { // ticks should occur at roughly 110bpm
+	//if(frame % 33 == 0) { // ticks should occur at roughly 110bpm
+	if(frame % 32 == 0) { // ticks should occur at roughly 110bpm, nvm now its 32 bc power of 2
 		//BN_LOG("TICKS");
 		doTicks();
 	}

@@ -3164,11 +3164,31 @@ void EffectsManager::wings() {
 		}
 		obj->tempCounter2 = 0;
 		
-		obj->graphicsIndex++;
+
 		
+		// i aint no,,, math doctor
+		// but non power of 2 modulos are expensive. this one getting called every frame is goofy
+		// i might be hitting EXTREMELY high virgin levels by changing this, but i am
+		
+		
+		/*
+		obj->graphicsIndex++;	
+		if(obj->graphicsIndex == 3) {
+			obj->graphicsIndex = 0
+		}
+		*/
+		
+		// check the asm if you want to, this is more efficent.
+		if(obj->graphicsIndex == 2) {
+			obj->graphicsIndex = 0;
+		} else {
+			obj->graphicsIndex++;
+		}
+			
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,
-			obj->graphicsIndex % 3
+			//obj->graphicsIndex % 3
+			obj->graphicsIndex
 		);
 		
 		Direction dir = player->currentDir;
@@ -3583,7 +3603,8 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			0
 		);
 	
-		obj->sprite.spritePointer.set_z_order(1);
+		//obj->sprite.spritePointer.set_z_order(1);
+		obj->sprite.spritePointer.set_bg_priority(3);
 	
 		obj->x = -32;
 		obj->y = -32;
@@ -3627,7 +3648,8 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			image_speed = (bn::fixed)0;
 			y_speedup = randomGenerator.get_int(2, 6 + 1);
 			t = randomGenerator.get_int(0, 180 + 1);
-			amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
+			//amplitude = ((bn::fixed)randomGenerator.get_int(4, 12 + 1)) / 40;
+			amplitude = randomGenerator.get_fixed(4.0/40.0, (12.0 + 1.0)/40.0);
 			//graphicsIndex = (bn::fixed)0;
 			graphicsIndex = (bn::fixed)randomGenerator.get_int(0, 9 + 1);
 			freezeFrames = randomGenerator.get_int(0, 60 + 1);
@@ -3639,14 +3661,20 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			freezeFrames = randomGenerator.get_int(0, 60 + 1);
 		}
 		
-
-		image_speed += 0.02;
+		// ideally,, i would be used fixed point here at all tbh
+		
+		
+		image_speed += (0.02 / 60.0);
 		//image_speed += 0.20;
 		
 		//y -= (0.1 * y_speedup);
 		y -= (0.075 * y_speedup);
 		
-		t = ((t + 1) % 360);
+		//t = ((t + 1) % 360);
+		t = (t + 1);
+		if(t == 360) { // saveing a modulo
+			t = 0;
+		}
 		x = (x + (amplitude * sinTable[t]));
 		
 		if(x > 240) {
@@ -3657,16 +3685,25 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 		
 		
 		
-		BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
+		//BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
 		
-		graphicsIndex += image_speed / 60;
-		
+		//graphicsIndex += image_speed / 60;
+		graphicsIndex += image_speed;
+	
 		// replacing this with freezeFrames > 0
 		// while bugged, also worked quite well
 		if(freezeFrames == 0) {
+			
+			while(graphicsIndex.integer() >= 9) {
+				graphicsIndex -= 9;
+			}
+			
+			//BN_ASSERT(graphicsIndex.integer() >= 0 && graphicsIndex.integer() < 9, "a fucky wucky occured while you were desperately trying to save cycles on division in roomdust");
+			
 			obj->sprite.spritePointer.set_tiles(
 				*obj->tiles,
-				graphicsIndex.integer() % 9
+				//graphicsIndex.integer() % 9
+				graphicsIndex.integer()
 			);
 		} else {
 			freezeFrames--;
