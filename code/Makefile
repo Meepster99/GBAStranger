@@ -55,7 +55,8 @@ ROMCODE     :=  GBST
 # and tbh, it doesnt help the poor quality caused by,, overtones or something?
 
 
-USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+USERFLAGS   :=  -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 # DOES -mcpu=arm7tdmi HELP OR HARM PERFORMANCE? ALSO MY GODS WHY DID I LEAVE OFAST ON?
 #USERFLAGS   :=  -mcpu=arm7tdmi -Ofast -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 #USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_27_KHZ
@@ -76,6 +77,9 @@ USERBUILD   :=
 EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; python  ../misc/soundConverter/soundConverter.py regenIncludes; python  ../misc/musicConverter/musicConverter.py regenIncludes
 
 
+ifdef DISABLEASSERTS
+	USERFLAGS += -DDISABLEASSERTS=true 
+endif
 
 ifdef LOG
 	USERFLAGS += -DENABLELOGGING=true 

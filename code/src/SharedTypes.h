@@ -78,6 +78,8 @@
 #define BN_LOG(...) do {} while (false)
 #endif
 
+
+
 /*
 #include "bn_log.h"
 #include "bn_config_log.h"
@@ -96,6 +98,16 @@
 
 #include "bn_time.h"
 #include "bn_date.h"
+
+
+#ifdef DISABLEASSERTS
+
+#warning asserts are disabled! you might have a bad time (sans noises)
+
+#undef BN_ASSERT
+#define BN_ASSERT(...) do {} while (false)
+
+#endif
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -588,10 +600,12 @@ public:
 
 	Pos(int x_, int y_) : x(x_), y(y_) { 
 
+		/*
 		if(!(x >= 0 && y >= 0 && x < 14 && y < 9)) {
 			// this is a remnant of the one time i had to use vscode for debugging.
 			BN_LOG("bruh");
 		}
+		*/
 
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}

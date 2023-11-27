@@ -2956,103 +2956,108 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	);
 	
 	if(globalGame->entityManager.player->hasSuperRod) {
-		
-		// THIS NEEDS TO BE MADE LESS EXPENSIVE! IS IT THE CREATEPALETTE CALLS?
-		// or just the way to many stack allocs,,,, or the use of the string stream?
-		// i really also could use a method of defering the call of the creation of an effect for n frames.
-		// i should REALLY pregenerate a font with outline
-		
-		// do the super rods effect anim 
-		// the issue? using 4 sprites for the outline like i am rn is,,, ugh 
-		
-		auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
-		//auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
-		auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
-		
-		bn::vector<bn::sprite_ptr, 4> mainNumberSprites;
-		//bn::vector<bn::sprite_ptr, 16> outlineNumberSprites[4];
-		// a basic array didnt seem to want to work with bn::move, valid tho
-		bn::vector<bn::vector<bn::sprite_ptr, 4>, 4> outlineNumberSprites(4, bn::vector<bn::sprite_ptr, 4>());
-		
-		Pos playerPos = globalGame->entityManager.player->p;
-		int val = globalGame->entityManager.player->rod.size();
-		
-		bn::string<4> string;
-		bn::ostringstream stream(string);
-		
-		stream << val;
-		
-		int xVal = (16 * playerPos.x) - 240/2 + 12;
-		int yVal = (16 * playerPos.y) - 160/2 + 8;
-
-		textGenerator.set_center_alignment();
-
-		textGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
-		for(int i=0; i<mainNumberSprites.size(); i++) {
-			mainNumberSprites[i].set_bg_priority(0);
-			mainNumberSprites[i].set_z_order(-2);
-			mainNumberSprites[i].set_palette(blackTextPalette);
-		}
-		
-		
-		// i dislike seperating these calls, but i dont trust shit
-		for(int j=0; j<4; j++) {
-
-			// stupid way of doing this but i dont want to write a switch case
-			Pos dif = Pos(1, 1);
-			dif.move(static_cast<Direction>(j));
-			
-			int tempX = xVal + (dif.x - 1);
-			int tempY = yVal + (dif.y - 1);
-			
-			textGenerator.generate((bn::fixed)tempX, (bn::fixed)tempY, bn::string_view(string), outlineNumberSprites[j]);
-
-			for(int i=0; i<outlineNumberSprites[j].size(); i++) {
-				outlineNumberSprites[j][i].set_bg_priority(0);
-				outlineNumberSprites[j][i].set_z_order(-1);
-				outlineNumberSprites[j][i].set_palette(activeTextPalette);
-			}
-		}
-		
-		textGenerator.set_left_alignment();
-		
-		//while(true){game->doButanoUpdate();}
-		
-		createEffect([](Effect* obj) mutable -> void {
-			obj->sprite.updateRawPosition(-32, -32);
-		},
-		// this syntax is something i should of been doing for a while
-		// i could also declare less complex, static vars in here 
-		// bn::move is also,,, something that i wish i knew earlier. it isnt in the docs
-		[
-		mainNumberSprites = bn::move(mainNumberSprites), 
-		outlineNumberSprites = bn::move(outlineNumberSprites)
-		](Effect* obj) mutable -> bool {
-			
-			
-			if(obj->tempCounter < 8) {
-				for(int i=0; i<mainNumberSprites.size(); i++) {
-					mainNumberSprites[i].set_y(mainNumberSprites[i].y() - 1);
-				}
-				
-				for(int i=0; i<4; i++) {
-					for(int j=0; j<outlineNumberSprites[i].size(); j++) {
-						outlineNumberSprites[i][j].set_y(outlineNumberSprites[i][j].y() - 1);
-					}
-				}
-			}
-			
-			
-			obj->tempCounter++;
-			if(obj->tempCounter == 12) {
-				return true;
-			}
-			return false;
-		}
-		);
+		superRodNumber();
 	}
 		
 		
+}
+
+void EffectsManager::superRodNumber() { profileFunction();
+	
+	// THIS NEEDS TO BE MADE LESS EXPENSIVE! IS IT THE CREATEPALETTE CALLS?
+	// or just the way to many stack allocs,,,, or the use of the string stream?
+	// i really also could use a method of defering the call of the creation of an effect for n frames.
+	// i should REALLY pregenerate a font with outline
+	
+	// do the super rods effect anim 
+	// the issue? using 4 sprites for the outline like i am rn is,,, ugh 
+	
+	auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
+	//auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
+	auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
+	
+	bn::vector<bn::sprite_ptr, 4> mainNumberSprites;
+	//bn::vector<bn::sprite_ptr, 16> outlineNumberSprites[4];
+	// a basic array didnt seem to want to work with bn::move, valid tho
+	bn::vector<bn::vector<bn::sprite_ptr, 4>, 4> outlineNumberSprites(4, bn::vector<bn::sprite_ptr, 4>());
+	
+	Pos playerPos = globalGame->entityManager.player->p;
+	int val = globalGame->entityManager.player->rod.size();
+	
+	bn::string<4> string;
+	bn::ostringstream stream(string);
+	
+	stream << val;
+	
+	int xVal = (16 * playerPos.x) - 240/2 + 12;
+	int yVal = (16 * playerPos.y) - 160/2 + 8;
+
+	textGenerator.set_center_alignment();
+
+	textGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
+	for(int i=0; i<mainNumberSprites.size(); i++) {
+		mainNumberSprites[i].set_bg_priority(1);
+		mainNumberSprites[i].set_z_order(-2);
+		mainNumberSprites[i].set_palette(blackTextPalette);
+	}
+	
+	
+	// i dislike seperating these calls, but i dont trust shit
+	for(int j=0; j<4; j++) {
+
+		// stupid way of doing this but i dont want to write a switch case
+		Pos dif = Pos(1, 1);
+		dif.move(static_cast<Direction>(j));
+		
+		int tempX = xVal + (dif.x - 1);
+		int tempY = yVal + (dif.y - 1);
+		
+		textGenerator.generate((bn::fixed)tempX, (bn::fixed)tempY, bn::string_view(string), outlineNumberSprites[j]);
+
+		for(int i=0; i<outlineNumberSprites[j].size(); i++) {
+			outlineNumberSprites[j][i].set_bg_priority(1);
+			outlineNumberSprites[j][i].set_z_order(-1);
+			outlineNumberSprites[j][i].set_palette(activeTextPalette);
+		}
+	}
+	
+	textGenerator.set_left_alignment();
+	
+	//while(true){game->doButanoUpdate();}
+	
+	createEffect([](Effect* obj) mutable -> void {
+		obj->sprite.updateRawPosition(-32, -32);
+	},
+	// this syntax is something i should of been doing for a while
+	// i could also declare less complex, static vars in here 
+	// bn::move is also,,, something that i wish i knew earlier. it isnt in the docs
+	[
+	mainNumberSprites = bn::move(mainNumberSprites), 
+	outlineNumberSprites = bn::move(outlineNumberSprites)
+	](Effect* obj) mutable -> bool {
+		
+		
+		if(obj->tempCounter < 8) {
+			for(int i=0; i<mainNumberSprites.size(); i++) {
+				mainNumberSprites[i].set_y(mainNumberSprites[i].y() - 1);
+			}
+			
+			for(int i=0; i<4; i++) {
+				for(int j=0; j<outlineNumberSprites[i].size(); j++) {
+					outlineNumberSprites[i][j].set_y(outlineNumberSprites[i][j].y() - 1);
+				}
+			}
+		}
+		
+		
+		obj->tempCounter++;
+		if(obj->tempCounter == 12) {
+			return true;
+		}
+		return false;
+	}
+	);
+	
 }
 
 void EffectsManager::wings() {
@@ -3162,27 +3167,6 @@ void EffectsManager::wings() {
 		int xOffset = 0;
 		int yOffset = 0;
 		
-		/*
-		obj->x = goofyP.x * 16;
-		obj->y = goofyP.y * 16;
-		if(goofyDir == Direction::Right) {
-			obj->sprite.spritePoint er.set_horizontal_flip(true);
-			obj->x -= 8;
-		} else if(goofyDir == Direction::Left) {
-			obj->x += 8;
-		}
-	
-		obj->x += offset;
-		
-		if(offset < 0) {
-			obj->sprite.spritePointer.set_horizontal_flip(true);
-		}
-		
-		if(player->currentDir == Direction::Up || player->currentDir == Direction::Down) {
-			obj->y -= 4;
-		}
-		*/
-		
 		if(dir == Direction::Left || dir == Direction::Right) {
 			obj->sprite.spritePointer.set_horizontal_flip(dir == Direction::Right);
 			
@@ -3200,11 +3184,8 @@ void EffectsManager::wings() {
 			obj->sprite.spritePointer.set_z_order(-1);
 		}
 		
-		
-		
 		obj->sprite.spritePointer.set_x(player->sprite.spritePointer.x() + xOffset);
 		obj->sprite.spritePointer.set_y(player->sprite.spritePointer.y() + yOffset);
-		
 		
 		return false;
 	};

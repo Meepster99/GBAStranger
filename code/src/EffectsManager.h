@@ -381,6 +381,7 @@ public:
 	
 	void glassBreak(Pos p);
 	void voidRod(Pos p, Direction dir);
+	void superRodNumber();
 	void wings();
 	void explosion(Pos p);
 	void sword(Pos p, Direction dir);

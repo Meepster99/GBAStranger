@@ -1144,6 +1144,7 @@ void Game::run() {
 	}
 	
 	loadLevel();
+	doButanoUpdate();
 	fullDraw();
 	
 	save();
@@ -1151,6 +1152,8 @@ void Game::run() {
 	state = GameState::Normal;
 	
 	changeMusic();
+
+	//doButanoUpdate();
 
 	BN_LOG("starting main gameloop");
 	while(true) {
@@ -1204,8 +1207,6 @@ void Game::run() {
 		//if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
 		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 0.1) {
 			
-			BN_LOG("startframe ", frame);
-			
 			inputTimer.restart();
 			
 			if(bn::keypad::start_pressed()) {
@@ -1234,8 +1235,6 @@ void Game::run() {
 			}
 			
 			playerIdleFrame = frame;
-			
-			BN_LOG("endframe ", frame);
 			
 			/*
 			bn::fixed tickCount = inputTimer.elapsed_ticks();
