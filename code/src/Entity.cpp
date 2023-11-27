@@ -461,8 +461,14 @@ bn::optional<Direction> Enemy::getNextMove() {
 bn::optional<Direction> Bull::getNextMove() {
 	
 	bn::optional<Direction> temp = nextMove;
-	
 	nextMove.reset();
+	
+	// this MIGHT BE DUMB
+	Pos tempPos = p;
+	if(temp.has_value() && tempPos.move(temp.value()) && entityManager->hasNonPlayerEntity(tempPos)) {
+		idle = true;
+		return bn::optional<Direction>();
+	}
 
 	return temp;
 }
@@ -476,10 +482,20 @@ bn::optional<Direction> Chester::getNextMove() {
 	//return entityManager->canSeePlayer(p);
 	
 	bn::optional<Direction> temp = nextMove;
-	
 	nextMove.reset();
+	
+	// this MIGHT BE DUMB
+	Pos tempPos = p;
+	if(temp.has_value() && tempPos.move(temp.value()) && entityManager->hasNonPlayerEntity(tempPos)) {
+		idle = true;
+		return bn::optional<Direction>();
+	}
 
 	return temp;
+}
+
+void Chester::moveFailed() {
+	idle = true;
 }
 
 bn::optional<Direction> Mimic::getNextMove() {

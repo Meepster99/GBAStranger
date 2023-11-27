@@ -833,6 +833,14 @@ void EntityManager::doMoves() { profileFunction();
 		shadowMove.reset();
 	}
 	
+	// THIS MIGHT BE FUCKING BAD
+	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
+	// having this extra call here is bad, and wastes time. omfg
+	updateMap(); 
+	if(hasKills()) {
+		return;
+	}
+	
 	Diamond* tempDiamond;
 	Bull* tempBull;
 	Chester* tempChester;
@@ -887,13 +895,27 @@ void EntityManager::doMoves() { profileFunction();
 			
 				break;
 			case EntityType::Chester:
+			
+				// ok,, what if,,,,, gods 
+				// chesters also have some sort of idle state??
+				// the mechanics with them interacting with well, i suppose anything but in this case shadows are very weird
 				
 				tempChester = static_cast<Chester*>(*it);
 				
-				tempChester->nextMove = canSeePlayer(tempChester->p);
-				if(tempChester->nextMove.has_value()) {
-					tempChester->currentDir = tempChester->nextMove.value();
+				if(tempChester->idle) {
+					tempChester->nextMove = canSeePlayer(tempChester->p);
+					if(tempChester->nextMove.has_value()) {
+						tempChester->currentDir = tempChester->nextMove.value();
+					} else {
+						tempChester->idle = false;
+					}
+					
+				} else {
+					tempChester->nextMove = tempChester->currentDir;
 				}
+				
+				
+				
 		
 				break;
 			default:
@@ -901,15 +923,7 @@ void EntityManager::doMoves() { profileFunction();
 		}
 	}
 	
-	
-	
-	// THIS MIGHT BE FUCKING BAD
-	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
-	// having this extra call here is bad, and wastes time. omfg
-	updateMap(); 
-	if(hasKills()) {
-		return;
-	}
+
 
 	// TODO when you have a shadow, and go from being onto a shadow tile to falling(with wings) it spawns the default gray sprite, fix that
 	manageShadows(shadowMove);
@@ -917,6 +931,8 @@ void EntityManager::doMoves() { profileFunction();
 	if(hasKills()) {
 		return;
 	}
+
+	
 	
 	
 	// do i even need this var to be a class var

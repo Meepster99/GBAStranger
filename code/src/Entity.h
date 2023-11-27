@@ -501,6 +501,10 @@ public:
 	}
 	
 	bn::optional<Direction> nextMove;
+	
+	bool idle = true;
+	
+	void moveFailed() override;
 
 	Chester* clone() const override { return new Chester(*this); }
 
