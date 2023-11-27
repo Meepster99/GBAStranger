@@ -3044,7 +3044,7 @@ void EffectsManager::superRodNumber() { profileFunction();
 
 		for(int i=0; i<outlineNumberSprites[j].size(); i++) {
 			outlineNumberSprites[j][i].set_bg_priority(1);
-			outlineNumberSprites[j][i].set_z_order(0);
+			outlineNumberSprites[j][i].set_z_order(-1);
 			outlineNumberSprites[j][i].set_palette(activeTextPalette);
 		}
 	}
@@ -3052,7 +3052,7 @@ void EffectsManager::superRodNumber() { profileFunction();
 	textGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
 	for(int i=0; i<mainNumberSprites.size(); i++) {
 		mainNumberSprites[i].set_bg_priority(1);
-		mainNumberSprites[i].set_z_order(0);
+		mainNumberSprites[i].set_z_order(-1);
 		mainNumberSprites[i].set_palette(blackTextPalette);
 	}
 	
@@ -3655,7 +3655,8 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			
 		static unsigned lastResetFrame = -1;
 		
-		if(y < -16) {
+		//if(y < -16) {
+		if(y < -4) {
 			
 			// this might be,,, weird. 
 			// basically, check what scanline we are at in vblank, and if its late enough, delay updating this dust 
