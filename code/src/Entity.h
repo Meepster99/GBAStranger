@@ -207,39 +207,7 @@ public:
 		sprite.updatePosition(p);
 	}
 	
-	
 	virtual void isDead();// { return; } // needed for,,, lev statue falls?
-	
-	/*
-	virtual bool fallDeath() {
-		// return true once the animation is over, and kill the sprite.
-		
-		if(!isFalling) {
-			isFalling = true;
-			startFall();
-		}
-		
-		if(fallData.size() == 0) {
-			sprite.setVisible(false);
-			return true;
-		}
-		
-		// all this just to avoid a isFalling variable. really?
-		// funnything is i added in the variable above for startof fall behaviour
-		sprite.spritePointer.set_tiles(
-			fallData[0].first,
-			abs(fallData[0].first.graphics_count() - fallData[0].second) % fallData[0].first.graphics_count()
-		);
-		
-		fallData[0].second--;
-		
-		if(fallData[0].second == 0) {
-			fallData.erase(fallData.begin());
-		}
-		
-		return false;
-	}
-	*/
 	
 	virtual void killedPlayer() { 
 		// this func will be called if this entity kills a player, and do all the animations and suc
@@ -340,6 +308,7 @@ public:
 	int playerIdleStart = 0;
 	bool wasMoved = false;
 	
+	// this is so dumb. i should make it such that the only thing with these things are interactables.
 	virtual void specialBumpFunction() { return; }
 	
 	Obstacle(Pos p_) : Entity(p_) {}
@@ -360,6 +329,10 @@ public:
 	}
 	
 	void doTick() override { return; }
+	
+	// THIS MIGHT BE VERY BAD!
+	
+	// i can,,,, maybe save calls by only calling doUpdate on the first
 	
 	//void startFall() override;
 	

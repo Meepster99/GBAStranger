@@ -1325,12 +1325,14 @@ void EntityManager::updateMap() {  profileFunction();
 	// of cpu cycles, and just have vblank do drawing, but ugh 
 	// i should of had a more event based system for the timings of event ticks.
 
+	Entity* temp = NULL;
+
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			
 			// i tried haveing a iscollision check here, but it slowed it down??
 			
-			Entity* temp = NULL;
+			
 			
 			// should probs use a swtitch statement here, maybe?
 			// yup, made it a lil faster
@@ -1642,6 +1644,7 @@ void EntityManager::doVBlank() { profileFunction();
 	}
 	
 	
+	
 	// i despise this code. it also is DEF the thing contributing to slowdown in vblank!
 	if(obstacleList.size() != 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
@@ -1649,6 +1652,10 @@ void EntityManager::doVBlank() { profileFunction();
 			BN_ASSERT(*it != NULL, "a specialbump was somehow null. how??? why???");
 			// THIS FUNCTION CAN,, AS IN IF IT DELETES OBSTACLES INSIDE OF IT, I AM FUCKED?????
 			// ITS PATHETIC I DIDNT SEE THIS EARLIER
+			
+			if( (*it)->entityType() != EntityType::Interactable ) {
+				continue;
+			}
 			
 			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}

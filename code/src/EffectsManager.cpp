@@ -2905,7 +2905,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	
 	// rod
 	createEffect(
-	[p, dir](Effect* obj) mutable -> void {
+	[p, dir](Effect* obj) -> void {
 		
 		// tbh,,, i should of went with sprite instead of sprite_tiles for like,, everything 
 		// but changing that back would be way to much
@@ -2946,7 +2946,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		obj->sprite.updateRawPosition(obj->x, obj->y);
 		//obj->sprite.spritePointer.set_z_order(-2);
 	},
-	[](Effect* obj) mutable -> bool {
+	[](Effect* obj) -> bool {
 		obj->tempCounter++;
 		if(obj->tempCounter == 12) {
 			return true;
@@ -2972,9 +2972,16 @@ void EffectsManager::superRodNumber() { profileFunction();
 	// do the super rods effect anim 
 	// the issue? using 4 sprites for the outline like i am rn is,,, ugh 
 	
-	auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
-	//auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
-	auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
+	// ok. i have limits, and they have been reached.
+	// there is no fucking way that drawing 5 sprites to the screen is taking up 20% of my frame cpu.
+	// SOMETHING IS CRITICALLY WRONG IN THIS FUNCTION, TODO
+	
+	//auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
+	//auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
+	
+	auto activeTextPalette = spritePalette->getSpritePalette();
+    auto blackTextPalette = spritePalette->getBlackSpritePalette();
+	
 	
 	bn::vector<bn::sprite_ptr, 4> mainNumberSprites;
 	//bn::vector<bn::sprite_ptr, 16> outlineNumberSprites[4];
@@ -2994,14 +3001,6 @@ void EffectsManager::superRodNumber() { profileFunction();
 
 	textGenerator.set_center_alignment();
 
-	textGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
-	for(int i=0; i<mainNumberSprites.size(); i++) {
-		mainNumberSprites[i].set_bg_priority(1);
-		mainNumberSprites[i].set_z_order(-2);
-		mainNumberSprites[i].set_palette(blackTextPalette);
-	}
-	
-	
 	// i dislike seperating these calls, but i dont trust shit
 	for(int j=0; j<4; j++) {
 
@@ -3016,9 +3015,16 @@ void EffectsManager::superRodNumber() { profileFunction();
 
 		for(int i=0; i<outlineNumberSprites[j].size(); i++) {
 			outlineNumberSprites[j][i].set_bg_priority(1);
-			outlineNumberSprites[j][i].set_z_order(-1);
+			outlineNumberSprites[j][i].set_z_order(0);
 			outlineNumberSprites[j][i].set_palette(activeTextPalette);
 		}
+	}
+	
+	textGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
+	for(int i=0; i<mainNumberSprites.size(); i++) {
+		mainNumberSprites[i].set_bg_priority(1);
+		mainNumberSprites[i].set_z_order(0);
+		mainNumberSprites[i].set_palette(blackTextPalette);
 	}
 	
 	textGenerator.set_left_alignment();
@@ -3032,8 +3038,11 @@ void EffectsManager::superRodNumber() { profileFunction();
 	// i could also declare less complex, static vars in here 
 	// bn::move is also,,, something that i wish i knew earlier. it isnt in the docs
 	[
-	mainNumberSprites = bn::move(mainNumberSprites), 
-	outlineNumberSprites = bn::move(outlineNumberSprites)
+	//mainNumberSprites = bn::move(mainNumberSprites), 
+	//outlineNumberSprites = bn::move(outlineNumberSprites)
+	
+	mainNumberSprites = mainNumberSprites, 
+	outlineNumberSprites = outlineNumberSprites
 	](Effect* obj) mutable -> bool {
 		
 		
