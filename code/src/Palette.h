@@ -14,11 +14,11 @@
 #define LIGHTGRAY 3
 #define DARKGRAY 4
  
-#define A 0
-#define B 1
-#define C 2
-#define D 3
-#define E 4
+#define ACOL 0
+#define BCOL 1
+#define CCOL 2
+#define DCOL 3
+#define ECOL 4
  
 class Palette {
 public:
@@ -228,11 +228,11 @@ public:
 		// sets the palette specifically for when,,, im in the menu section??
 		
 		
-		tempColorArray[0] = colorArray[A];
-		tempColorArray[1] = colorArray[B];
-		tempColorArray[2] = colorArray[E];
-		tempColorArray[3] = colorArray[D];
-		tempColorArray[4] = colorArray[C];
+		tempColorArray[0] = colorArray[ACOL];
+		tempColorArray[1] = colorArray[BCOL];
+		tempColorArray[2] = colorArray[ECOL];
+		tempColorArray[3] = colorArray[DCOL];
+		tempColorArray[4] = colorArray[CCOL];
 		
 	
 		//bn::span<bn::color> spanthing(alternateColorArray);
@@ -249,22 +249,22 @@ public:
 		
 		//  {a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e},
 		
-		tempColorArray[0] = colorArray[A];
-		tempColorArray[1] = colorArray[E];
-		tempColorArray[2] = colorArray[D];
-		tempColorArray[3] = colorArray[D];
-		tempColorArray[4] = colorArray[A];
-        tempColorArray[5] = colorArray[E];
-        tempColorArray[6] = colorArray[D];
-        tempColorArray[7] = colorArray[D];
-		tempColorArray[8] = colorArray[A];
-        tempColorArray[9] = colorArray[E];
-        tempColorArray[10] = colorArray[D];
-		tempColorArray[11] = colorArray[D];
-		tempColorArray[12] = colorArray[B];
-		tempColorArray[13] = colorArray[E];
-		tempColorArray[14] = colorArray[E];
-		tempColorArray[15] = colorArray[E];
+		tempColorArray[0]  = colorArray[ACOL];
+		tempColorArray[1]  = colorArray[ECOL];
+		tempColorArray[2]  = colorArray[DCOL];
+		tempColorArray[3]  = colorArray[DCOL];
+		tempColorArray[4]  = colorArray[ACOL];
+        tempColorArray[5]  = colorArray[ECOL];
+        tempColorArray[6]  = colorArray[DCOL];
+        tempColorArray[7]  = colorArray[DCOL];
+		tempColorArray[8]  = colorArray[ACOL];
+        tempColorArray[9]  = colorArray[ECOL];
+        tempColorArray[10] = colorArray[DCOL];
+		tempColorArray[11] = colorArray[DCOL];
+		tempColorArray[12] = colorArray[BCOL];
+		tempColorArray[13] = colorArray[ECOL];
+		tempColorArray[14] = colorArray[ECOL];
+		tempColorArray[15] = colorArray[ECOL];
 		
 		bn::span<bn::color> spanthing(tempColorArray);
 			

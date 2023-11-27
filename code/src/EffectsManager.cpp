@@ -1620,6 +1620,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	questionMarkCount = 0;
 	exitGlowCount = 0;
 	rotateTanStatuesCount = 0;
+	rotateTanStatuesFrames = 0;
 	
 	for(int i=0; i<effectList.size(); i++) {
 		if(effectList[i] != NULL) {
@@ -5502,6 +5503,8 @@ void EffectsManager::rotateTanStatues() {
 
 	// spr_killer
 	
+	rotateTanStatuesFrames = 24;
+	
 	if(rotateTanStatuesCount != 0) {
 		return;
 	}
@@ -5527,7 +5530,7 @@ void EffectsManager::rotateTanStatues() {
 		obj->sprite.updateRawPosition(-32, -32);
 	};
 	
-	auto tickFunc = [count = 0](Effect* obj) mutable -> bool {
+	auto tickFunc = [](Effect* obj) mutable -> bool {
 	
 		(void)obj;
 	
@@ -5535,9 +5538,10 @@ void EffectsManager::rotateTanStatues() {
 			return false;
 		}
 		
-		count++;
+		globalGame->effectsManager.rotateTanStatuesFrames--;
+		const int val = (globalGame->effectsManager.rotateTanStatuesFrames) % 3;
 		
-		if(count == 24) {
+		if(globalGame->effectsManager.rotateTanStatuesFrames == 0) {
 			
 			for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
 				if(*it == NULL) {
@@ -5554,13 +5558,10 @@ void EffectsManager::rotateTanStatues() {
 				);
 			}
 			
-			
-			
 			globalGame->effectsManager.rotateTanStatuesCount--;
 			return true;
 		}
 		
-		const int val = count % 3;
 		for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
 			if(*it == NULL) {
 				continue;

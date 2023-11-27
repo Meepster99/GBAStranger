@@ -179,6 +179,7 @@ enum class GameState {
 	Paused, // either actually paused(which i havent even thought about making) or in dialogue.
 	Dialogue,
 	Cutscene,
+	Sleep,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const GameState& e) {

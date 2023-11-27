@@ -758,7 +758,9 @@ void EusStatue::isDead() {
 	tileManager->floorMap[p.x][p.y] = new FloorTile(p);
 
 	// this is trash, please make tilemanager update based on tile
-	tileManager->fullDraw();
+	// oh wow, i forgot that i wrote this method so long ago it was before i had the new tilesystem
+	//tileManager->fullDraw();
+	tileManager->updateTile(p);
 	
 	//Obstacle::startFall();
 }

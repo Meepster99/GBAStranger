@@ -294,6 +294,8 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsi
 	// ,,,,, dont ask.
 	// i could of, should of, and previously did this in a much easier way. but here i am now
 	
+	// also, this REALLY should of been written in thumb ugh
+	
 	unsigned res = 0;
 	
 	asm volatile(
