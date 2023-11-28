@@ -3597,8 +3597,10 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 	auto createFunc = [](Effect* obj) mutable -> void {
 
 		if(randomGenerator.get() & 1) {
+			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
 			obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
 		} else {
+			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle2, bn::sprite_shape_size(8, 8));
 			obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
 		}
 	
@@ -3638,11 +3640,14 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			// of course,,, i dont know where exactly in vblank my stuff is executed,,, ugh 
 			// i could,,, also maybe do something for,,, only allowing one thing to update per frame?
 			
+			// this is heret to attempt to reduce the amount of strain that roomdust has on the system.
+			// allowing for 8x8 sprites would also,,, tbh,,,, help?
+			// time to return to the trenches of massformatter, and then return with a shit ton of compiler errors.
+			
 			// https://problemkaputt.de/gbatek-lcd-i-o-interrupts-and-status.htm
 			if(*reinterpret_cast<unsigned short*>(0x04000006) > 210) {
 				return false;
 			}
-			
 			
 			if(frame == lastResetFrame) {
 				return false;

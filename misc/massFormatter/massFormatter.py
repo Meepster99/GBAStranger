@@ -325,6 +325,9 @@ validSizes = set([
 # but some things (like spr_playerswipe) are 32 by 16, and would be quite nice to have in just one sprite, so this 
 # will no longer be just 16 by 16 sprites
 validSizes = set([
+#(8, 8),
+#(8, 16),
+#(16, 8),
 (16, 16),
 (32, 16),
 (16, 32),
@@ -823,6 +826,8 @@ getSpriteDimensions.paddedSpriteList = None
 
 def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBackground):
 
+	#print(dimensions)
+
 	max_width, max_height = dimensions
 
 	total_height = max_height * len(spriteImages)
@@ -971,17 +976,18 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 	
 		# gods so many of these funcs could, and should of been standaridized
 		
-
+		#VAL = 8
+		VAL = 16
 		
-		for y in range(0, max_height, 16):
-			for x in range(0, max_width, 16):
+		for y in range(0, max_height, VAL):
+			for x in range(0, max_width, VAL):
 			
-				xMax = min(x + 16, max_width)
-				yMax = min(y + 16, max_height)
+				xMax = min(x + VAL, max_width)
+				yMax = min(y + VAL, max_height)
 				
 				idrk = tempImage[y:yMax, x:xMax]
 				
-				correctSize = np.full((16, 16, 3), (0, 255, 255), dtype=np.uint8)
+				correctSize = np.full((VAL, VAL, 3), (0, 255, 255), dtype=np.uint8)
 				
 				correctSize[0:yMax-y, 0:xMax-x] = idrk
 				
@@ -1007,7 +1013,23 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 				newTiles.append(np.hstack(tiles[i:i+hstackCount]))
 				
 			tiles = newTiles
+
 	
+	#print(len(tiles))
+	
+	
+	# this is jank, stupid, and dumb.
+	if spriteName == "spr_dustparticle" or spriteName == "spr_dustparticle2":
+		
+		newTiles = []
+		
+		outputHeight = 8
+		
+		for tile in tiles:
+			newTiles.append(tile[0:8, 0:8])
+			
+		tiles = newTiles
+		
 
 	allTiles = np.vstack(tiles)
 
@@ -1123,7 +1145,7 @@ def genSprite(spriteName, isBackground = False):
 	
 	if not nameMatch and paddedSpriteSize[0] != 16:
 		if paddedSpriteSize[0] < 64:
-			v = paddedSpriteSize[0]
+			v = max(5, paddedSpriteSize[0])
 			v-=1;
 			v |= v >> 1;
 			v |= v >> 2;
@@ -1134,7 +1156,7 @@ def genSprite(spriteName, isBackground = False):
 			paddedSpriteSize = (v, paddedSpriteSize[1])
 			
 		if paddedSpriteSize[1] < 64:
-			v = paddedSpriteSize[1]
+			v = max(5, paddedSpriteSize[1])
 			v-=1;
 			v |= v >> 1;
 			v |= v >> 2;
@@ -1653,7 +1675,7 @@ def main():
 	
 	# with undertalemodtool:
 	
-	# run ExportAllSprites(script in this folder) , rename to Export_Textures_Padded, move to folder
+	# run ExportAllSpr	ites(script in this folder) , rename to Export_Textures_Padded, move to folder
 	# run ExportAllTexturesGrouped, copy all 3 folders inside to this folder.
 	
 	# run ExportAllFontData, copy that folder to this folder.
@@ -1684,6 +1706,10 @@ def main():
 	
 	#genSprite("dw_spr_puumerkki_bigframe_index0", True)
 	#genSprite("dw_spr_dr_ab___on_index0", True)
+	#genSprite("dw_spr_textbox_endpointer")
+	#genSprite("dw_spr_items")
+	#genSprite("spr_dustparticle")
+	#genSprite("spr_dustparticle2")
 	#exit(1)
 	
 	
