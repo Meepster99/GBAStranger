@@ -81,6 +81,7 @@ public:
 	}
 	
 	void clear() {
+		BN_LOG("effectslayer clear called");
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				setBigTile(x, y, 0);
@@ -89,12 +90,23 @@ public:
 	}
 	
 	void black() {
+		BN_LOG("effectslayer black called");
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				setBigTile(x, y, 1);
 			}
 		}
 	}
+	
+	void setZoomTile(int x, int y, int t) {
+		
+		
+		if(x < 1 || y < 1 || x > 28 || y > 18) {
+			return;
+		}
+		
+		setTile(x, y, t);
+	};
 	
 
 	

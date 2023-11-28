@@ -913,9 +913,6 @@ void EntityManager::doMoves() { profileFunction();
 				} else {
 					tempChester->nextMove = tempChester->currentDir;
 				}
-				
-				
-				
 		
 				break;
 			default:

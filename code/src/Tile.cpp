@@ -168,7 +168,7 @@ void Switch::stepOff() {
 	pressedCount--;
 	isSteppedOn = false;
 	tileManager->updateExit();
-	game->playSound(&bn::sound_items::snd_activate);
+	game->playSound(&bn::sound_items::snd_reveal);
 }
 
 void Switch::isSteppedOnAnimation() {

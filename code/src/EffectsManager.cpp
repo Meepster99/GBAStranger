@@ -313,7 +313,9 @@ void BigSprite::loadBoobTrap() {
 		"I would say I appreciate it, but to be honest, its just borderlining on creepy now.\n"
 		"like, jesus christ. you dont even have music, or shortcuts working\r"
 		"but now you have boobs????\rwhy????????\r"
-		"actually wait a minute, what is that jam in the background? i guess music is somehow in!"
+		",,,\r"
+		",,,\r"
+		"actually wait a minute, what is that jam in the background?\ri guess music is somehow in!"
 		"\0"},
 		{"anyway, you know the drill\rhead down the stairs, good luck\0"}
 		};
@@ -1319,58 +1321,30 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 			}
 		}
 		
-		/*
-		Pos topLeft = safePos(p.x-layer, p.y-layer);
-		Pos bottomRight = safePos(p.x+layer, p.y+layer);
-		
-		for(int x = topLeft.x; x<=bottomRight.x; x++) {
-			if(p.y-layer >= 0) {
-				//effectsLayer.setBigTile(x, topLeft.y, inward);
-				effectsLayer.setTile(x, topLeft.y, 4*inward);
-			}
-			if(p.y+layer < 20) {
-				//effectsLayer.setBigTile(x, bottomRight.y, inward);
-				effectsLayer.setTile(x, bottomRight.y, 4*inward);
-			}
-		}
-		
-	
-		for(int y = topLeft.y; y<=bottomRight.y; y++) {
-			if(p.x-layer >= 0) {
-				//effectsLayer.setBigTile(topLeft.x, y, inward);
-				effectsLayer.setTile(topLeft.x, y, 4*inward);
-			}
-			if(p.x+layer < 30) {
-				//effectsLayer.setBigTile(bottomRight.x, y, inward);
-				effectsLayer.setTile(bottomRight.x, y, 4*inward);
-			}
-		}
-		*/
-		
 		int topLeftX = CLAMP(xPos - layer, -1, 30);
 		int topLeftY = CLAMP(yPos - layer, -1, 30);
 		int bottomRightX = CLAMP(xPos + layer, -1, 30);
 		int bottomRightY = CLAMP(yPos + layer, -1, 30);
 		
-		
 		for(int x = topLeftX; x<=bottomRightX; x++) {
 			if(topLeftY >= 0 && x >= 0) {
-				effectsLayer.setTile(x, topLeftY, tileIndex);
+				effectsLayer.setZoomTile(x, topLeftY, tileIndex);
 			}
 			if(bottomRightY < 20 && x >= 0) {
-				effectsLayer.setTile(x, bottomRightY, tileIndex);
+				effectsLayer.setZoomTile(x, bottomRightY, tileIndex);
 			}
 		}
 		
 	
 		for(int y = topLeftY; y<=bottomRightY; y++) {
 			if(topLeftX >= 0 && y >= 0) {
-				effectsLayer.setTile(topLeftX, y, tileIndex);
+				effectsLayer.setZoomTile(topLeftX, y, tileIndex);
 			}
 			if(bottomRightX < 30 && y >= 0) {
-				effectsLayer.setTile(bottomRightX, y, tileIndex);
+				effectsLayer.setZoomTile(bottomRightX, y, tileIndex);
 			}
 		}
+	
 			
 		layer += increment;
 		
@@ -1692,6 +1666,7 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 			} 
 			break;
 	}
+	
 	
 	
 	
@@ -5082,6 +5057,8 @@ void EffectsManager::shadowCreate(const Pos& p) {
 	// since this sprite is actually a full tile, by making its prio higher(lower), we chillin, mega chillin
 	
 	//spr_cr_create
+	
+	game->playSound(&bn::sound_items::snd_gestaltcreate);
 	
 	auto getCreateFunc = [](int x, int y) -> auto {
 		return [x, y](Effect* obj) mutable -> void {
