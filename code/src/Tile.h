@@ -44,9 +44,9 @@ public:
 	
 	virtual void draw();
 	
-	static void drawPit(u8 x, u8 y);
+	static void drawPit(int x, int y);
 	
-	static void drawDropOff(u8 x, u8 y);
+	static void drawDropOff(int x, int y);
 
 	virtual ~FloorTile() = default;
 	

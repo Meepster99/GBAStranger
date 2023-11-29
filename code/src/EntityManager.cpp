@@ -1031,7 +1031,9 @@ void EntityManager::doMoves() { profileFunction();
 	
 	
 	
-	// should this loop be here, or in domove
+	// THIS SHOULD RLLY BE PUT INTO THE BELOW LOOP!
+	// its such a bummer that the behavours for these objects arent stored in the object itself.
+	
 	if(enemyList.size() == 0 && shadowList.size() == 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 			if((*it)->entityType() == EntityType::TanStatue) {
@@ -1051,6 +1053,9 @@ void EntityManager::doMoves() { profileFunction();
 	// critical levels of goofyness
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		switch((*it)->entityType()) {
+			//case EntityType::TanStatue:
+				// i,, i could destroy them here, and save a loop, but i would have to do multiple enemyList.size() == 0 && shadowList.size() == 0) checks?
+				//break;
 			case EntityType::MonStatue:
 				// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
 				tempDir = canSeePlayer((*it)->p);
@@ -1114,7 +1119,9 @@ void EntityManager::doMoves() { profileFunction();
 	// ok nvm, now its lagging(now that i had it properly erase old tiles? 
 	// which for some reason, makes me happy
 	if(game->roomManager.isWhiteRooms()) {
-		tileManager->fullDraw();
+		//tileManager->fullDraw();
+		//tileManager->floorLayer.draw();
+		tileManager->floorLayer.draw(game->collisionMap, tileManager->floorMap);
 	}
 			
 	sanity();
@@ -1387,6 +1394,8 @@ void EntityManager::updateMap() { profileFunction();
 	//Shadow* doShadowDeath = NULL;
 
 	// this could most likely be optimized if i have a,, SET of positions which need to be checked.
+	// now that i think about that, isnt the thing that i have in floorsteps,,, exactly that?
+	
 	// instead of doing the whole map.
 	// im starting to have frame drops again, and while ik its ok, having framedrops in vblank due to my shitty effects classes, is rlly rlly bad 
 	// ugh 
@@ -1394,15 +1403,15 @@ void EntityManager::updateMap() { profileFunction();
 	// of cpu cycles, and just have vblank do drawing, but ugh 
 	// i should of had a more event based system for the timings of event ticks.
 
+
+
 	Entity* temp = NULL;
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			
 			entityMap[x][y] = futureEntityMap[x][y];
-			
-			//continue;
-			
+	
 			// i tried haveing a iscollision check here, but it slowed it down??
 			
 			// should probs use a swtitch statement here, maybe?

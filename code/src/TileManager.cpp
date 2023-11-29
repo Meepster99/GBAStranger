@@ -42,7 +42,8 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 				floorMap[x][y] = NULL;
 			}
 			
-			if(!(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2 || collisionMap[x][y] == 12)) {
+			//if(!(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2 || collisionMap[x][y] == 12)) {
+			if(!(collisionMap[x][y] < 3 || collisionMap[x][y] == 12)) {
 				continue;
 			}
 			
@@ -50,41 +51,37 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 				continue;
 			}
 			
-			
 			if(isWhiteRooms) {
 				if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {
-					if( (ABS(x - playerPos.x) <= 2) && 
-					(ABS(y - (playerPos.y + 1)) <= 2) && 
-					(y > 0 && floorMap[x][y-1] != NULL && floorMap[x][y-1]->drawDropOff())) {
+					if(y > 0 && floorMap[x][y - 1] != NULL && y - playerPos.y == 3 && (ABS(x - playerPos.x) <= 2)) {
 						FloorTile::drawDropOff(x, y);
 					} else {
-						FloorTile::drawPit(x, y);
+						FloorTile::drawPit(x, y);	
 					}
-					continue;
+				} else {
+					if(floorMap[x][y] == NULL) {
+						FloorTile::drawPit(x, y);
+					} else {
+						floorMap[x][y]->draw();
+						if(y < 8 && floorMap[x][y + 1] == NULL) {
+							FloorTile::drawDropOff(x, y + 1);
+						}
+					}
 				}
+				continue;
 			}
 			
 			// i pray this doesnt (curse) my performance.
 			if(floorMap[x][y] == NULL) {
-				FloorTile::drawPit(x, y);
+				// FloorTile::drawPit(x, y);
 			} else {
-				
 				floorMap[x][y]->draw();
-				
 				// y < 7 here bc row 8 is for ui, and we dont want dropoffs going there,, do we?
-
 				if(floorMap[x][y]->drawDropOff() && y < 8 && 
-				//(floorMap[x][y+1] == NULL || floorMap[x][y+1]->isTransparent()) &&
-				(floorMap[x][y+1] == NULL) &&
-				collisionMap[x][y+1] < 3) {
-					//rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 1, 4 * 2); 
-					//rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 1, 4 * 2 + 1); 
-					//rawMap.setTile(x * 2 + 1, (y + 1) * 2 + 2, 4 * 2 + 2); 
-					//rawMap.setTile(x * 2 + 2, (y + 1) * 2 + 2, 4 * 2 + 3); 
+				(floorMap[x][y+1] == NULL) && collisionMap[x][y+1] < 3) {
 					FloorTile::drawDropOff(x, y+1);
 				}	
 			}
-			
 		}
 	}
 	
@@ -740,7 +737,10 @@ void TileManager::fullDraw() {
 	floorLayer.draw(game->collisionMap, floorMap);
 	
 	// i do not like this!
-	updateExit();
+	
+	if(!game->roomManager.isWhiteRooms()) {
+		updateExit();
+	}
 	updateRod();
 	updateLocust();
 	updateVoidTiles();

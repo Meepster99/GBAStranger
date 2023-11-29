@@ -20,8 +20,8 @@ int Switch::totalCount = 0;
 //constexpr bn::span<const bn::pair<const bn::sprite_tiles_item, int>> bruh(glassAnimation);
 
 void FloorTile::draw() {
-	u8 x = tilePos.x;
-	u8 y = tilePos.y;
+	int x = tilePos.x;
+	int y = tilePos.y;
 	int tile = getTileValue();
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
@@ -29,54 +29,28 @@ void FloorTile::draw() {
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
 }
 
-void FloorTile::drawPit(u8 x, u8 y) {
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
+void FloorTile::drawPit(int x, int y) {
+	
 	
 	if(game->collisionMap[x][y] == 12) {
 		drawDropOff(x, y);
-	} else if(game->detailsMap[x][y] == 0 && !game->entityManager.hasCollision(Pos(x, y))) {
-		
-		//,,,,, we need to avoid overwriting details?
-		
-		//drawDropOff(x, y);
-		
-		//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1);
-		//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2);
-		//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
+	} else {
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+		globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
 	}
 	
 	
 }
 
-void FloorTile::drawDropOff(u8 x, u8 y) {
-	
-	// ,, this has REALLY stupid potential shit 
-	// basically, we only want to draw a pit if the tile here ISNT transparent, but depending on if we call this func before or after we do the transform,,, idek
-	 
-	//if(tileManager->floorMap[x][y] == NULL || !tileManager->floorMap[x][y]->isTransparent()) {
-	if(tileManager->floorMap[x][y] == NULL) {
-		//globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		//globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-		//globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
-		//globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3); 
-	}
-	
-	
-	//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * 12); 
-	//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * 12 + 1); 
-	//globalGame->collision.rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * 12 + 2); 
-	//globalGame->collision.rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * 12 + 3); 
+void FloorTile::drawDropOff(int x, int y) {
 	
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
 	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
-	
-	
+		
 }
 
 void Glass::stepOn() {

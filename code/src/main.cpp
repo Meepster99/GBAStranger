@@ -390,11 +390,19 @@ int main() {
 	memcpy(stareMap, dw_spr_un_stare_index0_bn_gfxMap, *stareMapCount);
 	memcpy(glitchTiles, dw_spr_glitchedsprites_bn_gfxTiles, *glitchTilesCount);
 	
+	// dont cause a initial framedrop on boot.
+	bn::core::update();
+	
+
 	Game* game = NULL;
 	
 	// this needs to be a pointer, or else i get scary stack errors.
 	while(true) {
 		game = new Game();
+		
+		// dont cause a initial framedrop on boot.
+		bn::core::update();
+	
 		game->run();
 		delete game;
 		game = NULL;

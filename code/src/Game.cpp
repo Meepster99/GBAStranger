@@ -541,7 +541,8 @@ void Game::resetRoom(bool debug) {
 
 void Game::loadTiles() {
 	
-	
+	// avoid dropping frames on the first alloc, when the game starts up
+
 	Room idek = roomManager.loadRoom();
 	
 	const bn::regular_bg_tiles_item* collisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
@@ -567,6 +568,9 @@ void Game::loadTiles() {
 	
 	BN_ASSERT( floorTileCount + collisionTileCount + detailsTileCount < tileRef.size(), "didnt have enough alloc for tiles, need at least ", floorTileCount + collisionTileCount + detailsTileCount);
 	
+
+	
+	/*
 	for(int i=0; i<collisionTileCount; i++) {
 		tileRef[i].data[0] = collisionTiles->tiles_ref()[i].data[0];
 		tileRef[i].data[1] = collisionTiles->tiles_ref()[i].data[1];
@@ -577,10 +581,12 @@ void Game::loadTiles() {
 		tileRef[i].data[6] = collisionTiles->tiles_ref()[i].data[6];
 		tileRef[i].data[7] = collisionTiles->tiles_ref()[i].data[7];
 	}
+	*/
 	
+	memcpy(tileRef.data(), collisionTiles->tiles_ref().data(), 8 * sizeof(uint32_t) * collisionTileCount);
 	
+	/*
 	for(int i=0; i<detailsTileCount; i++) {
-		
 		tileRef[i + collisionTileCount].data[0] = detailsTiles->tiles_ref()[i].data[0];
 		tileRef[i + collisionTileCount].data[1] = detailsTiles->tiles_ref()[i].data[1];
 		tileRef[i + collisionTileCount].data[2] = detailsTiles->tiles_ref()[i].data[2];
@@ -590,6 +596,11 @@ void Game::loadTiles() {
 		tileRef[i + collisionTileCount].data[6] = detailsTiles->tiles_ref()[i].data[6];
 		tileRef[i + collisionTileCount].data[7] = detailsTiles->tiles_ref()[i].data[7];
 	}
+	*/
+	
+	
+	
+	memcpy(tileRef.data() + collisionTileCount, detailsTiles->tiles_ref().data(), 8 * sizeof(uint32_t) * detailsTileCount);
 	
 	if(roomManager.isWhiteRooms()) {
 		
@@ -618,6 +629,7 @@ void Game::loadTiles() {
 		}
 	
 	} else {
+		/*
 		for(int i=0; i<floorTileCount; i++) {
 			tileRef[i + detailsTileCount + collisionTileCount].data[0] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[0];
 			tileRef[i + detailsTileCount + collisionTileCount].data[1] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[1];
@@ -628,6 +640,9 @@ void Game::loadTiles() {
 			tileRef[i + detailsTileCount + collisionTileCount].data[6] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[6];
 			tileRef[i + detailsTileCount + collisionTileCount].data[7] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[7];
 		}
+		*/
+		
+		memcpy(tileRef.data() + collisionTileCount + detailsTileCount, bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref().data(), 8 * sizeof(uint32_t) * floorTileCount);
 	}
 	
 	details.collisionTileCount = collisionTileCount;
@@ -642,42 +657,12 @@ void Game::loadLevel(bool debug) {
 
 	Room idek = roomManager.loadRoom();
 	
+	
 	u8 uncompressedCollision[126];
 	u8 uncompressedDetails[126];
 	
 	uncompressData(uncompressedCollision, (u8*)idek.collision);
 	uncompressData(uncompressedDetails, (u8*)idek.details);
-	
-	//static const bn::regular_bg_tiles_item* collisionTiles = NULL;
-	//static const bn::regular_bg_tiles_item* detailsTiles = NULL;
-	
-	/*
-	const bn::regular_bg_tiles_item* collisionTiles = NULL;
-	const bn::regular_bg_tiles_item* detailsTiles = NULL;
-	
-	const bn::regular_bg_tiles_item* newCollisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
-	if(newCollisionTiles != collisionTiles) {
-		needRedraw = true;
-	}
-	collisionTiles = newCollisionTiles;
-
-	const bn::regular_bg_tiles_item* newDetailsTiles = (const bn::regular_bg_tiles_item*)idek.detailsTiles;
-	if(newDetailsTiles != detailsTiles) {
-		needRedraw = true;
-	}
-	detailsTiles = newDetailsTiles;
-	
-	int collisionTileCount = collisionTiles->tiles_ref().size();
-	int detailsTileCount = detailsTiles->tiles_ref().size();
-	*/
-	
-	//BN_ASSERT(collisionTileCount < 128 * 4, "collisionTileCount, wtf = ", collisionTileCount);
-	//BN_ASSERT(detailsTileCount < 128 * 4, "detailsTileCount, wtf = ", detailsTileCount);
-	
-	// i could maybe avoid realloc each time,, but im not 100% sure 
-	// a tile being 4 subtiles always (curse)s my math up
-	// also, im no longer going to use a bitwise, im just going to add the number of collision tiles 
-	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
 	
 
 	static bool needRestore = false;
@@ -688,28 +673,11 @@ void Game::loadLevel(bool debug) {
 		needRestore = false;
 	}
 	
+	
+	
 	loadTiles();
-	
-	
-	// just in case the destructor isnt automatically called like,, do this
-	// if we dont set the new bg ptr, the mem doesnt get freed
-	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(1, bn::bpp_mode::BPP_4);
-	//collision.rawMap.bgPointer.set_tiles(backgroundTiles);
-	
-	// this call is here to update the ref manager, and properly free the memory
-	// it ispossible to maybe avoid this by calling update in bn_bg_blocks_manager directly
-	//doButanoUpdate(); // these excess frame updates will just slow (curse) down
-	
-	// i could(and maybe should) realloc this every time 
-	// but im wasting bg tiles on, stuff that i dont even know abt?
-	// im going to try just having it be a const 512 again
-	//backgroundTiles = bn::regular_bg_tiles_ptr::allocate(collisionTileCount + detailsTileCount, bn::bpp_mode::BPP_4);
-	//collision.rawMap.bgPointer.set_tiles(backgroundTiles);
-	
-	//doButanoUpdate();
-	
-	if(needRedraw) {
 		
+	if(needRedraw) {	
 		needRedraw = false;
 		
 		
@@ -723,7 +691,6 @@ void Game::loadLevel(bool debug) {
 	also of note, reverseing all my x y loops to go y x would maybe give a small speed boost bc of caching
 	
 	*/
-	
 
 	for(int x=0; x<14; x++) { 
 		//for(int y=0; y<9; y++) {
@@ -757,14 +724,21 @@ void Game::loadLevel(bool debug) {
 	
 	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount, exitDest);
 	
+	
 	if(!debug) {
 		doButanoUpdate();
 	}
+	
 
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
+	
+	
+	if(!debug) {
+		doButanoUpdate();
+	}
 	
 
 	EffectHolder* effectsPointer = (EffectHolder*)idek.effects;
@@ -811,12 +785,30 @@ void Game::fullDraw() {
 	BN_LOG("entering fulldraw");
 	
 	// THESE 3 CALLS SHOULD BE MERGED INTO ONE FUCKHEAD
+	
+	bn::timer tempTimer;
+	bn::fixed tickCount; 
+			(void)tickCount; // supress warning if logging is disabled
+			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
+			//if(tickCount > FRAMETICKS) {
+			if(true) {
+				
+			}
+	tempTimer.restart();
 	collision.draw(collisionMap);
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("collision draw took ", tickCount.safe_division(FRAMETICKS), " frames");
+	
+	tempTimer.restart();
 	details.draw(detailsMap, collisionMap);
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("details draw took ", tickCount.safe_division(FRAMETICKS), " frames");
+	
+	tempTimer.restart();
 	tileManager.fullDraw();
-	
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("tile draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 
-	
 	entityManager.fullUpdate();
 	
 	// i swear. why does the game crash without this print here?
@@ -1116,6 +1108,7 @@ void Game::run() {
 	roomManager.isCustomRooms();
 	
 	load();
+	
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it

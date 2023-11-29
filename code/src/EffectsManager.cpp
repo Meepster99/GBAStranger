@@ -1408,8 +1408,6 @@ void EffectsManager::setBorderColor(bool black) {
 	}
 	
 	effectsLayer.reloadCells();
-	
-	
 
 }
 
