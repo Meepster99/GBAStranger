@@ -709,7 +709,8 @@ const MessageStr randomBoulderMessages[] = {
 	MSGSTR("Watch the monogatari series!\0"),
 	MSGSTR("Watch(and read, its getting super good, but ending soon) yofukashi no uta!\0"),
 	MSGSTR("Listen to Bloody Mercury, i rlly like their music. Also Vafi, both are on spotify and youtube.\0"),
-	MSGSTR("I really am sitting here typing messages no one will ever read.\nlol\0")
+	MSGSTR("I really am sitting here typing messages no one will ever read.\nlol\0"),
+	MSGSTR("ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0")
 };
 
 void Boulder::interact() {
@@ -727,7 +728,7 @@ void Boulder::interact() {
 		return;
 	}
 	
-	constexpr int prevMsgStackSize = 8;
+	constexpr int prevMsgStackSize = 16;
 	static bn::vector<int, prevMsgStackSize> prevMsgStack(prevMsgStackSize, -1);
 	
 	int i=0;

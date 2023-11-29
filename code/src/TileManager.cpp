@@ -52,11 +52,18 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 			}
 			
 			if(isWhiteRooms) {
-				if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {
-					if(y > 0 && floorMap[x][y - 1] != NULL && y - playerPos.y == 3 && (ABS(x - playerPos.x) <= 2)) {
+				
+				// horrid shit code. this needs to be made, into something that makes a vague amount of sense.
+				
+				if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {	
+					if(globalGame->tileManager.hasFloor(x, y) == TileType::Exit) {
+						floorMap[x][y]->draw();
+					} else if(y > 0	&& globalGame->tileManager.hasFloor(x, y - 1) == TileType::Exit) {
+						FloorTile::drawDropOff(x, y);
+					} else if(y - playerPos.y == 3 && y > 0 && floorMap[x][y - 1] != NULL && ABS(x - playerPos.x) <= 2) {
 						FloorTile::drawDropOff(x, y);
 					} else {
-						FloorTile::drawPit(x, y);	
+						FloorTile::drawPit(x, y);
 					}
 				} else {
 					if(floorMap[x][y] == NULL) {
@@ -83,6 +90,11 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 				}	
 			}
 		}
+	}
+	
+	// i hate this code.
+	if(isWhiteRooms) {
+		globalGame->tileManager.updateExit();
 	}
 	
 	collisionPointer->rawMap.reloadCells();
@@ -738,9 +750,7 @@ void TileManager::fullDraw() {
 	
 	// i do not like this!
 	
-	if(!game->roomManager.isWhiteRooms()) {
-		updateExit();
-	}
+	updateExit();
 	updateRod();
 	updateLocust();
 	updateVoidTiles();
@@ -807,7 +817,7 @@ void TileManager::doVBlank() { profileFunction();
 
 // -----
 
-bn::optional<TileType> TileManager::hasFloor(const u8& x, const u8& y) { 
+bn::optional<TileType> TileManager::hasFloor(const int x, const int y) { 
 	const FloorTile* temp = floorMap[x][y];
 	
 	if(temp == NULL || !temp->isAlive) {

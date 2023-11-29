@@ -165,7 +165,7 @@ public:
 	
 	void fullDraw();
 	
-	bn::optional<TileType> hasFloor(const u8& x, const u8& y);
+	bn::optional<TileType> hasFloor(const int x, const int y);
 	bn::optional<TileType> hasFloor(const Pos& p) { return hasFloor(p.x, p.y); } // i really enjoy this use of optional here.
 	
 	void stepOff(Pos p);
