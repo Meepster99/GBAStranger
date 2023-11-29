@@ -598,7 +598,7 @@ public:
 	int x;
 	int y;
 
-	Pos(int x_, int y_) : x(x_), y(y_) { 
+	constexpr Pos(int x_, int y_) : x(x_), y(y_) { 
 
 		/*
 		if(!(x >= 0 && y >= 0 && x < 14 && y < 9)) {
@@ -606,7 +606,8 @@ public:
 			BN_LOG("bruh");
 		}
 		*/
-
+	
+		// this assert almost definitely causes a considerable amount of lag.
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
 	

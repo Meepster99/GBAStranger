@@ -1226,6 +1226,7 @@ void Game::run() {
 				} else {
 					Profiler::show();
 				}
+				doButanoUpdate();
 				continue;
 			}
 			

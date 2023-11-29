@@ -786,11 +786,19 @@ void EntityManager::doMoves() { profileFunction();
 	//
 	
 	//player->doUpdate();*/
+	/*
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
+			// this is expensive, and fucking stupid,,,, is it even needed?
+			// this literally updates the whole ass map, for ONE. PLAYER
 			entityMap[x][y] = futureEntityMap[x][y];
 		}
 	}
+	*/
+	
+	entityMap[playerStart.x][playerStart.y] = futureEntityMap[playerStart.x][playerStart.y];
+	entityMap[player->p.x][player->p.y] = futureEntityMap[player->p.x][player->p.y];
+	
 	
 	// a small check is needed here tho for if we walked backward into a shadow
 	if(playerMoved && getMap(player->p).size() >= 2) {
@@ -1117,7 +1125,7 @@ void EntityManager::doMoves() { profileFunction();
 
 // -----
 
-bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) {
+bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileFunction();
 	
 	BN_ASSERT(e != NULL, "killentity tried to kill a null??");
 	
@@ -1222,7 +1230,7 @@ void EntityManager::killAllAddStatues() {
 
 }
 
-void EntityManager::manageShadows(bn::optional<Direction> playerDir) { 
+void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFunction();
 	
 	// IMPORTANT. SHADOWS WILL ALWAYS SPRING UP FROM THE TILE THEY WERE STEPPED ON FROM
 	// HOWEVER, IF THERE IS ANOTHER SHADOW(POSSIBLY ANY ENTITY?) ON SAID TILE 
@@ -1249,6 +1257,8 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	BN_ASSERT(nextPos.moveInvert(moveDir, true, true), "somehow, in shadowmanager when reversing a playermove, the move failed??");
 	
 	//BN_LOG("moving shadows (",nextPos.x,",",nextPos.y,")");
+	
+	// moving the,, shadow at the end to the players past pos would be much more efficent!!
 	
 	for(int i=0; i<shadowList.size(); i++) {
 		
@@ -1336,7 +1346,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) {
 	
 }
 
-void EntityManager::updateMap() {  profileFunction();
+void EntityManager::updateMap() { profileFunction();
 
 	// return an entity if we died an need a reset
 
@@ -1353,12 +1363,15 @@ void EntityManager::updateMap() {  profileFunction();
 	
 	// TODO: THIS CODE SHOULD DO STATUE CHECKS!!!!!!!!!!!!!!!!!!
 
+	// doing this type of copy is,,, expensive. ugh
+	/*
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			entityMap[x][y] = futureEntityMap[x][y];
 			//futureEntityMap[x][y].clear();
 		}
 	}
+	*/
 	
 	// do floor updates.
 	
@@ -1385,6 +1398,8 @@ void EntityManager::updateMap() {  profileFunction();
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
+			
+			entityMap[x][y] = futureEntityMap[x][y];
 			
 			//continue;
 			
@@ -1495,8 +1510,11 @@ void EntityManager::updateMap() {  profileFunction();
 					}
 					break;
 			}
+		
+			futureEntityMap[x][y] = entityMap[x][y];
 		}
 	}
+	
 	
 	if(hasFloor(player->p)) {
 		player->wingsUse = 0;
@@ -1507,11 +1525,13 @@ void EntityManager::updateMap() {  profileFunction();
 	// ugh i am so scared to touch all this but i have to.
 	// im keeping the wings check here tho
 	
+	/*
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			futureEntityMap[x][y] = entityMap[x][y];
 		}
 	}
+	*/
 	
 	sanity();
 }

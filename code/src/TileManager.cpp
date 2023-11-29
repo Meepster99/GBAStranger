@@ -546,7 +546,7 @@ void TileManager::doFloorSteps() { profileFunction();
 	checkBrand();
 }
 
-void TileManager::updateTile(const Pos& p) { profileFunction();
+void TileManager::updateTile(const Pos& p) {
 	
 	const int x = p.x;
 	const int y = p.y;
