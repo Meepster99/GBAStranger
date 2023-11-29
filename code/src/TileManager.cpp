@@ -494,14 +494,14 @@ void TileManager::doFloorSteps() { profileFunction();
 	// stepoffs occur before stepons bc of shadows, and switches
 	for(auto it = stepOffs.cbegin(); it != stepOffs.cend(); ++it) {
 		Pos tempPos = *it;
-		if(hasFloor(tempPos)) [[likely]] {
+		if(hasFloor(tempPos)) { [[likely]]
 			stepOff(tempPos);
 		}
 	}
 	
 	for(auto it = stepOns.cbegin(); it != stepOns.cend(); ++it) {
 		Pos tempPos = *it;
-		if(hasFloor(tempPos)) [[likely]] {
+		if(hasFloor(tempPos)) { [[likely]] 
 			stepOn(tempPos);
 		}
 	}

@@ -652,6 +652,7 @@ public:
 	
 	bool move(Direction moveDir) {
 		
+		/*
 		int newX = x;
 		int newY = y;
 		
@@ -680,6 +681,49 @@ public:
 		y = newY;
 		
 		return true;
+		*/
+		
+		
+	
+		
+		switch (moveDir) {
+			case Direction::Up:
+				if(y == 0) {
+					return false;
+				}
+				y -= 1;
+				break;
+			case Direction::Down:
+				if(y == 8) {
+					return false;
+				}
+				y += 1;
+				break;
+			case Direction::Left:
+				if(x == 0) {
+					return false;
+				}
+				x -= 1;
+				break;
+			case Direction::Right:
+				if(x == 13) {
+					return false;
+				}
+				x += 1;
+				break;
+			default:
+				break;
+		}
+		
+		
+		/*
+		if(newX < 0 || newY < 0 || newX >= 14 || newY >= 9) {
+			return false;
+		}
+		*/
+		
+		return true;
+		
 	}
 	
 	bool moveInvert(Direction moveDir, bool invertHorizontal, bool invertVertical) {

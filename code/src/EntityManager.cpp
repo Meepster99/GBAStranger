@@ -1386,124 +1386,114 @@ void EntityManager::updateMap() {  profileFunction();
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			
+			//continue;
+			
 			// i tried haveing a iscollision check here, but it slowed it down??
-			
-			
 			
 			// should probs use a swtitch statement here, maybe?
 			// yup, made it a lil faster
 			switch(entityMap[x][y].size()) {
 				case 0: [[likely]]
-					continue;
+					break;
 				case 1: [[likely]]
 					
 					temp = *entityMap[x][y].begin();
 					
 					if(!hasFloor(Pos(x, y)) && !hasCollision(Pos(x, y))) {
-						if(temp->entityType() == EntityType::Shadow) {
-							//effectsManager->shadowDeath(static_cast<Shadow*>(temp));
-							//doShadowDeath = static_cast<Shadow*>(temp);
-							//doShadowDeath = true;
-							addKill(temp);
-						} else if(temp->entityType() == EntityType::Player) {
-							if(!player->hasWings || player->hasWingsTile) {
-								BN_LOG("no floor kill");
+						
+						switch(temp->entityType()) {
+							case EntityType::Shadow:
 								addKill(temp);
-							} else {
-								if(player->wingMoveCheck != playerMoveCount && !hasKills()) { // removed one indent layer down here yeet
-									player->wingMoveCheck = playerMoveCount;
-									
-									player->wingsUse++;
-									if(player->wingsUse == 2) {
+								break;
+							case EntityType::Player:
+								if(!player->hasWings || player->hasWingsTile) {
+									BN_LOG("no floor kill");
+									addKill(temp);
+								} else {
+									if(player->wingMoveCheck != playerMoveCount && !hasKills()) { // removed one indent layer down here yeet
+										player->wingMoveCheck = playerMoveCount;
 										
-										if(playerStart == player->p) { // ladies and gents, 10 layers of indentation. (not counting the switch statements weirdness)
-											// tbh, i rlly should of just made the,,, specialized predeath anims effects? but its easier this way, and i dont need main for anything else
+										player->wingsUse++;
+										if(player->wingsUse == 2) {
 											
-											// THIS SHOULD 100% BE IN EFFECTS!
-											// I LITERALLY HAVE DOKILLEFFECTS FOR A REASON
-											shouldTickPlayer = false;
-											
-											unsigned tempCount = 0;
-											while(true) { // 11
-												player->doTick();
-												for(int j=0; j<6; j++) { // 12
-													game->doButanoUpdate();
-												}
-												if(!player->pushAnimation) {
-													tempCount++;
-													if(tempCount == 2) { // 13
-														break;
+											if(playerStart == player->p) { // ladies and gents, 10 layers of indentation. (not counting the switch statements weirdness)
+												// tbh, i rlly should of just made the,,, specialized predeath anims effects? but its easier this way, and i dont need main for anything else
+												
+												// THIS SHOULD 100% BE IN EFFECTS!
+												// I LITERALLY HAVE DOKILLEFFECTS FOR A REASON
+												shouldTickPlayer = false;
+												
+												unsigned tempCount = 0;
+												while(true) { // 11
+													player->doTick();
+													for(int j=0; j<6; j++) { // 12
+														game->doButanoUpdate();
+													}
+													if(!player->pushAnimation) {
+														tempCount++;
+														if(tempCount == 2) { // 13
+															break;
+														}
 													}
 												}
-											}
-											
-											player->wingsUse = 0;
-											Effect* sweatEffect = effectsManager->generateSweatEffect();
-											
-											for(int i=0; i<8; i++) {
-												player->doTick();
-												for(int j=0; j<6; j++) {
-													game->doButanoUpdate();
+												
+												player->wingsUse = 0;
+												Effect* sweatEffect = effectsManager->generateSweatEffect();
+												
+												for(int i=0; i<8; i++) {
+													player->doTick();
+													for(int j=0; j<6; j++) {
+														game->doButanoUpdate();
+													}
 												}
+												
+												effectsManager->removeEffect(sweatEffect);
+												shouldTickPlayer = true;
 											}
-											
-											effectsManager->removeEffect(sweatEffect);
-											shouldTickPlayer = true;
+											addKill(temp);
+										} else {
+											// spawn wing anim/sound here
+											effectsManager->wings();
 										}
-										addKill(temp);
-									} else {
-										// spawn wing anim/sound here
-										effectsManager->wings();
 									}
 								}
-							}
-
-						} else {
-							killEntity(temp);
+								break;
+							default:
+								killEntity(temp);
+								break;
 						}
 					}
-					
-					continue;
+					break;
 				default: [[unlikely]]
 					// remove all enemies, keep obstacles
 					for(auto it = entityMap[x][y].begin(); it != entityMap[x][y].end(); ) {
 						
 						temp = *it;
 						
-						if(temp->entityType() == EntityType::Player) {
-							
-							// grab another(any) one entity in this square to be the death reason
-							SaneSet<Entity*, 4> tempMap = entityMap[x][y];
-							
-							tempMap.erase(temp);
-							
-							Entity* tempKiller = *tempMap.begin();
-							
-							BN_LOG("intersect kill with a ", tempKiller->entityType());
-							//res = *tempMap.begin();
-							addKill(tempKiller);
-							++it;
-							// break, NOT ITERATE here so that we dont delete the thing that killed us
-							// for death animation reasons.
-							//break;
-						} else if(temp->entityType() == EntityType::Shadow) {
-							//res = temp;
-							addKill(temp);
-							++it;
-						} else if(temp->isObstacle()) {
-							++it;
-							continue;
-						} else if(temp->isEnemy()) {
-							// kill
-							
-							// the it wasnt being set here but stuff was still running fine for a while. why??
-							it = killEntity(temp);
-							continue;
-						} else {
-							BN_ERROR("a entity was somehow not a player, obstacle, or enemy. wtf.");
+						switch(temp->entityType()) {
+							case EntityType::Player:
+								entityMap[x][y].erase(temp);
+								BN_LOG("intersect kill with a ", (*(entityMap[x][y]).begin())->entityType());
+								addKill((*(entityMap[x][y]).begin()));
+								++it;
+								break;
+							case EntityType::Shadow:
+								addKill(temp);
+								++it;
+								break;
+							default:
+								if(temp->isObstacle()) {
+									++it;
+								} else if(temp->isEnemy()) {
+									it = killEntity(temp);
+									continue;
+								} else {
+									BN_ERROR("a entity was somehow not a player, obstacle, or enemy. wtf.");
+								}
+								break;
 						}
 					}
-					continue;
+					break;
 			}
 		}
 	}
