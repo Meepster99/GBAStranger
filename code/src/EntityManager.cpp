@@ -12,6 +12,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 	posTracker.clear();
 
+	//playerPush = NULL;
+
 	shouldTickPlayer = true;
 
 	LevStatue::rodUses = 0;
@@ -630,7 +632,10 @@ EntityManager::~EntityManager() {
 
 bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	
-	posTracker.insert(e->p);
+	
+	if(!dontSet) {
+		posTracker.insert(e->p);
+	}
 	
 	bn::optional<Direction> nextMove = e->getNextMove();
 	
@@ -734,6 +739,8 @@ void EntityManager::moveObstacles() {
 }
 
 void EntityManager::doMoves() { profileFunction();
+
+	//BN_LOG("\n\ndoMoves START");
 	
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -850,6 +857,7 @@ void EntityManager::doMoves() { profileFunction();
 	// THIS MIGHT BE FUCKING BAD
 	// THIS CASE IS HERE TO NOT UPDATE SHADOWS WHEN WE JUST JUMP OFF A CLIFF
 	// having this extra call here is bad, and wastes time. omfg
+	//BN_LOG("player move");
 	updateMap(); 
 	if(hasKills()) {
 		return;
@@ -938,7 +946,8 @@ void EntityManager::doMoves() { profileFunction();
 
 	// TODO when you have a shadow, and go from being onto a shadow tile to falling(with wings) it spawns the default gray sprite, fix that
 	manageShadows(shadowMove);
-	updateMap(); // this call may not be needed, but im not rishing it
+	//BN_LOG("shadow move");
+	updateMap(); // this call may not be needed, but im not risking it
 	if(hasKills()) {
 		return;
 	}
@@ -959,7 +968,21 @@ void EntityManager::doMoves() { profileFunction();
 	// check if player is moving into an obstacle
 	// move obstacle
 	// if that obstacle kills something, remove it from all sublists.
-	moveObstacles();
+	// THIS SHOULD REAAAAAAAAAAAAAAAAAAALLLLLLY only move the obstacle the player bumped into(if they did?);
+	// this code is still not ideal, but the issue of kickedlist not being actually, cleared means,,, yea 
+	// ugh,, but tbh the idea of saving a whole loop,,,, sounds wayyyy to good.
+	// ima do some jank
+	// actually,,, no.
+	// additionally,,,, all obstacles need a update every tick in case their floor was bombed,,, a bit not ideal tbh 
+	
+	//moveObstacles();
+	//moveEntity(playerPush);
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+		if( (static_cast<Obstacle*>(*it))->bumpDirections.size() != 0 ) {
+			moveEntity(*it);
+		}
+	}
+	//BN_LOG("PLAYER obstacle move");
 	updateMap();
 	if(hasKills()) {
 		return;
@@ -1002,13 +1025,17 @@ void EntityManager::doMoves() { profileFunction();
 		}
 	}
 	
+	/*
+	// does this call even,, do ANYTHING???
 	updateMap();
 	if(hasKills()) {
 		return;
 	}
+	*/
 	
 
 	moveObstacles();
+	//BN_LOG("GENERAL obstacle move");
 	updateMap();
 	if(hasKills()) {
 		return;
@@ -1030,6 +1057,7 @@ void EntityManager::doMoves() { profileFunction();
 	// also possibly kill the player.
 	
 	moveEnemies();
+	//BN_LOG("enemy move");
 	updateMap();
 	if(hasKills()) {
 		return;
@@ -1164,6 +1192,8 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 		e->doUpdate();
 	}
 	*/
+	
+	//posTracker.insert(tempPos);
 	
 	// IS THIS CALL NEEDED/OK??? WHAT THE FUCK
 	futureEntityMap[tempPos.x][tempPos.y].erase(e);
@@ -1400,6 +1430,24 @@ void EntityManager::updateMap() { profileFunction();
 	}
 	*/
 	
+	// this copy needs to occur here so that doFloorSteps has the correct data to work on. 
+	// if it messes up performance,,, 
+	// gods i hope it doesnt
+	// putting the copies into the actual loop made stuff faster
+	// i hope this doesnt hurt me to much
+	// ok, it doesnt seem to
+	
+	if(posTracker.size() != 0) {
+		for(auto posit = posTracker.cbegin(); posit != posTracker.cend(); ++posit) {
+	
+			int x = (*posit).x;
+			int y = (*posit).y;
+	
+			entityMap[x][y] = futureEntityMap[x][y];
+		}
+	}
+	
+	
 	tileManager->doFloorSteps();
 	// i could(and maybe should) do haskills here,,, but,, this causes issues with shadows
 	// ill do haskills, and null in kills?
@@ -1426,7 +1474,7 @@ void EntityManager::updateMap() { profileFunction();
 	Entity* temp = NULL;
 
 
-	BN_LOG("posTracker size is ", posTracker.size());
+	//BN_LOG("posTracker size is ", posTracker.size());
 	
 	//for(int x=0; x<14; x++) {
 	//	for(int y=0; y<9; y++) {
@@ -1436,7 +1484,7 @@ void EntityManager::updateMap() { profileFunction();
 			int x = (*posit).x;
 			int y = (*posit).y;
 		
-			entityMap[x][y] = futureEntityMap[x][y];
+			//entityMap[x][y] = futureEntityMap[x][y];
 	
 			// i tried haveing a iscollision check here, but it slowed it down??
 			

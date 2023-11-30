@@ -177,7 +177,7 @@ extern int* glitchTilesCount;
 : __DATE__ [2] == 'v' ? 11 \
 : 12)
 
-__attribute__((section(".iwram"))) unsigned short bruhRand();
+__attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand();
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData();
 
@@ -622,7 +622,10 @@ public:
     }
 	
 	bool operator<(const Pos& other) const {
-		return (x + 14 * y) < (other.x + 14 * y);
+		//return (x + 14 * y) < (other.x + 14 * y);
+		// x and y both,, are restricted to 4 bits max per num,,,, i canoptimize this 
+		// this is only rlly being used for SaneSet anyway
+		return ((x << 4) | y) < ((other.x << 4) | other.y);
 	}
 	
 	Pos operator+(const Pos& other) {

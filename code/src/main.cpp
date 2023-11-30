@@ -47,20 +47,32 @@ void doNothing() {
 }
 
 // i swear to the gods. this func was not supposed to become my default rand func. what am i smoking?
-__attribute__((section(".iwram"))) unsigned short bruhRand() {
-	const uint64_t a = 6364136223846793005;
-	static uint64_t seed = 1;
-    seed = a * seed + 1;
+// should this be targeted to arm? unsure.
+
+// WHY DOES THIS TARGET BEING ARM SOMEHOW MESS UP THE CARTPULL FUNC?????
+__attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand() {
+	// WHAT IS THIS NUMBER???
+	const uint64_t a = 6364136223846793005ULL;
 	
-	//unsigned short res = (seed >> 48);
-	//res ^= ((seed >> 32) & 0xFFFF);
-	//return res;
-    //return (unsigned short)(seed >> 32);
+	// returning an unsigned short was dumb. thumb instrs are 16 bit, but in the actual ram/cpu i have 32 bit regs.
+	
+	//static uint64_t seed = 191847; // WHY THE HELL DID I HAVE THE SEED AT 1 FOR SO LONG????
+	// actually,, most numbers dont give a good result, i was just lucky with this one?
+	// maybe,,, bc it has only 2 prime factors,,, and the gcd between that and a is 3?
+	// ill pick a big prime number
+	// ok this thing fails to monobit, but passes everything else.
+	// wait,,, oh no my testing output was only outputting unsigned short not unsigned
+	//,,,,,,,, and now im bombing the tests. 
+	// maybe i stick to returning unsigned shorts.
+	
+	static uint64_t seed = 4446193083169520393;
+	
+    seed = a * seed + 1;
+
 	unsigned res = 0;
-	res ^= ((seed & 0xFFFF) >> 0);
-	//res ^= ((seed & 0xFFFF0000) >> 16);
-	res ^= ((seed & 0xFFFF00000000) >> 32);
-	res ^= ((seed & 0xFFFF000000000000) >> 48);
+	res = seed;
+	res ^= (seed >> 32);
+	
 	return res;
 }
 

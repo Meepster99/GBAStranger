@@ -112,12 +112,34 @@ void Bomb::stepOn() {
 }
 
 void Death::stepOn() {
+	
+	// ok, what the fuck?
+	// this function was, using the previous position??? of the,,, entity to kill?
+	// because updatemap wasnt,,, called???
+	// how did this function EVER kill anything? 
+	// because,,,, enemies only move,,, once?
+	// and are the last updatemap?
+	// how the hell did this ever used to work?
+	// im getting the things to kill from the tilepos, however since this code is called BEFORE the map actually updates,, 
+	// then the entities would always be on the improper level!
+	// i changed this to, not updating,,,
+	// OHSHIT
+	// i used to copy the future map to the present BEFORE doing this call!
+	// i hope that doing that now wont add to much time.
+	
+	
 	isSteppedOn = true;
 	
 	effectsManager->deathTile(tilePos);
 	
+	//entityManager->posTracker.insert(tilePos); // NOT CLEAN, STUPID
+	
 	// this needs to call updatemap as well. gods(maybe?)
 	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+	
+	
+	
+	//BN_LOG("DEATHTILE CALLED, TEMPMAP LENGTH IS ", tempMap.size(), " at ", tilePos);
 	
 	for(auto it = tempMap.begin(); it != tempMap.end(); ) {
 		if((*it)->entityType() == EntityType::Player) {
@@ -125,6 +147,7 @@ void Death::stepOn() {
 			entityManager->addKill(*it);
 			++it;
 		} else {
+			//BN_LOG("killing a ", (*it)->entityType());
 			it = entityManager->killEntity(*it);
 		}
 	}

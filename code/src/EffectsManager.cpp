@@ -1657,10 +1657,12 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		case hashString("rm_rest_area_8\0"):
 		case hashString("rm_rest_area_9\0"):
 			roomDust();
+			game->doButanoUpdate(); // avert the frame drops that loading roomdust causes
 			break;
 		default:
 			if(game->roomManager.isWhiteRooms()) {
 				roomDust();
+				game->doButanoUpdate(); // avert the frame drops that loading roomdust causes
 			} 
 			break;
 	}
@@ -3592,15 +3594,22 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 	
 	// this REALLLLY needs to be optimized.
 	
-	auto createFunc = [](Effect* obj) mutable -> void {
+	Sprite tempSprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
+	const bn::sprite_tiles_item* tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+	
+	if(!(randomGenerator.get() & 1)) {
+		tempSprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle2, bn::sprite_shape_size(8, 8));
+		tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
+	}
 
-		if(randomGenerator.get() & 1) {
-			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
-			obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
-		} else {
-			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle2, bn::sprite_shape_size(8, 8));
-			obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
-		}
+	
+	auto createFunc = [
+	tempSprite = bn::move(tempSprite),
+	tempTiles = bn::move(tempTiles)
+	](Effect* obj) mutable -> void {
+
+		obj->sprite = tempSprite;
+		obj->tiles = tempTiles;
 	
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,
@@ -3754,6 +3763,20 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 
 void EffectsManager::roomDust() {
 
+	// i might be smoking something here.
+	// but i THINK, that if i preload these sprite tiles data from rom into ram BEFORE they are needed to be loaded in vblank(when create is called),, yea?
+	// what i should do tho is have a queue of effects to be created in dobutanoupdate, to allow for better delays 
+	// that might also help with the lag from the super rod 
+	// ugh,,, yea. 
+	// effects queue time.
+	// tbh should of been added sooner
+	// or maybe bn::move in the create func?
+	// now it drops frames in cpu instead of in vblank
+	// lmao 
+	// am i loading the tiles multiple times? i shouldnt be 
+	// ugh im doing all this just trying to avoid making an effect queue, which would be super helpful tbh
+	// got around it by adding an extra frame update. gods.
+	
 	// gml_Object_obj_dustparticle2_Step_0 seems to have the code 
 	
 	BN_LOG("CREATING ROOMDUST");
