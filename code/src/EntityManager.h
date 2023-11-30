@@ -21,9 +21,9 @@ public:
 	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
 	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
 	
-	bn::vector<Shadow*, MAXENTITYSPRITES> shadowList;
+	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
 	// i rlly should impliment dynamic resizing for these vecs.
-	bn::vector<Pos, 64> shadowQueue;
+	bn::deque<Pos, 128> shadowQueue;
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
 	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;

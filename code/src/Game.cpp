@@ -36,28 +36,6 @@ void delay(int delayFrameCount) {
 	}
 }
 
-void Game::doButanoUpdate() {
-	
-	bn::core::update();
-	
-	int temp = bn::core::last_missed_frames();
-	
-	bn::fixed vblankUsage = bn::core::last_vblank_usage();
-	
-	if(temp != 0) {
-		BN_LOG("dropped frames: ", temp);
-		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
-		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
-	}
-	
-	if(vblankUsage > 1) {
-		BN_LOG("VBLANK EXCEDED, THIS IS RLLY BAD: ");
-		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
-		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
-	}
-	
-}	
-
 void Game::uncompressData(u8 res[126], u8* input) {
 	
 	int i = 0;
@@ -1019,6 +997,30 @@ Game::~Game() {
 	frame = 0;
 }
 
+void Game::doButanoUpdate() {
+	
+	globalGame->doVBlank();	
+	
+	bn::core::update();
+	
+	int temp = bn::core::last_missed_frames();
+	
+	bn::fixed vblankUsage = bn::core::last_vblank_usage();
+	
+	if(temp != 0) {
+		BN_LOG("dropped frames: ", temp);
+		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
+		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
+	}
+	
+	if(vblankUsage > 1) {
+		BN_LOG("VBLANK EXCEDED, THIS IS RLLY BAD: ");
+		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
+		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
+	}
+	
+}
+
 void didVBlank() {
 	
 	//frame = (frame + 1) % 600000;
@@ -1032,7 +1034,7 @@ void didVBlank() {
 	BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
 	
 	isVblank = true;
-	globalGame->doVBlank();	
+	//globalGame->doVBlank();	
 	randomGenerator.update();
 	bruhRand();
 	isVblank = false;
@@ -1048,17 +1050,45 @@ void Game::doVBlank() { profileFunction();
 	// also should cutscenes have a vblank call? maybe 
 	// i could have it execute a lambda
 	
+	// a fundimental flaw has been discovered. 
+	// i,, everything i do in vblank, doesnt need to be in vblank, and tbh maybe shouldnt be in vblank?
+	// bc like,,, maybe i should leave that to butano? 
+	// does,,, oh gods 
+	// when i first started this, i was just using the vblank hook, but now that i have dobutanoupdate, i can like 
+	// use cputime for extra stuff, per frame 
+	// another issue is, when im executing code, do i only have a,, scanlines 0-160 worth? or do i have that and vblank??
+	// should i maybe,,, have a non vblank func for each thing 
+	// also gods now that i have that extra, hella extra cpu time bc of the optimizations i made 
+	// holy fucking shit 
+	// i just moved this function call to instead of being called in didvblank 
+	// call it in dobutanoupdate. 
+	// this means that if i have any bn::core::update calls left anywhere, im boned, but like 
+	// holy shit this is insanely helpful 
+	// b213 full of shadows, 0.22 cpu usage per move
+	// actually fucking insane how,, how did i not notice this earlier?
+	
+	
+	//static bn::timer timer;
+	
 	static bool a, b, c = false;
 	
 	switch(state) {
 		default:
 		case GameState::Normal:
 			//BN_LOG("entityManager.doVBlank();");
+			//timer.restart();
 			entityManager.doVBlank();
+			//BN_LOG("entityManager vblank took ", ((bn::fixed)timer.elapsed_ticks()).safe_division(VBLANKTICKS), " vblanks");
+			
 			//BN_LOG("effectsManager.doVBlank();");
+			//timer.restart();
 			effectsManager.doVBlank();
+			//BN_LOG("effectsManager vblank took ", ((bn::fixed)timer.elapsed_ticks()).safe_division(VBLANKTICKS), " vblanks");
+			
 			//BN_LOG("tileManager.doVBlank();");
+			//timer.restart();
 			tileManager.doVBlank();
+			//BN_LOG("tileManager vblank took ", ((bn::fixed)timer.elapsed_ticks()).safe_division(VBLANKTICKS), " vblanks");
 			//BN_LOG("done");
 			break;
 		case GameState::Exiting:

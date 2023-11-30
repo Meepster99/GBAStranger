@@ -778,6 +778,7 @@ void TileManager::doVBlank() { profileFunction();
 	
 	bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
 	
+	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			if(floorMap[x][y] == NULL) {
@@ -787,6 +788,7 @@ void TileManager::doVBlank() { profileFunction();
 			BN_ASSERT(floorMap[x][y]->isAlive, "a floor tile wasnt alive during vblank?? how??");
 			
 			if(floorMap[x][y]->isSteppedOn) {
+				// isnt this kinda dumb? why am i not just,,, doing this,,, during cpu??
 				floorMap[x][y]->isSteppedOnAnimation();
 			} 
 			if(floorMap[x][y]->tileType() == TileType::Exit) { // not ideal code.
@@ -797,15 +799,16 @@ void TileManager::doVBlank() { profileFunction();
 		}
 	}
 	
+	
+	// this should maybe be done during cpu?
 	// i wonder/hope this is ok 
 	// sword tile needs to be updated every,, frame for flashing?
+	
+	
 	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);
-		
-		//swordTile->draw();
-		//needUpdate = true;
-		//floorLayer.reloadCells(); // might cause horrid lag
 	}
+	
 
 	/*
 	if(needUpdate) {

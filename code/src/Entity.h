@@ -134,6 +134,7 @@ public:
 	
 	//bn::vector<bn::pair<bn::sprite_tiles_item, int>, 4> fallData;
 	
+	// THIS VARIABLE SHOULD BE MADE STATIC!!!!
 	int animationIndex = 0;
 	int tileIndex = 0;
 	
@@ -175,7 +176,11 @@ public:
 		updateTileIndex();
 
 		animationIndex = animationIndex + 1;
-		animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
+		//animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
+		// why when i was going through and fixing unneeded modulos earlier did i not catch this?? this is going to be huge!
+		if(animationIndex >= spriteTilesArray[tileIndex].graphics_count()) {
+			animationIndex = 0;
+		}
 	
 	
 		// should this be here?
@@ -193,7 +198,11 @@ public:
 		updateTileIndex();
 		
 		// just incase
-		animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
+		//animationIndex = animationIndex % spriteTilesArray[tileIndex].graphics_count();
+		
+		if(animationIndex >= spriteTilesArray[tileIndex].graphics_count()) {
+			animationIndex = 0;
+		}
 		
 		sprite.spritePointer.set_tiles(
 			spriteTilesArray[tileIndex],
@@ -688,6 +697,12 @@ public:
 	bool canFall() const override { return false; }
 	
 	bn::optional<Direction> getNextMove() override { return bn::optional<Direction>(); }
+	
+	// this is overriden since all shadows need to share the same tick animation state. 
+	// now that i think abt it, doesnt everything? 
+	// well yes, bug i think since, shadows are the only entities that can be created on,,, any time after the room loads 
+	// then they arent const 
+	// but maybe this is overkill? i could just set the anim index whenever a new shadow is created.
 	
 };
 

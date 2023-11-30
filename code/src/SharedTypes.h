@@ -99,6 +99,8 @@
 #include "bn_time.h"
 #include "bn_date.h"
 
+#include "bn_timers.h"
+
 
 #ifdef DISABLEASSERTS
 
@@ -121,7 +123,11 @@
 typedef unsigned char u8;
 
 // unsure of accuracy, but will make things slightly easier, hopefully
-#define FRAMETICKS 4372
+// https://github.com/GValiente/butano/blob/master/butano/hw/include/bn_hw_timer_constants.h
+// bn::timers::ticks_per_frame()
+#define FRAMETICKS 4389
+
+#define VBLANKTICKS 1309
 
 // TODO, GO OVER ALL FUNCS, AND DEFINE WHAT CAN BE AS CONST REF
 // idrk if c++ optimization does that for me? but regardless its a good idea
