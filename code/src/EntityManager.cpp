@@ -1657,7 +1657,7 @@ void EntityManager::doTicks() {
 }	
 
 void EntityManager::fullUpdate() {
-	doTicks();
+	//doTicks();
 	updateScreen();
 }
 

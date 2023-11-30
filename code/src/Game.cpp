@@ -478,9 +478,10 @@ void Game::resetRoom(bool debug) {
 		// this one extra update is here for
 		// the mon lightning effect specifically, i think?
 		doButanoUpdate();
-
+	} else {
+		//doButanoUpdate();
 	}
-
+	
 	state = GameState::Loading;
 	
 	cutsceneManager.resetRoom();
@@ -495,7 +496,8 @@ void Game::resetRoom(bool debug) {
 	changeMusic();
 	
 	loadLevel(debug);
-	if(!debug) {
+	//if(!debug) {
+	if(true) {
 		doButanoUpdate();
 	}
 	
@@ -508,9 +510,13 @@ void Game::resetRoom(bool debug) {
 		while(state == GameState::Entering) { // wait for gamestate to no longer be entering
 			doButanoUpdate();
 		}
+	} else {
+		//doButanoUpdate();
 	}
 	
 	BN_ASSERT(state == GameState::Normal, "after a entering gamestate, the next state should be normal");
+	
+	doButanoUpdate();
 	
 	//bn::bg_tiles::log_status();
 	
@@ -708,7 +714,8 @@ void Game::loadLevel(bool debug) {
 	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount, exitDest);
 	
 	
-	if(!debug) {
+	//if(!debug) {
+	if(true) {
 		doButanoUpdate();
 	}
 	
@@ -719,7 +726,8 @@ void Game::loadLevel(bool debug) {
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
 	
-	if(!debug) {
+	//if(!debug) {
+	if(true) {
 		doButanoUpdate();
 	}
 	
@@ -763,6 +771,34 @@ void Game::loadLevel(bool debug) {
 	BN_LOG("loadlevel completed");
 }
 
+void Game::drawCollisionAndDetails() {
+	
+	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<8; y++) {
+			
+			int tile = collisionMap[x][y];
+			
+			if(tile < 3) {
+				tile = detailsMap[x][y];
+				
+				details.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
+				details.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
+				details.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
+				details.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+			} else {
+				collision.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
+				collision.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
+				collision.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
+				collision.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+			}
+		}
+	}
+	
+	//collision.reloadCells();
+	
+}
+
 void Game::fullDraw() {
 	
 	BN_LOG("entering fulldraw");
@@ -771,37 +807,51 @@ void Game::fullDraw() {
 	
 	bn::timer tempTimer;
 	bn::fixed tickCount; 
-			(void)tickCount; // supress warning if logging is disabled
-			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
-			//if(tickCount > FRAMETICKS) {
-			if(true) {
-				
-			}
+	(void)tickCount; // supress warning if logging is disabled
+	
+	/*
 	tempTimer.restart();
-	collision.draw(collisionMap);
+	//collision.draw(collisionMap);
 	tickCount = tempTimer.elapsed_ticks();
 	BN_LOG("collision draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 	
 	tempTimer.restart();
-	details.draw(detailsMap, collisionMap);
+	//details.draw(detailsMap, collisionMap);
 	tickCount = tempTimer.elapsed_ticks();
 	BN_LOG("details draw took ", tickCount.safe_division(FRAMETICKS), " frames");
+	*/
+	
+	
+	tempTimer.restart();
+	drawCollisionAndDetails();
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("collision and details draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 	
 	tempTimer.restart();
 	tileManager.fullDraw();
 	tickCount = tempTimer.elapsed_ticks();
 	BN_LOG("tile draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 
+
+	// bad move, wouldnt be needed if i wasnt drawing the background 3 FUCKING TIMES.
+	//doButanoUpdate();
+	
+	tempTimer.restart();
 	entityManager.fullUpdate();
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("entityManager draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 	
 	// i swear. why does the game crash without this print here?
 	BN_LOG("fulldraw completed");
 }
 
 void Game::fullTileDraw() {
-	collision.draw(collisionMap);
-	details.draw(detailsMap, collisionMap);
-	tileManager.fullDraw();
+	
+	// this func should be removeddddddd
+
+	//collision.draw(collisionMap);
+	//details.draw(detailsMap, collisionMap);
+	//tileManager.fullDraw();
 }
 
 void Game::changePalette(int offset) {
@@ -1193,6 +1243,11 @@ void Game::run() {
 				
 				int debugIncrement = bn::keypad::select_held() ? 5 : 1;
 				
+				// could maybe cause some issues if the frame counter,, resets? during this?
+				// does keeping the frame thing low save division cycles? i shouldnt even be doing modulo at all tho tbh
+				
+				unsigned startFrame = frame;
+				
 				if(bn::keypad::l_held()) {
 					for(int i=0; i<debugIncrement; i++) {
 						roomManager.prevRoom();
@@ -1202,15 +1257,27 @@ void Game::run() {
 						roomManager.nextRoom();
 					}
 				}
+				
 				resetRoom(true);
 				
-				miscTimer.restart();
+				//unsigned waitFrames = 5 - (int)(frame - startFrame);
+				unsigned waitFrames = frame - startFrame;
 				
-				//while(miscTimer.elapsed_ticks() < FRAMETICKS * 5) { }
-				//doButanoUpdate();
-
-				int i=0;
-				while(i<5) { i++; doButanoUpdate(); }
+				if(frame <= startFrame) {
+					waitFrames = 5;
+				}
+				
+				if(waitFrames > 5) {
+					waitFrames = 1;
+				} else {
+					waitFrames = 5 - waitFrames;
+				}
+				
+				
+				//BN_LOG(frame, " ", startFrame, " ", waitFrames);
+				
+				unsigned i=0;
+				while(i < waitFrames) { i++; doButanoUpdate(); }
 				
 				continue;
 			}

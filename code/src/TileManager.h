@@ -99,7 +99,9 @@ public:
 	const char* exitDestination = NULL;
 	bn::vector<bn::pair<const char*, Pos>, 8> secretDestinations;
 
-	void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
+	// this cant be arm, it causes some lambdas to fuck up. why? is iwram automatically set to be arm instructions, and then the lambdas,, ugh
+	// since this cant be arm, im putting it in ewram instead of iwram bc ewram is 16 bit for the thumb instrs
+	__attribute__((section(".ewram"))) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
 		
 	void doFloorSteps();
 	
@@ -126,10 +128,10 @@ public:
 	
 	bool hasCollision(const Pos& p);
 	
-	bool exitRoom(); // just in here as a temporary measure
-	bool enterRoom(); // just in here as a temporary measure
+	__attribute__((target("arm"), section(".iwram"))) bool exitRoom(); // just in here as a temporary measure
+	__attribute__((target("arm"), section(".iwram"))) bool enterRoom(); // just in here as a temporary measure
 	
 	//bool needUpdate = false;
-	void doVBlank();
+	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
 };
 

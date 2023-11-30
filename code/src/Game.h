@@ -35,22 +35,25 @@ public:
 	// this class is now legacy, but im going to reimpliment funcs in here and pass them off to collision
 	Details(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
 	
-	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
+	inline void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// flip the highest bit of the tile to get a details tile.
 		// grabbing the size here each call may be expensive. i could set it to a int
 		collisionPointer->setBigTile(x, y, tile + collisionTileCount, flipX, flipY);
 	}
 	
-	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
+	inline void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
 		collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 	}
 	
 	void draw(u8 (&detailsMap)[14][9], u8 (&collisionMap)[14][9]) {
 		
+		BN_ERROR("DONT CALL THE ACTUAL DRAW METHOD IN DETAILS");
+		
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				//if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
-				if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
+				//if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
+				if(collisionMap[x][y] < 3) {					
 					u8 tile = detailsMap[x][y];
 					if(tile != 0) {
 						setTile(x * 2 + 1, y * 2 + 1, 4 * tile + 0);
@@ -211,10 +214,13 @@ public:
 	void loadLevel(bool debug = false);
 	void resetRoom(bool debug = false);
 	
+	// HOLY SHIT. THIS ACTUALY WORKED. THIS ACTUALLY FIXED THE FRAMEDROP?
+	__attribute__((target("arm"), section(".iwram"))) void drawCollisionAndDetails();
+	
 	void fullDraw();
 	void fullTileDraw();
 	
-	void doVBlank();
+	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
 	
 	int paletteIndex = 0;
 	void changePalette(int offset);

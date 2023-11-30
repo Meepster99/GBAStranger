@@ -548,6 +548,8 @@ public:
 	
 	virtual void draw(u8 (&gameMap)[14][9]) {
 		
+		BN_ERROR("DONT CALL THE ACTUAL DRAW METHOD IN COLLISION");
+		
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
 				

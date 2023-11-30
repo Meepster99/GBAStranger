@@ -366,9 +366,9 @@ public:
 	bool topDownEffect(bool downward);
 	
 	void setBorderColor(bool black = true);
-	bool exitRoom();
-	bool enterRoom();
-	void doVBlank();
+	__attribute__((target("arm"), section(".iwram"))) bool exitRoom();
+	__attribute__((target("arm"), section(".iwram"))) bool enterRoom();
+	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
 	
 	void loadEffects(EffectHolder* effects, int effectsCount);
 	
