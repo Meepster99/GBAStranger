@@ -263,8 +263,8 @@ static int inline getWordTileIndex(const char c) {
 
 void WordTile::draw() {
 	
-	u8 x = tilePos.x;
-	u8 y = tilePos.y;
+	int x = tilePos.x;
+	int y = tilePos.y;
 	
 	int temp;
 	

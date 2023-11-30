@@ -334,63 +334,6 @@ bn::optional<Direction> Player::getNextMove() {
 	return temp; 
 }
 
-/*
-void Player::startFall() {
-	
-	BN_LOG("playerfal");
-	
-	if(entityManager->enemyKill()) { // died from enemy
-		// is 16 actually the ideal number here?
-		// also wow, falldata needs to be its own struct now tbh.
-		
-		
-		switch(game->mode) {
-			default:
-			case 0:
-				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_hit, 16)); 
-				break;
-			case 1:
-				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_lil_hit, 16)); 
-				break;
-			case 2:
-				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cif_hit, 16)); 
-				break;
-		}
-		
-	} else { // fall death
-	
-		bn::sound_items::snd_player_fall.play();
-	
-		// have the player do the cyote time thingy
-		tileIndex = static_cast<int>(currentDir);
-		fallData.insert(fallData.begin(), bn::pair<bn::sprite_tiles_item, u8>(spriteTilesArray[tileIndex], 6));
-		
-		switch(game->mode) {
-			default:
-			case 0:
-				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_player_fall, 6));
-				break;
-			case 1:
-				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_lil_fall, 6));
-				break;
-			case 2:
-				fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_cif_fall, 6));
-				break;
-		}
-	}
-	
-	// do locust bs
-	if(!isVoided && locustCount > 0) {
-		locustCount--;
-		tileManager->updateLocust();
-	} else if(locustCount == 0) {
-		isVoided = true;
-		tileManager->updateVoidTiles();
-	}
-	
-}
-*/
-
 void Player::updateTileIndex() {
 	
 	// there should of been a way to do this by,,, setting the bool in hasmoved, but that didnt seem to work.

@@ -10,6 +10,8 @@
 
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 
+	posTracker.clear();
+
 	shouldTickPlayer = true;
 
 	LevStatue::rodUses = 0;
@@ -628,6 +630,8 @@ EntityManager::~EntityManager() {
 
 bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	
+	posTracker.insert(e->p);
+	
 	bn::optional<Direction> nextMove = e->getNextMove();
 	
 	if(!nextMove) {
@@ -703,6 +707,8 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(e->entityType(), bn::pair<Pos, Pos>(e->p, testPos));
 	
 	tileManager->floorSteps.push_back(tempFloorStep);
+	
+	posTracker.insert(testPos);
 	
 	e->currentDir = move;
 	e->p = testPos;
@@ -1382,6 +1388,18 @@ void EntityManager::updateMap() { profileFunction();
 	
 	// do floor updates.
 	
+	// this is shit code. im just doing this to like,,,,, see if this is even feasable.
+	// tbh tho, i think ill have a seperate var for tracking it.
+	/*
+	SaneSet<Pos, MAXENTITYSPRITES> testPoses;
+	
+	// even with this horrid copying, the code is still efficient!
+	for(auto it = tileManager->floorSteps.cbegin(); it != tileManager->floorSteps.cend(); ++it) {
+		testPoses.insert((*it).second.first);
+		testPoses.insert((*it).second.second);
+	}
+	*/
+	
 	tileManager->doFloorSteps();
 	// i could(and maybe should) do haskills here,,, but,, this causes issues with shadows
 	// ill do haskills, and null in kills?
@@ -1407,9 +1425,17 @@ void EntityManager::updateMap() { profileFunction();
 
 	Entity* temp = NULL;
 
-	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			
+
+	BN_LOG("posTracker size is ", posTracker.size());
+	
+	//for(int x=0; x<14; x++) {
+	//	for(int y=0; y<9; y++) {
+	if(posTracker.size() != 0) {
+		for(auto posit = posTracker.cbegin(); posit != posTracker.cend(); ++posit) {
+
+			int x = (*posit).x;
+			int y = (*posit).y;
+		
 			entityMap[x][y] = futureEntityMap[x][y];
 	
 			// i tried haveing a iscollision check here, but it slowed it down??
@@ -1524,11 +1550,11 @@ void EntityManager::updateMap() { profileFunction();
 		}
 	}
 	
-	
 	if(hasFloor(player->p)) {
 		player->wingsUse = 0;
 	}
 	
+	posTracker.clear();
 	
 	// all the following code could(and probs should) be called once at the end of the domove func,,,,, but 
 	// ugh i am so scared to touch all this but i have to.

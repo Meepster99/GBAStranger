@@ -28,6 +28,8 @@ public:
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
 	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
 	
+	SaneSet<Pos, MAXENTITYSPRITES> posTracker;
+	
 	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
 
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
