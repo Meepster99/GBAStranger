@@ -725,6 +725,11 @@ void Game::loadLevel(bool debug) {
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 	
+	/*
+	if(!debug) {
+		doButanoUpdate();
+	}
+	*/
 	
 	//if(!debug) {
 	if(true) {
@@ -767,6 +772,7 @@ void Game::loadLevel(bool debug) {
 	}
 	
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
+	
 	
 	BN_LOG("loadlevel completed");
 }
@@ -1486,7 +1492,7 @@ void Game::playSound(const bn::sound_item* sound) {
 	
 	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED OR ALTERED
 	
-	if(boobaCount > 8 && (
+	if(boobaCount >= 8 && (
 	sound == &bn::sound_items::snd_push_small
 	)) {
 		sound = &bn::sound_items::snd_bounce;

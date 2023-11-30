@@ -81,6 +81,7 @@ public:
 	
 	void createResetRoom();
 	
+	void displayDisText(const char* errorLine);
 	void disCrash(FloorTile* testTile, bool isPickup);
 	
 	void crashGame();

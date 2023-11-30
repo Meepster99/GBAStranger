@@ -178,9 +178,9 @@ void CutsceneManager::introCutscene() {
 		maps[3]->bgPointer.set_y(maps[3]->bgPointer.y() + 1);
 		yPos++;
 		face.updateRawPosition(xPos, yPos);
-		bn::core::update();
-		bn::core::update();
-		
+		//bn::core::update();
+		//bn::core::update();
+		game->doButanoUpdate();
 	}
 
 	
@@ -193,16 +193,16 @@ void CutsceneManager::introCutscene() {
 	// its insane that i never overloaded the set_tiles func
 	for(int i=1; i<=3; i++) {
 		face.spritePointer.set_tiles(*faceItem, i);
-		bn::core::update();
-		bn::core::update();
-		bn::core::update();
-		bn::core::update();
-		bn::core::update();
-		bn::core::update();
+		game->doButanoUpdate();
+		game->doButanoUpdate();
+		game->doButanoUpdate();
+		game->doButanoUpdate();
+		game->doButanoUpdate();
+		game->doButanoUpdate();
 	}
 	
 	for(int j=0; j<32; j++) {
-		bn::core::update();
+		game->doButanoUpdate();
 	}
 	
 	for(int i=0; i<=3; i++) {
@@ -223,7 +223,7 @@ void CutsceneManager::introCutscene() {
 		face.spritePointer.set_palette(game->pal->getSpritePaletteFade(i));
 		
 		for(int j=0; j<16; j++) {
-			bn::core::update();
+			game->doButanoUpdate();
 		}
 		
 	}
@@ -235,7 +235,7 @@ void CutsceneManager::introCutscene() {
 	
 	for(int i=0; i<98 - (6 * 3) - (16 * 4) - 32; i++) {
 		//maps[3]->bgPointer.set_y(maps[3]->bgPointer.y() + 1);
-		bn::core::update();
+		game->doButanoUpdate();
 	}
 	
 	restore();
@@ -245,7 +245,7 @@ void CutsceneManager::introCutscene() {
 	
 	game->effectsManager.hideForDialogueBox(true, true);
 	face.setVisible(false);
-	bn::core::update();
+	game->doButanoUpdate();
 	
 	//BN_LOG("bg_tiles status");
 	//bn::bg_tiles::log_status();
@@ -890,7 +890,7 @@ void CutsceneManager::brandInput() {
 			
 		
 		
-		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
+		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 0.1) {
 			inputTimer.restart();
 			if(allDone) {
 		
@@ -1553,6 +1553,87 @@ void CutsceneManager::carcusEnding() {
 	
 }
 
+void CutsceneManager::displayDisText(const char* errorLine) {
+	
+	if(errorLine == NULL) {
+		return;
+	}
+	
+	if(disText.size() == disText.max_size()) {
+		disText.pop_back();
+	}
+	disText.insert(disText.begin(), errorLine);
+	
+	
+	if(disTextSprites.size() == 0) {
+		disTextSprites.push_back(bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
+		
+		char tempBuffer[32];
+		memset(tempBuffer, 0, 32);
+
+		strcpy(tempBuffer, "DIS OS REPORT \0");
+		if(__DATE__[4] == ' ') {
+			tempBuffer[14] = '0';
+		} else {
+			tempBuffer[14] = __DATE__[4];
+		}
+		
+		if(__DATE__[5] == ' ') {
+			tempBuffer[15] = '0';
+		} else {
+			tempBuffer[15] = __DATE__[5];
+		}
+		
+		tempBuffer[16] = '/';
+		tempBuffer[17] = '0' + (MONTH / 10);
+		tempBuffer[18] = '0' + (MONTH % 10);
+		tempBuffer[19] = '/';
+		tempBuffer[20] = '1';			
+		tempBuffer[21] = '1';
+	
+		// Nov  5 2023
+		
+		strcpy(tempBuffer+22, __DATE__+7);
+		
+		//strcpy(tempBuffer+14, __DATE__[4]);
+		//"DIS OS REPORT 05/11/112023"
+		//BN_LOG(tempBuffer);
+		//BN_LOG(__DATE__);
+		
+		disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16, bn::string_view(tempBuffer), disOsTextSprites);
+		for(int i=0; i<disOsTextSprites.size(); i++) {
+			disOsTextSprites[i].set_palette(game->pal->getWhiteSpritePalette());
+			disOsTextSprites[i].set_bg_priority(3);
+		}
+	}
+
+		
+	if(disTextSprites.size() == disTextSprites.max_size()) {
+		disTextSprites.pop_back();
+	}
+	
+	// move all previous sprites down 16 tiles.
+	for(int j=0; j<disTextSprites.size(); j++) {
+		for(int i=0; i<disTextSprites[j].size(); i++) {
+			disTextSprites[j][i].set_y(-80+16+((j+2)*16));
+			if(j == 0) {
+				disTextSprites[j][i].set_palette(game->pal->getDarkGraySpritePalette());
+			}
+		}
+	}
+	
+	disTextSprites.insert(disTextSprites.begin(), bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
+
+	BN_ASSERT(disTextSprites.size() >= 2, "in the dis text generator, there were not a minimum of two lines to be generated!");
+	
+	disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16+(1*16), bn::string_view(disText[0]), disTextSprites[0]);
+	for(int i=0; i<disTextSprites[0].size(); i++) {
+		disTextSprites[0][i].set_palette(game->pal->getLightGraySpritePalette());
+		disTextSprites[0][i].set_bg_priority(3);
+	}
+	
+}
+
 void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 	// it is critical that we pass a ref of the pointer to do proper comparisons
 	// wait no is it?
@@ -1819,78 +1900,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 		return;
 	}
 	
-	if(disText.size() == disText.max_size()) {
-		disText.pop_back();
-	}
-	disText.insert(disText.begin(), errorLine);
-	
-	
-	if(disTextSprites.size() == 0) {
-		disTextSprites.push_back(bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
-		
-		char tempBuffer[32];
-		memset(tempBuffer, 0, 32);
-
-		strcpy(tempBuffer, "DIS OS REPORT \0");
-		if(__DATE__[4] == ' ') {
-			tempBuffer[14] = '0';
-		} else {
-			tempBuffer[14] = __DATE__[4];
-		}
-		
-		if(__DATE__[5] == ' ') {
-			tempBuffer[15] = '0';
-		} else {
-			tempBuffer[15] = __DATE__[5];
-		}
-		
-		tempBuffer[16] = '/';
-		tempBuffer[17] = '0' + (MONTH / 10);
-		tempBuffer[18] = '0' + (MONTH % 10);
-		tempBuffer[19] = '/';
-		tempBuffer[20] = '1';			
-		tempBuffer[21] = '1';
-	
-		// Nov  5 2023
-		
-		strcpy(tempBuffer+22, __DATE__+7);
-		
-		//strcpy(tempBuffer+14, __DATE__[4]);
-		//"DIS OS REPORT 05/11/112023"
-		//BN_LOG(tempBuffer);
-		//BN_LOG(__DATE__);
-		
-		disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16, bn::string_view(tempBuffer), disOsTextSprites);
-		for(int i=0; i<disOsTextSprites.size(); i++) {
-			disOsTextSprites[i].set_palette(game->pal->getWhiteSpritePalette());
-			disOsTextSprites[i].set_bg_priority(3);
-		}
-	}
-
-		
-	if(disTextSprites.size() == disTextSprites.max_size()) {
-		disTextSprites.pop_back();
-	}
-	
-	// move all previous sprites down 16 tiles.
-	for(int j=0; j<disTextSprites.size(); j++) {
-		for(int i=0; i<disTextSprites[j].size(); i++) {
-			disTextSprites[j][i].set_y(-80+16+((j+2)*16));
-			if(j == 0) {
-				disTextSprites[j][i].set_palette(game->pal->getDarkGraySpritePalette());
-			}
-		}
-	}
-	
-	disTextSprites.insert(disTextSprites.begin(), bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
-
-	BN_ASSERT(disTextSprites.size() >= 2, "in the dis text generator, there were not a minimum of two lines to be generated!");
-	
-	disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16+(1*16), bn::string_view(disText[0]), disTextSprites[0]);
-	for(int i=0; i<disTextSprites[0].size(); i++) {
-		disTextSprites[0][i].set_palette(game->pal->getLightGraySpritePalette());
-		disTextSprites[0][i].set_bg_priority(3);
-	}
+	displayDisText(errorLine);
 	
 	if(doCarcusEnding) {
 		carcusEnding();

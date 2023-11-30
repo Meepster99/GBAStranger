@@ -137,8 +137,6 @@ void Death::stepOn() {
 	// this needs to call updatemap as well. gods(maybe?)
 	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
 	
-	
-	
 	//BN_LOG("DEATHTILE CALLED, TEMPMAP LENGTH IS ", tempMap.size(), " at ", tilePos);
 	
 	for(auto it = tempMap.begin(); it != tempMap.end(); ) {

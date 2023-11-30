@@ -117,9 +117,12 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		posSet.insert(tempPos);
 		
 		//BN_ASSERT(hasFloor(tempPos), "tryed loading entity without floor under it????");
+		/*
 		if(hasFloor(tempPos)) {
+			// if this is a player who spawns on a copy tile(like in bee's hole), this wont work properly since we dont have updatemap!
 			tileManager->stepOn(tempPos);
 		}
+		*/
 		
 		if(i == 0) {
 			BN_ASSERT(temp.t == EntityType::Player, "first entity loaded into a room MUST be the player");
@@ -259,6 +262,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		SaneSet<Entity*, 4>& mapRef = getMap(temp->p);
 		
 		mapRef.insert(temp);
+		
+		if(hasFloor(temp->p)) {
+			tileManager->stepOn(temp->p);
+		}
 
 		if(temp->isEnemy()) {
 			

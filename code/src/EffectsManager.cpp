@@ -279,11 +279,46 @@ void BigSprite::loadBoobTrap() {
 		
 		static unsigned boobaBackup = 0;
 		
+		if(boobaCount > 32) {
+			
+			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
+				bigSprite->effectsManager->doDialogue(
+				"fool.\n"
+				"get out of my sight.\0"
+				);
+			
+				globalGame->cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_black_bg);
+				
+				for(unsigned i=0; i<boobaCount; i++) {
+					bn::sound_items::snd_reveal.play();
+					globalGame->effectsManager.deathTile(globalGame->entityManager.player->p);
+					delay(5);
+				}
+				globalGame->cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+				delay(5);
+				
+				bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
+				
+				globalGame->roomManager.nextRoom();
+				
+				return;
+			}
+			
+			
+			bigSprite->effectsManager->doDialogue(
+			"...\n"
+			"[They refuse to speak with you.]\n"
+			"[You feel ashamed.]\0"
+			);
+			
+			return;
+		}
+		
 		if(boobaCount != boobaBackup) {
 			boobaBackup = boobaCount;
 			
 			bigSprite->effectsManager->doDialogue(
-			"please dont touch me\rin that manner.\ryou'll regret it."
+			"please dont touch me\rin that manner.\ryou'll regret it.\0"
 			);
 			
 			return;
@@ -294,7 +329,7 @@ void BigSprite::loadBoobTrap() {
 			bigSprite->effectsManager->doDialogue(
 			"i,,, why did you even do that?\rprobably wanted to see if i had programed it in\n"
 			"well, i did\rlet me move that out of the way\n"
-			"it might hurt a little bit though"
+			"it might hurt a little bit though\0"
 			);
 			
 			// it would be quite funny to somehow have her boobs kill you
@@ -338,8 +373,12 @@ void BigSprite::loadBoobTrap() {
 		if(frame % 2 != 0) {
 			return false;
 		}
-		
-		if(boobaCount > 16 && randomGenerator.get_int(0, 256 - boobaCount) == 0) {
+			
+		if(boobaCount > 32 && (boobaCount > 255 || (randomGenerator.get_int(0, 256 - boobaCount) == 0))) {
+			
+			// why doesnt the : display here?
+			globalGame->cutsceneManager.displayDisText(">FATAL ERROR : TOO MUCH BOOBA\0");
+			
 			bn::sound_items::metal_pipe_falling_sound_effect.play();
 			int lmao = 0;
 			while(lmao < 60 * 5) {
@@ -361,6 +400,15 @@ void BigSprite::loadBoobTrap() {
 		if(timesCalled == 4) {
 			timesCalled = 0;
 			boobaCount++;
+		
+			if(boobaCount == 8) {
+				globalGame->cutsceneManager.displayDisText(">ERR: BOOBA\0");
+			} else if(boobaCount == 16) {
+				globalGame->cutsceneManager.displayDisText(">ERR: BOOBA COUNTER OVERFLOW\0");
+			} else if(boobaCount == 32) {
+				globalGame->cutsceneManager.displayDisText(">ERR: WHY ARE YOU LIKE THIS\0");
+			}
+			
 			return true;
 		} 
 		return false;

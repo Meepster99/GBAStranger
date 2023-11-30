@@ -342,6 +342,8 @@ static const char *TileTypeToString[] ={
 
 }
 
+#define BACKGROUNDMAPATTRIBUTES __attribute__((section(".ewram")))
+
 class BackgroundMap {
 public:
 
@@ -474,7 +476,7 @@ public:
 			setTile(16,24,4);
 	}
 	
-	void setTile(int x, int y, int tileIndex) {
+	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) {
 	
 		bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
@@ -488,7 +490,7 @@ public:
 		//bgMap.reload_cells_ref();
 	}
 	
-	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
+	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 		
 		bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
@@ -600,6 +602,8 @@ public:
 	
 };
 
+#define POSATTRIBUTES __attribute__((section(".ewram")))
+
 class Pos {
 public:
 
@@ -619,9 +623,9 @@ public:
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
 	
-	Pos(const Pos& other) : x(other.x), y(other.y) {}
+	constexpr Pos(const Pos& other) : x(other.x), y(other.y) {}
 	
-	Pos& operator=(const Pos& other) {
+	constexpr Pos& operator=(const Pos& other) {
         if (this != &other) {
             x = other.x;
 			y = other.y;
@@ -629,14 +633,14 @@ public:
         return *this;
     }
 	
-	bool operator<(const Pos& other) const {
+	POSATTRIBUTES bool operator<(const Pos& other) const {
 		//return (x + 14 * y) < (other.x + 14 * y);
 		// x and y both,, are restricted to 4 bits max per num,,,, i canoptimize this 
 		// this is only rlly being used for SaneSet anyway
 		return ((x << 4) | y) < ((other.x << 4) | other.y);
 	}
 	
-	Pos operator+(const Pos& other) {
+	POSATTRIBUTES Pos operator+(const Pos& other) {
 
 		int tempX = x + other.x;
 		int tempY = y + other.y;
@@ -649,7 +653,7 @@ public:
 		return Pos(tempX, tempY);
 	}
 	
-	Pos operator-(const Pos& other) {
+	POSATTRIBUTES Pos operator-(const Pos& other) {
 
 		int tempX = x - other.x;
 		int tempY = y - other.y;
@@ -662,41 +666,7 @@ public:
 		return Pos(tempX, tempY);
 	}
 	
-	bool move(Direction moveDir) {
-		
-		/*
-		int newX = x;
-		int newY = y;
-		
-		switch (moveDir) {
-			case Direction::Up:
-				newY -= 1;
-				break;
-			case Direction::Down:
-				newY += 1;
-				break;
-			case Direction::Left:
-				newX -= 1;
-				break;
-			case Direction::Right:
-				newX += 1;
-				break;
-			default:
-				break;
-		}
-		
-		if(newX < 0 || newY < 0 || newX >= 14 || newY >= 9) {
-			return false;
-		}
-		
-		x = newX;
-		y = newY;
-		
-		return true;
-		*/
-		
-		
-	
+	POSATTRIBUTES bool move(Direction moveDir) {
 		
 		switch (moveDir) {
 			case Direction::Up:
@@ -738,7 +708,7 @@ public:
 		
 	}
 	
-	bool moveInvert(Direction moveDir, bool invertHorizontal, bool invertVertical) {
+	POSATTRIBUTES bool moveInvert(Direction moveDir, bool invertHorizontal, bool invertVertical) {
 	
 		if(invertHorizontal) {
 			if(moveDir == Direction::Left) {
@@ -759,9 +729,9 @@ public:
 		return move(moveDir);
 	}
 	
-	bool operator==(Pos const& rhs) const { return x == rhs.x && y == rhs.y; }
+	POSATTRIBUTES bool operator==(Pos const& rhs) const { return x == rhs.x && y == rhs.y; }
 
-	bool sanity() const {
+	POSATTRIBUTES bool sanity() const {
 		// checks if im going insane.
 		return x >= 0 && y >= 0 && x < 14 && y < 9;
 	}
@@ -881,13 +851,17 @@ public:
 // i could maybe use,, unique pointer? but tbh i just dont want to 
 // actually, we only have unique pointers! no shared, so im doing this
 // insertion will be slow, but at least lookup will be fast.
+
+//#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+#define SANESETATTRIBUTES __attribute__((section(".ewram")))
+
 template <typename T, int maxVecSize>
 class SaneSet {
 private:
 	
 	bn::vector<T, maxVecSize> data;
 
-	int binarySearch(const T& elem) const {
+	SANESETATTRIBUTES int binarySearch(const T& elem) const {
 		int left = 0;
         int right = data.size() - 1;
 
@@ -904,7 +878,7 @@ private:
 		return -1;
 	}
 	
-	int getInsertIndex(const T& elem) const {
+	SANESETATTRIBUTES int getInsertIndex(const T& elem) const {
         int left = 0;
         int right = data.size();
 
@@ -923,18 +897,18 @@ private:
 	
 public:
 
-	SaneSet() {}	
+	SANESETATTRIBUTES SaneSet() {}	
 
-	SaneSet(const SaneSet& other) : data(other.data) {}
+	SANESETATTRIBUTES SaneSet(const SaneSet& other) : data(other.data) {}
 	
-	SaneSet& operator=(const SaneSet& other) { 
+	SANESETATTRIBUTES SaneSet& operator=(const SaneSet& other) { 
         if (this != &other) {
             data = other.data;
         }
         return *this;
     }
 	
-	void insert(const T& elem) {
+	SANESETATTRIBUTES void insert(const T& elem) {
 		int index = binarySearch(elem);
         if (index == -1) {
             // Element not found, insert it at the appropriate position
@@ -943,14 +917,14 @@ public:
         }
 	}
 	
-	bool contains(const T& elem) const {
+	SANESETATTRIBUTES bool contains(const T& elem) const {
 		if(data.size() == 0) {
 			return false;
 		}
 		return binarySearch(elem) != -1;
 	}
 	
-	bn::vector<T, maxVecSize>::iterator erase(const T& elem) {
+	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator erase(const T& elem) {
         int index = binarySearch(elem);
         if (index != -1) {
             return data.erase(data.begin() + index);
@@ -958,11 +932,11 @@ public:
 		return data.end();
     }
 	
-	bn::vector<T, maxVecSize>::iterator erase(const bn::vector<T, maxVecSize>::iterator it) {
+	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator erase(const bn::vector<T, maxVecSize>::iterator it) {
 		return data.erase(it);
 	}
 	
-	bn::vector<T, maxVecSize>::iterator insert(const bn::vector<T, maxVecSize>::iterator it) {
+	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator insert(const bn::vector<T, maxVecSize>::iterator it) {
 		int index = binarySearch(*it);
         if (index == -1) {
             // Element not found, insert it at the appropriate position
@@ -972,33 +946,33 @@ public:
 		return data.begin() + index;
 	}
 	
-	int size() const {
+	SANESETATTRIBUTES int size() const {
 		return data.size();
 	}
 	
 	// is returning these iterators,,, ok??
 	
-	auto begin() {
+	SANESETATTRIBUTES auto begin() {
 		return data.begin();
 	}
 	
-	auto end() {
+	SANESETATTRIBUTES auto end() {
 		return data.end();
 	}
 	
-	auto cbegin() const {
+	SANESETATTRIBUTES auto cbegin() const {
 		return data.cbegin();
 	}
 	
-	auto cend() const {
+	SANESETATTRIBUTES auto cend() const {
 		return data.cend();
 	}
 	
-	void clear() {
+	SANESETATTRIBUTES void clear() {
 		data.clear();
 	}
 	
-	int maxSize() const {
+	SANESETATTRIBUTES int maxSize() const {
 		return maxVecSize;
 	}
 	
