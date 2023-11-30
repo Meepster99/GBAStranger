@@ -704,6 +704,11 @@ void Game::loadLevel(bool debug) {
 			}
 			*/
 			
+			if(y == 8) { // room 39 fix
+				collisionMap[x][y] = 0;
+				continue;
+			}
+			
 			collisionMap[x][y] = uncompressedCollision[x + 14 * y];
 			detailsMap[x][y] = uncompressedDetails[x + 14 * y];
 			
