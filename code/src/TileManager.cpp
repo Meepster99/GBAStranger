@@ -516,6 +516,10 @@ void TileManager::doFloorSteps() { profileFunction();
 	}
 	
 	// ok now we are in that class. im still going to leave parts ofthis hardcoded tho
+	
+	// THIS CODE IS DUMB!!!! AND WASTEFUL!!!!
+	// now that i think abt it, depracating this also,,, depracates the need for the floorsteos array?
+	/*
 	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
 		if((*it).first == EntityType::Player) {
 			
@@ -532,7 +536,7 @@ void TileManager::doFloorSteps() { profileFunction();
 			}
 		}
 	}
-	
+	*/
 
 	stepOns.clear();
 	stepOffs.clear();

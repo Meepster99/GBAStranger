@@ -632,6 +632,14 @@ EntityManager::~EntityManager() {
 
 bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	
+	switch(e->entityType()) {
+		case EntityType::Chest:
+			return false;
+		case EntityType::Interactable:
+			return false;
+		default:
+			break;
+	}
 	
 	if(!dontSet) {
 		posTracker.insert(e->p);
@@ -944,10 +952,14 @@ void EntityManager::doMoves() { profileFunction();
 	
 
 
-	// TODO when you have a shadow, and go from being onto a shadow tile to falling(with wings) it spawns the default gray sprite, fix that
-	manageShadows(shadowMove);
-	//BN_LOG("shadow move");
-	updateMap(); // this call may not be needed, but im not risking it
+	if( (shadowMove) && !(shadowQueue.size() == 0 && shadowList.size() == 0)) {	
+		manageShadows(shadowMove);
+		//BN_LOG("shadow move");
+		// TBH, THE MANAGESHADOW SHADOW EXISTANCE CHECK SHOULD OCCUR OUT HERE, AND THIS CALL SHOULDNT EVEN HAPPEN IF NO SHADDOWS EXIST!
+		updateMap(); // this call may not be needed, but im not risking it
+	}
+	
+	// leaving this here bc technically, the above switch statement with the diamonds can cause a death
 	if(hasKills()) {
 		return;
 	}
@@ -1280,13 +1292,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 	// IT WILL WAIT UNTIL CLEAR.
 	// ADDITIONALLY, NEW SHADOWS WILL SPAWN AFTER OLD ONES MOVE
 
-	if(!playerDir) {
-		return;
-	}
-	
-	if(shadowQueue.size() == 0 && shadowList.size() == 0) {
-		return;
-	}
+	BN_ASSERT(playerDir.has_value(), "manageshadows was called with a playerdir without a value??");
 	
 	Direction moveDir = playerDir.value();
 	
@@ -1307,36 +1313,64 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 		
 		Pos currentPos = shadowList[i]->p;
 	
-		BN_LOG("moving shadows (",currentPos.x,",",currentPos.y,") (",nextPos.x,",",nextPos.y,")");
+		// this log statement was causing,, a suprising amount of lag. makes sense, but still
+		//BN_LOG("moving shadows (",currentPos.x,",",currentPos.y,") (",nextPos.x,",",nextPos.y,")");
 		
 		BN_ASSERT(currentPos != nextPos, "error finding next shadow move, current and next pos were equal?? i=", i);
 	
-		int xDif = nextPos.x - currentPos.x;
-		int yDif = nextPos.y - currentPos.y;
+		int xDif = 1 + nextPos.x - currentPos.x;
+		int yDif = 1 + nextPos.y - currentPos.y;
 		
-		BN_ASSERT(!(xDif != 0 && yDif != 0), "error finding next shadow move, it was diag?");
+		//BN_ASSERT(!(xDif != 0 && yDif != 0), "error finding next shadow move, it was diag?");
+		
+		// was previously doing a bunch of ifs. not ideal
+		// adding 1 to the thing converts out -1,0,1 to 0,1,2
+		// heres some python code as an explination:
+		/*
 		
 		
-		if(xDif > 0) {
-			shadowList[i]->p.move(Direction::Right);
-			shadowList[i]->currentDir = Direction::Right;
-		} else if(xDif < 0) {
-			shadowList[i]->p.move(Direction::Left);
-			shadowList[i]->currentDir = Direction::Left;
-		} else if(yDif > 0) {
-			shadowList[i]->p.move(Direction::Down);
-			shadowList[i]->currentDir = Direction::Down;
-		} else if(yDif < 0) {
-			shadowList[i]->p.move(Direction::Up);
-			shadowList[i]->currentDir = Direction::Up;
+		for x in [-1, 0, 1]:
+			for y in [-1, 0, 1]:
+				if abs(x) ^ abs(y) == 0:
+					continue
+				
+				xDif = 1 + x
+				yDif = 1 + y
+				
+				switchVal = (yDif << 2) | xDif;
+				
+				print(xDif, yDif, "{:04b}".format(switchVal))
+		
+		
+		*/
+		
+		int switchVal = (yDif << 2) | xDif;
+		
+		switch(switchVal) {
+			case 0b0100:
+				shadowList[i]->p.move(Direction::Left);
+				shadowList[i]->currentDir = Direction::Left;
+				break;
+			case 0b0001:
+				shadowList[i]->p.move(Direction::Up);
+				shadowList[i]->currentDir = Direction::Up;
+				break;
+			case 0b1001:
+				shadowList[i]->p.move(Direction::Down);
+				shadowList[i]->currentDir = Direction::Down;
+				break;
+			case 0b0110:
+				shadowList[i]->p.move(Direction::Right);
+				shadowList[i]->currentDir = Direction::Right;
+				break;
+			default: [[unlikely]]
+				BN_ERROR("error in manageShadows switch statement! xdif = ", xDif, " ydif = ", yDif, " switchval was ", switchVal);
+				break;
 		}
-		
-		// dont do moveentity, as shadows are nonstandard!
-		//moveEntity(shadowList[i]);
 		
 		BN_ASSERT(currentPos != shadowList[i]->p, "somehow a shadow move failed?? how?");
 		
-		BN_ASSERT(futureEntityMap[currentPos.x][currentPos.y].contains(shadowList[i]), "in shadowmanager, tryed to move an entity in futuremap that wasnt there? x=", currentPos.x, " y=", currentPos.y);
+		//BN_ASSERT(futureEntityMap[currentPos.x][currentPos.y].contains(shadowList[i]), "in shadowmanager, tryed to move an entity in futuremap that wasnt there? x=", currentPos.x, " y=", currentPos.y);
 		futureEntityMap[currentPos.x][currentPos.y].erase(shadowList[i]);
 		
 		bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(shadowList[i]->entityType(), bn::pair<Pos, Pos>(currentPos, shadowList[i]->p));
@@ -1344,48 +1378,54 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 
 		futureEntityMap[shadowList[i]->p.x][shadowList[i]->p.y].insert(shadowList[i]);
 		
+		// should these poses be insterted into posTracker?
+		// there dont seem to be any bugs,, at least yet
+		// nvm, shadows can now fly. problems.
+		posTracker.insert(shadowList[i]->p);
+		
 		nextPos = currentPos;
 	}
-
-
-	// hacky, but needs to be done since movedir like, changes the future, and i need that future as the present
-	// but,,, ugh ijust hope this doesnt cause problems down the road
 	
-	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			entityMap[x][y] = futureEntityMap[x][y];
-		}
+	//for(auto it = shadowQueue.begin(); it != shadowQueue.end(); ) {
+	if(shadowQueue.size() != 0) {
+		
+		Pos queuePos = *shadowQueue.begin();
+		
+		// not using hasEntity here bc im going off of the future map in this case.
+		//if(hasEntity(queuePos)) {
+		if(futureEntityMap[queuePos.x][queuePos.y].size() == 0) {
+			
+			// this may be an assumption. 
+			// but, 
+			// if/assuming the queue is in order,,, 
+			// i can just break here?
+			// i really dont think this should work tbh 
+			// but it somehow does.
+			// im,, im inserting stuff to the end of the shadowqueue, 
+			// BUT WAIT THE STUFF AT THE START IS THE OLDEST, MEANING SOONEST TO GET CREATED
+			// im chilling.
+			// and,,, since only one shadow can be created per move, i can further optimize this
+			//break;
+			
+			shadowQueue.erase(shadowQueue.begin());
+		
+			// unsure if needed
+			posTracker.insert(queuePos);
+			
+			effectsManager->shadowCreate(queuePos);
+			Shadow* temp = new Shadow(queuePos);
+			shadowList.push_back(temp); 
+			entityList.insert(temp);
+			
+			// this doupdate call fixes buggy sprites why dying right as a shadow is created
+			//temp->doUpdate();
+		
+			futureEntityMap[queuePos.x][queuePos.y].insert(temp);
+			
+		}		
 	}
 	
-	for(auto it = shadowQueue.begin(); it != shadowQueue.end(); ) {
-		
-		Pos queuePos = *it;
-		
-		if(hasEntity(queuePos)) {
-			++it;
-			continue;
-		}
-		
-		it = shadowQueue.erase(it);
-		
-		
-		effectsManager->shadowCreate(queuePos);
-		Shadow* temp = new Shadow(queuePos);
-		shadowList.push_back(temp); 
-		entityList.insert(temp);
-		
-		// this doupdate call fixes buggy sprites why dying right as a shadow is created
-		temp->doUpdate();
-		
-		// shadows should be able to be added to enemylist,, since their moves will be used earlier?
-		// nvm i dont like that.
-		// do i????
-		//enemyList.insert(temp);
-
-		getMap(queuePos).insert(temp);
-		// also insert this into futuremap
-		futureEntityMap[queuePos.x][queuePos.y].insert(temp);
-	}
+	
 	
 }
 

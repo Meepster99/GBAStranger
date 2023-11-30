@@ -131,6 +131,8 @@ public:
 	
 	void isSteppedOnAnimation() override;
 	
+	void stepOn() override;
+	
 };
 
 class Switch : public FloorTile { // switch

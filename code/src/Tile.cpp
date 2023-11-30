@@ -325,5 +325,20 @@ void Copy::isSteppedOnAnimation() {
 	
 }
 
+void Copy::stepOn() {
+
+	isSteppedOn = true;
+	
+	// im hoping this call will be more efficient than what i was doing in dofloorsteps, which was a full loop over all steps
+	
+	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+
+	for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+		if((*it)->entityType() == EntityType::Player) {
+			entityManager->shadowQueue.push_back(tilePos);
+		}
+	}
+}
+
 
 

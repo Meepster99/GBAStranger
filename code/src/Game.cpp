@@ -1387,7 +1387,13 @@ void Game::load() {
 
 void Game::playSound(const bn::sound_item* sound) {
 	
-	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED
+	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED OR ALTERED
+	
+	if(boobaCount > 8 && (
+	sound == &bn::sound_items::snd_push_small
+	)) {
+		sound = &bn::sound_items::snd_bounce;
+	}
 	
 	if(state == GameState::Loading || state == GameState::Entering) {
 		return;
