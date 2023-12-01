@@ -283,6 +283,9 @@ void BigSprite::loadBoobTrap() {
 		//if(true) {
 			
 			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
+				
+				bn::music::stop();
+				
 				bigSprite->effectsManager->doDialogue(
 				"fool.\n"
 				"get out of my sight.\0"

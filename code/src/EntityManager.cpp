@@ -327,6 +327,7 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 	
 	std::function<bool(void*)> kickFunc = [](void* unused) mutable -> bool {
 		(void)unused;
+		globalGame->playSound(&bn::sound_items::snd_push_small);
 		return true;
 	};
 	
@@ -423,6 +424,8 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		};
 		
 		kickFunc = [](void* obj) -> bool {
+			
+			globalGame->playSound(&bn::sound_items::snd_push_small);
 			
 			BN_ASSERT(obj != NULL, "WTF IN kickedfunc ");
 			
