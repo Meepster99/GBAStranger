@@ -640,8 +640,10 @@ EntityManager::~EntityManager() {
 bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	
 	switch(e->entityType()) {
-		case EntityType::Chest:
-			return false;
+		//case EntityType::Chest:
+			
+			//(static_cast<Obstacle*>(e))->bumpDirections.clear(); // is this ok?
+			//return false;
 		case EntityType::Interactable:
 			return false;
 		default:
@@ -1800,9 +1802,16 @@ void EntityManager::doVBlank() { profileFunction();
 			// THIS FUNCTION CAN,, AS IN IF IT DELETES OBSTACLES INSIDE OF IT, I AM FUCKED?????
 			// ITS PATHETIC I DIDNT SEE THIS EARLIER
 			
-			if( (*it)->entityType() != EntityType::Interactable ) { // pathetic half fix
-				continue;
+			// pathetic half fix
+			switch((*it)->entityType()) {
+				case EntityType::Interactable:
+					continue;
+				case EntityType::Chest:
+					break;
+				default:
+					break;
 			}
+		
 			
 			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}
@@ -2084,7 +2093,8 @@ bn::optional<Direction> EntityManager::canPathToPlayer(Diamond* e, Pos playerSta
 			continue;
 		}
 		
-		if(testPos == playerStartPos) {
+		//if(testPos == playerStartPos) {
+		if(testPos == playerStart) {
 			
 			e->nextMove = testDirections[i];
 			

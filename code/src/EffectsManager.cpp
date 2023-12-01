@@ -397,7 +397,8 @@ void BigSprite::loadBoobTrap() {
 		",,,\r"
 		"actually wait a minute, what is that jam in the background?\ri guess music is somehow in!"
 		"\0"},
-		{"anyway, you know the drill\rhead down the stairs, good luck\0"}
+		{"anyway, you know the drill\rhead down the stairs, good luck\0"},
+		{"<3\0"}
 		};
 		
 		// i rlly need to rewrite the dialogue system to automatically cut words.
@@ -421,15 +422,24 @@ void BigSprite::loadBoobTrap() {
 			
 		if(boobaCount > 32 && (boobaCount > 255 || (randomGenerator.get_int(0, 256 - boobaCount) == 0))) {
 			
+			// for some reason, if this branch is predictable(not random) it causes a sprite tiles crash.
+			
 			// why doesnt the : display here?
 			globalGame->cutsceneManager.displayDisText(">FATAL ERROR : TOO MUCH BOOBA\0");
 			
+			delay(1);
 			bn::sound_items::metal_pipe_falling_sound_effect.play();
 			int lmao = 0;
 			while(lmao < 60 * 5) {
 				lmao++;
 				game->doButanoUpdate();
 			}
+			
+		
+			bn::sound_items::snd_reveal.play();
+			globalGame->effectsManager.deathTile(globalGame->entityManager.player->p);
+			delay(10);
+			
 			BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
 		}
 		
