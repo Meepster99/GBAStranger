@@ -278,16 +278,61 @@ void BigSprite::loadBoobTrap() {
 		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
 		
 		static unsigned boobaBackup = 0;
-		
+
 		if(boobaCount > 32) {
+		//if(true) {
 			
 			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
 				bigSprite->effectsManager->doDialogue(
 				"fool.\n"
 				"get out of my sight.\0"
 				);
+				
+				
+				/*
+				bn::vector<BigSprite*, 128>& allBigSprites = globalGame->effectsManager.bigSprites;
+				
+				BigSprite* boobSprite = NULL;
+						
+				for(auto it = allBigSprites.begin(); it != allBigSprites.end(); ++it) {
+					if( (*it)->tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
+						boobSprite = *it;
+						break;
+					}
+				}
+				
+				BN_ASSERT(boobSprite != NULL, "couldnt find tails tail sprite ptr???");
 			
+				boobSprite->sprites[0].spritePointer.set_visible(false);
+				*/
+				
+				Pos startPos = globalGame->entityManager.player->p;
+				Pos downPos = startPos;
+				downPos.move(Direction::Down);
+				
+				bn::sound_items::snd_reveal.play();
+				globalGame->effectsManager.deathTile(downPos);
+				
+				delete globalGame->tileManager.floorMap[downPos.x][downPos.y];
+				globalGame->tileManager.floorMap[downPos.x][downPos.y] = NULL;
+				globalGame->tileManager.updateTile(downPos);
+				delay(30);
+				
+				
+				globalGame->entityManager.player->p.move(Direction::Down);
+	
+				globalGame->entityManager.updateScreen();
+				
+				bn::sound_items::snd_push.play();
+				
+				effectsManager->smokeCloud(downPos, Direction::Down);
+				
+				delay(15);
+				
 				globalGame->cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_black_bg);
+				
+				// only here for debugging
+				boobaCount = MAX(32, boobaCount); 
 				
 				for(unsigned i=0; i<boobaCount; i++) {
 					bn::sound_items::snd_reveal.play();
@@ -298,7 +343,7 @@ void BigSprite::loadBoobTrap() {
 				delay(5);
 				
 				bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
-				
+			
 				globalGame->roomManager.nextRoom();
 				
 				return;
