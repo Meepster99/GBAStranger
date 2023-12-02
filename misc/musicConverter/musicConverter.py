@@ -167,14 +167,36 @@ class ITFile:
 		
 		tempBuffer = io.BytesIO()
 		
-		test = AudioSegment.from_file(filename + ".ogg")
+		#test = AudioSegment.from_file(filename + ".ogg")
+		
+		"""
+		# this is just here for debug!
+		cmd = ["ffmpeg", "-y", "-i", filename + ".ogg", 
+		"-ac", "1",
+		"-filter_complex",
+		#"[0]aresample={:d}[1]".format(GBASAMPLERATE), 
+		#"[0]lowpass=f={:d}[2];[2]aresample={:d}[1]".format(GBASAMPLERATE // 2, GBASAMPLERATE), 
+		# i have no clue what value is ideal for this, additionally, do i want this to be a normal filter, or to hard cut all freqs above a value?
+		"[0]lowpass=f={:d}[2];[2]aresample={:d}[1]".format(int( (GBASAMPLERATE / 2) * 0.33), GBASAMPLERATE), 
+		"-map", "[1]", "-acodec", "pcm_s16le", self.filename + ".wav"]
+		
+		res = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
+		if res.returncode != 0:
+			res = subprocess.run(cmd)
+			print(RED + " ".join(cmd) + " failed!" + RESET)
+			exit(1)
+			
+		"""
 		
 		# ffmpeg -y -i ../ExportData/Exported_Sounds/audiogroup_music/msc_voidsong.ogg -map 0 -f s16le pipe:
 		cmd = ["ffmpeg", "-y", "-i", filename + ".ogg", 
 		"-ac", "1",
 		"-filter_complex",
-		"[0]aresample={:d}[1]".format(GBASAMPLERATE), 
-		
+		#"[0]aresample={:d}[1]".format(GBASAMPLERATE), 
+		# i have no clue what value is ideal for this, additionally, do i want this to be a normal filter, or to hard cut all freqs above a value?
+		# seems like,, poles is what i want
+		# nvm! bc they dont let me go above 2?
+		"[0]highpass=f=120:p=2[3];[3]lowpass=f={:d}:p=2[2];[2]aresample={:d}[1]".format(int( (GBASAMPLERATE // 2) * 0.707 ) , GBASAMPLERATE), 
 		"-map", "[1]", "-f", "s16le", "pipe:"]
 		
 		res = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
@@ -184,7 +206,6 @@ class ITFile:
 			res = subprocess.run(cmd)
 			print(RED + " ".join(cmd) + " failed!" + RESET)
 			exit(1)
-		
 		
 		self.sampleBytes = struct.unpack('<' + 'h' * (len(res.stdout) // 2), res.stdout)		
 		
@@ -980,11 +1001,11 @@ class ITFile:
 		f.close()
 		
 		
-		if os.path.isdir(self.filename):
-			shutil.rmtree(self.filename)
-		removeFile(self.filename + ".wav")
-		removeFile(self.filename + "2.wav")
-		removeFile(self.filename + "3.wav")
+		#if os.path.isdir(self.filename):
+		#	shutil.rmtree(self.filename)
+		#removeFile(self.filename + ".wav")
+		#removeFile(self.filename + "2.wav")
+		#removeFile(self.filename + "3.wav")
 		
 		
 		pass
