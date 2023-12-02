@@ -1080,6 +1080,8 @@ void EntityManager::doMoves() { profileFunction();
 	// >=1 obstacle, and any entities, this shouldnt happen i believe?
 	// also possibly kill the player.
 	
+	posTracker.insert(player->p); // a chester, moving onto and destroying a section of bomb tiles with you on it, wasnt properly activiating wings?
+	
 	moveEnemies();
 	//BN_LOG("enemy move");
 	updateMap();

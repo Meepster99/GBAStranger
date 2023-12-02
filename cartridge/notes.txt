@@ -53,3 +53,4 @@ says it works with variable input voltages, but other sites,,, ugh
 actually, doesnt seem ill be able to use this 
 needs a 1.8V vcc, even if i can have the io go to 3.3, the extra hardware to drop 3.3 to 1.8 aint worth it 
 
+https://www.mouser.com/c/semiconductors/programmable-logic-ics/cpld-complex-programmable-logic-devices/?m=Intel
