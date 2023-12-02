@@ -6,4 +6,50 @@ https://reinerziegler.de.mirrors.gg8.se/GBA/gba.htm
 
 https://i.stack.imgur.com/Lflo3.png
 
+ok, so 
+i need to latch lines 0-15, 16-23 are ok bc those arent used for data.
+
+CS low latches 0-15
+RD low(i think?) reads 16 bits(unsigned short/short)
+
+each sequential RD low increases the address, for sequential reads.
+
+address inc occurs on the rising edge of RD 
+
+i despise doing any sort of tristate logic, im going to despise this 
+
+wait states, going to be an issue.
+
+additionally, i should be able to do a write to rom to trigger a bank swap.
+
+for save data, use FRAM, no battery, no expiration(of said batter), no running out like flash 
+
+
+TODO:
+CS2, what is it 
+WR 
+CLK, needed? 
+the cart irq, might be very useful. 
+
+i could maybe use it to stop all other, stuff from occuring (including music?) 
+when swapping the rom banks 
+and i could literally do a read from ROM inside the cart irq to see if the cartridge 
+was actually removed(trigger add scene) or just a swap, and continue as normal 
+
+aligning the music data, may also be an issue.
+
+i also despise using a fpga/cpld for something as simple as this, but regretably, thats 
+just the way of the world 
+i feel like that type of design ruined the beauty of so many older devices.
+everythings just one chip these days 
+
+https://www.intel.com/content/www/us/en/products/details/fpga/max/v/products.html
+
+cheap, available, yea. this will work well.
+except, the voltage? i need 3.3
+https://www.intel.com/content/www/us/en/products/sku/210257/max-v-5m80z-cpld/specifications.html 
+says it works with variable input voltages, but other sites,,, ugh 
+
+actually, doesnt seem ill be able to use this 
+needs a 1.8V vcc, even if i can have the io go to 3.3, the extra hardware to drop 3.3 to 1.8 aint worth it 
 
