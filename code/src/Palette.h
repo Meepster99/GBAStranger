@@ -130,6 +130,23 @@ public:
 	tempColorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)}
 	{
 		
+		
+		
+	}
+	
+	void update() {
+		
+		const auto& a = colorArray[0];
+		const auto& b = colorArray[1];
+		const auto& c = colorArray[2];
+		const auto& d = colorArray[3];
+		const auto& e = colorArray[4];
+		
+		alternateColorArray = {a, b, e, d, c, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)};
+		fontColorArray = {a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e};
+		tempColorArray = {a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)};
+		
+		
 		blackColorArray = {
 			colorArray[TRANSPARENT], colorArray[BLACK], colorArray[BLACK], colorArray[BLACK], colorArray[BLACK],
 			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
@@ -250,6 +267,13 @@ public:
 	const bn::sprite_palette_item getLightGraySpritePalette() {
 		
 		/*
+		lightGrayColorArray = {
+			colorArray[TRANSPARENT], colorArray[LIGHTGRAY], colorArray[LIGHTGRAY], colorArray[LIGHTGRAY], colorArray[LIGHTGRAY],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		*/
+		
+		/*
 		tempColorArray[BLACK] = colorArray[LIGHTGRAY];
 		tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
 		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
@@ -265,6 +289,13 @@ public:
 	const bn::sprite_palette_item getWhiteSpritePalette() {
 		
 		/*
+		whiteColorArray = {
+			colorArray[TRANSPARENT], colorArray[WHITE], colorArray[WHITE], colorArray[WHITE], colorArray[WHITE],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		*/
+		
+		/*
 		tempColorArray[BLACK] = colorArray[WHITE];
 		tempColorArray[DARKGRAY] = colorArray[WHITE];
 		tempColorArray[LIGHTGRAY] = colorArray[WHITE];
@@ -278,6 +309,13 @@ public:
 	}
 	
 	const bn::sprite_palette_item getDarkGraySpritePalette() {
+	
+		/*
+		darkGrayColorArray = {
+			colorArray[TRANSPARENT], colorArray[DARKGRAY], colorArray[DARKGRAY], colorArray[DARKGRAY], colorArray[DARKGRAY],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		*/
 		
 		/*
 		tempColorArray[BLACK] = colorArray[DARKGRAY];
@@ -292,6 +330,13 @@ public:
 	}
 	
 	const bn::sprite_palette_item getBlackSpritePalette() {
+		
+		/*
+		blackColorArray = {
+			colorArray[TRANSPARENT], colorArray[BLACK], colorArray[BLACK], colorArray[BLACK], colorArray[BLACK],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		*/
 		
 		/*
 		tempColorArray[BLACK] = colorArray[BLACK];

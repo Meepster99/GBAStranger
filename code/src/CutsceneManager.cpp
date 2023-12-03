@@ -2168,6 +2168,8 @@ void CutsceneManager::inputCustomPalette() {
 					colorRef.set_blue(CLAMP(colorRef.blue() + changeVal, 0, 31));
 				}
 				
+				game->pal->update();
+				
 				colorOptions[0].spritePointer.set_palette(game->pal->getBlackSpritePalette());
 				colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
 				colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());

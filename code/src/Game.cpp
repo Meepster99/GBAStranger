@@ -777,7 +777,7 @@ void Game::loadLevel(bool debug) {
 	BN_LOG("loadlevel completed");
 }
 
- __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) void drawCollisionAndDetails() {
+ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_call)) void drawCollisionAndDetails() {
 //void drawCollisionAndDetails() {
 	
 	// PUTTING THIS IN ARM GIVES A 50% REDUCTION. FIGURE IT OUT DUMBASS
@@ -912,6 +912,7 @@ void Game::changePalette(int offset) {
 	
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 	
+	pal->update();
 	
 	*col0 = pal->colorArray[0].data();
 	*col1 = pal->colorArray[1].data();

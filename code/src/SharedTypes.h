@@ -184,9 +184,9 @@ extern int* glitchTilesCount;
 : __DATE__ [2] == 'v' ? 11 \
 : 12)
 
-__attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand();
+__attribute__((section(".iwram"), target("thumb"), long_call)) unsigned short bruhRand();
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData();
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) unsigned getMiscData();
 
 void doNothing();
 
