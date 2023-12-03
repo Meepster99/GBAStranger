@@ -8,6 +8,8 @@
 #include <bn_assert.h>
 #include "bn_fixed.h"
 
+#include "bn_array.h"
+
 #define TRANSPARENT 0
 #define BLACK 1 
 #define WHITE 2
@@ -19,21 +21,113 @@
 #define CCOL 2
 #define DCOL 3
 #define ECOL 4
+
+/*
+
+ohnobro.
+it seems like ive done a major fucky wucky 
+sprite palette item's spans,, hold a refrence to the color. 
+meaning that my "tempcolorarray" solution was actually "fucked"
+and also that doing palette manip is also WAYYYY easier than i made it be for myself.
+
+and now ive somehow corrupted every single palette. 
+
+i suppose,,, im going to need to have,,, a fucking individual array foreach thing again 
+unless i want to deal with memory hell. 
+ugh
+annnnnnd IM almost definitely going to fuck up all the fancy fades ive made
+
+godsssss this whole class is fucked to all hell
+
+no wait, i know how to get around this. 
+i just need to avoid EVER updating the ACTUAL palette cache.
+i did this other times.
+
+you wont see this in the commit logs, but like 
+gods trying to get restrequest working again like, WHAT THE FUCK IS GOING ON 
+i ended up having to reset back to head
+
+this whole implimentation is scuffed. why dont i have global funcs for getting the palettes of things??? omfg 
+
+was it caused by me moving random shit out of rom into ram?
+theres no fucking way though, like theres no fucking way 
+
+ok aparently there is a way?????
+thats,,, that not ok. thats just not ok. 
+how.
+
+i moved game vblank, and the effects manager vblank, enter and exit funcs from arm and iwram, to ewram and thumb. 
+and the bug went away??? what the fuck 
+i just spent 3 hours on this?!?!?!?!
+
+gods the issue is,,, i have certain things that like, need to be in arm, else i lag ( floor draw code)
+
+is this going to hurt performance?
+
+ok now i,,, 
+i give up. i do not get it 
+
+let it be known, if shit just gets weird, its arm/something else being fucked
+or maybe i just needed a make clean???? 
+
+no! putting the game classes vblank func into arm and iwram, causes the text when saying no to cif's dream in 254 to corrupt like, fucking everything.
+i rlly hope that like, swapping from thumb to arm isnt expensive.
+bc im trying to keep other things in arm 
+or maybe its bc im not putting the attributes in the cpp and header???
+
+nvm even with vblank in ewram, shits still fucked, just on the second time talking to the tree
+
+gods having an array per thing is just horrid for mem management, and idek if it will actually help
+
+*/
+ 
  
 class Palette {
 public:
 
-	bn::color colorArray[16];
-	bn::color alternateColorArray[16];
-	bn::color fontColorArray[16];
-	bn::color tempColorArray[16];
+	//bn::color colorArray[16];
+	//bn::color alternateColorArray[16];
+	//bn::color fontColorArray[16];
+	//bn::color tempColorArray[16];
+	
+	bn::array<bn::color, 16> colorArray;
+	bn::array<bn::color, 16> alternateColorArray;
+	bn::array<bn::color, 16> fontColorArray;
+	bn::array<bn::color, 16> tempColorArray;
+	
+	bn::array<bn::color, 16> blackColorArray;
+	bn::array<bn::color, 16> darkGrayColorArray;
+	bn::array<bn::color, 16> lightGrayColorArray;
+	bn::array<bn::color, 16> whiteColorArray;
 	
 	constexpr Palette(bn::color a, bn::color b, bn::color c, bn::color d, bn::color e = bn::color(0, 0, 0)) :
 	colorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
 	alternateColorArray{a, b, e, d, c, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
 	fontColorArray{a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e},
 	tempColorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)}
-	{}
+	{
+		
+		blackColorArray = {
+			colorArray[TRANSPARENT], colorArray[BLACK], colorArray[BLACK], colorArray[BLACK], colorArray[BLACK],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		
+		darkGrayColorArray = {
+			colorArray[TRANSPARENT], colorArray[DARKGRAY], colorArray[DARKGRAY], colorArray[DARKGRAY], colorArray[DARKGRAY],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		
+		lightGrayColorArray = {
+			colorArray[TRANSPARENT], colorArray[LIGHTGRAY], colorArray[LIGHTGRAY], colorArray[LIGHTGRAY], colorArray[LIGHTGRAY],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		
+		whiteColorArray = {
+			colorArray[TRANSPARENT], colorArray[WHITE], colorArray[WHITE], colorArray[WHITE], colorArray[WHITE],
+			bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)
+		};
+		
+	}
 
 	const bn::bg_palette_item getBGPalette() {
 		
@@ -123,56 +217,69 @@ public:
 		tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
 		tempColorArray[WHITE] = colorArray[LIGHTGRAY];
 		
+		
 		bn::span<bn::color> spanthing(tempColorArray);
+		//bn::span<bn::color> spanthing(darkGrayColorArray);
 
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
 	const bn::sprite_palette_item getLightGraySpritePalette() {
 		
+		/*
 		tempColorArray[BLACK] = colorArray[LIGHTGRAY];
 		tempColorArray[DARKGRAY] = colorArray[LIGHTGRAY];
 		tempColorArray[LIGHTGRAY] = colorArray[LIGHTGRAY];
 		tempColorArray[WHITE] = colorArray[LIGHTGRAY];
+		*/
 		
-		bn::span<bn::color> spanthing(tempColorArray);
+		//bn::span<bn::color> spanthing(tempColorArray);
+		bn::span<bn::color> spanthing(lightGrayColorArray);
 
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
 	const bn::sprite_palette_item getWhiteSpritePalette() {
 		
+		/*
 		tempColorArray[BLACK] = colorArray[WHITE];
 		tempColorArray[DARKGRAY] = colorArray[WHITE];
 		tempColorArray[LIGHTGRAY] = colorArray[WHITE];
 		tempColorArray[WHITE] = colorArray[WHITE];
+		*/
 		
-		bn::span<bn::color> spanthing(tempColorArray);
+		//bn::span<bn::color> spanthing(tempColorArray);
+		bn::span<bn::color> spanthing(whiteColorArray);
 
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
 	const bn::sprite_palette_item getDarkGraySpritePalette() {
 		
+		/*
 		tempColorArray[BLACK] = colorArray[DARKGRAY];
 		tempColorArray[DARKGRAY] = colorArray[DARKGRAY];
 		tempColorArray[LIGHTGRAY] = colorArray[DARKGRAY];
 		tempColorArray[WHITE] = colorArray[DARKGRAY];
+		*/
 		
-		bn::span<bn::color> spanthing(tempColorArray);
+		bn::span<bn::color> spanthing(darkGrayColorArray);
 
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
 	const bn::sprite_palette_item getBlackSpritePalette() {
 		
+		/*
 		tempColorArray[BLACK] = colorArray[BLACK];
 		tempColorArray[DARKGRAY] = colorArray[BLACK];
 		tempColorArray[LIGHTGRAY] = colorArray[BLACK];
 		tempColorArray[WHITE] = colorArray[BLACK];
+		*/
 		
-		bn::span<bn::color> spanthing(tempColorArray);
-
+		//bn::span<bn::color> spanthing(tempColorArray);
+		bn::span<bn::color> spanthing(blackColorArray);
+	
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
 	
@@ -227,16 +334,16 @@ public:
 	const bn::sprite_palette_item getAlternateSpritePalette() {
 		// sets the palette specifically for when,,, im in the menu section??
 		
-		
+		/*
 		tempColorArray[0] = colorArray[ACOL];
 		tempColorArray[1] = colorArray[BCOL];
 		tempColorArray[2] = colorArray[ECOL];
 		tempColorArray[3] = colorArray[DCOL];
 		tempColorArray[4] = colorArray[CCOL];
-		
+		*/
 	
-		//bn::span<bn::color> spanthing(alternateColorArray);
-		bn::span<bn::color> spanthing(tempColorArray);
+		bn::span<bn::color> spanthing(alternateColorArray);
+		//bn::span<bn::color> spanthing(tempColorArray);
 			
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}
@@ -249,6 +356,7 @@ public:
 		
 		//  {a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e},
 		
+		/*
 		tempColorArray[0]  = colorArray[ACOL];
 		tempColorArray[1]  = colorArray[ECOL];
 		tempColorArray[2]  = colorArray[DCOL];
@@ -265,8 +373,10 @@ public:
 		tempColorArray[13] = colorArray[ECOL];
 		tempColorArray[14] = colorArray[ECOL];
 		tempColorArray[15] = colorArray[ECOL];
+		*/
 		
-		bn::span<bn::color> spanthing(tempColorArray);
+		//bn::span<bn::color> spanthing(tempColorArray);
+		bn::span<bn::color> spanthing(fontColorArray);
 			
 		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
 	}

@@ -366,9 +366,13 @@ public:
 	bool topDownEffect(bool downward);
 	
 	void setBorderColor(bool black = true);
-	__attribute__((target("arm"), section(".iwram"))) bool exitRoom();
-	__attribute__((target("arm"), section(".iwram"))) bool enterRoom();
-	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
+	
+	//#define EFFECTSMANAGERATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+	//#define EFFECTSMANAGERATTRIBUTES __attribute__((section(".ewram")))
+	#define EFFECTSMANAGERATTRIBUTES
+	EFFECTSMANAGERATTRIBUTES bool exitRoom();
+	EFFECTSMANAGERATTRIBUTES bool enterRoom();
+	EFFECTSMANAGERATTRIBUTES void doVBlank();
 	
 	void loadEffects(EffectHolder* effects, int effectsCount);
 	
@@ -388,7 +392,7 @@ public:
 	
 	void setMenuVis(bool vis);
 	
-	bool restRequest(const char* questionString = "Rest?\0", bool getOption = true);
+	bool restRequest(const char* questionString = NULL, bool getOption = true);
 	
 	
 	void glassBreak(Pos p);

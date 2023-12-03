@@ -1925,6 +1925,8 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 
 void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sound_item* sound) {
 	
+	//BN_LOG("doing dialogue of ", data);
+	
 	if(sound == NULL) {
 		switch(game->mode) {
 			default:
@@ -2258,25 +2260,39 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	// go with making a border with a palete index of 5, which is transparent most of the time 
 	// but if needed, we like yea 
 	
+	const char* defaultMessage = "Rest?\0";
+	
+	if(questionString == NULL) {
+		questionString = defaultMessage;
+	}
+	
+	
+	
 	GameState restoreState = game->state;
 	game->state = GameState::Dialogue;
 	
-	bn::vector<bn::sprite_ptr, 64> restSprites;
-	bn::vector<bn::sprite_ptr, 4> yesSprites;
-	bn::vector<bn::sprite_ptr, 4> noSprites;
-	
 	textGenerator.set_one_sprite_per_character(false);
 	
+	/*
 	auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
 	auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
 	auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
 	
 	if(game->roomManager.isWhiteRooms()) {
-		
 		activeTextPalette = spritePalette->getLightGraySpritePalette().create_palette();
 		alternateTextPalette = spritePalette->getDarkGraySpritePalette().create_palette();
-		
 	}
+	*/
+	
+	auto activeTextPalette = spritePalette->getSpritePalette();
+	auto alternateTextPalette = spritePalette->getAlternateSpritePalette();
+	auto blackTextPalette = spritePalette->getBlackSpritePalette();
+	
+	if(game->roomManager.isWhiteRooms()) {
+		activeTextPalette = spritePalette->getLightGraySpritePalette();
+		alternateTextPalette = spritePalette->getDarkGraySpritePalette();
+	}
+	
 	
 	for(int i=0; i<60; i++) {
 		game->doButanoUpdate();
@@ -2289,9 +2305,16 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		restX -= (textGenerator.width(bn::string_view(questionString)) / 2);
 	}
 	
+	// moving these variables, above, the onespriteperchar line,,,, crashes the fucking game when this is called???
+	// gods at this point im starting to wonder how much of my fucking optmizations are worth it
+	bn::vector<bn::sprite_ptr, 64> restSprites;
+	bn::vector<bn::sprite_ptr, 4> yesSprites;
+	bn::vector<bn::sprite_ptr, 4> noSprites;
 	
 	//textGenerator.generate((bn::fixed)-16, (bn::fixed)-30, bn::string_view("Rest?\0"), textSpritesLine1);
+	
 	textGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view(questionString), restSprites);
+	//textGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view("Rest?\0"), restSprites);
 	for(int i=0; i<restSprites.size(); i++) {
 		restSprites[i].set_bg_priority(0);
 		restSprites[i].set_palette(activeTextPalette);

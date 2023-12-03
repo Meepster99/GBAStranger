@@ -1055,6 +1055,8 @@ Game::~Game() {
 
 void Game::doButanoUpdate() {
 	
+	BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
+	
 	globalGame->doVBlank();	
 	
 	bn::core::update();
@@ -1129,7 +1131,6 @@ void Game::doVBlank() { profileFunction();
 	static bool a, b, c = false;
 	
 	switch(state) {
-		default:
 		case GameState::Normal:
 			//BN_LOG("entityManager.doVBlank();");
 			//timer.restart();
@@ -1178,6 +1179,9 @@ void Game::doVBlank() { profileFunction();
 			cutsceneManager.doVBlank();
 			break;
 		case GameState::Sleep:
+			break;
+		default: [[unlikely]]
+			BN_ERROR("unknown state in game::doVBlank");
 			break;
 	}
 	

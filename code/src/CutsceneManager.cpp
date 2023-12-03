@@ -305,14 +305,11 @@ void CutsceneManager::cifDream() {
 	
 	game->effectsManager.doDialogue(""
 	"[This Lotus-Eater Machine is still operational]\n"
-	"[Maybe you could take a quick rest?]\n"
-	"\0", false);
+	"[Maybe you could take a quick rest?]\0", false); // was the buffer overflow in here?
 	
 	if(!game->effectsManager.restRequest()) {
 		return;
 	}
-	
-	
 	
 	game->state = GameState::Dialogue;
 	

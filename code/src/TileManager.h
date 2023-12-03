@@ -128,10 +128,10 @@ public:
 	
 	bool hasCollision(const Pos& p);
 	
-	__attribute__((target("arm"), section(".iwram"))) bool exitRoom(); // just in here as a temporary measure
-	__attribute__((target("arm"), section(".iwram"))) bool enterRoom(); // just in here as a temporary measure
+	__attribute__((section(".ewram")))  bool exitRoom(); // just in here as a temporary measure
+	__attribute__((section(".ewram")))  bool enterRoom(); // just in here as a temporary measure
 	
 	//bool needUpdate = false;
-	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
+	__attribute__((section(".ewram")))  void doVBlank();
 };
 

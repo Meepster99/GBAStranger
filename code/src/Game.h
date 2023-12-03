@@ -215,12 +215,20 @@ public:
 	void resetRoom(bool debug = false);
 	
 	// HOLY SHIT. THIS ACTUALY WORKED. THIS ACTUALLY FIXED THE FRAMEDROP?
-	__attribute__((target("arm"), section(".iwram"))) void drawCollisionAndDetails();
+	// and now, i am extremely scared of EVER using these things. they seem to cause
+	// weird, stupid, unknown bugs 
+	//__attribute__((target("arm"), section(".iwram"))) void drawCollisionAndDetails();
+	__attribute__((section(".ewram"))) void drawCollisionAndDetails();
 	
 	void fullDraw();
 	void fullTileDraw();
 	
-	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
+	// read the top of palette.h for an explination on this bs
+	void doVBlank();
+	//__attribute__((target("arm"), section(".iwram"))) void doVBlank();
+	//__attribute__((section(".iwram"))) void doVBlank();
+	//__attribute__((section(".ewram"))) void doVBlank();
+	//__attribute__((section(".iwram"))) void doVBlank();
 	
 	int paletteIndex = 0;
 	void changePalette(int offset);

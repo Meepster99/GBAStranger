@@ -165,9 +165,13 @@ public:
 	void createKillEffects() const;
 	
 	void hideForDialogueBox(bool vis, bool isCutscene);
-	__attribute__((target("arm"), section(".iwram"))) bool exitRoom();
-	__attribute__((target("arm"), section(".iwram"))) bool enterRoom();
-	__attribute__((target("arm"), section(".iwram"))) void doVBlank();
+	
+	#define ENTITYMANAGERATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+	//#define ENTITYMANAGERATTRIBUTES __attribute__((section(".ewram")))
+	
+	ENTITYMANAGERATTRIBUTES bool exitRoom();
+	ENTITYMANAGERATTRIBUTES bool enterRoom();
+	ENTITYMANAGERATTRIBUTES void doVBlank();
 		
 private:
 	// make a class OBJECT, have entity and floortile extend it, have this be an array of that.
