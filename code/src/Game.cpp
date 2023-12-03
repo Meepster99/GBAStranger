@@ -777,8 +777,20 @@ void Game::loadLevel(bool debug) {
 	BN_LOG("loadlevel completed");
 }
 
-void Game::drawCollisionAndDetails() {
+static __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) void drawCollisionAndDetails() {
+//void drawCollisionAndDetails() {
 	
+	// PUTTING THIS IN ARM GIVES A 50% REDUCTION. FIGURE IT OUT DUMBASS
+	
+	// why the fuck. does putting this in arm and iwram cause everything in restrequest to fucking melt and die??
+	*reinterpret_cast<unsigned short*>(0x04000208) = 0; // disable interrupts
+
+	
+	auto& collisionMap = globalGame->collisionMap;
+	auto& detailsMap = globalGame->detailsMap;
+	
+	auto& collision = globalGame->collision;
+	auto& details = globalGame->details;
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<8; y++) {
@@ -800,6 +812,8 @@ void Game::drawCollisionAndDetails() {
 			}
 		}
 	}
+	
+	*reinterpret_cast<unsigned short*>(0x04000208) = 1; // enable interrupts
 	
 	//collision.reloadCells();
 	

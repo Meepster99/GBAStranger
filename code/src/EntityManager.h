@@ -166,8 +166,10 @@ public:
 	
 	void hideForDialogueBox(bool vis, bool isCutscene);
 	
-	#define ENTITYMANAGERATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+	//#define ENTITYMANAGERATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+	//#define ENTITYMANAGERATTRIBUTES __attribute__((section(".iwram")))
 	//#define ENTITYMANAGERATTRIBUTES __attribute__((section(".ewram")))
+	#define ENTITYMANAGERATTRIBUTES
 	
 	ENTITYMANAGERATTRIBUTES bool exitRoom();
 	ENTITYMANAGERATTRIBUTES bool enterRoom();

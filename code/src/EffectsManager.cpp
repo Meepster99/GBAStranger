@@ -2075,6 +2075,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		char* filteredBufferPtr = filteredBuffer;
 		while(true) {
 			
+			BN_ASSERT(filteredBufferPtr - filteredBuffer < 256, "HOLY SHIT");
+			
 			char c = *originalBufferPtr;
 			if(c == '`') {
 				c = ' ';
@@ -2088,14 +2090,21 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 				break;
 			}
 		}
+		
+		//*filteredBufferPtr = 
 		filteredBufferPtr = filteredBuffer;
+		
+		
 			
+		//BN_LOG("bruh ", filteredBufferPtr);
+		
 		textGeneratorObj.set_one_sprite_per_character(true);
 		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(filteredBufferPtr), textSprites);
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_bg_priority(0);
 			textSprites[i].set_visible(false);
-			textSprites[i].set_palette(spritePalette->getSpritePalette());
+			//textSprites[i].set_palette(spritePalette->getSpritePalette());
+			textSprites[i].set_palette(globalGame->pal->getSpritePalette());
 		}
 		globalGame->doButanoUpdate();
 		
@@ -2144,7 +2153,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_visible(true);
 			textSprites[i].set_bg_priority(0);
-			textSprites[i].set_palette(spritePalette->getSpritePalette());
+			//textSprites[i].set_palette(spritePalette->getSpritePalette());
+			textSprites[i].set_palette(globalGame->pal->getSpritePalette());
 		}
 		
 		globalGame->doButanoUpdate();

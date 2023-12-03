@@ -79,6 +79,23 @@ nvm even with vblank in ewram, shits still fucked, just on the second time talki
 
 gods having an array per thing is just horrid for mem management, and idek if it will actually help
 
+ok i have no clue anymore 
+
+i think its an issue with sections,,, does,,, does putting something in overwrite my palette data?? as in my funcs are overwriteing other data?
+putting my shit onto ewram like,, i need it in arm to be fast enough!
+
+is it,, swaping to arm instrs without, actually swapping to arm code mode??? theres no way, it would crash
+how much of my code is actually in thumb vs arm?? 
+i have -mthumb and mthumb interwork
+does putting something into iwram automatically compile it as arm?? what the fuck is happening
+would noinline give it the push needed to, not be a bitch and switch to arm? 
+what the fuck is happening?
+is it because these funcs arent global???
+
+gods i dont want to rewrite evrything with namespaceslkjadakhfdkjalfs
+
+also gods im probs just placeboing myself, but i swear the code is slower now.
+
 */
  
  

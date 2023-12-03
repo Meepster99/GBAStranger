@@ -218,7 +218,8 @@ public:
 	// and now, i am extremely scared of EVER using these things. they seem to cause
 	// weird, stupid, unknown bugs 
 	//__attribute__((target("arm"), section(".iwram"))) void drawCollisionAndDetails();
-	__attribute__((section(".ewram"))) void drawCollisionAndDetails();
+	//__attribute__((section(".iwram"))) void drawCollisionAndDetails();
+	//__attribute__((section(".ewram"))) void drawCollisionAndDetails();
 	
 	void fullDraw();
 	void fullTileDraw();

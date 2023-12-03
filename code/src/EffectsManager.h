@@ -367,8 +367,9 @@ public:
 	
 	void setBorderColor(bool black = true);
 	
-	//#define EFFECTSMANAGERATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+	//#define EFFECTSMANAGERATTRIBUTES __attribute__((noinline, target("arm"), section(".iwram")))
 	//#define EFFECTSMANAGERATTRIBUTES __attribute__((section(".ewram")))
+	//#define EFFECTSMANAGERATTRIBUTES __attribute__((section(".iwram")))
 	#define EFFECTSMANAGERATTRIBUTES
 	EFFECTSMANAGERATTRIBUTES bool exitRoom();
 	EFFECTSMANAGERATTRIBUTES bool enterRoom();
@@ -382,7 +383,7 @@ public:
 	
 	// dialogue needs to become its own class.
 	// more than it already is
-	void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = NULL);
+	__attribute__((noinline, target("thumb"), optimize("O2"))) void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = NULL);
 	void doDialogue(const char* data, const bn::sound_item* sound) {
 		doDialogue(data, false, sound);
 	}
@@ -392,7 +393,7 @@ public:
 	
 	void setMenuVis(bool vis);
 	
-	bool restRequest(const char* questionString = NULL, bool getOption = true);
+	__attribute__((noinline, target("thumb"), optimize("O2"))) bool restRequest(const char* questionString = NULL, bool getOption = true);
 	
 	
 	void glassBreak(Pos p);
