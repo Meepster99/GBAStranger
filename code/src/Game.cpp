@@ -777,7 +777,7 @@ void Game::loadLevel(bool debug) {
 	BN_LOG("loadlevel completed");
 }
 
-static __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) void drawCollisionAndDetails() {
+ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"))) void drawCollisionAndDetails() {
 //void drawCollisionAndDetails() {
 	
 	// PUTTING THIS IN ARM GIVES A 50% REDUCTION. FIGURE IT OUT DUMBASS

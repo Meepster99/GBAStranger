@@ -258,7 +258,17 @@ void CutsceneManager::introCutscene() {
 
 void CutsceneManager::cifDream() {
 	
+	/*
+		game->effectsManager.doDialogue("[This Lotus-Eater Machine is still operational]\n"
+	"[Maybe you could take a quick rest?]\0\0\0\0\0\0\0\0\0\0\0\0\0\0"); // was the buffer overflow in here?
+
 	
+	// why does this run, but doing it in the right spot doesnt??
+	delay(1);
+		game->effectsManager.doDialogue("[This Lotus-Eater Machine is still operational]\n"
+	"[Maybe you could take a quick rest?]\0\0\0\0\0\0\0\0\0\0\0\0\0\0"); // was the buffer overflow in here?
+	*/
+
 	// most assets are found by searching for "cdream" or "cifdream"
 	// song is msc_cif_regret
 	// for the glowys, just search glow / soulglow
@@ -292,7 +302,7 @@ void CutsceneManager::cifDream() {
 	
 	GameState restoreState = game->state;
 
-
+	BN_ASSERT(game->effectsManager.bigSprites.size() != 0, "WHATJDSAFLKDSAJFDSF");
 	if(game->effectsManager.bigSprites[0]->animationIndex != 0) {
 		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better move on]\0", false);
 		// in the glistening of the bark, you seem drained as well
@@ -302,9 +312,10 @@ void CutsceneManager::cifDream() {
 	
 	
 	
+	delay(1);
 	
 	game->effectsManager.doDialogue("[This Lotus-Eater Machine is still operational]\n"
-	"[Maybe you could take a quick rest?]\0"); // was the buffer overflow in here?
+	"[Maybe you could take a quick rest?]\0\0\0\0\0\0\0\0\0\0\0\0\0\0"); // was the buffer overflow in here?
 	
 	if(!game->effectsManager.restRequest()) {
 		return;
@@ -410,7 +421,6 @@ void CutsceneManager::cifDream() {
 	cifGlow.spritePointer.set_z_order(1);
 	cifGlow.spritePointer.set_bg_priority(2);
 	
-	
 	// the more that i think of the positions of the lords, the more symbolism i see. its insane. i love this game sm
 	
 	maps[0]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, 2);
@@ -489,6 +499,8 @@ void CutsceneManager::cifDream() {
 	auto createEffect = [spritePalette, darkSpritePalette]() -> Effect {
 		
 		auto createFunc = [spritePalette, darkSpritePalette](Effect* obj) mutable -> void {
+			
+			/*
 			if(randomGenerator.get() & 1) {
 				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
 				obj->sprite.spritePointer.set_palette(darkSpritePalette);
@@ -501,6 +513,30 @@ void CutsceneManager::cifDream() {
 				*obj->tiles,
 				0
 			);
+			*/
+			
+			int tileSelector = randomGenerator.get_int(0, 5);
+				
+			const bn::sprite_tiles_item* spriteTiles[5] = {
+				&bn::sprite_tiles_items::dw_spr_soulglow_big,
+				&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
+				&bn::sprite_tiles_items::dw_spr_soulglow_med,
+				&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
+				&bn::sprite_tiles_items::dw_spr_soulglow_sma,
+			};
+			
+			const bn::sprite_shape_size spriteShapes[5] = {
+				bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
+				bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
+			};
+		
+			obj->tiles = spriteTiles[tileSelector];
+			
+			obj->sprite = Sprite(*spriteTiles[tileSelector], spriteShapes[tileSelector]);
+			
 		
 			obj->x = -32;
 			obj->y = -32;
@@ -617,15 +653,25 @@ void CutsceneManager::cifDream() {
 		return Effect(createFunc, tickFunc);
 	};
 	
+	
+	
+	
+	BN_LOG("YAYAY");
+	
 	while(effects.size() != effects.max_size()) {
 		effects.push_back(createEffect());
 	}
+	
+	BN_LOG("YAYAy2");
 	
 	// init all the effects such that the palete table wont be moving
 	for(int i=0; i<effects.size(); i++) {
 		effects[i].animate();
 	}
-			
+	
+	BN_LOG("YAYAy3");
+	
+	
 	vBlankFuncs.push_back([this, effects, spritePalette, darkSpritePalette]() mutable {
 		
 		for(int i=0; i<effects.size(); i++) {
@@ -635,6 +681,11 @@ void CutsceneManager::cifDream() {
 		
 		return;
 	});
+	
+	
+	
+	BN_LOG("YAYAy4");
+	
 	
 	
 	// fade should be done here, i believe

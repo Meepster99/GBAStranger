@@ -4,6 +4,7 @@
 #include "bn_color.h"
 #include "bn_bg_palette_item.h"
 #include "bn_sprite_palette_item.h"
+#include "bn_compression_type.h"
 
 #include <bn_assert.h>
 #include "bn_fixed.h"
@@ -96,6 +97,11 @@ gods i dont want to rewrite evrything with namespaceslkjadakhfdkjalfs
 
 also gods im probs just placeboing myself, but i swear the code is slower now.
 
+am i,, running out of iwram?
+
+i,, think i am?? 
+the fact that i didnt get an error though,,, is extremely concerning
+
 */
  
  
@@ -157,7 +163,7 @@ public:
 		
 		bn::span<bn::color> spanthing(colorArray);
 			
-		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4);
+		return bn::sprite_palette_item(spanthing, bn::bpp_mode::BPP_4, bn::compression_type::NONE);
 	}
 
 	void modifyTempColors(int index, bool toWhite) {

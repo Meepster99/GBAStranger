@@ -2069,21 +2069,24 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		) mutable -> bool {
 			
 		// cringe is occuring! this should/could maybe be static, but im (curse)ing scared
-		char filteredBuffer[256];
+		//char filteredBuffer[256];
+		bn::array<char, 256> filteredBuffer;
 		
 		char* originalBufferPtr = bufferPtr;
-		char* filteredBufferPtr = filteredBuffer;
+		//char* filteredBufferPtr = filteredBuffer;
+		int filteredBufferIndex = 0;
 		while(true) {
 			
-			BN_ASSERT(filteredBufferPtr - filteredBuffer < 256, "HOLY SHIT");
+			//BN_ASSERT(filteredBufferPtr - filteredBuffer < 256, "HOLY SHIT");
 			
 			char c = *originalBufferPtr;
 			if(c == '`') {
 				c = ' ';
 			}
 			
-			*filteredBufferPtr = c;
-			filteredBufferPtr++;
+			filteredBuffer[filteredBufferIndex] = c;
+			//filteredBufferPtr++;
+			filteredBufferIndex++;
 			originalBufferPtr++;
 			
 			if(c == '\0') {
@@ -2092,14 +2095,19 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		}
 		
 		//*filteredBufferPtr = 
-		filteredBufferPtr = filteredBuffer;
+		//filteredBufferPtr = filteredBuffer;
 		
 		
 			
 		//BN_LOG("bruh ", filteredBufferPtr);
 		
+		//const char* WHAT = (const char*)filteredBuffer.data();
+		const char* WHAT = (const char*)filteredBuffer._data;
+		
+		//BN_LOG("WHAT ", WHAT);
+		
 		textGeneratorObj.set_one_sprite_per_character(true);
-		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(filteredBufferPtr), textSprites);
+		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(WHAT), textSprites);
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_bg_priority(0);
 			textSprites[i].set_visible(false);
@@ -2147,9 +2155,12 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		
 		globalGame->playSound(sound);
 		
+		//BN_LOG("WHAT ", WHAT);
+		
 		textSprites.clear();
 		textGeneratorObj.set_one_sprite_per_character(false);
-		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(filteredBufferPtr), textSprites);
+		//textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(filteredBufferPtr), textSprites);
+		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(WHAT), textSprites);
 		for(int i=0; i<textSprites.size(); i++) {
 			textSprites[i].set_visible(true);
 			textSprites[i].set_bg_priority(0);

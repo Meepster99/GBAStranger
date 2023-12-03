@@ -71,9 +71,11 @@ public:
 	
 	void resetRoom();
 	
+	// how long ago did i put this here, only to forget that. 
+	// my god this should be everywhere
 	__attribute__((optimize("O2"))) void introCutscene();
 	
-	void cifDream();
+	__attribute__((optimize("O2"))) void cifDream();
 	
 	void brandInput();
 	

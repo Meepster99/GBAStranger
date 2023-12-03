@@ -19,7 +19,7 @@ void Floor::setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 	collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 }
 
-__attribute__((noinline, target("arm"), section(".iwram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
+__attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 		
 	// THIS COULD, AND SHOULD BE OPTIMIZED INTO ONE LOOP OVER THE THING.
 	// also the whole background doesnt need a redraw, only the stuff that changed
@@ -112,7 +112,7 @@ void Floor::reloadCells() {
 // assuming that doesnt cause slowdown, that would be a good idea
 
 //__attribute__((noinline, target("arm"), section(".iwram"))) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
-__attribute__((noinline, section(".iwram"))) void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
+__attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
 	
 	u8 uncompressedFloor[126];
 	globalGame->uncompressData(uncompressedFloor, floorPointer);

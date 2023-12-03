@@ -344,6 +344,7 @@ static const char *TileTypeToString[] ={
 }
 
 #define BACKGROUNDMAPATTRIBUTES __attribute__((section(".ewram")))
+//#define BACKGROUNDMAPATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 class BackgroundMap {
 public:
@@ -568,17 +569,17 @@ public:
 		rawMap.reloadCells();
 	}
 	
-	void setTile(int x, int y, int tileIndex) { 
+	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) { 
 		rawMap.setTile(x, y, tileIndex); 
 	}
 	
-	void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { 
+	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { 
 		rawMap.setTile(x, y, tileIndex, flipX, flipY);
 	}
 	
 	u8 tempTileIndicies[4];
 	
-	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
+	BACKGROUNDMAPATTRIBUTES void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// this func actually being able to flip (curse) properly is UNCONFIRMED bc I AM SLEEPY
 		
 		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
