@@ -633,6 +633,7 @@ void Chest::specialBumpFunction() {
 
 #define MSGSTR(s) { s }
 const MessageStr randomBoulderMessages[] = { 
+	MSGSTR("lmao if you are seeing this, i did something wrong\0"), 
 	MSGSTR("i rlly hope this works\0"), 
 	MSGSTR("Did you know every time you sigh, a little bit of happiness escapes?\0"), 
 	MSGSTR("VOID look heres a bunch of text wow we even have scrolling\nbruh1\nbruh2\0"),
@@ -653,8 +654,40 @@ const MessageStr randomBoulderMessages[] = {
 	MSGSTR("Watch(and read, its getting super good, but ending soon) yofukashi no uta!\0"),
 	MSGSTR("Listen to Bloody Mercury, i rlly like their music. Also Vafi, both are on spotify and youtube.\0"),
 	MSGSTR("I really am sitting here typing messages no one will ever read.\nlol\0"),
-	MSGSTR("ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0")
+	MSGSTR("ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0"),
+	MSGSTR("I feel like i need to start stacking therapy sessions.\rLike,,,, doing multiple therapy at once.\0")
 };
+
+void generateFunny(char* res) {
+	
+	bn::string<512> string;
+	bn::ostringstream string_stream(string);
+	
+	
+	string_stream << "oh gods please let this work\n";
+	string_stream << "ok we chillin now\n";
+	string_stream << "have you ever wanted to know the ram usage of you gba at this point in time?\rno?\rwell, luckily, i dont care\n";
+	
+	string_stream << "stack iwram: " << ((bn::fixed)bn::memory::used_stack_iwram()).safe_division(1024) << " KB\r";
+	string_stream << "static iwram: " << ((bn::fixed)bn::memory::used_static_iwram()).safe_division(1024) << " KB\r";
+	string_stream << "static ewram: " << ((bn::fixed)bn::memory::used_static_ewram()).safe_division(1024) << " KB\r";
+	
+	string_stream << "damnnnn im not a math doctor, but those numbers seem pretty high\rif only SOMEONE could program this better!\n";
+	string_stream << "with that much ewram left over, you should just start shoving random things in it, fool";
+	
+	// i do not for the life of me understand why i cant get a properly nulltermed string out of the bn::string class
+	int i=0;
+	for(; i<string.size(); i++) {
+		res[i] = string[i];
+		BN_LOG(string[i]);
+	}	
+	// i fucking knew it, it is my code which needs 2 nullterms for some reason?
+	res[i] = '\0';
+	res[i+1] = '\0';
+	//res[i+2] = '\0';
+	
+	
+}
 
 void Boulder::interact() {
 	
@@ -672,7 +705,7 @@ void Boulder::interact() {
 	}
 	
 	constexpr int prevMsgStackSize = 16;
-	static bn::vector<int, prevMsgStackSize> prevMsgStack(prevMsgStackSize, -1);
+	BN_DATA_EWRAM static bn::vector<int, prevMsgStackSize> prevMsgStack(prevMsgStackSize, -1);
 	
 	int i=0;
 
@@ -693,8 +726,22 @@ void Boulder::interact() {
 	lastIndex = index;
 
 	const char* temp = randomBoulderMessages[index].str;
+	
+	if(index == 0) {
 		
-	effectsManager->doDialogue(temp);
+		// idc abt stack allocs anymore, im fucking scared of leaking
+		char buffer[512];
+		
+		generateFunny(buffer);
+			
+		// i remember having rlly weird problems with c_str vs data, i hope this is ok
+		//const char* actualTemp = string.data();
+		effectsManager->doDialogue(buffer);
+	} else {
+		effectsManager->doDialogue(temp);
+	}
+	
+	
 }
 
 void Obstacle::moveSucceded() {

@@ -377,12 +377,15 @@ int main() {
 	bn::fixed stackIWram = bn::memory::used_stack_iwram();
 	bn::fixed staticIWram = bn::memory::used_static_iwram();
 	bn::fixed totalIWram = stackIWram + staticIWram;
-
+	bn::fixed totalEWram = bn::memory::used_static_ewram();
+	
 	BN_LOG("used_stack_iwram: ", stackIWram.safe_division(32 * 1024));
 	BN_LOG("used_static_iwram: ", staticIWram.safe_division(32 * 1024));
 	BN_LOG("total iwram: ", totalIWram.safe_division(32 * 1024));
+	BN_LOG("total ewram: ", totalEWram.safe_division(256 * 1024));
 	
 	BN_ASSERT(totalIWram.safe_division(32 * 1024) < 1, "iwram overflow!!!");
+	BN_ASSERT(totalEWram.safe_division(256 * 1024) < 1, "ewram overflow!!!");
 
 	
 	

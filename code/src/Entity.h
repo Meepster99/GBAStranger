@@ -80,35 +80,35 @@ public:
 		}
 	
 		
-	void updatePosition(const Pos& p) {
+	USEEWRAM void updatePosition(const Pos& p) {
 		screenx = p.x * 16 - 8 - (6 * 16); 
 		screeny = p.y * 16 - (4 * 16);
 		spritePointer.set_x(screenx);
 		spritePointer.set_y(screeny);
 	}
 	
-	void updateRawPosition(const int x, const int y) {
+	USEEWRAM void updateRawPosition(const int x, const int y) {
 		screenx = x - 224/2 + 8;
 		screeny = y - 144/2 + 8;
 		spritePointer.set_x(screenx);
 		spritePointer.set_y(screeny);
 	}
 	
-	Pos getCurrentScreenPos() const {
+	USEEWRAM Pos getCurrentScreenPos() const {
 		return Pos((screenx.integer() + 8 + (6 * 16))/16, (screeny.integer() + (4 * 16))/16);
 	}
 	
-	void setRawX(const bn::fixed x) {
+	USEEWRAM void setRawX(const bn::fixed x) {
 		screenx = x - 224/2 + 8;
 		spritePointer.set_x(screenx);
 	}
 	
-	void setRawY(const bn::fixed y) {
+	USEEWRAM void setRawY(const bn::fixed y) {
 		screeny = y - 144/2 + 8;
 		spritePointer.set_y(screeny);
 	}
 	
-	void setVisible(bool vis) {	
+	USEEWRAM void setVisible(bool vis) {	
 		spritePointer.set_visible(vis);
 	}
 	
@@ -159,7 +159,7 @@ public:
 	virtual Entity* clone() const = 0;
 	virtual EntityType entityType() const = 0;
 	
-	virtual bn::optional<Direction> getNextMove() = 0;
+	USEEWRAM virtual bn::optional<Direction> getNextMove() = 0;
 	virtual void moveFailed() = 0;
 	virtual void moveSucceded() = 0;
 
@@ -212,7 +212,7 @@ public:
 		sprite.updatePosition(p);
 	}
 	
-	void updatePosition() {
+	USEEWRAM void updatePosition() {
 		sprite.updatePosition(p);
 	}
 	

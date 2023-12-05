@@ -52,16 +52,16 @@ public:
 	
 	void updatePalette(Palette* pal);
 	
-	bool moveEntity(Entity* e, bool dontSet = false);
-	void moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end);
-	void moveEnemies();
-	void moveObstacles();
+	USEEWRAM bool moveEntity(Entity* e, bool dontSet = false);
+	USEEWRAM void moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end);
+	USEEWRAM void moveEnemies();
+	USEEWRAM void moveObstacles();
 	
-	void doMoves();
+	USEEWRAM void doMoves();
 
-	void manageShadows(bn::optional<Direction> playerDir);	
+	USEEWRAM void manageShadows(bn::optional<Direction> playerDir);	
 
-	void updateMap();
+	USEEWRAM void updateMap();
 
 	void updateScreen();
 	
@@ -85,18 +85,18 @@ public:
 		return entityMap[p.x][p.y]; 
 	}
 	
-	bool hasEntity(const Pos& p) const;
-	bool hasPlayer(const Pos& p) const;
-	bool hasNonPlayerEntity(const Pos& p) const;
-	bool hasEnemy(const Pos& p) const;
-	bool hasObstacle(const Pos& p) const;
-	bool hasCollision(const Pos& p) const;
-	bn::optional<TileType> hasFloor(const Pos& p) const;
-	bool hasNonInteractableObstacle(const Pos& p) const; //nice function name (curse)
+	USEEWRAM bool hasEntity(const Pos& p) const;
+	USEEWRAM bool hasPlayer(const Pos& p) const;
+	USEEWRAM bool hasNonPlayerEntity(const Pos& p) const;
+	USEEWRAM bool hasEnemy(const Pos& p) const;
+	USEEWRAM bool hasObstacle(const Pos& p) const;
+	USEEWRAM bool hasCollision(const Pos& p) const;
+	USEEWRAM bn::optional<TileType> hasFloor(const Pos& p) const;
+	USEEWRAM bool hasNonInteractableObstacle(const Pos& p) const; //nice function name (curse)
 	
-	bn::optional<Direction> canSeePlayer(const Pos& p) const;
-	bn::optional<Direction> canPathToPlayer(const Pos& p, const Pos& playerPos) const;
-	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStartPos);
+	USEEWRAM bn::optional<Direction> canSeePlayer(const Pos& p) const;
+	USEEWRAM bn::optional<Direction> canPathToPlayer(const Pos& p, const Pos& playerPos) const;
+	USEEWRAM bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStartPos);
 	
 	bool levKill = false;
 	

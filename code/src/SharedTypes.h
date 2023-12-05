@@ -112,6 +112,8 @@
 #endif
 
 
+#define USEEWRAM __attribute__((section(".ewram")))
+
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 

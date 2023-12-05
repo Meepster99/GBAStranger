@@ -117,7 +117,7 @@ public:
 	int getLocustCount();
 	int getRoomIndex();
 	
-	void updateWhiteRooms(const Pos& startPos, const Pos& currentPos);
+	__attribute__((section(".ewram"))) void updateWhiteRooms(const Pos& startPos, const Pos& currentPos);
 	void fullDraw();
 	
 	bn::optional<TileType> hasFloor(const int x, const int y);
