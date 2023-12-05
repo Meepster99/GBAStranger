@@ -751,12 +751,17 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 	
 	auto& collisionMap = globalGame->collisionMap;
 	auto& detailsMap = globalGame->detailsMap;
+	auto& floorMap = globalGame->tileManager.floorMap;
 	
 	auto& collision = globalGame->collision;
 	auto& details = globalGame->details;
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<8; y++) {
+			
+			if(floorMap[x][y] != NULL) {
+				continue;
+			}
 			
 			int tile = collisionMap[x][y];
 			
