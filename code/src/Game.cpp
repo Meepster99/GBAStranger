@@ -759,6 +759,7 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<8; y++) {
 			
+			// ugh. this is needed, i just hate that it is needed
 			if(floorMap[x][y] != NULL) {
 				continue;
 			}

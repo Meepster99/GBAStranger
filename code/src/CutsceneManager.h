@@ -94,6 +94,8 @@ public:
 	
 	void titleScreen();
 	
+	void mimicTalk();
+	
 	// -----
 	
 //private:

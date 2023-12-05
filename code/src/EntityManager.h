@@ -74,6 +74,7 @@ public:
 	void doDeaths();
 	
 	bn::vector<Entity*, 4>::iterator killEntity(Entity* e);
+	void removeEntity(Entity* e);
 	
 	SaneSet<Entity*, 4>& getMap(const Pos &p) { 
 		//BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
@@ -171,9 +172,9 @@ public:
 	//#define ENTITYMANAGERATTRIBUTES __attribute__((section(".ewram")))
 	#define ENTITYMANAGERATTRIBUTES
 	
-	ENTITYMANAGERATTRIBUTES bool exitRoom();
-	ENTITYMANAGERATTRIBUTES bool enterRoom();
-	ENTITYMANAGERATTRIBUTES void doVBlank();
+	USEEWRAM bool exitRoom();
+	USEEWRAM bool enterRoom();
+	USEEWRAM void doVBlank();
 		
 private:
 	// make a class OBJECT, have entity and floortile extend it, have this be an array of that.

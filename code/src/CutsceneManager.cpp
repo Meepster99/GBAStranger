@@ -2441,6 +2441,26 @@ void CutsceneManager::titleScreen() {
 	
 }
 
+void CutsceneManager::mimicTalk() {
+	
+	
+	delay(5);
+	
+	Sprite idrk(bn::sprite_items::dw_idrk);
+	idrk.spritePointer.set_bg_priority(0);
+	idrk.updatePosition(Pos(11, 4));
+	
+	effectsManager->doDialogue("hello there!\nThank you for playing <3.\r"
+	"It means the world to me.\n"
+	"But well, anyways, I am in your way.\n"
+	"You should come say hi later though, I never meet anyone around here.\n"
+	"I normally hang out around the trees. Please come. Ill cook us some eggs.\0");
+	
+	
+	
+	
+}
+
 // -----
 
 void CutsceneManager::backup(int i) {

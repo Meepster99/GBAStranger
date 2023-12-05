@@ -147,6 +147,19 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				
 				Entity* tempEntity = *(entityManager->getMap(tilePos).begin());
 				if(tempEntity->entityType() != EntityType::Shadow) {
+					
+					if(hashString("rm_0172\0") == game->roomManager.currentRoomHash()) {
+						// i rlly rlly hope that doing,,, this call so deep inside of the move code doesnt
+						// mess anything up during vblank
+						game->cutsceneManager.mimicTalk();
+						
+						entityManager->removeEntity(tempEntity);
+						effectsManager->sword(tilePos, currentDir);
+						
+						
+						return {true, bn::optional<Direction>()};
+					}
+					
 					entityManager->killEntity(tempEntity);
 					
 					// ADD STEPOFF HERE?

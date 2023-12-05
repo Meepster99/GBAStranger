@@ -1273,6 +1273,22 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	return res;
 }
 
+void EntityManager::removeEntity(Entity* e) {
+	
+	Pos tempPos = e->p;
+	
+	futureEntityMap[tempPos.x][tempPos.y].erase(e);
+	
+	entityMap[tempPos.x][tempPos.y].erase(e);
+	entityList.erase(e);
+	obstacleList.erase(e);
+	enemyList.erase(e);		
+
+	deadList.insert(e);
+	
+	
+}
+
 void EntityManager::killAllAddStatues() {
 	
 	// SHOULD THIS CHECK BE HERE??? BC LIKE,,, UGHH GODS 
