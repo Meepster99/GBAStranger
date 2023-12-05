@@ -373,7 +373,35 @@ int main() {
 	bn::core::init(); 
 	
 	BN_LOG("butano inited");
+	
+	bn::fixed stackIWram = bn::memory::used_stack_iwram();
+	bn::fixed staticIWram = bn::memory::used_static_iwram();
+	bn::fixed totalIWram = stackIWram + staticIWram;
 
+	BN_LOG("used_stack_iwram: ", stackIWram.safe_division(32 * 1024));
+	BN_LOG("used_static_iwram: ", staticIWram.safe_division(32 * 1024));
+	BN_LOG("total iwram: ", totalIWram.safe_division(32 * 1024));
+	
+	BN_ASSERT(totalIWram.safe_division(32 * 1024) < 1, "iwram overflow!!!");
+
+	
+	
+	/*
+	
+	[WARN] GBA Debug:	butano inited
+	[WARN] GBA Debug:	used_stack_iwram: 0.01953
+	[WARN] GBA Debug:	used_static_iwram: 0.81420
+	[WARN] GBA Debug:	total iwram: 0.83374
+		
+	[WARN] GBA Debug:	butano inited
+	[WARN] GBA Debug:	used_stack_iwram: 0.02709
+	[WARN] GBA Debug:	used_static_iwram: 0.70678
+	[WARN] GBA Debug:	total iwram: 0.73413
+	
+	
+	*/
+	
+	
 	bn::bg_tiles::set_allow_offset(true);
 
 	bn::hw::irq::set_isr(bn::hw::irq::id::GAMEPAK, _cartPull);

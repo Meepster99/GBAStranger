@@ -802,6 +802,9 @@ void EntityManager::doMoves() { profileFunction();
 	
 	// (maybe) insert shadows move into its func? (MORE NEEDS TO BE DONE ON THIS)
 	
+	//stupid code 
+	Pos playerStartBackup = player->p;
+	
 	// do player move.
 	playerStart = player->p;
 	bool playerMoved = moveEntity(player);
@@ -1178,10 +1181,13 @@ void EntityManager::doMoves() { profileFunction();
 	// it was probs just other areas of unoptimized code that were actally causing the lag.
 	// ok nvm, now its lagging(now that i had it properly erase old tiles? 
 	// which for some reason, makes me happy
+	
+	
 	if(game->roomManager.isWhiteRooms()) {
 		//tileManager->fullDraw();
 		//tileManager->floorLayer.draw();
-		tileManager->floorLayer.draw(game->collisionMap, tileManager->floorMap);
+		//tileManager->floorLayer.draw(game->collisionMap, tileManager->floorMap);
+		tileManager->updateWhiteRooms(playerStartBackup, player->p);
 	}
 			
 	sanity();

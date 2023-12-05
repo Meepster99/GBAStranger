@@ -232,3 +232,16 @@ Palette CUSTOM    = PALETTEGEN(0,8421504,12632256,16777215);
 Palette* paletteList[14] = {&GRAYPALETTE,&REDPALETTE,&ORANGEPALETTE,&YELLOWPALETTE,&GREENPALETTE,&BLUEPALETTE,&INDIGOPALETTE,&VIOLETPALETTE,&BLUEBERRYJAMPALETTE,&ZERORANGERPALETTE,&DEPTHS,&NIGHT,&MILK,&CUSTOM};
 
 const char* paletteNameList[14] = {"GRAY\0", "RED\0", "ORANGE\0", "YELLOW\0", "GREEN\0", "BLUE\0", "INDIGO\0", "VIOLET\0", "BLUEBERRYJAM\0", "ZERORANGER\0", "DEPTHS\0", "NIGHT\0", "MILK\0", "CUSTOM(PRESS B)\0"};
+
+
+bn::array<bn::color, 16> colorArray;
+bn::array<bn::color, 16> alternateColorArray;
+bn::array<bn::color, 16> fontColorArray;
+bn::array<bn::color, 16> tempColorArray;
+
+bn::array<bn::color, 16> blackColorArray;
+bn::array<bn::color, 16> darkGrayColorArray;
+bn::array<bn::color, 16> lightGrayColorArray;
+bn::array<bn::color, 16> whiteColorArray;
+
+

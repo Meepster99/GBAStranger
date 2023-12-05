@@ -23,7 +23,8 @@ public:
 	
 	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
 
-	__attribute__((section(".ewram"))) void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
+	//__attribute__((section(".ewram"))) void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
+	void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
 	
 	void reloadCells();
 
@@ -101,7 +102,8 @@ public:
 
 	// this cant be arm, it causes some lambdas to fuck up. why? is iwram automatically set to be arm instructions, and then the lambdas,, ugh
 	// since this cant be arm, im putting it in ewram instead of iwram bc ewram is 16 bit for the thumb instrs
-	__attribute__((noinline, section(".ewram"))) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
+	//__attribute__((noinline, section(".ewram"))) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
+	__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
 		
 	void doFloorSteps();
 	
@@ -115,6 +117,7 @@ public:
 	int getLocustCount();
 	int getRoomIndex();
 	
+	void updateWhiteRooms(const Pos& startPos, const Pos& currentPos);
 	void fullDraw();
 	
 	bn::optional<TileType> hasFloor(const int x, const int y);

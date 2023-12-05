@@ -552,37 +552,7 @@ void Game::loadTiles() {
 	
 	BN_ASSERT( floorTileCount + collisionTileCount + detailsTileCount < tileRef.size(), "didnt have enough alloc for tiles, need at least ", floorTileCount + collisionTileCount + detailsTileCount);
 	
-
-	
-	/*
-	for(int i=0; i<collisionTileCount; i++) {
-		tileRef[i].data[0] = collisionTiles->tiles_ref()[i].data[0];
-		tileRef[i].data[1] = collisionTiles->tiles_ref()[i].data[1];
-		tileRef[i].data[2] = collisionTiles->tiles_ref()[i].data[2];
-		tileRef[i].data[3] = collisionTiles->tiles_ref()[i].data[3];
-		tileRef[i].data[4] = collisionTiles->tiles_ref()[i].data[4];
-		tileRef[i].data[5] = collisionTiles->tiles_ref()[i].data[5];
-		tileRef[i].data[6] = collisionTiles->tiles_ref()[i].data[6];
-		tileRef[i].data[7] = collisionTiles->tiles_ref()[i].data[7];
-	}
-	*/
-	
 	memcpy(tileRef.data(), collisionTiles->tiles_ref().data(), 8 * sizeof(uint32_t) * collisionTileCount);
-	
-	/*
-	for(int i=0; i<detailsTileCount; i++) {
-		tileRef[i + collisionTileCount].data[0] = detailsTiles->tiles_ref()[i].data[0];
-		tileRef[i + collisionTileCount].data[1] = detailsTiles->tiles_ref()[i].data[1];
-		tileRef[i + collisionTileCount].data[2] = detailsTiles->tiles_ref()[i].data[2];
-		tileRef[i + collisionTileCount].data[3] = detailsTiles->tiles_ref()[i].data[3];
-		tileRef[i + collisionTileCount].data[4] = detailsTiles->tiles_ref()[i].data[4];
-		tileRef[i + collisionTileCount].data[5] = detailsTiles->tiles_ref()[i].data[5];
-		tileRef[i + collisionTileCount].data[6] = detailsTiles->tiles_ref()[i].data[6];
-		tileRef[i + collisionTileCount].data[7] = detailsTiles->tiles_ref()[i].data[7];
-	}
-	*/
-	
-	
 	
 	memcpy(tileRef.data() + collisionTileCount, detailsTiles->tiles_ref().data(), 8 * sizeof(uint32_t) * detailsTileCount);
 	
@@ -613,19 +583,6 @@ void Game::loadTiles() {
 		}
 	
 	} else {
-		/*
-		for(int i=0; i<floorTileCount; i++) {
-			tileRef[i + detailsTileCount + collisionTileCount].data[0] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[0];
-			tileRef[i + detailsTileCount + collisionTileCount].data[1] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[1];
-			tileRef[i + detailsTileCount + collisionTileCount].data[2] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[2];
-			tileRef[i + detailsTileCount + collisionTileCount].data[3] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[3];
-			tileRef[i + detailsTileCount + collisionTileCount].data[4] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[4];
-			tileRef[i + detailsTileCount + collisionTileCount].data[5] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[5];
-			tileRef[i + detailsTileCount + collisionTileCount].data[6] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[6];
-			tileRef[i + detailsTileCount + collisionTileCount].data[7] = bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref()[i].data[7];
-		}
-		*/
-		
 		memcpy(tileRef.data() + collisionTileCount + detailsTileCount, bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref().data(), 8 * sizeof(uint32_t) * floorTileCount);
 	}
 	
@@ -777,7 +734,13 @@ void Game::loadLevel(bool debug) {
 	BN_LOG("loadlevel completed");
 }
 
- __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_call)) void drawCollisionAndDetails() {
+#pragma GCC push_options
+//#pragma GCC optimize ("-fno-unroll-loops")
+//#pragma GCC optimize ("-Os")
+#pragma GCC optimize ("-O3")
+
+//__attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_call)) void drawCollisionAndDetails() {
+__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void drawCollisionAndDetails() {
 //void drawCollisionAndDetails() {
 	
 	// PUTTING THIS IN ARM GIVES A 50% REDUCTION. FIGURE IT OUT DUMBASS
@@ -799,11 +762,12 @@ void Game::loadLevel(bool debug) {
 			
 			if(tile < 3) {
 				tile = detailsMap[x][y];
-				
-				details.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
-				details.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
-				details.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
-				details.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+				if(tile != 0) {
+					details.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
+					details.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
+					details.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
+					details.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+				}
 			} else {
 				collision.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
 				collision.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
@@ -817,6 +781,40 @@ void Game::loadLevel(bool debug) {
 	
 	//collision.reloadCells();
 	
+}
+
+#pragma GCC pop_options
+
+__attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_call)) void clearGameMap() {
+	
+	// the goal of this is simple, to clear the game map 
+	// i could do it in dotiledraw, but it rlly fucked performance (made it const time)
+	// which is to an extent, ideal, but still
+	// does butano have any funcs for this already?
+	// i rlly hope that this doesnt take to much iwram up 
+	// loop unrolling rlly is messing me up here
+	// also gods pointer lookups vs refs 
+	// i rlly need to make everything namespaces, but make sure they are still in ewram 
+	// im also reminded at how much i despise this syntax 
+	
+	// clearGameMap draw took 0.08715 frames
+	// [WARN] GBA Debug:	clearGameMap draw took 0.10717 frames
+	// going through butano funcs is pathetically slow, most likely due to mults/maybe they arent in iwram?
+	// i am quite suspicious of the difference between only having section(".iwram") and having that and target("arm")
+	// i swear that the arm being there is needed to have it actually be in arm
+	
+	auto& cells = globalGame->collision.rawMap.cells;
+	auto& mapItem = globalGame->collision.rawMap.mapItem;
+	
+	for(int x=1; x<28+1; x++) {
+		for(int y=1; y<18+1; y++) {
+			bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
+			bn::regular_bg_map_cell_info current_cell_info(current_cell);
+
+			current_cell_info.set_tile_index(0);
+			current_cell = current_cell_info.cell(); 
+		}
+	}
 }
 
 void Game::fullDraw() {
@@ -841,11 +839,10 @@ void Game::fullDraw() {
 	BN_LOG("details draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 	*/
 	
-	
 	tempTimer.restart();
-	drawCollisionAndDetails();
+	clearGameMap();
 	tickCount = tempTimer.elapsed_ticks();
-	BN_LOG("collision and details draw took ", tickCount.safe_division(FRAMETICKS), " frames");
+	BN_LOG("clearGameMap draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 	
 	tempTimer.restart();
 	tileManager.fullDraw();
@@ -853,6 +850,11 @@ void Game::fullDraw() {
 	BN_LOG("tile draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 
 
+	tempTimer.restart();
+	drawCollisionAndDetails();
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("collision and details draw took ", tickCount.safe_division(FRAMETICKS), " frames");
+	
 	// bad move, wouldnt be needed if i wasnt drawing the background 3 FUCKING TIMES.
 	//doButanoUpdate();
 	
@@ -898,6 +900,8 @@ void Game::changePalette(int offset) {
 	}
 	*/
 	
+	pal->update();
+	
 	entityManager.updatePalette(paletteList[paletteIndex]);
 	effectsManager.updatePalette(paletteList[paletteIndex]);
 
@@ -914,11 +918,11 @@ void Game::changePalette(int offset) {
 	
 	pal->update();
 	
-	*col0 = pal->colorArray[0].data();
-	*col1 = pal->colorArray[1].data();
-	*col2 = pal->colorArray[2].data();
-	*col3 = pal->colorArray[3].data();
-	*col4 = pal->colorArray[4].data();
+	*col0 = pal->getColorArray()[0].data();
+	*col1 = pal->getColorArray()[1].data();
+	*col2 = pal->getColorArray()[2].data();
+	*col3 = pal->getColorArray()[3].data();
+	*col4 = pal->getColorArray()[4].data();
 	
 	//BN_LOG(*col1);
 	//BN_LOG(*col2);
@@ -1073,7 +1077,7 @@ void Game::doButanoUpdate() {
 	BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
 	
 	globalGame->doVBlank();	
-	
+
 	bn::core::update();
 	
 	int temp = bn::core::last_missed_frames();
@@ -1095,6 +1099,17 @@ void Game::doButanoUpdate() {
 }
 
 void didVBlank() {
+	
+	
+	unsigned stackIWram = bn::memory::used_stack_iwram();
+	unsigned staticIWram = bn::memory::used_static_iwram();
+	unsigned totalIWram = stackIWram + staticIWram;
+
+	//BN_LOG("used_stack_iwram: ", stackIWram.safe_division(32 * 1024));
+	//BN_LOG("used_static_iwram: ", staticIWram.safe_division(32 * 1024));
+	//BN_LOG("total iwram: ", totalIWram.safe_division(32 * 1024));
+	
+	BN_ASSERT(totalIWram < 32 * 1024, "iwram overflow!!!");
 	
 	//frame = (frame + 1) % 600000;
 	frame++;
@@ -1346,6 +1361,12 @@ void Game::run() {
 				} else {
 					Profiler::show();
 				}
+				
+				//bn::sprite_palettes::set_inverted(!bn::sprite_palettes::inverted());
+				//bn::bg_palettes::set_inverted(!bn::bg_palettes::inverted());
+				
+				 
+				
 				doButanoUpdate();
 				continue;
 			}
@@ -1495,10 +1516,10 @@ void Game::load() {
 	mode = saveData.mode;
 	roomManager.setMode(mode);
 	
-	CUSTOM.colorArray[1].set_data(saveData.col1Save);
-	CUSTOM.colorArray[2].set_data(saveData.col2Save);
-	CUSTOM.colorArray[3].set_data(saveData.col3Save);
-	CUSTOM.colorArray[4].set_data(saveData.col4Save);
+	CUSTOM.b.set_data(saveData.col1Save);
+	CUSTOM.c.set_data(saveData.col2Save);
+	CUSTOM.d.set_data(saveData.col3Save);
+	CUSTOM.e.set_data(saveData.col4Save);
 	
 	
 	for(int i=0; i<6; i++) {

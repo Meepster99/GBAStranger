@@ -7,6 +7,9 @@ class EffectsManager;
 class TileManager;
 class EntityManager;
 class Game;
+class Floor;
+
+//#include <functional>
 
 class FloorTile { // default floor.
 public:	
@@ -16,6 +19,7 @@ public:
 	//static BackgroundMap* rawMap;
 	static EntityManager* entityManager;
 	static Game* game;
+	static Floor* floorLayer;
 
 	Pos tilePos; // im not sure how much i like this, but for tiles to call/create effects, this is needed
 	
@@ -255,7 +259,9 @@ class SpriteTile : public FloorTile {
 public:
 
 	int (*tileFunc)(void);
+	//std::function<int(void)> tileFunc;
 
+	//SpriteTile(Pos p, std::function<int(void)> tileFunc_) : FloorTile(p, 51, 2), tileFunc(tileFunc_) {}
 	SpriteTile(Pos p, int (*tileFunc_)(void)) : FloorTile(p, 51, 2), tileFunc(tileFunc_) {}
 	
 	bool drawDropOff() const override { return true; }

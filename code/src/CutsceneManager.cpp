@@ -2040,7 +2040,7 @@ void CutsceneManager::inputCustomPalette() {
 			bn::string<64> string;
 			bn::ostringstream string_stream(string);
 			
-			bn::color& colorRef = globalGame->pal->colorArray[paletteLookup[i]];
+			bn::color& colorRef = globalGame->pal->getColorArray()[paletteLookup[i]];
 			
 			constexpr char channelNames[3] = {'R', 'G', 'B'};
 			int values[3] = {colorRef.red(), colorRef.green(), colorRef.blue()};
@@ -2158,7 +2158,7 @@ void CutsceneManager::inputCustomPalette() {
 				
 				int changeVal = bn::keypad::up_held() ? 1 : -1;
 				
-				bn::color& colorRef = game->pal->colorArray[paletteLookup[currentSelector]];
+				bn::color& colorRef = game->pal->getColorArray()[paletteLookup[currentSelector]];
 				
 				if(rgbSelector == 0) {
 					colorRef.set_red(CLAMP(colorRef.red() + changeVal, 0, 31));
@@ -2167,6 +2167,13 @@ void CutsceneManager::inputCustomPalette() {
 				} else {
 					colorRef.set_blue(CLAMP(colorRef.blue() + changeVal, 0, 31));
 				}
+				
+				// shit code
+				globalGame->pal->a = globalGame->pal->getColorArray()[0];
+				globalGame->pal->b = globalGame->pal->getColorArray()[1];
+				globalGame->pal->c = globalGame->pal->getColorArray()[2];
+				globalGame->pal->d = globalGame->pal->getColorArray()[3];
+				globalGame->pal->e = globalGame->pal->getColorArray()[4];
 				
 				game->pal->update();
 				

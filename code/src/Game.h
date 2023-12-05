@@ -36,38 +36,21 @@ public:
 	Details(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
 	
 	//inline void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
-	BACKGROUNDMAPATTRIBUTES inline void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
+	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// flip the highest bit of the tile to get a details tile.
 		// grabbing the size here each call may be expensive. i could set it to a int
 		collisionPointer->setBigTile(x, y, tile + collisionTileCount, flipX, flipY);
 	}
 	
 	//inline void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
-	BACKGROUNDMAPATTRIBUTES inline void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
+	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
 		collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 	}
 	
 	void draw(u8 (&detailsMap)[14][9], u8 (&collisionMap)[14][9]) {
-		
 		BN_ERROR("DONT CALL THE ACTUAL DRAW METHOD IN DETAILS");
-		
-		for(int x=0; x<14; x++) {
-			for(int y=0; y<9; y++) {
-				//if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
-				//if(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2) {					
-				if(collisionMap[x][y] < 3) {					
-					u8 tile = detailsMap[x][y];
-					if(tile != 0) {
-						setTile(x * 2 + 1, y * 2 + 1, 4 * tile + 0);
-						setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
-						setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
-						setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);	
-					}
-				}
-			}
-		}
-		
-		collisionPointer->rawMap.reloadCells();
+		(void)detailsMap;
+		(void)collisionMap;
 	}
 	
 	
@@ -173,6 +156,7 @@ public:
 		FloorTile::effectsManager = &effectsManager;
 		FloorTile::tileManager = &tileManager;
 		FloorTile::entityManager = &entityManager;
+		FloorTile::floorLayer = &tileManager.floorLayer;
 		//FloorTile::rawMap = &(tileManager.floorLayer.rawMap);
 	
 		FloorTile::game = this;
@@ -210,7 +194,9 @@ public:
 	void loadCustomSave();
 	uint64_t getSaveHash();
 	
-	void loadTiles();
+	// putting this in ewram stopped the glitching between rooms when in debug mode 
+	// weird, i didnt think it would help bc of how much loading from rom im doing, and the use of memcpy
+	__attribute__((section(".ewram"))) void loadTiles();
 	void createExitEffects();
 	void findNextRoom();
 	void loadLevel(bool debug = false);

@@ -19,7 +19,89 @@ void Floor::setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 	collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 }
 
-__attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
+//__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void doFloorDraw() {
+__attribute__((noinline, section(".ewram"))) void doFloorDraw() {
+	
+	auto& floorMap = globalGame->tileManager.floorMap;
+	//auto& floorLayer = globalGame->tileManager.floorLayer;
+	
+	// is the floor map stored in iwram or ewram?
+	
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			
+			if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
+				delete floorMap[x][y];
+				floorMap[x][y] = NULL;
+				continue;
+			}
+			
+			/*
+			// this could DEF be optimized!
+			if(!(collisionMap[x][y] < 3 || collisionMap[x][y] == 12) || detailsMap[x][y] != 0) {
+				continue;
+			}
+			*/
+			
+			
+			if(floorMap[x][y] != NULL) {
+				floorMap[x][y]->draw();
+				
+				if(y < 8 && floorMap[x][y]->drawDropOff() && floorMap[x][y+1] == NULL) {
+					FloorTile::drawDropOff(x, y+1);
+					y++;
+					
+					//floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
+					//floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
+					//floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
+					//floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
+				}
+			}
+		}
+	}
+};
+
+__attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
+
+	// a refrence requires lookup,, right? would using just a normal thing be better?
+	const int playerX = globalGame->entityManager.player->p.x;
+	const int playerY = globalGame->entityManager.player->p.y;
+	
+	const int startX = MAX(playerX - 2, 0);
+	const int startY = MAX(playerY - 2, 0);
+	
+	const int endX = MIN(playerX + 2, 13);
+	const int endY = MIN(playerY + 2, 8);
+	
+	auto& floorMap = globalGame->tileManager.floorMap;
+
+	for(int x=startX; x<=endX; x++) {
+		for(int y=startY; y<=endY; y++) {
+			
+			if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
+				delete floorMap[x][y];
+				floorMap[x][y] = NULL;
+				continue;
+			}
+			
+			if(floorMap[x][y] != NULL) {
+				
+				floorMap[x][y]->draw();
+				
+				if( (y < 8) && (
+				(y == endY) ||
+				(floorMap[x][y]->drawDropOff() && floorMap[x][y+1] == NULL)
+				)) {
+					FloorTile::drawDropOff(x, y+1);
+					y++;
+				}
+			}
+		}
+	}
+}
+
+//__attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
+void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 		
 	// THIS COULD, AND SHOULD BE OPTIMIZED INTO ONE LOOP OVER THE THING.
 	// also the whole background doesnt need a redraw, only the stuff that changed
@@ -29,6 +111,9 @@ __attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], F
 	// does putting it in the loop cause repeat calls?
 	// the more i look at the compiler the more i realize im bad 
 	
+	// this func has desperately needed a rewrite for a while
+	
+	/*
 	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
 	const Pos& playerPos = globalGame->entityManager.player->p; // and now im doing const refs like this omg
 	
@@ -96,6 +181,24 @@ __attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], F
 	if(isWhiteRooms) {
 		globalGame->tileManager.updateExit();
 	}
+	*/
+	
+	(void)collisionMap;
+	(void)floorMap;
+	
+	
+	//const auto& detailsMap = globalGame->detailsMap;
+	//auto& tileManager = globalGame->tileManager;
+	
+	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
+
+	//BN_LOG("whiterooms status ", isWhiteRooms);
+	
+	if(isWhiteRooms) {
+		doWhiteRoomsFloorDraw();
+	} else {
+		doFloorDraw();
+	}
 	
 	collisionPointer->rawMap.reloadCells();
 }
@@ -104,6 +207,47 @@ void Floor::reloadCells() {
 	collisionPointer->reloadCells();
 }
 
+auto memoryGetFunc = []() -> int {
+	Player* player = globalGame->entityManager.player;
+	
+	BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+	
+	if(player->hasMemory) {
+		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 0;
+	}
+	
+	return 57;
+};
+
+auto wingsGetFunc = []() -> int {
+	Player* player = globalGame->entityManager.player;
+	
+	BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+	
+	if(player->hasWings) {
+		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 1;
+	}
+	
+	return 57;
+};
+
+auto swordGetFunc = []() -> int {
+	Player* player = globalGame->entityManager.player;
+	
+	BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+	
+	if(player->hasSword) {
+		Pos tempPos = player->p;
+		
+		if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
+			return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
+		}
+		
+		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
+	}
+	
+	return 57;
+};
 
 // TODO: should tiles have entitymanagaer access?
 // copy tiles could call shadow spawns from there
@@ -111,8 +255,8 @@ void Floor::reloadCells() {
 // also, i would be passing the entity in as an optional param, maybe?
 // assuming that doesnt cause slowdown, that would be a good idea
 
-//__attribute__((noinline, target("arm"), section(".iwram"))) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
-__attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
+void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
+//__attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
 	
 	u8 uncompressedFloor[126];
 	globalGame->uncompressData(uncompressedFloor, floorPointer);
@@ -238,8 +382,14 @@ __attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* flo
 		
 		floorMap[7][8] = new WordTile(Pos(7, 8));
 		
+		
+		
 		// rodtile, and everything else should maybe(in the future) be replaced with spritetiles with custom lambdas?
-		memoryTile = new SpriteTile(Pos(8, 8), []() -> int {
+		
+		//std::function<int(void)> memoryGetFunc = []() -> int {
+		//int (*memoryGetFunc)() = []() -> int {
+		/*
+		auto memoryGetFunc = []() -> int {
 			Player* player = globalGame->entityManager.player;
 			
 			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
@@ -249,10 +399,17 @@ __attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* flo
 			}
 			
 			return 57;
-		});
+		};
+		*/
+		
+		memoryTile = new SpriteTile(Pos(8, 8), memoryGetFunc);
 		floorMap[8][8] = memoryTile;
 		
-		wingsTile = new SpriteTile(Pos(9, 8), []() -> int {
+		
+		//std::function<int(void)> wingsGetFunc = []() -> int {
+		//int (*wingsGetFunc)() = []() -> int {
+		/*
+		auto wingsGetFunc = []() -> int {
 			Player* player = globalGame->entityManager.player;
 			
 			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
@@ -262,10 +419,16 @@ __attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* flo
 			}
 			
 			return 57;
-		});
+		};
+		*/
+		
+		wingsTile = new SpriteTile(Pos(9, 8), wingsGetFunc);
 		floorMap[9][8] = wingsTile;
 		
-		swordTile = new SpriteTile(Pos(10, 8), []() -> int {
+		//std::function<int(void)> swordGetFunc = []() -> int {
+		//int (*swordGetFunc)() = []() -> int {
+		/*
+		auto swordGetFunc = []() -> int {
 			Player* player = globalGame->entityManager.player;
 			
 			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
@@ -281,7 +444,10 @@ __attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* flo
 			}
 			
 			return 57;
-		});
+		};
+		*/
+		
+		swordTile = new SpriteTile(Pos(10, 8), swordGetFunc);
 		floorMap[10][8] = swordTile;
 		
 		floorMap[11][8] = new WordTile(Pos(11, 8));
@@ -562,6 +728,8 @@ void TileManager::doFloorSteps() { profileFunction();
 
 void TileManager::updateTile(const Pos& p) {
 	
+	// i pray that like, i can optimize out the creation of the pos class in this
+	
 	const int x = p.x;
 	const int y = p.y;
 
@@ -747,6 +915,152 @@ int TileManager::getRoomIndex() {
 
 bool TileManager::hasCollision(const Pos& p) {
 	return entityManager->hasCollision(p);
+}
+
+void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
+
+	if(startPos == currentPos) {
+		return;
+	}
+	
+	// assuming this dir, is,,, bad. 
+	// i should get it from the dir, but im fucking tired 
+	Direction dir = globalGame->entityManager.player->currentDir;
+	Direction ortho;
+	
+	switch(dir) {
+		case Direction::Up:
+		case Direction::Down:
+			ortho = Direction::Left;
+			break;
+		case Direction::Left:
+		case Direction::Right:
+			ortho = Direction::Up;
+			break;
+		default:
+			BN_ERROR("no");
+			break;
+	}
+	
+	Pos drawPos = startPos;
+	drawPos.move(dir);
+	drawPos.move(dir);
+	drawPos.move(dir);
+	
+	drawPos.move(ortho);
+	drawPos.move(ortho);
+	
+	Pos erasePos = currentPos;
+	erasePos.moveInvert(dir, true, true);
+	erasePos.moveInvert(dir, true, true);
+	erasePos.moveInvert(dir, true, true);
+	
+	erasePos.move(ortho);
+	erasePos.move(ortho);
+	//erasePos.move(ortho);
+	
+	auto doDraw = [this, &dir](const Pos& p) -> void {
+		
+		int x = p.x;
+		int y = p.y;
+		
+		if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
+			delete floorMap[x][y];
+			floorMap[x][y] = NULL;
+		}
+		
+		if(floorMap[x][y] != NULL) {
+			
+			floorMap[x][y]->draw();
+			
+			if(y < 8) {
+				switch(dir) {
+					case Direction::Up:
+						if(floorMap[x][y+1] == NULL) {
+							FloorTile::drawDropOff(x, y+1);
+						}
+						break;
+					case Direction::Down:
+					case Direction::Left:
+					case Direction::Right:
+						FloorTile::drawDropOff(x, y+1);
+						break;
+					default:
+						BN_ERROR("unreachable");
+						break;
+				}
+			}
+		}
+	};
+	
+	auto doClear = [this, &ortho, &dir](const Pos& p) -> void {
+		
+		int x = p.x;
+		int y = p.y;
+		
+		// shit code, but works
+		
+		FloorTile::drawPit(x, y);
+		
+		
+		switch(dir) {
+			case Direction::Left:
+			case Direction::Right:
+				if(y < 8 && floorMap[x][y] != NULL) {
+					FloorTile::drawPit(x, y+1);
+				}
+				break;
+			case Direction::Up:
+				if(y < 8) {
+					FloorTile::drawPit(x, y + 1);
+				}
+				if(y > 0 && floorMap[x][y-1] != NULL) {
+					FloorTile::drawDropOff(x, y);
+				}
+				break;
+			case Direction::Down:
+				if(y < 8 && floorMap[x][y+1] == NULL) {
+					FloorTile::drawPit(x, y + 1);
+				}
+				break;
+			default:
+				BN_ERROR("unreachable");
+				break;
+		}
+		
+	};
+	
+	
+	Pos iteratorPos = currentPos;
+	iteratorPos.move(ortho);
+	iteratorPos.move(ortho);
+	
+	Pos stopPos = currentPos;
+	stopPos.moveInvert(ortho, true, true);
+	stopPos.moveInvert(ortho, true, true);
+	
+	while(true) { 
+
+		doClear(erasePos);
+	
+		doDraw(drawPos);
+		
+		if(iteratorPos == stopPos) {
+			break;
+		}
+		
+		drawPos.moveInvert(ortho, true, true);
+		erasePos.moveInvert(ortho, true, true);
+		iteratorPos.moveInvert(ortho, true, true);
+	}
+	//doClear(erasePos);
+	//erasePos.moveInvert(ortho, true, true);
+	//doClear(erasePos);
+	
+	updateExit();
+	
+	floorLayer.reloadCells();
+	
 }
 
 void TileManager::fullDraw() { 

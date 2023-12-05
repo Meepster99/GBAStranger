@@ -105,6 +105,17 @@ the fact that i didnt get an error though,,, is extremely concerning
 */
  
  
+ 
+extern bn::array<bn::color, 16> colorArray;
+extern bn::array<bn::color, 16> alternateColorArray;
+extern bn::array<bn::color, 16> fontColorArray;
+extern bn::array<bn::color, 16> tempColorArray;
+
+extern bn::array<bn::color, 16> blackColorArray;
+extern bn::array<bn::color, 16> darkGrayColorArray;
+extern bn::array<bn::color, 16> lightGrayColorArray;
+extern bn::array<bn::color, 16> whiteColorArray;
+ 
 class Palette {
 public:
 
@@ -113,34 +124,30 @@ public:
 	//bn::color fontColorArray[16];
 	//bn::color tempColorArray[16];
 	
-	bn::array<bn::color, 16> colorArray;
-	bn::array<bn::color, 16> alternateColorArray;
-	bn::array<bn::color, 16> fontColorArray;
-	bn::array<bn::color, 16> tempColorArray;
+	bn::color a;
+	bn::color b;
+	bn::color c;
+	bn::color d;
+	bn::color e;
 	
-	bn::array<bn::color, 16> blackColorArray;
-	bn::array<bn::color, 16> darkGrayColorArray;
-	bn::array<bn::color, 16> lightGrayColorArray;
-	bn::array<bn::color, 16> whiteColorArray;
+	constexpr Palette(bn::color a_, bn::color b_, bn::color c_, bn::color d_, bn::color e_ = bn::color(0, 0, 0)) :
 	
-	constexpr Palette(bn::color a, bn::color b, bn::color c, bn::color d, bn::color e = bn::color(0, 0, 0)) :
-	colorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
-	alternateColorArray{a, b, e, d, c, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)},
-	fontColorArray{a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e},
-	tempColorArray{a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)}
+	a(a_), b(b_), c(c_), d(d_), e(e_)
+	
 	{
-		
-		
-		
+		//colorArray = {a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)};
+	
+		update();
 	}
 	
-	void update() {
+	bn::array<bn::color, 16>& getColorArray() {
+		return colorArray;
+	}
+	
+	constexpr void update() {
+	
+		colorArray = {a, b, c, d, e, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)};
 		
-		const auto& a = colorArray[0];
-		const auto& b = colorArray[1];
-		const auto& c = colorArray[2];
-		const auto& d = colorArray[3];
-		const auto& e = colorArray[4];
 		
 		alternateColorArray = {a, b, e, d, c, bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0), bn::color(0, 0, 0)};
 		fontColorArray = {a, e, d, d, a, e, d, d, a, e, d, d, b, e, e, e};
