@@ -2878,7 +2878,7 @@ void EffectsManager::doMenu() {
 		game->resetRoom(true);
 	}
 	menuOptions.clear();
-	tileManager->fullDraw(); // literally only here since for some reason, butden tiles didnt update until a move?
+	//tileManager->fullDraw(); // literally only here since for some reason, butden tiles didnt update until a move?
 	game->doButanoUpdate();
 	
 	for(int x=0; x<14; x++) {
