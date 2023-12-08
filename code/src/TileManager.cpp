@@ -923,6 +923,15 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 		return;
 	}
 	
+	/*
+	if(exitTile != NULL) {
+		Pos exitPos = exitTile->tilePos;
+		if(exitPos.move(Direction::Down)) {
+			FloorTile::drawDropOff(exitPos.x, exitPos.y);
+		}
+	}
+	*/
+
 	// assuming this dir, is,,, bad. 
 	// i should get it from the dir, but im fucking tired 
 	Direction dir = globalGame->entityManager.player->currentDir;

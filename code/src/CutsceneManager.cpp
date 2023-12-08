@@ -2443,6 +2443,12 @@ void CutsceneManager::titleScreen() {
 
 void CutsceneManager::mimicTalk() {
 	
+	// i dont know what to play here. but i want to put something here.
+	// thx erika
+	
+	bn::optional<bn::music_item> musicBackup = bn::music::playing_item();
+
+	bn::music_items::dancing_lesson.play();
 	
 	delay(5);
 	
@@ -2456,6 +2462,13 @@ void CutsceneManager::mimicTalk() {
 	"You should come say hi later though, I never meet anyone around here.\n"
 	"I normally hang out around the trees. Please come. Ill cook us some eggs.\0");
 	
+	//BN_ASSERT(musicBackup.has_value(), "in mimicTalk, musicbackup didnt have a value? how?");
+	// in the future, i should have a option to disable music, this will, semi help/be safer 
+	if(musicBackup.has_value()) {
+		musicBackup.value().play();
+	} else {
+		bn::music::stop();
+	}
 	
 	
 	

@@ -1086,7 +1086,15 @@ void Game::doButanoUpdate() {
 	
 	BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
 	
+	//static bn::timer vblankTimer;
+	//static bn::fixed tickCount; 
+	//(void)tickCount; // supress warning if logging is disabled
+	//vblankTimer.restart();
+	
 	globalGame->doVBlank();	
+	
+	//tickCount = vblankTimer.elapsed_ticks();
+	//BN_LOG("vblank ops took ", tickCount.safe_division(FRAMETICKS), " frames");
 
 	bn::core::update();
 	

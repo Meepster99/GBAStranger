@@ -111,6 +111,13 @@
 
 #endif
 
+// wee woo wee woo 
+// i hate this 
+// https://stackoverflow.com/questions/33050620/golang-style-defer-in-c
+//using defer = std::shared_ptr<void>;    
+// defer _(nullptr, [](...){ std::cout << ", World!"; });
+//#define DEFER(code) std::shared_ptr<void> _(nullptr, [](...){ code }); 
+#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...){ code }); 
 
 #define USEEWRAM __attribute__((section(".ewram")))
 

@@ -1062,6 +1062,7 @@ def getNeededFiles():
 			refs.update(matches)
 
 	refs.remove("cifdream")
+	refs.remove("dancing_lesson")
 	
 	#refs = ["msc_voidsong"]
 	
@@ -1070,6 +1071,7 @@ def getNeededFiles():
 def copyNeededMusic():
 
 	copyIfChanged("cifdream.xm", outputFolder)
+	copyIfChanged("dancing_lesson.it", outputFolder)
 
 	files = getNeededFiles()
 	

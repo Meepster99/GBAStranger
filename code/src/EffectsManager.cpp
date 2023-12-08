@@ -692,13 +692,24 @@ void BigSprite::loadTree() {
 		
 		return [alreadyTalked](void* unused) mutable -> void {
 			(void)unused;
-			
+		
 			// hehe, have me give them an egg if behind the tree
-			
-			
 			
 			auto eggFunc = [&alreadyTalked]() mutable -> void {
 
+				bn::optional<bn::music_item> musicBackup = bn::music::playing_item();
+
+				bn::music_items::dancing_lesson.play();
+				
+				// vine boom sound effect 
+				// i miss go 
+				DEFER(musicBackup, 
+					if(musicBackup.has_value()) {
+						musicBackup.value().play();
+					} else {
+						bn::music::stop();
+					}
+				);
 			
 				// my use of lambdas has become excessive 
 				auto giveEgg = []() -> void {
@@ -3744,20 +3755,25 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 	
 	// this REALLLLY needs to be optimized.
 	
-	Sprite tempSprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
-	const bn::sprite_tiles_item* tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
+	//Sprite tempSprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
+	//const bn::sprite_tiles_item* tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
 	
+	/*
 	if(!(randomGenerator.get() & 1)) {
 		tempSprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle2, bn::sprite_shape_size(8, 8));
 		tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
 	}
+	*/
 
 	
 	auto createFunc = [
-	tempSprite = bn::move(tempSprite),
-	tempTiles = bn::move(tempTiles)
+	//tempSprite = bn::move(tempSprite),
+	//tempTiles = bn::move(tempTiles)
+	//tempSprite = tempSprite,
+	//tempTiles = tempTiles
 	](Effect* obj) mutable -> void {
 
+		/*
 		obj->sprite = tempSprite;
 		obj->tiles = tempTiles;
 	
@@ -3765,6 +3781,9 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			*obj->tiles,
 			0
 		);
+		*/
+		
+		//obj->sprite = tempSprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
 	
 		//obj->sprite.spritePointer.set_z_order(1);
 		//obj->sprite.spritePointer.set_z_order(0);
@@ -3833,6 +3852,7 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 				y = 16*4+randomGenerator.get_int(32);
 			}
 			
+			obj->sprite.spritePointer.set_tiles(*obj->tiles, bn::sprite_shape_size(8, 8));
 			
 			
 			image_speed = (bn::fixed)0;
@@ -3931,11 +3951,19 @@ void EffectsManager::roomDust() {
 	
 	BN_LOG("CREATING ROOMDUST");
 	
-	for(int unused = 0; unused<16; unused++) {
+	bn::timer tempTimer;
+	bn::fixed tickCount; 
+	(void)tickCount; // supress warning if logging is disabled
 	
+	tempTimer.restart();
+	
+	for(int unused = 0; unused<16; unused++) {
 		Effect* e = getRoomDustEffect();
 		effectList.push_back(e);	
 	}
+	
+	tickCount = tempTimer.elapsed_ticks();
+	BN_LOG("roomDust push took ", tickCount.safe_division(FRAMETICKS), " frames");
 
 }
 
