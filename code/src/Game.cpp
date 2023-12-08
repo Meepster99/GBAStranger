@@ -720,18 +720,20 @@ void Game::loadLevel(bool debug) {
 	} else {
 		if((strstrCustom(roomManager.currentRoomName(), "_u_00\0") == NULL) &&
 			(strstrCustom(roomManager.currentRoomName(), "_u_en\0") == NULL)) {	
-			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
-			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+			bn::bg_palettes::set_transparent_color(pal->getColorArray()[1]);
+			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
+			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 		} else {
-			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
-			cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
+			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+			bn::bg_palettes::set_transparent_color(pal->getColorArray()[2]);
 		}
 	}
 	
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	
-	BN_LOG("loadlevel completed");
+	BN_LOG("loadlevel completed");   
 }
 
 #pragma GCC push_options
@@ -907,6 +909,8 @@ void Game::changePalette(int offset) {
 	*/
 	
 	pal->update();
+	
+	bn::bg_palettes::set_transparent_color(pal->getColorArray()[1]);
 	
 	entityManager.updatePalette(paletteList[paletteIndex]);
 	effectsManager.updatePalette(paletteList[paletteIndex]);
