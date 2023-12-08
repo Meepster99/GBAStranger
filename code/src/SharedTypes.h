@@ -908,6 +908,26 @@ private:
         return left;
     }
 	
+	SANESETATTRIBUTES int binarySearchOrInsertIndex(const T& elem) {
+		int low = 0;
+		int high = data.size() - 1;
+
+		while (low <= high) {
+			int mid = low + (high - low) / 2;
+
+			if (data[mid] == elem) {
+				return -1; // Element already exists, return a special value
+			} else if (data[mid] < elem) {
+				low = mid + 1;
+			} else {
+				high = mid - 1;
+			}
+		}
+
+		// Element not found, return the index where it should be inserted
+		return low;
+	}
+	
 public:
 
 	SANESETATTRIBUTES SaneSet() {}	
@@ -922,12 +942,24 @@ public:
     }
 	
 	SANESETATTRIBUTES void insert(const T& elem) {
+		
+		// this should TOTALLY fucking be optimized 
+		// to not do 2 binary searches
+		
+		/*
 		int index = binarySearch(elem);
         if (index == -1) {
             // Element not found, insert it at the appropriate position
             int insertIndex = getInsertIndex(elem);
             data.insert(data.begin() + insertIndex, elem);
         }
+		*/
+		
+		int index = binarySearchOrInsertIndex(elem);
+		
+		if(index != -1) {
+			data.insert(data.begin() + index, elem);
+		}
 	}
 	
 	SANESETATTRIBUTES bool contains(const T& elem) const {
