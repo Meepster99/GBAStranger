@@ -338,6 +338,14 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		}
 	}
 
+	
+	// check if we are bumping into an obstacle, and if so, set the playerPush var 
+	tempPos = p;
+	if(tempPos.move(currentDir) && entityManager->hasObstacle(tempPos)) {
+		BN_ASSERT(entityManager->getMap(tempPos).size() == 1, "when deciding what the player pushed, something was wrong");
+		entityManager->playerPush = *(entityManager->getMap(tempPos).begin());
+	}
+	
 	return {true, bn::optional<Direction>(currentDir)};
 }
 

@@ -88,6 +88,8 @@ void Bomb::stepOn() {
 	charge++;
 	if(charge == 2) {
 		isAlive = false;
+		
+		game->entityManager.posTracker.insert(tilePos);
 	
 		game->effectsManager.bombTileAnimate(tilePos);
 	

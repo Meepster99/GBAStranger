@@ -32,6 +32,8 @@ public:
 	
 	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
 
+	Entity* playerPush = NULL;
+	
 	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
 	
 	// i could include a unordered map here for each entity type, but 

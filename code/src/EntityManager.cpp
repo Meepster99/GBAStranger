@@ -12,7 +12,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 	posTracker.clear();
 
-	//playerPush = NULL;
+	playerPush = NULL;
 
 	shouldTickPlayer = true;
 
@@ -1003,12 +1003,23 @@ void EntityManager::doMoves() { profileFunction();
 	// additionally,,,, all obstacles need a update every tick in case their floor was bombed,,, a bit not ideal tbh 
 	
 	//moveObstacles();
-	//moveEntity(playerPush);
-	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+	if(playerPush != NULL) {
+		// my first attempt at this didnt do a if null, and was constantly jumping to undef code(bc ofc it was) im so dumb
+		moveEntity(playerPush);
+		playerPush = NULL;
+	}
+	
+	// i rlly rlly think that,, the playerpush move was the right move here.
+	
+	/*
+	//for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+	for(auto it = kickedList.begin(); it != kickedList.end(); ++it) { // unsure if this change is ok!
 		if( (static_cast<Obstacle*>(*it))->bumpDirections.size() != 0 ) {
 			moveEntity(*it);
 		}
 	}
+	*/
+	
 	//BN_LOG("PLAYER obstacle move");
 	updateMap();
 	if(hasKills()) {
@@ -1060,8 +1071,14 @@ void EntityManager::doMoves() { profileFunction();
 	}
 	*/
 	
+	//for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+	for(auto it = kickedList.begin(); it != kickedList.end(); ++it) { // unsure if this change is ok!
+		if( (static_cast<Obstacle*>(*it))->bumpDirections.size() != 0 ) {
+			moveEntity(*it);
+		}
+	}
 
-	moveObstacles();
+	//moveObstacles();
 	//BN_LOG("GENERAL obstacle move");
 	updateMap();
 	if(hasKills()) {
