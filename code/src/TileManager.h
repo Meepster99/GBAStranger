@@ -19,9 +19,9 @@ public:
 	// this class is now legacy, but im going to reimpliment funcs in here and pass them off to collision
 	Floor(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
 	
-	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false);
+	USEIWRAM void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false);
 	
-	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
+	USEIWRAM void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
 
 	//__attribute__((section(".ewram"))) void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
 	void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);

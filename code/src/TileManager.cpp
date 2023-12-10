@@ -20,45 +20,32 @@ void Floor::setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 }
 
 //__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void doFloorDraw() {
-__attribute__((noinline, section(".ewram"))) void doFloorDraw() {
+__attribute__((noinline, section(".iwram"))) void doFloorDraw() {
 	
 	auto& floorMap = globalGame->tileManager.floorMap;
 	//auto& floorLayer = globalGame->tileManager.floorLayer;
 	
 	// is the floor map stored in iwram or ewram?
+	// does, not doing this sequentially cause fuck ups with doing multiplication?
 	
 	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			
-			if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
-				delete floorMap[x][y];
-				floorMap[x][y] = NULL;
-				continue;
-			}
-			
-			/*
-			// this could DEF be optimized!
-			if(!(collisionMap[x][y] < 3 || collisionMap[x][y] == 12) || detailsMap[x][y] != 0) {
-				continue;
-			}
-			*/
-			
-			
+		for(int y=0; y<8; y++) { // save a branch, also layer 8 isnt even needed dumbass bc thats the fuckin, UI layer, idiot
 			if(floorMap[x][y] != NULL) {
 				floorMap[x][y]->draw();
-				
-				if(y < 8 && floorMap[x][y]->drawDropOff() && floorMap[x][y+1] == NULL) {
-					FloorTile::drawDropOff(x, y+1);
+				if(floorMap[x][y+1] == NULL && floorMap[x][y]->drawDropOff()) {
 					y++;
-					
-					//floorLayer.setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
-					//floorLayer.setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
-					//floorLayer.setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
-					//floorLayer.setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
+					FloorTile::drawDropOff(x, y);
 				}
 			}
 		}
 	}
+	
+	for(int x=0; x<14; x++) {
+		if(floorMap[x][8] != NULL) {
+			floorMap[x][8]->draw();
+		}
+	}
+	
 };
 
 __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
@@ -78,11 +65,13 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 	for(int x=startX; x<=endX; x++) {
 		for(int y=startY; y<=endY; y++) {
 			
+			/*
 			if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
 				delete floorMap[x][y];
 				floorMap[x][y] = NULL;
 				continue;
 			}
+			*/
 			
 			if(floorMap[x][y] != NULL) {
 				
@@ -110,78 +99,6 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 	// does settings this here vs calling it in the func like 
 	// does putting it in the loop cause repeat calls?
 	// the more i look at the compiler the more i realize im bad 
-	
-	// this func has desperately needed a rewrite for a while
-	
-	/*
-	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
-	const Pos& playerPos = globalGame->entityManager.player->p; // and now im doing const refs like this omg
-	
-	for(int x=0; x<14; x++) {
-		// we now do this in reverse to preserve the dropoffs
-		//for(int y=0; y<9; y++) {
-		for(int y=8; y>=0; y--) {
-			
-			if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
-				delete floorMap[x][y];
-				floorMap[x][y] = NULL;
-			}
-			
-			//if(!(collisionMap[x][y] == 0 || collisionMap[x][y] == 1 || collisionMap[x][y] == 2 || collisionMap[x][y] == 12)) {
-			if(!(collisionMap[x][y] < 3 || collisionMap[x][y] == 12)) {
-				continue;
-			}
-			
-			if(globalGame->detailsMap[x][y] != 0) {
-				continue;
-			}
-			
-			if(isWhiteRooms) {
-				
-				// horrid shit code. this needs to be made, into something that makes a vague amount of sense.
-				
-				if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {	
-					if(globalGame->tileManager.hasFloor(x, y) == TileType::Exit) {
-						floorMap[x][y]->draw();
-					} else if(y > 0	&& globalGame->tileManager.hasFloor(x, y - 1) == TileType::Exit) {
-						FloorTile::drawDropOff(x, y);
-					} else if(y - playerPos.y == 3 && y > 0 && floorMap[x][y - 1] != NULL && ABS(x - playerPos.x) <= 2) {
-						FloorTile::drawDropOff(x, y);
-					} else {
-						FloorTile::drawPit(x, y);
-					}
-				} else {
-					if(floorMap[x][y] == NULL) {
-						FloorTile::drawPit(x, y);
-					} else {
-						floorMap[x][y]->draw();
-						if(y < 8 && floorMap[x][y + 1] == NULL) {
-							FloorTile::drawDropOff(x, y + 1);
-						}
-					}
-				}
-				continue;
-			}
-			
-			// i pray this doesnt (curse) my performance.
-			if(floorMap[x][y] == NULL) {
-				// FloorTile::drawPit(x, y);
-			} else {
-				floorMap[x][y]->draw();
-				// y < 7 here bc row 8 is for ui, and we dont want dropoffs going there,, do we?
-				if(floorMap[x][y]->drawDropOff() && y < 8 && 
-				(floorMap[x][y+1] == NULL) && collisionMap[x][y+1] < 3) {
-					FloorTile::drawDropOff(x, y+1);
-				}	
-			}
-		}
-	}
-	
-	// i hate this code.
-	if(isWhiteRooms) {
-		globalGame->tileManager.updateExit();
-	}
-	*/
 	
 	(void)collisionMap;
 	(void)floorMap;
@@ -256,10 +173,12 @@ auto swordGetFunc = []() -> int {
 // assuming that doesnt cause slowdown, that would be a good idea
 
 void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
-//__attribute__((noinline, section(".ewram"))) void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
+	
+	bn::timer testTimer;
+	testTimer.restart();
 	
 	u8 uncompressedFloor[126];
-	globalGame->uncompressData(uncompressedFloor, floorPointer);
+	uncompressData(uncompressedFloor, floorPointer);
 	
 	stepOns.clear();
 	stepOffs.clear();
@@ -273,7 +192,6 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 			player->rod[i] = NULL;
 		}
 		player->rod.clear();
-	
 	}
 	
 	exitTile = NULL;
@@ -378,74 +296,14 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		floorMap[6][8] = new RodTile(Pos(6, 8));
 		rodTile = static_cast<RodTile*>(floorMap[6][8]);
 		
-		
-		
 		floorMap[7][8] = new WordTile(Pos(7, 8));
 		
-		
-		
-		// rodtile, and everything else should maybe(in the future) be replaced with spritetiles with custom lambdas?
-		
-		//std::function<int(void)> memoryGetFunc = []() -> int {
-		//int (*memoryGetFunc)() = []() -> int {
-		/*
-		auto memoryGetFunc = []() -> int {
-			Player* player = globalGame->entityManager.player;
-			
-			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
-			
-			if(player->hasMemory) {
-				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 0;
-			}
-			
-			return 57;
-		};
-		*/
-		
+
 		memoryTile = new SpriteTile(Pos(8, 8), memoryGetFunc);
 		floorMap[8][8] = memoryTile;
 		
-		
-		//std::function<int(void)> wingsGetFunc = []() -> int {
-		//int (*wingsGetFunc)() = []() -> int {
-		/*
-		auto wingsGetFunc = []() -> int {
-			Player* player = globalGame->entityManager.player;
-			
-			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
-			
-			if(player->hasWings) {
-				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 1;
-			}
-			
-			return 57;
-		};
-		*/
-		
 		wingsTile = new SpriteTile(Pos(9, 8), wingsGetFunc);
 		floorMap[9][8] = wingsTile;
-		
-		//std::function<int(void)> swordGetFunc = []() -> int {
-		//int (*swordGetFunc)() = []() -> int {
-		/*
-		auto swordGetFunc = []() -> int {
-			Player* player = globalGame->entityManager.player;
-			
-			BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
-			
-			if(player->hasSword) {
-				Pos tempPos = player->p;
-				
-				if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
-					return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
-				}
-				
-				return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
-			}
-			
-			return 57;
-		};
-		*/
 		
 		swordTile = new SpriteTile(Pos(10, 8), swordGetFunc);
 		floorMap[10][8] = swordTile;
@@ -485,6 +343,14 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		secrets++;
 	}
 	
+	// why in tarnation is this vblank needed for floor 136??
+	// i dont like having this here and slowing down debug swapping, but ugh 
+	// if i want to do tas verification, i need to not have framedrops
+	game->doButanoUpdate();
+	
+	
+	bn::fixed tickCount = testTimer.elapsed_ticks();
+	BN_LOG("tilemanager loadtiles ", tickCount.safe_division(FRAMETICKS), " frames");
 }
 
 int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
@@ -1095,13 +961,12 @@ bool TileManager::enterRoom() {
 
 void TileManager::doVBlank() { profileFunction();
 	
-	// things like glass breaking(and maybe others) should occur in here!
-	
 	
 	// i PRAY that this doesnt kill performance. something sorta similar to this may have (curse)ed performance back when i was trying to get death tiles working?
 	
-	bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
+	// this whole area of code is trash and needs a rewrite
 	
+	bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1114,35 +979,36 @@ void TileManager::doVBlank() { profileFunction();
 			if(floorMap[x][y]->isSteppedOn) {
 				// isnt this kinda dumb? why am i not just,,, doing this,,, during cpu??
 				floorMap[x][y]->isSteppedOnAnimation();
-			} 
+			}
+			
+			/*
 			if(floorMap[x][y]->tileType() == TileType::Exit) { // not ideal code.
 				static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
 			} else if(doDeathTileAnim && floorMap[x][y]->tileType() == TileType::Death) { // not ideal code.
 				effectsManager->deathTileAnimate(Pos(x, y));
 			}
+			*/
+			
+			switch(floorMap[x][y]->tileType()) {
+				case TileType::Exit:
+					static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
+					break;
+				case TileType::Death:
+					if(doDeathTileAnim) {
+						effectsManager->deathTileAnimate(Pos(x, y));
+					}
+					break;
+				default: [[likely]]
+					break;
+			}
 		}
 	}
-	
-	
-	// this should maybe be done during cpu?
-	// i wonder/hope this is ok 
-	// sword tile needs to be updated every,, frame for flashing?
 	
 	
 	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);
 	}
-	
 
-	/*
-	if(needUpdate) {
-		needUpdate = false;
-		floorLayer.reloadCells();
-	}
-	*/
-	
-	//floorLayer.reloadCells();
-	
 	return;
 }
 

@@ -46,11 +46,11 @@ public:
 	
 	virtual bool isTransparent() const { return false; }
 	
-	virtual void draw();
+	USEIWRAM virtual void draw();
 	
-	static void drawPit(int x, int y);
+	USEIWRAM static void drawPit(int x, int y);
 	
-	static void drawDropOff(int x, int y);
+	USEIWRAM static void drawDropOff(int x, int y);
 
 	virtual ~FloorTile() = default;
 	
@@ -151,6 +151,7 @@ public:
 	
 	// should this be an override?
 	// this was overkill tbh, but im not touching it rn
+
 	~Switch() {
 		totalCount--;
 		if(isSteppedOn) {

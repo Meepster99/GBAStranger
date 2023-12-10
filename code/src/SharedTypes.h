@@ -120,6 +120,7 @@
 #define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...){ code }); 
 
 #define USEEWRAM __attribute__((section(".ewram")))
+#define USEIWRAM __attribute__((section(".iwram")))
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -196,6 +197,8 @@ extern int* glitchTilesCount;
 __attribute__((section(".iwram"), target("thumb"), long_call)) unsigned short bruhRand();
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) unsigned getMiscData();
+
+__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void uncompressData(u8 res[126], u8* input);
 
 void doNothing();
 
@@ -352,7 +355,8 @@ static const char *TileTypeToString[] ={
 
 }
 
-#define BACKGROUNDMAPATTRIBUTES __attribute__((section(".ewram")))
+#define BACKGROUNDMAPATTRIBUTES __attribute__((section(".iwram")))
+//#define BACKGROUNDMAPATTRIBUTES __attribute__((section(".ewram")))
 //#define BACKGROUNDMAPATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 class BackgroundMap {
@@ -489,7 +493,10 @@ public:
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) {
 	
-		bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
+		//bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
+		
+		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
+
 		//bn::regular_bg_map_cell_info current_cell_info(current_cell);
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
 
@@ -504,7 +511,13 @@ public:
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 		
-		bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
+		//bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
+
+		// removing butano's overhead saved a regretably large amount of cpu. 
+		// im talking .35 of a frame to .2 on floor 10 
+		// its a bummer that my other arrays arent indexed by [y][x] but by [x][y], as [y][x] would be better for optimization
+		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
+
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
 
 		current_cell_info.set_tile_index(tileIndex);
@@ -614,7 +627,7 @@ public:
 	
 };
 
-#define POSATTRIBUTES __attribute__((section(".ewram")))
+#define POSATTRIBUTES __attribute__((section(".iwram")))
 
 class Pos {
 public:
@@ -982,6 +995,7 @@ public:
 	}
 	
 	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator insert(const bn::vector<T, maxVecSize>::iterator it) {
+		/*
 		int index = binarySearch(*it);
         if (index == -1) {
             // Element not found, insert it at the appropriate position
@@ -989,6 +1003,15 @@ public:
             return data.insert(data.begin() + insertIndex, *it);
         }
 		return data.begin() + index;
+		*/
+		
+
+		int index = binarySearchOrInsertIndex(*it);
+		if(index == -1) {
+			return data.begin() + index;
+		}
+		
+		return data.insert(data.begin() + index, *it);
 	}
 	
 	SANESETATTRIBUTES int size() const {

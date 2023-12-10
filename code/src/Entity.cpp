@@ -142,7 +142,9 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		// if there is a entity in this tile, this is an invalid move(unless sword!).
 		
 		if(entityManager->hasEntity(tilePos)) {
-			if(hasSword && !inRod(tileManager->swordTile)) {
+			if( (hasSword && !inRod(tileManager->swordTile)) || 
+				hashString("rm_0172\0") == game->roomManager.currentRoomHash()
+				) {
 				BN_ASSERT(entityManager->getMap(tilePos).size() == 1, "when killing an entity, there were multiple entitys in the tilepos??");
 				
 				Entity* tempEntity = *(entityManager->getMap(tilePos).begin());
@@ -700,7 +702,7 @@ void generateFunny(char* res) {
 	int i=0;
 	for(; i<string.size(); i++) {
 		res[i] = string[i];
-		BN_LOG(string[i]);
+		//BN_LOG(string[i]);
 	}	
 	// i fucking knew it, it is my code which needs 2 nullterms for some reason?
 	res[i] = '\0';

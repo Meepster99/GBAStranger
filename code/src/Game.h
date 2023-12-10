@@ -36,14 +36,14 @@ public:
 	Details(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
 	
 	//inline void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
-	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
+	USEIWRAM void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// flip the highest bit of the tile to get a details tile.
 		// grabbing the size here each call may be expensive. i could set it to a int
 		collisionPointer->setBigTile(x, y, tile + collisionTileCount, flipX, flipY);
 	}
 	
 	//inline void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
-	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
+	USEIWRAM void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false) { 
 		collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 	}
 	
@@ -228,7 +228,7 @@ public:
 	void changeMusic();
 	
 	void doButanoUpdate();
-	void uncompressData(u8 res[126], u8* input);
+	//void uncompressData(u8 res[126], u8* input);
 	
 	void changeMode(int val) {
 		mode += val;

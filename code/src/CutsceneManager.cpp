@@ -2458,9 +2458,11 @@ void CutsceneManager::mimicTalk() {
 	
 	effectsManager->doDialogue("hello there!\nThank you for playing <3.\r"
 	"It means the world to me.\n"
-	"But well, anyways, I am in your way.\n"
+	"I really hope the following does sound wrong, I am nervous talking to new people.\n"
+	"Anyways, I am in your way.\r"
 	"You should come say hi later though, I never meet anyone around here.\n"
-	"I normally hang out around the trees. Please come. Ill cook us some eggs.\0");
+	"I normally hang out around the trees. Please come.\r"
+	"Ill cook us some eggs.\0");
 	
 	//BN_ASSERT(musicBackup.has_value(), "in mimicTalk, musicbackup didnt have a value? how?");
 	// in the future, i should have a option to disable music, this will, semi help/be safer 

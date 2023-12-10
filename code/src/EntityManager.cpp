@@ -202,7 +202,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				break;
 			case EntityType::Chest:
 				entityList.insert(new Chest(tempPos));
-				if(tileManager->floorMap[tempPos.x][tempPos.y] == NULL) {
+				if(tileManager->floorMap[tempPos.x][tempPos.y] == NULL) { 
 					tileManager->floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
 				}
 				break;

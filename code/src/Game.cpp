@@ -36,7 +36,7 @@ void delay(int delayFrameCount) {
 	}
 }
 
-void Game::uncompressData(u8 res[126], u8* input) {
+void uncompressData(u8 res[126], u8* input) {
 	
 	int i = 0;
 	
@@ -60,11 +60,9 @@ void Game::uncompressData(u8 res[126], u8* input) {
 			res[i] = val;
 			i++;
 		}
-		
 	}
 	
 	BN_ASSERT(i == 126, "i wasnt equal to 126 after decomp.");
-	
 	
 }
 
@@ -527,6 +525,11 @@ void Game::loadTiles() {
 	
 	// avoid dropping frames on the first alloc, when the game starts up
 
+	bn::timer loadTilesTimer;
+	bn::fixed tickCount; 
+	(void)tickCount; // supress warning if logging is disabled
+	loadTilesTimer.restart();
+	
 	Room idek = roomManager.loadRoom();
 	
 	const bn::regular_bg_tiles_item* collisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
@@ -588,13 +591,23 @@ void Game::loadTiles() {
 	
 	details.collisionTileCount = collisionTileCount;
 	tileManager.floorLayer.collisionTileCount = collisionTileCount + detailsTileCount;
+	
+	tickCount = loadTilesTimer.elapsed_ticks();
+	BN_LOG("loadtiles took ", tickCount.safe_division(FRAMETICKS), " frames");
 }
 
 void Game::loadLevel(bool debug) {
 	
+	loadTiles();
+	
 	BN_LOG("entered loadlevel with debug=", debug, " roomname=", roomManager.currentRoomName(), " roomindex = ", roomManager.roomIndex);
 	
 	//load();
+	
+	bn::timer loadLevelTimer;
+	bn::fixed tickCount; 
+	(void)tickCount; // supress warning if logging is disabled
+	loadLevelTimer.restart();
 
 	Room idek = roomManager.loadRoom();
 	
@@ -614,15 +627,11 @@ void Game::loadLevel(bool debug) {
 		needRestore = false;
 	}
 	
-	
-	
-	loadTiles();
-		
 	if(needRedraw) {	
 		needRedraw = false;
-		
-		
+
 	}
+	
 	//doButanoUpdate(); // these excess frame updates will just slow (curse) down
 	
 	/*
@@ -636,15 +645,7 @@ void Game::loadLevel(bool debug) {
 	for(int x=0; x<14; x++) { 
 		//for(int y=0; y<9; y++) {
 		for(int y=0; y<9; y++) {
-			
-			/*
-			if(y == 8) {
-				collisionMap[x][y] = 1;
-				detailsMap[x][y] = 0;
-				continue;
-			}
-			*/
-			
+
 			if(y == 8) { // room 39 fix
 				collisionMap[x][y] = 0;
 				continue;
@@ -668,32 +669,27 @@ void Game::loadLevel(bool debug) {
 	int secretsCount = idek.secretsCount;
 	const char* exitDest = (const char*)idek.exitDest;
 	
+	
+	doButanoUpdate();
+	
+	
+	//static bn::timer tempTimer;
+	//tempTimer.restart();
+	
 	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount, exitDest);
 	
+	//tickCount = tempTimer.elapsed_ticks();
+	//BN_LOG("tileManager loadtiles took ", tickCount.safe_division(FRAMETICKS), " frames");
 	
-	//if(!debug) {
-	if(true) {
-		doButanoUpdate();
-	}
+	doButanoUpdate();
 	
-
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
-	
-	/*
-	if(!debug) {
-		doButanoUpdate();
-	}
-	*/
-	
-	//if(!debug) {
-	if(true) {
-		doButanoUpdate();
-	}
-	
 
+	doButanoUpdate();
+	
 	EffectHolder* effectsPointer = (EffectHolder*)idek.effects;
 	int effectsCount = idek.effectsCount;
 	
@@ -733,7 +729,8 @@ void Game::loadLevel(bool debug) {
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	
-	BN_LOG("loadlevel completed");   
+	tickCount = loadLevelTimer.elapsed_ticks();
+	BN_LOG("loadlevel completed, took ", tickCount.safe_division(FRAMETICKS), " frames");
 }
 
 #pragma GCC push_options
@@ -1095,39 +1092,56 @@ void Game::doButanoUpdate() {
 	
 	//tickCount = vblankTimer.elapsed_ticks();
 	//BN_LOG("vblank ops took ", tickCount.safe_division(FRAMETICKS), " frames");
-
+	//vblankTimer.restart();
+	
 	bn::core::update();
+	
+	//tickCount = vblankTimer.elapsed_ticks();
+	//BN_LOG("vblank core took ", tickCount.safe_division(FRAMETICKS), " frames");
 	
 	int temp = bn::core::last_missed_frames();
 	
 	bn::fixed vblankUsage = bn::core::last_vblank_usage();
 	
+	//bool fucked = false;
+	
 	if(temp != 0) {
+		BN_LOG("\n\n\n\n\n");
 		BN_LOG("dropped frames: ", temp);
 		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
 		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
+		//fucked = true;
 	}
 	
 	if(vblankUsage > 1) {
+		BN_LOG("\n\n\n\n\n");
 		BN_LOG("VBLANK EXCEDED, THIS IS RLLY BAD: ");
 		BN_LOG("CPU:    ", bn::core::last_cpu_usage());
 		BN_LOG("VBLANK: ", bn::core::last_vblank_usage());
+		//fucked = true;
 	}
 	
+	/*
+	if(fucked) {
+		for(int i=0; i<20; i++) {
+			BN_LOG("YOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED\nYOU ARE FUCKED");
+		}
+	}
+	*/
 }
 
 void didVBlank() {
 	
 	
-	unsigned stackIWram = bn::memory::used_stack_iwram();
-	unsigned staticIWram = bn::memory::used_static_iwram();
-	unsigned totalIWram = stackIWram + staticIWram;
+	//unsigned stackIWram = bn::memory::used_stack_iwram();
+	//unsigned staticIWram = bn::memory::used_static_iwram();
+	//unsigned totalIWram = stackIWram + staticIWram;
 
 	//BN_LOG("used_stack_iwram: ", stackIWram.safe_division(32 * 1024));
 	//BN_LOG("used_static_iwram: ", staticIWram.safe_division(32 * 1024));
 	//BN_LOG("total iwram: ", totalIWram.safe_division(32 * 1024));
 	
-	BN_ASSERT(totalIWram < 32 * 1024, "iwram overflow!!!");
+	//BN_ASSERT(totalIWram < 32 * 1024, "iwram overflow!!!");
 	
 	//frame = (frame + 1) % 600000;
 	frame++;
@@ -1137,7 +1151,7 @@ void didVBlank() {
 	// i save a branch? (yes)
 	frame = frame & 0b1111111111111111;
 	
-	BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
+	//BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
 	
 	isVblank = true;
 	//globalGame->doVBlank();	
@@ -1246,6 +1260,9 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
+	//BN_LOG(collision.rawMap.mapItem.flat_layout());
+	//BN_LOG(collision.rawMap.mapItem.dimensions().width());
+	
 	globalGame = this;
 	
 	roomManager.isCustomRooms();
@@ -1326,7 +1343,7 @@ void Game::run() {
 				}
 				
 				if(waitFrames > 5) {
-					waitFrames = 1;
+					waitFrames = 0;
 				} else {
 					waitFrames = 5 - waitFrames;
 				}
