@@ -1314,9 +1314,10 @@ void Game::run() {
 		//BN_LOG("start frame ", frame);
 		
 		if(bn::keypad::any_held()) {
-			if(bn::keypad::l_held() || bn::keypad::r_held()) {
+			if(bn::keypad::select_held() && (bn::keypad::l_held() || bn::keypad::r_held())) {
 				
-				int debugIncrement = bn::keypad::select_held() ? 5 : 1;
+				//int debugIncrement = bn::keypad::select_held() ? 5 : 1;
+				int debugIncrement = bn::keypad::start_held() ? 5 : 1;
 				
 				// could maybe cause some issues if the frame counter,, resets? during this?
 				// does keeping the frame thing low save division cycles? i shouldnt even be doing modulo at all tho tbh

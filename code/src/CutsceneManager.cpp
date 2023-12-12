@@ -2498,8 +2498,9 @@ constexpr LyricTimeStamp voidedLyricsData[] = {
 	{60 * (1 * 60 + 30), "My grievance is mine\0"}, // 1:30
 	{60 * (1 * 60 + 33), "My sadness is mine\0"}, // 1:33
 	{60 * (1 * 60 + 37), "My loss is mine\0"}, // 1:37
-	{60 * (2 * 60 + 11), "One toss and I'll forever be blind\0"}, // 2:11
-	{60 * (2 * 60 + 16), "Toss the key oh please be kind\0"}, // 2:16
+	
+	{60 * (2 * 60 + 10), "One toss and I'll forever be blind\0"}, // 2:11
+	{60 * (2 * 60 + 15), "Toss the key oh please be kind\0"}, // 2:16
 	{60 * (2 * 60 + 23), "In this state of oblivion\0"}, // 2:23
 	{60 * (2 * 60 + 27), "My silence goes on\0"}, // 2:27
 	{60 * (2 * 60 + 30), "My bearings stay stored\0"}, // 2:30
@@ -2511,24 +2512,25 @@ constexpr LyricTimeStamp voidedLyricsData[] = {
 	{60 * (2 * 60 + 57), "My sadness is mine\0"}, // 2:57
  	{60 * (3 * 60 +  0), "My loss is mine\0"}, // 3:00
 	
-	{60 * (3 * 60 + 30), ":,: (My silence goes on / My bearings stay stored)\0"}, // 3:30
-	{60 * (3 * 60 + 37), "(I'm closing the door / Don't ask no more) :,:\0"}, // 3:37
-	{60 * (3 * 60 + 44), ":,: (My silence goes on / My bearings stay stored)\0"}, // 3:44
-	{60 * (3 * 60 + 51), "(I'm closing the door / Don't ask no more) :,:\0"}, // 3:51 
-	{60 * (4 * 60 +  0), ":,: (My silence goes on / My bearings stay stored)\0"}, // 4:00
-	{60 * (4 * 60 +  7), "(I'm closing the door / Don't ask no more) :,:\0"}, // 4:07
-	{60 * (4 * 60 + 14), ":,: (My silence goes on / My bearings stay stored)\0"}, // 4:14
-	{60 * (4 * 60 + 21), "(I'm closing the door / Don't ask no more) :,:\0"}, // 4:21
+	{60 * (3 * 60 + 30), "(My silence goes on / My bearings stay stored)\0"}, // 3:30
+	{60 * (3 * 60 + 37), "(I'm closing the door / Don't ask no more)\0"}, // 3:37
+	{60 * (3 * 60 + 44), "(My silence goes on / My bearings stay stored)\0"}, // 3:44
+	{60 * (3 * 60 + 51), "(I'm closing the door / Don't ask no more)\0"}, // 3:51 
+	{60 * (4 * 60 +  0), "(My silence goes on / My bearings stay stored)\0"}, // 4:00
+	{60 * (4 * 60 +  7), "(I'm closing the door / Don't ask no more)\0"}, // 4:07
+	{60 * (4 * 60 + 14), "(My silence goes on / My bearings stay stored)\0"}, // 4:14
+	{60 * (4 * 60 + 21), "(I'm closing the door / Don't ask no more)\0"}, // 4:21
 	
-	{60 * (4 * 60 + 28), "I hold on I hold on I hold on\0"}, // 4:28
-	{60 * (4 * 60 + 34), "'cause that's the only thing\0"}, // 4:34
+	{60 * (4 * 60 + 27), "I hold on I hold on I hold on\0"}, // 4:28
+	{60 * (4 * 60 + 33), "'cause that's the only thing\0"}, // 4:34
 	{60 * (4 * 60 + 36), "the one thing I can control\0"}, // 4:36
 	{60 * (4 * 60 + 40), "My grievance is mine\0"}, // 4:40
-	{60 * (4 * 60 + 44), "My sadness is mine\0"}, // 4:44
-	{60 * (4 * 60 + 47), "My loss is mine\0"}, // 4:47
-	{60 * (4 * 60 + 54), "My grievance is mine\0"}, // 4:54
-	{60 * (4 * 60 + 57), "My sadness is mine\0"}, // 4:57
-	{60 * (5 * 60 +  0), "My loss is mine\0"} // 5:00
+	{60 * (4 * 60 + 43), "My sadness is mine\0"}, // 4:44
+	{60 * (4 * 60 + 46), "My loss is mine\0"}, // 4:47
+	{60 * (4 * 60 + 53), "My grievance is mine\0"}, // 4:54
+	{60 * (4 * 60 + 56), "My sadness is mine\0"}, // 4:57
+	{60 * (4 * 60 + 59), "My loss is mine\0"}, // 5:00
+	{60 * (5 * 60 + 9), "\0\0\0"} // 5:10, song end
 };
 
 constexpr unsigned lyricsCount = sizeof(voidedLyricsData) / sizeof(voidedLyricsData[0]);
@@ -2588,6 +2590,11 @@ void CutsceneManager::voidedLyrics() {
                     : My loss is mine
 	*/
 	
+	// longer lines are cut off 
+	// i worry that me being on antidepressants is making me care less about fixing those kind of bugs 
+	// some might say its good that im more relaxed, but idrk 
+	// ive made no progress on this project in the past week.
+	
 	auto createFunc = [](Effect* obj) -> void {
 		obj->sprite.updateRawPosition(-32, -32);
 	};
@@ -2606,6 +2613,7 @@ void CutsceneManager::voidedLyrics() {
 			if(index == lyricsCount) {
 				startFrame = frame;
 				index = 0;
+				bn::music_items::msc_voidsong.play();
 			}
 			
 		}
