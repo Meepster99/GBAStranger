@@ -1855,8 +1855,7 @@ void EntityManager::doVBlank() { profileFunction();
 				default:
 					break;
 			}
-		
-			
+
 			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}
 	}

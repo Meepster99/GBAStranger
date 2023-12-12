@@ -2458,9 +2458,10 @@ void CutsceneManager::mimicTalk() {
 	
 	effectsManager->doDialogue("hello there!\nThank you for playing <3.\r"
 	"It means the world to me.\n"
-	"I really hope the following does sound wrong, I am nervous talking to new people.\n"
+	"I really hope the following doesnt sound wrong, I am nervous talking to new people.\n"
+	"I never meet anyone around here, so I dont have much practice.\n"
 	"Anyways, I am in your way.\r"
-	"You should come say hi later though, I never meet anyone around here.\n"
+	"You should come say hi later though!\r"
 	"I normally hang out around the trees. Please come.\r"
 	"Ill cook us some eggs.\0");
 	
@@ -2474,6 +2475,146 @@ void CutsceneManager::mimicTalk() {
 	
 	
 	
+}
+
+struct LyricTimeStamp {
+	unsigned time;
+	const char* lyric;
+};
+
+// whole song is,, 5:10 
+constexpr LyricTimeStamp voidedLyricsData[] = {
+	{60 * (0 * 60 + 39), "There's a safety locker\0"}, // 0:39
+	{60 * (0 * 60 + 43), "inside of me\0"}, // 0:43
+	{60 * (0 * 60 + 48), "out of your reach\0"}, // 0:48
+	{60 * (0 * 60 + 51), "And I hold the key\0"}, // 0:51
+	{60 * (0 * 60 + 57), "It's sealed with layers\0"}, // 0:57
+	{60 * (1 * 60 +  0), "and layers of irony\0"}, // 1:00
+	{60 * (1 * 60 +  5), "What's within\0"}, // 1:05
+	{60 * (1 * 60 +  8), "I refuse to see\0"}, // 1:08
+	{60 * (1 * 60 + 17), "I hold on I hold on I hold on\0"}, // 1:17
+	{60 * (1 * 60 + 24), "'cause that's the only thing\0"}, // 1:24
+	{60 * (1 * 60 + 26), "the one thing I can control\0"}, // 1:26
+	{60 * (1 * 60 + 30), "My grievance is mine\0"}, // 1:30
+	{60 * (1 * 60 + 33), "My sadness is mine\0"}, // 1:33
+	{60 * (1 * 60 + 37), "My loss is mine\0"}, // 1:37
+	{60 * (2 * 60 + 11), "One toss and I'll forever be blind\0"}, // 2:11
+	{60 * (2 * 60 + 16), "Toss the key oh please be kind\0"}, // 2:16
+	{60 * (2 * 60 + 23), "In this state of oblivion\0"}, // 2:23
+	{60 * (2 * 60 + 27), "My silence goes on\0"}, // 2:27
+	{60 * (2 * 60 + 30), "My bearings stay stored\0"}, // 2:30
+	{60 * (2 * 60 + 33), "My walls stay strong\0"}, // 2:33
+	{60 * (2 * 60 + 40), "I hold on I hold on I hold on\0"}, // 2:40
+	{60 * (2 * 60 + 47), "'cause that's the only thing\0"}, // 2:47
+	{60 * (2 * 60 + 49), "the one thing I can control\0"}, // 2:49
+	{60 * (2 * 60 + 53), "My grievance is mine\0"}, // 2:53
+	{60 * (2 * 60 + 57), "My sadness is mine\0"}, // 2:57
+ 	{60 * (3 * 60 +  0), "My loss is mine\0"}, // 3:00
+	
+	{60 * (3 * 60 + 30), ":,: (My silence goes on / My bearings stay stored)\0"}, // 3:30
+	{60 * (3 * 60 + 37), "(I'm closing the door / Don't ask no more) :,:\0"}, // 3:37
+	{60 * (3 * 60 + 44), ":,: (My silence goes on / My bearings stay stored)\0"}, // 3:44
+	{60 * (3 * 60 + 51), "(I'm closing the door / Don't ask no more) :,:\0"}, // 3:51 
+	{60 * (4 * 60 +  0), ":,: (My silence goes on / My bearings stay stored)\0"}, // 4:00
+	{60 * (4 * 60 +  7), "(I'm closing the door / Don't ask no more) :,:\0"}, // 4:07
+	{60 * (4 * 60 + 14), ":,: (My silence goes on / My bearings stay stored)\0"}, // 4:14
+	{60 * (4 * 60 + 21), "(I'm closing the door / Don't ask no more) :,:\0"}, // 4:21
+	
+	{60 * (4 * 60 + 28), "I hold on I hold on I hold on\0"}, // 4:28
+	{60 * (4 * 60 + 34), "'cause that's the only thing\0"}, // 4:34
+	{60 * (4 * 60 + 36), "the one thing I can control\0"}, // 4:36
+	{60 * (4 * 60 + 40), "My grievance is mine\0"}, // 4:40
+	{60 * (4 * 60 + 44), "My sadness is mine\0"}, // 4:44
+	{60 * (4 * 60 + 47), "My loss is mine\0"}, // 4:47
+	{60 * (4 * 60 + 54), "My grievance is mine\0"}, // 4:54
+	{60 * (4 * 60 + 57), "My sadness is mine\0"}, // 4:57
+	{60 * (5 * 60 +  0), "My loss is mine\0"} // 5:00
+};
+
+constexpr unsigned lyricsCount = sizeof(voidedLyricsData) / sizeof(voidedLyricsData[0]);
+constexpr unsigned songLength = (5 * 60) + 10;
+
+void CutsceneManager::voidedLyrics() {
+	
+	// this might be to ambitious 
+	// but having the voided lyrics in the dis text would be rlly cool
+	
+	
+	/*
+	UNSYNCEDLYRICS  : There's a safety locker
+                    : inside of me
+                    : out of your reach
+                    : And I hold the key
+                    :
+                    : It's sealed with layers
+                    : and layers of irony
+                    : What's within
+                    : I refuse to see
+                    :
+                    : I hold on I hold on I hold on
+                    : 'cause that's the only thing
+                    : the one thing I can control
+                    : My grievance is mine
+                    : My sadness is mine
+                    : My loss is mine
+                    :
+                    :
+                    : One toss and I'll forever be blind
+                    : Toss the key oh please be kind
+                    : In this state of oblivion
+                    : My silence goes on
+                    : My bearings stay stored
+                    : My walls stay strong
+                    :
+                    : I hold on I hold on I hold on
+                    : 'cause that's the only thing
+                    : the one thing I can control
+                    : My grievance is mine
+                    : My sadness is mine
+                    : My loss is mine
+                    :
+                    : :,: (My silence goes on / My bearings stay stored)
+                    : (I'm closing the door / Don't ask no more) :,:
+                    :
+                    : I hold on I hold on I hold on
+                    : 'cause that's the only thing
+                    : the one thing I can control
+                    : My grievance is mine
+                    : My sadness is mine
+                    : My loss is mine
+                    :
+                    : My grievance is mine
+                    : My sadness is mine
+                    : My loss is mine
+	*/
+	
+	auto createFunc = [](Effect* obj) -> void {
+		obj->sprite.updateRawPosition(-32, -32);
+	};
+
+	auto tickFunc = [startFrame = frame,
+	index = 0
+	](Effect* obj) mutable -> bool {
+		
+		(void)obj;
+		
+		if(frame - startFrame > voidedLyricsData[index].time) {
+			
+			globalGame->cutsceneManager.displayDisText(voidedLyricsData[index].lyric);
+			
+			index++;
+			if(index == lyricsCount) {
+				startFrame = frame;
+				index = 0;
+			}
+			
+		}
+
+		return false;
+	};
+	
+	effectsManager->createEffect(createFunc, tickFunc);
+
 }
 
 // -----

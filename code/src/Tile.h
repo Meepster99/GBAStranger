@@ -33,7 +33,6 @@ public:
 	
 	int currentTile = 0; // current tile index.
 	
-	
 	FloorTile(Pos p_) : tilePos(p_) {}
 	FloorTile(Pos p_, int startIndex_, int tileCount_) : tilePos(p_), startIndex(startIndex_), tileCount(tileCount_) {
 		

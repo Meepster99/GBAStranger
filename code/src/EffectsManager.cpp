@@ -1784,6 +1784,10 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 			break;
 	}
 	
+	// init the hopefully cool voided lyrics 
+	if(game->mode == 2 && roomNameHash == hashString("rm_rest_area_9\0")) {
+		globalGame->cutsceneManager.voidedLyrics();
+	}
 	
 	
 	
@@ -1859,6 +1863,8 @@ int Dialogue::getNextDialogue(char* res) {
 	// the bool represents if we should scroll or like, not 
 	// now an int, 0 is continue, 1 is newline, 2 is stop 
 	// buffer is/should be 256 chars 
+	
+	// if i have something with,,, over 256 chars will it overflow?? or like will the automatic line cutoffs prevent that
 	
 	if(*data == '\0') {
 	    return 2;

@@ -627,7 +627,8 @@ public:
 	
 };
 
-#define POSATTRIBUTES __attribute__((section(".iwram")))
+//#define POSATTRIBUTES __attribute__((section(".iwram")))
+#define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 class Pos {
 public:
@@ -877,9 +878,9 @@ public:
 // actually, we only have unique pointers! no shared, so im doing this
 // insertion will be slow, but at least lookup will be fast.
 
-//#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 //#define SANESETATTRIBUTES __attribute__((section(".ewram")))
-#define SANESETATTRIBUTES __attribute__((section(".iwram")))
+//#define SANESETATTRIBUTES __attribute__((section(".iwram")))
 
 template <typename T, int maxVecSize>
 class SaneSet {
@@ -1043,9 +1044,7 @@ public:
 	SANESETATTRIBUTES int maxSize() const {
 		return maxVecSize;
 	}
-	
-	
-	
+
 };
 
 template <typename T, int maxVecSize>

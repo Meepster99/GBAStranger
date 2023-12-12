@@ -24,7 +24,7 @@ public:
 	USEIWRAM void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
 
 	//__attribute__((section(".ewram"))) void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
-	void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
+	void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][16]);
 	
 	void reloadCells();
 
@@ -33,7 +33,14 @@ public:
 class TileManager {
 public:
 
-	FloorTile* floorMap[14][9];
+	// hmm 
+	// it would be quite nice if this width was,,, 16 instead of 14 so that i wouldnt need to 
+	// use mults?? wonder if i could just change it to 16
+	// actually, changing the 9 to 16 is what i need
+	// as for if this helped,,, im honestly not sure, and it probs maybe increased my iwram usage?
+	// the arm7tdmi, the m stands for fast multiplier, but how fast is it? is it faster/at the same speed as just a bitshift?
+	FloorTile* floorMap[14][16];
+	//FloorTile* floorMap[16][9];
 	
 	// these tiles are getting,, like gods this is just excessive
 	Exit* exitTile = NULL;

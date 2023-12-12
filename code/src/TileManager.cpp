@@ -90,7 +90,7 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 }
 
 //__attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
-void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
+void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][16]) {
 		
 	// THIS COULD, AND SHOULD BE OPTIMIZED INTO ONE LOOP OVER THE THING.
 	// also the whole background doesnt need a redraw, only the stuff that changed

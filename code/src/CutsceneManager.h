@@ -96,6 +96,8 @@ public:
 	
 	void mimicTalk();
 	
+	void voidedLyrics();
+	
 	// -----
 	
 //private:
