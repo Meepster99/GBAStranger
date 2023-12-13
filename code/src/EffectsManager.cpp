@@ -2602,6 +2602,8 @@ void EffectsManager::doMenu() {
 	// also show compile time, date, and butano version 
 	// BN_VERSION_STRING   __DATE__   __TIME__
 	
+	game->entityManager.menuOpened = true; 
+	
 	setBorderColor();
 	
 	GameState restoreState = game->state;

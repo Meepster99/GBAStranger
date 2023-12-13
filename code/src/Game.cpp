@@ -155,19 +155,20 @@ void Game::findNextRoom() {
 		entityManager.player->wingsUse = 0;
 		
 		entityManager.updateScreen(); // is this ok?
-
-
+		
 		int tileManagerRoomIndex = tileManager.getRoomIndex();
 		int startRoomIndex = roomManager.roomIndex;
 		
 		// crash game.
-		if(tileManagerRoomIndex == -1) {
+		if(tileManagerRoomIndex == -1 && startRoomIndex <= 256) {
+			BN_LOG("crashing game due to bad floor count");
 			cutsceneManager.displayDisText("FATAL ERROR : BR NULL\0");
 			delay(5);
 			cutsceneManager.crashGame();
 		}
 		
 		if(tileManager.getLocustCount() == -1) {
+			BN_LOG("crashing game due to bad locust count");
 			cutsceneManager.displayDisText("FATAL ERROR : LI NULL\0");
 			delay(5);
 			cutsceneManager.crashGame();

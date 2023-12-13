@@ -11,6 +11,8 @@
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 
 	posTracker.clear();
+	
+	menuOpened = false;
 
 	playerPush = NULL;
 
@@ -215,7 +217,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				}
 				break;
 			case EntityType::AddStatue:
-				entityList.insert(new AddStatue(tempPos));
+				//entityList.insert(new AddStatue(tempPos));
+				entityList.insert(getAddStatue(tempPos));
 				break;
 			case EntityType::EusStatue:
 				entityList.insert(new EusStatue(tempPos));
@@ -315,6 +318,286 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	}
 	
 	updateMap();
+	
+}
+
+AddStatue* EntityManager::getAddStatue(Pos p) {
+	
+	// should these,,,,, be interactables???
+	// no. they move.
+	// shit
+	// fuck 
+	// fuckkkkkkkkkkkkkk 
+	// they,,, need to be both?
+	// i could 
+	// omfg 
+	// now that specialBumpFunction is being called every tick, i can use that. 
+	// but my gods does it 
+	// i despise my code 
+	// normally id use like,,,, an effect for this? 
+	// but i feel so dumb for doing that 
+	// like i hate using the effects for stuff like that, 
+	// and using the specialbump func is just stupid bc its literally not named that 
+	// gods 
+	// also omfg special bump func isnt even a func pointer, its a thing which needs to be overloaded.
+	// this is going to be shit
+	
+	AddStatue* res = new AddStatue(p);
+	
+	std::function<void(AddStatue*)> specialBumpFunctionPointer = [](AddStatue* obj) -> void {
+		(void)obj;
+		return;
+	};
+	
+	unsigned roomHash = game->roomManager.currentRoomHash();
+	
+	if(roomHash == hashString("rm_e_019\0")) { // the floor where it needs to move up every pause
+		
+		specialBumpFunctionPointer = [this](AddStatue* e) -> void {
+			
+			if(menuOpened) {
+				
+				menuOpened = false;
+				
+				BN_LOG("move");
+				
+				Pos pastPos = e->p;
+
+				futureEntityMap[e->p.x][e->p.y].erase(e);
+				
+				e->p.move(Direction::Up);
+
+				bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(e->entityType(), bn::pair<Pos, Pos>(pastPos, e->p));
+				
+				tileManager->floorSteps.push_back(tempFloorStep);
+				
+				futureEntityMap[e->p.x][e->p.y].insert(e);
+				
+				e->doUpdate();
+				
+				tileManager->doFloorSteps();
+			}
+		};
+		
+	} else if(roomHash == hashString("rm_e_intermission\0")) {
+		// starting room of dis
+		
+		// leech, eye, maggot.
+		// does killing the bull,, matter? if done before this case, yes i suppose
+		// this is going to be coded like shit. i dont care anymore 
+		
+		specialBumpFunctionPointer = [this,
+		stage = 0,
+		hasLeech = true,
+		hasEye = true,
+		hasMaggot = true,
+		hasBull = true
+		](AddStatue* e) mutable -> void {
+			
+			(void)e;
+			
+			hasLeech = false;
+			hasEye = false;
+			hasMaggot = false;
+			hasBull = false;
+			
+			for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
+				switch((*it)->entityType()) {
+					case EntityType::Leech:
+						hasLeech = true;
+						break;
+					case EntityType::Eye:
+						hasEye = true;
+						break;
+					case EntityType::Maggot:
+						hasMaggot = true;
+						break;
+					case EntityType::Bull:
+						hasBull = true;	
+						break;
+					default:
+						break;
+				}
+			}
+			
+			if(stage == 0) {
+				if(!hasLeech && hasEye && hasMaggot && hasBull) {
+					stage++;
+				}
+			} else if(stage == 1) {
+				if(!hasEye && hasMaggot && hasBull) {
+					stage++;
+				}
+			} else if(stage == 2) {
+				if(!hasMaggot && hasBull) {
+					stage++;
+					needKillAllAddStatues = true;
+				}
+			}
+		};	
+	} else if(roomHash == hashString("rm_e_023\0")) {
+		
+		specialBumpFunctionPointer = [this](AddStatue* e) mutable -> void {
+			(void)e;
+			
+			BN_ASSERT(tileManager->memoryTile != NULL, "memoryTile tile null for some reason");
+			BN_ASSERT(tileManager->wingsTile != NULL, "wingsTile tile null for some reason");
+			BN_ASSERT(tileManager->swordTile != NULL, "swordTile tile null for some reason");
+			
+			// (4, 4) (6, 4) (8, 4)
+			
+			// this shit is dumb
+			SaneSet<Pos, 3> temp;
+			
+			temp.insert(Pos(4, 4));
+			temp.insert(Pos(6, 4));
+			temp.insert(Pos(8, 4));
+			
+			temp.erase(tileManager->memoryTile->tilePos);
+			temp.erase(tileManager->wingsTile->tilePos);
+			temp.erase(tileManager->swordTile->tilePos);
+			
+			if(temp.size() == 0) {
+				needKillAllAddStatues = true;
+			}
+		};
+	} else if(roomHash == hashString("rm_e_018\0")) {
+		
+		// check if any glass.
+		// shit code 
+		
+		specialBumpFunctionPointer = [this](AddStatue* e) -> void {
+			(void)e;
+
+			for(int x=0; x<14; x++) {
+				for(int y=0; y<9; y++) {
+					if(tileManager->hasFloor(x, y) == TileType::Glass) {
+						return;
+					}
+				}
+			}
+			
+			needKillAllAddStatues = true;
+		};
+	} else if(roomHash == hashString("rm_e_022\0")) {
+		
+		
+		// sword the leechs
+		// deathtile the maggots
+		// drop the eyes 
+		
+		// this is going to be,,,, annoying 
+		// it would of been nice if i programed in a reason for the things in deathlist 
+		// i dont want to add an obscene amount of overhead for this one room ugh
+		// ugh i also need to program in the boulder dialogueeee
+		// ugh
+		// i could add something to the deadlist vector, but it not being unique would,,, scare me 
+		// i could add another variable to entity, but that would also not be ideal since,, 
+		// it would make allocing all entitys more expensive 
+		// but like,,,, do i rlly care?
+		// probs not ig 
+		// ugh and then discerning between,,, falls and collisions and deathtiles?
+		// i could have,,, it,, i could have the death reason be an optional entity type. 
+		// the optional being missing means its,, a tile related death, check whats under it?
+		// the optional being there means, profit? 
+		// this will be scuffed as fuck, but its ok.
+		// specialbump func is called BEFORE deadlist meaning i can use deadlist
+		
+		// 4 leeches, 2 maggots, 2 eyes
+		
+		specialBumpFunctionPointer = [this,
+		leechSuccessCount = 0,
+		maggotSuccessCount = 0,
+		eyeSuccessCount = 0
+		](AddStatue* e) mutable -> void {
+			(void)e;
+			
+			static unsigned prevFrame = 0;
+			
+			if(frame == prevFrame) {
+				return;
+			}
+			
+			prevFrame = frame;
+			
+			for(auto it = deadList.cbegin(); it != deadList.cend(); ++it) {
+				switch( (*it)->entityType() ) {
+					case EntityType::Leech:
+						if((*it)->deathReason == EntityType::Player) {
+							leechSuccessCount++;
+						}
+						break;
+					case EntityType::Maggot:
+						if(!(*it)->deathReason.has_value() && hasFloor((*it)->p) == TileType::Death) {
+							maggotSuccessCount++;
+						}
+						break;
+					case EntityType::Eye:
+						if(!(*it)->deathReason.has_value() && !hasFloor((*it)->p)) {
+							eyeSuccessCount++;
+						}
+						break;						
+					default:
+						break;
+				}
+			}
+			
+			if(leechSuccessCount == 4 && maggotSuccessCount == 2 && eyeSuccessCount == 2) {
+				needKillAllAddStatues = true;
+				maggotSuccessCount = 0; // stop repeated calls, which i should REALLY have for the other funcs
+			}
+		};		
+	} else if(roomHash == hashString("rm_e_021\0")) {
+		
+		// send to "rm_e_027\0" if success
+		
+		specialBumpFunctionPointer = [this](AddStatue* e) mutable -> void {
+			(void)e;
+			
+			if(enemyList.size() != 0) { // eyes need to be dead
+				return;
+			}
+			
+			// boulder is on (6, 4)
+			
+			// i pray that the exceptions for 4 i made dont fuck me here
+			
+			SaneSet<Pos, 4> temp;
+			
+			temp.insert(Pos(5, 4));
+			temp.insert(Pos(7, 4));
+			temp.insert(Pos(6, 3));
+			temp.insert(Pos(6, 5));
+			
+			for(auto it = obstacleList.cbegin(); it != obstacleList.cend(); ++it) {
+				
+				switch( (*it)->entityType() ) {
+					case EntityType::EusStatue:
+						return; // eus needs to not be there
+						break;
+					case EntityType::Boulder:
+						if( (*it)->p != Pos(6, 4) ) {
+							return;
+						}
+						break;				
+					case EntityType::LevStatue:
+						temp.erase((*it)->p);
+						break;
+					default:
+						break;
+				}
+			}
+		
+			if(temp.size() == 0) {
+				// add statues dont die here
+				tileManager->exitDestination = "rm_e_027\0";
+			}
+		};
+	}
+	
+	res->specialBumpFunctionPointer = specialBumpFunctionPointer;
+	
+	return res;
 	
 }
 
@@ -1287,6 +1570,9 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	e->isDead();
 	
 	
+	// should a floorstep be put in here?
+	
+	
 	return res;
 }
 
@@ -1326,12 +1612,19 @@ void EntityManager::killAllAddStatues() {
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 		BN_ASSERT(*it != NULL, "wtf in killalladdstatues");
 		if((*it)->entityType() == EntityType::AddStatue) {
+			
+			// should this be here or in,,, killentity
+			tileManager->stepOffs.insert((*it)->p);
+			
 			killEntity(*it);
+			
 			it = obstacleList.begin(); // trash code, killentity only returns the getpos index, this needs to be fixed, TODO
 		} else {
 			++it;
 		}
 	}
+	
+	tileManager->doFloorSteps();
 	
 	// is this call needed????? is this call extremely stupid??? will this call fix this stupid bug???
 	//updateMap();
@@ -1811,6 +2104,7 @@ void EntityManager::doVBlank() { profileFunction();
 		}
 	}
 	
+	// is this ok to occur here?
 	if(needKillAllAddStatues) {
 		needKillAllAddStatues = false;
 		killAllAddStatues();
@@ -1836,6 +2130,11 @@ void EntityManager::doVBlank() { profileFunction();
 		}
 	}
 
+	// this causes a BUNCH of lag
+	// it should skip empty chests, and stuff that doesnt have a special bump 
+	// it doesnt
+	// CREATE A FUCKING SPECIALBUMP LIST!
+	
 	// i despise this code. it also is DEF the thing contributing to slowdown in vblank!
 	if(obstacleList.size() != 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
@@ -1846,15 +2145,17 @@ void EntityManager::doVBlank() { profileFunction();
 			
 			// pathetic half fix
 			// this is REALLY bad.
-			switch((*it)->entityType()) {
+			/*switch((*it)->entityType()) {
 				//case EntityType::Interactable:
 				//	continue;
-				case EntityType::Chest:
-					break;
+				//case EntityType::Chest:
+				//	break;
 				default:
-					static_cast<Obstacle*>((*it))->specialBumpFunction();
 					break;
 			}
+			*/
+			
+			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}
 	}
 	

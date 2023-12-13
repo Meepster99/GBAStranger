@@ -138,6 +138,8 @@ public:
 	int animationIndex = 0;
 	int tileIndex = 0;
 	
+	bn::optional<EntityType> deathReason;
+		
 	Entity(Pos p_) : p(p_), 
 		spriteTilesArray(1, bn::sprite_tiles_items::dw_spr_gray_w_d),
 		sprite(spriteTilesArray[0])
@@ -722,6 +724,8 @@ public:
 
 	EntityType entityType() const override { return EntityType::Boulder; }
 	
+	const char* specialDialogue = NULL;
+	
 	void interact() override;
 
 };
@@ -761,6 +765,16 @@ public:
 	AddStatue* clone() const override { return new AddStatue(*this); }
 
 	EntityType entityType() const override { return EntityType::AddStatue; }
+	
+	// all of this is shit code
+	std::function<void(AddStatue*)> specialBumpFunctionPointer = [](AddStatue* obj) -> void {
+		(void)obj;
+		return;
+	};
+	
+	void specialBumpFunction() override { 
+		specialBumpFunctionPointer(this);
+	}
 
 };
 

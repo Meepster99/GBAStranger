@@ -343,6 +343,14 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		secrets++;
 	}
 	
+	if(game->roomManager.currentRoomHash() == hashString("rm_e_021\0")) {
+		// this is the room which,, takes you back unless you have the right config
+		// it will take you back to rm_e_020\0
+		
+		exitDestination = "rm_e_020\0";
+		
+	}
+	
 	// why in tarnation is this vblank needed for floor 136??
 	// i dont like having this here and slowing down debug swapping, but ugh 
 	// if i want to do tas verification, i need to not have framedrops

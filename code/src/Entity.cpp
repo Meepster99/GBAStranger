@@ -162,6 +162,8 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 						return {true, bn::optional<Direction>()};
 					}
 					
+					tempEntity->deathReason = EntityType::Player;
+						
 					entityManager->killEntity(tempEntity);
 					
 					// ADD STEPOFF HERE?
@@ -715,6 +717,11 @@ void generateFunny(char* res) {
 }
 
 void Boulder::interact() {
+	
+	if(specialDialogue != NULL) {
+		effectsManager->doDialogue(specialDialogue);
+		return;
+	}
 	
 	static int lastIndex = -1;
 	

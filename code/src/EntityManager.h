@@ -51,6 +51,9 @@ public:
 	
 	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
 	Interactable* getEmptyChest(Pos p);
+	AddStatue* getAddStatue(Pos p);
+	
+	bool menuOpened = false;
 	
 	void updatePalette(Palette* pal);
 	
