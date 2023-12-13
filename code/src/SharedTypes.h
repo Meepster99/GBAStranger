@@ -957,62 +957,95 @@ public:
 	
 	SANESETATTRIBUTES void insert(const T& elem) {
 		
-		// this should TOTALLY fucking be optimized 
-		// to not do 2 binary searches
+		// i doubt my code even ever actually,,, does a duplicate??
 		
-		/*
-		int index = binarySearch(elem);
-        if (index == -1) {
-            // Element not found, insert it at the appropriate position
-            int insertIndex = getInsertIndex(elem);
-            data.insert(data.begin() + insertIndex, elem);
-        }
-		*/
-		
-		int index = binarySearchOrInsertIndex(elem);
-		
-		if(index != -1) {
-			data.insert(data.begin() + index, elem);
+		if constexpr (maxVecSize == 4) {
+			
+			for(auto it = data.begin(); it != data.end(); ++it) {
+				if(*it == elem) {
+					return;
+				}
+			}
+			
+			data.push_back(elem);
+			
+		} else {
+
+			int index = binarySearchOrInsertIndex(elem);
+			
+			if(index != -1) {
+				data.insert(data.begin() + index, elem);
+			}
 		}
-	}
-	
-	SANESETATTRIBUTES bool contains(const T& elem) const {
-		if(data.size() == 0) {
-			return false;
-		}
-		return binarySearch(elem) != -1;
 	}
 	
 	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator erase(const T& elem) {
-        int index = binarySearch(elem);
-        if (index != -1) {
-            return data.erase(data.begin() + index);
-        }
-		return data.end();
+        
+		if constexpr (maxVecSize == 4) {
+			for(auto it = data.begin(); it != data.end(); ++it) {
+				if(*it == elem) {
+					return data.erase(it);
+
+				}
+			}
+			return data.end();
+		} else {
+		
+			int index = binarySearch(elem);
+			
+			if (index != -1) {
+				return data.erase(data.begin() + index);
+			}
+			
+			return data.end();	
+		}
     }
+	
+	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator insert(const bn::vector<T, maxVecSize>::iterator it) {
+		
+		if constexpr (maxVecSize == 4) {
+			
+			for(auto temp = data.cbegin(); temp != data.cend(); ++temp) {
+				if(*temp == *it) {
+					return;
+				}
+			}
+			
+			return data.insert(data.end(), *it);
+		} else {
+		
+			int index = binarySearchOrInsertIndex(*it);
+			
+			if(index == -1) {
+				return data.begin() + index;
+			}
+			
+			return data.insert(data.begin() + index, *it);
+		}
+	}
 	
 	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator erase(const bn::vector<T, maxVecSize>::iterator it) {
 		return data.erase(it);
 	}
 	
-	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator insert(const bn::vector<T, maxVecSize>::iterator it) {
-		/*
-		int index = binarySearch(*it);
-        if (index == -1) {
-            // Element not found, insert it at the appropriate position
-            int insertIndex = getInsertIndex(*it);
-            return data.insert(data.begin() + insertIndex, *it);
-        }
-		return data.begin() + index;
-		*/
+	SANESETATTRIBUTES bool contains(const T& elem) const {
 		
-
-		int index = binarySearchOrInsertIndex(*it);
-		if(index == -1) {
-			return data.begin() + index;
+		if(data.size() == 0) {
+			return false;
 		}
 		
-		return data.insert(data.begin() + index, *it);
+		if constexpr (maxVecSize == 4) {
+			
+			for(auto it = data.cbegin(); it != data.cend(); ++it) {
+				if(*it == elem) {
+					return true;
+				}
+			}
+			
+			return false;
+		} else {
+			return binarySearch(elem) != -1;
+		}
 	}
 	
 	SANESETATTRIBUTES int size() const {

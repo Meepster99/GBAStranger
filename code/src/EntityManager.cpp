@@ -1295,8 +1295,8 @@ void EntityManager::removeEntity(Entity* e) {
 	Pos tempPos = e->p;
 	
 	futureEntityMap[tempPos.x][tempPos.y].erase(e);
-	
 	entityMap[tempPos.x][tempPos.y].erase(e);
+	
 	entityList.erase(e);
 	obstacleList.erase(e);
 	enemyList.erase(e);		
@@ -1835,9 +1835,7 @@ void EntityManager::doVBlank() { profileFunction();
 			}
 		}
 	}
-	
-	
-	
+
 	// i despise this code. it also is DEF the thing contributing to slowdown in vblank!
 	if(obstacleList.size() != 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
@@ -1847,20 +1845,18 @@ void EntityManager::doVBlank() { profileFunction();
 			// ITS PATHETIC I DIDNT SEE THIS EARLIER
 			
 			// pathetic half fix
+			// this is REALLY bad.
 			switch((*it)->entityType()) {
-				case EntityType::Interactable:
-					continue;
+				//case EntityType::Interactable:
+				//	continue;
 				case EntityType::Chest:
 					break;
 				default:
+					static_cast<Obstacle*>((*it))->specialBumpFunction();
 					break;
 			}
-
-			static_cast<Obstacle*>((*it))->specialBumpFunction();
 		}
 	}
-	
-	
 	
 	// deaths is done last bc in case something is both dead, and kicked, we dont want a use after free.
 	// this is a MASSIVE bug, how did i only just catch it now 

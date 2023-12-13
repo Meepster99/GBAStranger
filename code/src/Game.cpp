@@ -216,8 +216,10 @@ void Game::findNextRoom() {
 	// because of the goofy ahh way this is written, this is going to get called every time until the falling anim finishes?, i dont like that tbh, but i cannot do anything
 	// i can at least like,,, do a check to not duplicate inc room via just setting locusts to 0
 	if(entityManager.fallKill() && entityManager.player->locustCount != 0) {
+		
 		bool beeReset = false;
 		Pos testPos = entityManager.player->p;
+		
 		if(testPos.move(Direction::Up)) {
 			SaneSet<Entity*, 4> tempMap = entityManager.getMap(testPos);
 			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
@@ -452,8 +454,11 @@ void Game::resetRoom(bool debug) {
 		findNextRoom();
 	}
 	
-	entityManager.player->locustCount = tileManager.getLocustCount();
+	
 	if(!debug) {
+		
+		entityManager.player->locustCount = tileManager.getLocustCount();
+		
 		if(!entityManager.player->isVoided && !entityManager.playerWon()) {
 			if(entityManager.player->locustCount > 0) { 
 				entityManager.player->locustCount--;
@@ -1308,13 +1313,15 @@ void Game::run() {
 
 	//doButanoUpdate();
 
+	bool selectToggle = false;
+	
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
 		//BN_LOG("start frame ", frame);
 		
 		if(bn::keypad::any_held()) {
-			if(bn::keypad::select_held() && (bn::keypad::l_held() || bn::keypad::r_held())) {
+			if(selectToggle && (bn::keypad::l_held() || bn::keypad::r_held())) {
 				
 				//int debugIncrement = bn::keypad::select_held() ? 5 : 1;
 				int debugIncrement = bn::keypad::start_held() ? 5 : 1;
@@ -1388,6 +1395,7 @@ void Game::run() {
 			}
 	
 			if(bn::keypad::select_pressed()) {
+				selectToggle = !selectToggle;
 				continue;
 			}
 			
