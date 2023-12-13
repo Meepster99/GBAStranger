@@ -449,6 +449,8 @@ void Game::resetRoom(bool debug) {
 		createExitEffects();
 	}
 
+	int prevRoomIndex = roomManager.roomIndex;
+	
 	// decide what room to goto next 
 	if(!debug) {
 		findNextRoom();
@@ -457,9 +459,12 @@ void Game::resetRoom(bool debug) {
 	
 	if(!debug) {
 		
-		entityManager.player->locustCount = tileManager.getLocustCount();
+		if(!roomManager.isWhiteRooms()) {
+			entityManager.player->locustCount = tileManager.getLocustCount();
+		}
 		
-		if(!entityManager.player->isVoided && !entityManager.playerWon()) {
+		//if(!entityManager.player->isVoided && !entityManager.playerWon()) {
+		if(!entityManager.player->isVoided && prevRoomIndex == roomManager.roomIndex) {
 			if(entityManager.player->locustCount > 0) { 
 				entityManager.player->locustCount--;
 			} else {
