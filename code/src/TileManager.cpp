@@ -733,12 +733,12 @@ void TileManager::updateBurdenTiles() {
 int TileManager::getLocustCount() {
 	
 	if(locustCounterTile == NULL) {
-		return 0;
+		return -1;
 	}
 	
 	if(entityManager->player->inRod(locustCounterTile) || 
 		entityManager->player->inRod(locustTile)) {
-		return 0;
+		return -1;
 	}
 
 	
@@ -747,7 +747,7 @@ int TileManager::getLocustCount() {
 	locustPos.move(Direction::Right);
 	
 	if(locustPos != counterPos) {
-		return 0;
+		return -1; // this might cause,, issues
 	}
 	
 	return locustCounterTile->getNumber();

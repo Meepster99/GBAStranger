@@ -159,6 +159,19 @@ void Game::findNextRoom() {
 
 		int tileManagerRoomIndex = tileManager.getRoomIndex();
 		int startRoomIndex = roomManager.roomIndex;
+		
+		// crash game.
+		if(tileManagerRoomIndex == -1) {
+			cutsceneManager.displayDisText("FATAL ERROR : BR NULL\0");
+			delay(5);
+			cutsceneManager.crashGame();
+		}
+		
+		if(tileManager.getLocustCount() == -1) {
+			cutsceneManager.displayDisText("FATAL ERROR : LI NULL\0");
+			delay(5);
+			cutsceneManager.crashGame();
+		}
 	
 		// check for cif statue
 		bool cifReset = false;
@@ -460,7 +473,7 @@ void Game::resetRoom(bool debug) {
 	if(!debug) {
 		
 		if(!roomManager.isWhiteRooms()) {
-			entityManager.player->locustCount = tileManager.getLocustCount();
+			entityManager.player->locustCount = MAX(0, tileManager.getLocustCount());
 		}
 		
 		//if(!entityManager.player->isVoided && !entityManager.playerWon()) {
