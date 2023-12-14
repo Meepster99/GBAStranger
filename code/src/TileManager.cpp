@@ -87,6 +87,14 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 			}
 		}
 	}
+	
+	//globalGame->tileManager.updateExit();
+	if(globalGame->tileManager.exitTile != NULL) {
+		Pos exitPos = globalGame->tileManager.exitTile->tilePos;
+		if(exitPos.move(Direction::Down)) {
+			FloorTile::drawDropOff(exitPos.x, exitPos.y);
+		}
+	}
 }
 
 //__attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
@@ -941,6 +949,22 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 	//doClear(erasePos);
 	
 	updateExit();
+	
+	// goofy ahh shit code
+	if(globalGame->tileManager.exitTile != NULL) {
+		Pos exitPos = globalGame->tileManager.exitTile->tilePos;
+		if(exitPos.move(Direction::Down)) {
+			
+			// check if the dropoff is within 2 units of the player
+			if(ABS(currentPos.x - exitPos.x) <= 2 && ABS(currentPos.y - exitPos.y) <= 2) {
+				if(floorMap[exitPos.x][exitPos.y] != NULL) {
+					floorMap[exitPos.x][exitPos.y]->draw();
+				}
+			} else {
+				FloorTile::drawDropOff(exitPos.x, exitPos.y);	
+			}
+		}
+	}
 	
 	floorLayer.reloadCells();
 	

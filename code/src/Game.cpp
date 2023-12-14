@@ -514,6 +514,7 @@ void Game::resetRoom(bool debug) {
 	
 	// this hopefully wont slow down debug moving much
 	cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	cutsceneManager.backgroundLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 	
 	changeMusic();
 	
