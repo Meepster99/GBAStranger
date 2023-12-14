@@ -682,7 +682,11 @@ const MessageStr randomBoulderMessages[] = {
 	MSGSTR("ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0"),
 	MSGSTR("I feel like i need to start stacking therapy sessions.\rLike,,,, doing multiple therapy at once.\0"),
 	MSGSTR("I often wonder about why I made this. Im on new meds now, and my work on this has really slowed down. Part of me thinks that its because I am basically done. But another part of me worries that the meds are making me, complacent? tired? more worthless than I already am. At the end of the day, what have I created here. What have I done. Ive done nothing but regurgitate an objectively worse caricature of the actual game. I feel like this whole project is just plagiarism. And it hurts. Because I love this game so fucking much.\0"),
-	MSGSTR("By the way, if you want to hear voided, goto B254 as cif. Thats where it plays.\0")
+	MSGSTR("By the way, if you want to hear voided, goto B254 as cif. Thats where it plays.\0"),
+	MSGSTR("Knowing and not knowing don't matter. After all, even if you don't know about something, you can guess just about everything if you look at it.\0"),
+	MSGSTR("I don't know everything, I just know what I know\0"),
+	MSGSTR("I know everything. There's nothing i don't know\0"),
+	MSGSTR("I don't know anything, you are the one who knows\0")
 };
 
 void generateFunny(char* res) {

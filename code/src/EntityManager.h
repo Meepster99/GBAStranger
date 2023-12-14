@@ -52,6 +52,7 @@ public:
 	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
 	Interactable* getEmptyChest(Pos p);
 	AddStatue* getAddStatue(Pos p);
+	Boulder* getBoulder(Pos p);
 	
 	bool menuOpened = false;
 	

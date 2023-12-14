@@ -200,7 +200,8 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new Shadow(tempPos));
 				break;
 			case EntityType::Boulder:
-				entityList.insert(new Boulder(tempPos));
+				//entityList.insert(new Boulder(tempPos));
+				entityList.insert(getBoulder(tempPos));
 				break;
 			case EntityType::Chest:
 				entityList.insert(new Chest(tempPos));
@@ -832,7 +833,45 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 	
 	return res;
 }
+
+Boulder* EntityManager::getBoulder(Pos p) {
 	
+	Boulder* res = new Boulder(p);
+	
+	// should this be switch or if else?
+	
+	switch(game->roomManager.currentRoomHash()) {
+		case hashString("rm_e_intermission\0"):
+			res->specialDialogue = "That leech, that lazy eye, that maggot...\nTraitors' agents who roam here...\nHear me, reach them, slay them...\nAnd thus you shall prove your mettle...\0";
+			break;
+		case hashString("rm_e_023\0"):
+			res->specialDialogue = "Your blade...\nYour wings...\nYour memories...\nHow much do you treasure them...\0";
+			break;
+		case hashString("rm_e_018\0"):
+			res->specialDialogue = "How brittle...\nBe careful where you step...\nAnd leave nothing behind...\nDon't ask how I know...\0";
+			break;
+		case hashString("rm_e_019\0"):
+			res->specialDialogue = "This room was my joker moment.\rJust press start until the statue moves to the button\0";
+			break;
+		case hashString("rm_e_022\0"):
+			res->specialDialogue = "May the blade of beginnings slash through the leeches...\nMay the ever vigilant lightning strike down the maggots...\nMay nothingness claim the lazy eyes...\nLike the traitorous lords were defeated a long time ago...\0";
+			break;
+		case hashString("rm_e_020\0"):
+			res->specialDialogue = "There's another room...\nJust like this one...\nI just can't remember...\nWhat it looked like...\0";
+			break;
+		case hashString("rm_e_021\0"):
+			res->specialDialogue = "Were you always there...\nHow strange...\nEverything's so different...\nDoes it even matter...\0";
+			break;
+		case hashString("rm_e_000\0"):
+			res->specialDialogue = "Programming this would of been really hard...\nAnd im tired, and my tummy hurt...\nDon't ask how I knows...\nAlso,,, i dont have the next rooms programmed in, so this just sends you to the start of mons funhouse. sry\n<3\0";
+			break;
+		default:
+			break;		
+	}
+	
+	return res;
+}
+
 void EntityManager::updatePalette(Palette* pal) {
 	
 	
