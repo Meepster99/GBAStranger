@@ -570,6 +570,8 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 			temp.insert(Pos(6, 3));
 			temp.insert(Pos(6, 5));
 			
+			// i probs should of just used getpos calls for this ugh
+			
 			for(auto it = obstacleList.cbegin(); it != obstacleList.cend(); ++it) {
 				
 				switch( (*it)->entityType() ) {
@@ -592,6 +594,17 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 			if(temp.size() == 0) {
 				// add statues dont die here
 				tileManager->exitDestination = "rm_e_027\0";
+			}
+		};
+	} else if(roomHash == hashString("rm_secret_008\0")) {
+		
+		// cif room, should give 99 locusts when the tan statue is moved
+		
+		specialBumpFunctionPointer = [this](AddStatue* e) mutable -> void {
+			(void)e;
+			
+			if(player->p != Pos(8, 1) && getMap(Pos(8, 1)).size() == 1) {
+				needKillAllAddStatues = true;
 			}
 		};
 	}
@@ -817,10 +830,35 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		};
 		
 		
+	} else if(roomHash == hashString("rm_secret_008\0")) {
+		
+		initFunc = [](Interactable* inter) mutable -> void {
+			inter->sprite.setVisible(true);
+			inter->spriteTilesArray.clear();
+			inter->spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_small);
+			inter->animationIndex = 0;
+		};
+		
+		interactFunc = [](void* obj) mutable -> void {
+		
+			Interactable* inter = static_cast<Interactable*>(obj);
+			
+			if(inter->animationIndex == 1) {
+				globalGame->effectsManager.doDialogue("It's empty\0");
+				return;
+			}
+			
+			if(globalGame->entityManager.player->p == Pos(11, 3+1)) {
+				globalGame->effectsManager.doDialogue("[You aquired 99 locust idols]\n[I N C R E D I B L E !]\0");
+				inter->animationIndex = 1;
+				globalGame->entityManager.player->locustCount = 99;
+				globalGame->tileManager.locustCounterTile->first = '9';
+				globalGame->tileManager.locustCounterTile->second = '9';
+				globalGame->tileManager.updateLocust();
+				inter->doUpdate();
+			}
+		};
 	}
-	
-	
-	
 	
 	Interactable* res = new Interactable(p, 
 		interactFunc,

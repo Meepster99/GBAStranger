@@ -2461,7 +2461,7 @@ void CutsceneManager::mimicTalk() {
 	"I really hope the following doesnt sound wrong, I am nervous talking to new people.\n"
 	"I never meet anyone around here, so I dont have much practice.\n"
 	"Anyways, I am in your way.\r"
-	"You should come say hi later though!\r"
+	"But you should come say hi later though!\r"
 	"I normally hang out around the trees. Please come.\r"
 	"Ill cook us some eggs.\0");
 	
