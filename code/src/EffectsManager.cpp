@@ -936,7 +936,14 @@ void BigSprite::loadTree() {
 						break;
 					case 2:
 						if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
+							// ok shits being real fucking weird 
+							// so im going to make it weirder 
+							// i am running out of stack iwram in this,, maybe using defer would somehow magically make this better?
+							// what i rlly should do is,, have cutscenes be called NOT when fucking the stack is still in the movement code
+							//DEFER(unused=0,
 							globalGame->cutsceneManager.cifDream();
+							//);
+							
 						} else {
 							globalGame->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
 						}
@@ -1942,6 +1949,14 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 
 void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sound_item* sound) {
 	
+	/*
+	
+	this func is somehow causing a fucking stack overflow in iwram. 
+	what the fuck
+	or maybe its displaydistext?
+	
+	*/
+	
 	//BN_LOG("doing dialogue of ", data);
 	
 	if(sound == NULL) {
@@ -1978,23 +1993,6 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	if(!isCutscene) {
 		game->state = GameState::Dialogue;
 	}
-	
-	/*
-	for(int x=0; x<14; x++) {
-		tileManager->floorLayer.setBigTile(x, 6, 0);
-		tileManager->floorLayer.setBigTile(x, 7, 0);
-		tileManager->floorLayer.setBigTile(x, 8, 0);
-		
-		game->details.setBigTile(x, 6, 0);
-		game->details.setBigTile(x, 7, 0);
-		game->details.setBigTile(x, 8, 0);
-		
-		game->collision.setBigTile(x, 6, 0);
-		game->collision.setBigTile(x, 7, 0);
-		game->collision.setBigTile(x, 8, 0);
-		
-	}
-	*/
 	
 	//tileManager->floorLayer.rawMap.reloadCells();
 	//game->collision.reloadCells();
@@ -2077,12 +2075,13 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		tempBuffer++;
 	}
 	
-	auto scrollLine = [sound](bn::sprite_text_generator& textGeneratorObj, 
+	auto scrollLine = [](bn::sprite_text_generator& textGeneratorObj, 
 		bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>& textSprites, 
 		char* bufferPtr, 
 		int offset,
 		bool& skipScrollBool,
-		bool enableSkipScrollBool
+		bool enableSkipScrollBool,
+		const bn::sound_item* soundItem
 		) mutable -> bool {
 			
 		// cringe is occuring! this should/could maybe be static, but im (curse)ing scared
@@ -2139,7 +2138,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		// i may be bsing, but i think a sound plays at the start and and and when a space occurs 
 		// this is actually completley wrong! but im tired ok, and also kinda like it so im leaving it in
 		//globalGame->playSound(sound);
-		sound->play();
+		soundItem->play();
 		
 		int bufferIndex = 0;
 		for(int i=0; i<textSprites.size(); i++) {
@@ -2149,7 +2148,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 			}
 						
 			if(bufferPtr[bufferIndex] == ' ' || bufferPtr[bufferIndex] == '`') {
-				globalGame->playSound(sound);
+				globalGame->playSound(soundItem);
 				if(bufferPtr[bufferIndex] == '`') {
 					// delay scroll, this will eat up skipscrolls, but im tired.
 					for(int j=0; j<60; j++) {
@@ -2170,7 +2169,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 			}
 		}
 		
-		globalGame->playSound(sound);
+		globalGame->playSound(soundItem);
 		
 		//BN_LOG("WHAT ", WHAT);
 		
@@ -2232,23 +2231,15 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 			}
 			
 			if(textOffset == 0) { 
-				
 				res = dialogue.getNextDialogue(buffer);
-				
-				scrollLine(textGenerator, textSpritesLine1, buffer, textOffset, skipScroll, enableSkipScroll);
-				
+				scrollLine(textGenerator, textSpritesLine1, buffer, textOffset, skipScroll, enableSkipScroll, sound);
 				textOffset++;
 			}
 		
 			if(textOffset == 1 && res == 0) {
-				
 				res = dialogue.getNextDialogue(buffer);
-
-				scrollLine(textGenerator, textSpritesLine2, buffer, textOffset, skipScroll, enableSkipScroll);
-				
+				scrollLine(textGenerator, textSpritesLine2, buffer, textOffset, skipScroll, enableSkipScroll, sound);
 			}
-			
-			
 		}
 
 		
@@ -2258,11 +2249,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	
 	delete dialogueEndPointer;
 	dialogueEndPointer = NULL;
-	
-	
-	//game->doButanoUpdate();
-	
-	//game->doButanoUpdate();
+
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			effectsLayer.setBigTile(x, y, 0);
@@ -2270,20 +2257,20 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	}
 	effectsLayer.update();
 	
+
 	// this is trash, and will cause frame drops 
 	game->fullTileDraw();
-	
+
 	if(!isCutscene) {
 		hideForDialogueBox(true, isCutscene);	
 	}
-	
+
 	textSpritesLine1.clear();
 	textSpritesLine2.clear();
 	
 	if(!dontUpdateAtEnd) {
 		game->doButanoUpdate();
 	}
-	
 	
 	game->state = restoreState;
 	
@@ -2345,7 +2332,14 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	
 	// moving these variables, above, the onespriteperchar line,,,, crashes the fucking game when this is called???
 	// gods at this point im starting to wonder how much of my fucking optmizations are worth it
-	bn::vector<bn::sprite_ptr, 64> restSprites;
+	
+	// THESE ALLOCS ARE WHATS CAUSING MY OVERFLOWS
+	//#define RESTSPRITESIZE 64
+	#define RESTSPRITESIZE 8
+	bn::vector<bn::sprite_ptr, RESTSPRITESIZE> restSprites;
+	bn::vector<bn::vector<bn::sprite_ptr, RESTSPRITESIZE>, 4> restSpritesOutline;
+	
+	
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
 	bn::vector<bn::sprite_ptr, 4> noSprites;
 	
@@ -2358,7 +2352,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		restSprites[i].set_palette(activeTextPalette);
 	}
 	
-	bn::vector<bn::vector<bn::sprite_ptr, 64>, 4> restSpritesOutline;
+
 	
 	
 	for(int j=0; j<4; j++) {
@@ -2468,10 +2462,11 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	
 	// ` marks are used to delay the text
 	if(doCutsceneDialogue) {
-		doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
+		// why is this crashing?
+		//doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
+		doDialogue("[Slowly,`surely,`dreams embrace you]\0\0\0", false);
 	}
 	// PLAY THE EXIT THINGy
-	
 	
 	game->state = restoreState;
 	return true;

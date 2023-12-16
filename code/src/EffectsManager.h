@@ -383,6 +383,8 @@ public:
 	
 	// dialogue needs to become its own class.
 	// more than it already is
+	// this being O2, scares me now that i think about it 
+	// oh gods
 	__attribute__((noinline, target("thumb"), optimize("O2"))) void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = NULL);
 	void doDialogue(const char* data, const bn::sound_item* sound) {
 		doDialogue(data, false, sound);

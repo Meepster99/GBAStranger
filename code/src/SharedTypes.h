@@ -200,6 +200,8 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_
 
 __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void uncompressData(u8 res[126], u8* input);
 
+void logRamStatus();
+
 void doNothing();
 
 enum class GameState {
@@ -605,6 +607,7 @@ public:
 	BACKGROUNDMAPATTRIBUTES void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// this func actually being able to flip (curse) properly is UNCONFIRMED bc I AM SLEEPY
 		
+		// coming back to this code, a solid 3 months later, what the fuck?
 		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
 		tempTileIndicies[1] = 4 * tile + ((flipY << 1) | !flipX);
 		tempTileIndicies[2] = 4 * tile + ((!flipY << 1) | flipX);

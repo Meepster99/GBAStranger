@@ -194,6 +194,8 @@ void Game::findNextRoom() {
 			BN_ASSERT(entityManager.player != NULL, "player was null during cif reset");
 			
 			entityManager.player->locustCount = 0;
+			globalGame->tileManager.locustCounterTile->first = '0';
+			globalGame->tileManager.locustCounterTile->second = '0';
 			entityManager.player->isVoided = false;
 
 			//game->save(); // extranious call for sanity
@@ -1155,18 +1157,39 @@ void Game::doButanoUpdate() {
 	*/
 }
 
+void logRamStatus() {
+	
+	unsigned stackIWram = bn::memory::used_stack_iwram();
+	unsigned staticIWram = bn::memory::used_static_iwram();
+	unsigned totalIWram = stackIWram + staticIWram;
+	
+	BN_LOG("used_stack_iwram: ", ((bn::fixed)stackIWram).safe_division(32 * 1024));
+	BN_LOG("used_static_iwram: ", ((bn::fixed)staticIWram).safe_division(32 * 1024));
+	BN_LOG("total iwram: ", ((bn::fixed)totalIWram).safe_division(32 * 1024));
+	
+}
+
 void didVBlank() {
 	
 	
-	//unsigned stackIWram = bn::memory::used_stack_iwram();
-	//unsigned staticIWram = bn::memory::used_static_iwram();
-	//unsigned totalIWram = stackIWram + staticIWram;
+	unsigned stackIWram = bn::memory::used_stack_iwram();
+	unsigned staticIWram = bn::memory::used_static_iwram();
+	unsigned totalIWram = stackIWram + staticIWram;
 
 	//BN_LOG("used_stack_iwram: ", stackIWram.safe_division(32 * 1024));
 	//BN_LOG("used_static_iwram: ", staticIWram.safe_division(32 * 1024));
 	//BN_LOG("total iwram: ", totalIWram.safe_division(32 * 1024));
 	
-	//BN_ASSERT(totalIWram < 32 * 1024, "iwram overflow!!!");
+	BN_ASSERT(totalIWram < 32 * 1024, "iwram overflow!!! val=", totalIWram);
+	
+	/*
+	if(totalIWram > 31 * 1024) {
+		BN_LOG("iwram is getting concerningly high!");
+		BN_LOG("used_stack_iwram: ", ((bn::fixed)stackIWram).safe_division(32 * 1024));
+		BN_LOG("used_static_iwram: ", ((bn::fixed)staticIWram).safe_division(32 * 1024));
+		BN_LOG("total iwram: ", ((bn::fixed)totalIWram).safe_division(32 * 1024));
+	}
+	*/
 	
 	//frame = (frame + 1) % 600000;
 	frame++;
