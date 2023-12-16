@@ -408,6 +408,7 @@ public:
 	void monLightning(Pos p, Direction dir);
 	void sparkle(Pos p, int sparkleLength = 8);
 	Effect* getRoomDustEffect(bool isCutscene = false);
+	bn::vector<Effect*, 16> roomDustTracker; // i have 0 clue whats going on, but SOMETIMES during cif;s dream, the fuzzys just glitch allover?
 	void roomDust();
 	void entityKill(Entity* entity);
 	void entityFall(Entity* entity);

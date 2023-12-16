@@ -1719,6 +1719,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	rotateTanStatuesFrames = 0;
 	rodNumber = 0;
 	
+	roomDustTracker.clear();
+	
 	for(int i=0; i<effectList.size(); i++) {
 		if(effectList[i] != NULL) {
 			delete effectList[i];
@@ -1929,6 +1931,9 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
     }
 	*/
 	
+	// tbh, i think this func should just be removed??
+	// nope nope nope
+	
 	if(isCutscene) {
 		for(auto it = bigSprites.cbegin(); it != bigSprites.cend(); ++it) {
 			if((*it) == NULL) {
@@ -1954,8 +1959,33 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	this func is somehow causing a fucking stack overflow in iwram. 
 	what the fuck
 	or maybe its displaydistext?
-	
+	it was restreq fucking allocing 64*5 sprite pointers to display a single word :)))
 	*/
+	
+	// this func needs a double null termed string to function properly. why? idfk 
+	// but im now paranoid that i messed up/forgot somewhere 
+	// i SHOULD copy the datastring into a buffer and add the extra nullterm, but i dont like that 
+	// bc of having to do a massive alloc 
+	// actually, i SHOULD SHOULD, just fix my code, but my gods do i never want to interact with this code again 
+	// ,,,, i could add text scrolling tho,,, now that i know more 
+	// ugh no. 
+	
+	const char* safteyTestData = data;
+	
+	// sometimes, data can start with a nullterm if i want to exec code between dialogue things 
+	if(*safteyTestData == '\0') {
+		safteyTestData++;
+	}
+	
+	// find first nullterm
+	while(*safteyTestData != '\0') {
+		safteyTestData++;
+	}
+	// inc to where second nullterm should be
+	safteyTestData++;
+	
+	BN_ASSERT(*safteyTestData == '\0', "oh gods. dialogue data wasnt double nulltermed.  PLEASE MESSAGE ME THIS. str=", data);
+	
 	
 	//BN_LOG("doing dialogue of ", data);
 	
@@ -3960,8 +3990,11 @@ void EffectsManager::roomDust() {
 	
 	tempTimer.restart();
 	
+	BN_ASSERT(roomDustTracker.size() == 0, "roomDustTracker wasnt 0 when creating dust?");
+	
 	for(int unused = 0; unused<16; unused++) {
 		Effect* e = getRoomDustEffect();
+		roomDustTracker.push_back(e);
 		effectList.push_back(e);	
 	}
 	

@@ -1182,14 +1182,18 @@ void didVBlank() {
 	
 	BN_ASSERT(totalIWram < 32 * 1024, "iwram overflow!!! val=", totalIWram);
 	
+	BN_ASSERT(totalIWram < 31 * 1024, "iwram getting close to overflow!!! val=", totalIWram);
+	
 	/*
+	// TBH, IF IT EVER GETS THIS CLOSE, I SHOULD JUST THROW AN ERROR
 	if(totalIWram > 31 * 1024) {
-		BN_LOG("iwram is getting concerningly high!");
-		BN_LOG("used_stack_iwram: ", ((bn::fixed)stackIWram).safe_division(32 * 1024));
-		BN_LOG("used_static_iwram: ", ((bn::fixed)staticIWram).safe_division(32 * 1024));
-		BN_LOG("total iwram: ", ((bn::fixed)totalIWram).safe_division(32 * 1024));
+		//BN_LOG("iwram is getting concerningly high!");
+		//BN_LOG("used_stack_iwram: ", ((bn::fixed)stackIWram).safe_division(32 * 1024));
+		//BN_LOG("used_static_iwram: ", ((bn::fixed)staticIWram).safe_division(32 * 1024));
+		BN_LOG("iwram is getting concerningly high!\ntotal iwram: ", ((bn::fixed)totalIWram).safe_division(32 * 1024));
 	}
 	*/
+	
 	
 	//frame = (frame + 1) % 600000;
 	frame++;

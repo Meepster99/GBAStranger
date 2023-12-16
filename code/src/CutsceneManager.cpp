@@ -334,9 +334,41 @@ void CutsceneManager::cifDream() {
 		//BN_LOG("HEY FOOL, CHANGE THIS DELAY BACK TO 20");
 	}
 	
+	
+	bn::music::stop();
+	// this delay fucking causes the,, voided lyrics thingy to finally cut off 
+	delay(1);
+	
+	// extra one for paranoia? why are the fuzzys glitchy if i let the dis text display on screen?
+	delay(1);
+
+	disOsTextSprites.clear();
+	for(int i=0; i<disTextSprites.size(); i++) {
+		disTextSprites[i].clear();
+	}
+	disTextSprites.clear();
+	disText.clear();
+	
+	delay(1);
+	
+	/*
+	// now im just being fucking weird 
+	for(auto it = effectsManager->roomDustTracker.begin(); it != effectsManager->roomDustTracker.end(); ++it) {
+		effectsManager->removeEffect(*it);
+	}
+	delay(1);
+	effectsManager->roomDustTracker.clear();
+	delay(1);
+	*/
+	
 	game->state = GameState::Cutscene;
 	
+	
+	// ok. i no longer like this func. im just going to delete everything?
 	game->effectsManager.hideForDialogueBox(false, true);
+	
+	
+	
 	//backupAllButEffects();
 	backup();
 	
@@ -390,6 +422,7 @@ void CutsceneManager::cifDream() {
 	
 	delay(60 * 5);
 	
+		
 	bn::music_items::cifdream.play();
 	bn::music::set_pitch(1);
 	
@@ -400,7 +433,17 @@ void CutsceneManager::cifDream() {
 	maps[1]->bgPointer.set_priority(0);
 	effectsManager->effectsLayer.clear();
 	
-	bn::vector<Effect, 16> effects;
+	// changing this to a pointer bc,,,, running of of stack?
+	bn::vector<Effect*, 16> effects;
+	
+	// look at me being fancy 
+	DEFER(effects,
+		for(int i=0; i<effects.size(); i++) {
+			delete effects[i];
+			effects[i] = NULL;
+		}	
+		effects.clear();
+	);
 	
 	
 	//maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 0);
@@ -498,7 +541,10 @@ void CutsceneManager::cifDream() {
 	
 	// static vars, declared inside the lambda, dont reset on a second func call?? that is quite weird
 
-	auto createEffect = [spritePalette, darkSpritePalette]() -> Effect {
+	// some fucky shit is,,, causing,,, the soul glows to pop in and out randomly? 
+	// but only sometimes?
+	
+	auto createEffect = [spritePalette, darkSpritePalette]() -> Effect* {
 		
 		auto createFunc = [spritePalette, darkSpritePalette](Effect* obj) mutable -> void {
 			
@@ -560,7 +606,8 @@ void CutsceneManager::cifDream() {
 			darkSpritePalette
 			](Effect* obj) mutable -> bool {
 			
-			if(y < -16) {
+			
+			if(y.integer() < -16) {
 	
 				tileSelector = randomGenerator.get_int(0, 5);
 				
@@ -599,7 +646,7 @@ void CutsceneManager::cifDream() {
 				if(y == -32) {
 					y = randomGenerator.get_int(16 * 9);
 				} else {
-					y = 16 * 10;
+					y = 16 * 10 + randomGenerator.get_int(32);;
 				}
 				
 				image_speed = (bn::fixed)0;
@@ -627,9 +674,9 @@ void CutsceneManager::cifDream() {
 			t = ((t + 1) % 360);
 			x = (x + (amplitude * sinTable[t]));
 			
-			if(x > 240) {
+			if(x.integer() > 240 + 16) {
 				x -= 240;
-			} else if(x < 0) {
+			} else if(x.integer() < 0 - 16) {
 				x += 240;
 			}
 		
@@ -649,46 +696,75 @@ void CutsceneManager::cifDream() {
 			obj->y = y.integer();
 			obj->sprite.updateRawPosition(obj->x, obj->y);
 			
+			/*
+			if(y.integer() < -16) {
+				x = randomGenerator.get_int(16 * 14);
+				y = 180;
+				
+				tileSelector = randomGenerator.get_int(0, 5);
+				
+				const bn::sprite_tiles_item* spriteTiles[5] = {
+					&bn::sprite_tiles_items::dw_spr_soulglow_big,
+					&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
+					&bn::sprite_tiles_items::dw_spr_soulglow_med,
+					&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
+					&bn::sprite_tiles_items::dw_spr_soulglow_sma,
+				};
+				
+				const bn::sprite_shape_size spriteShapes[5] = {
+					bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
+					bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
+				};
+			
+				obj->tiles = spriteTiles[tileSelector];
+				
+				obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
+				
+				obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 1 : 3);
+				
+				obj->sprite.spritePointer.set_palette(tileSelector != 0 ? darkSpritePalette : spritePalette);
+				
+			}
+			
+			y -= 1;
+			graphicsIndex += 0.2;
+			
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				graphicsIndex.integer() % 5
+			);
+			
+			obj->x = x.integer();
+			obj->y = y.integer();
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+			*/
+			
 			return false;
 		};
 		
-		return Effect(createFunc, tickFunc);
+		return new Effect(createFunc, tickFunc);
 	};
-	
-	
-	
-	
-	BN_LOG("YAYAY");
-	
+
 	while(effects.size() != effects.max_size()) {
 		effects.push_back(createEffect());
 	}
 	
-	BN_LOG("YAYAy2");
-	
 	// init all the effects such that the palete table wont be moving
 	for(int i=0; i<effects.size(); i++) {
-		effects[i].animate();
+		effects[i]->animate();
 	}
-	
-	BN_LOG("YAYAy3");
-	
 	
 	vBlankFuncs.push_back([this, effects, spritePalette, darkSpritePalette]() mutable {
 		
 		for(int i=0; i<effects.size(); i++) {
-			effects[i].animate();
+			effects[i]->animate();
 		}
 		
-		
 		return;
-	});
-	
-	
-	
-	BN_LOG("YAYAy4");
-	
-	
+	});	
 	
 	// fade should be done here, i believe
 	// ugh.
@@ -787,6 +863,9 @@ void CutsceneManager::cifDream() {
 	tempSprites.clear();
 	vBlankFuncs.clear();
 	effects.clear();
+	
+	// recreate roomdust, and also probs lag shit out. 
+	//effectsManager->roomDust();
 	
 	game->effectsManager.bigSprites[0]->animate();
 	
@@ -1620,34 +1699,39 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 		char tempBuffer[32];
 		memset(tempBuffer, 0, 32);
 
-		strcpy(tempBuffer, "DIS OS REPORT \0");
-		if(__DATE__[4] == ' ') {
-			tempBuffer[14] = '0';
+		if(randomGenerator.get_int(0, 255) != 0) {
+
+			strcpy(tempBuffer, "DIS OS REPORT \0");
+			if(__DATE__[4] == ' ') {
+				tempBuffer[14] = '0';
+			} else {
+				tempBuffer[14] = __DATE__[4];
+			}
+			
+			if(__DATE__[5] == ' ') {
+				tempBuffer[15] = '0';
+			} else {
+				tempBuffer[15] = __DATE__[5];
+			}
+			
+			tempBuffer[16] = '/';
+			tempBuffer[17] = '0' + (MONTH / 10);
+			tempBuffer[18] = '0' + (MONTH % 10);
+			tempBuffer[19] = '/';
+			tempBuffer[20] = '1';			
+			tempBuffer[21] = '1';
+		
+			// Nov  5 2023
+			
+			strcpy(tempBuffer+22, __DATE__+7);
+			
+			//strcpy(tempBuffer+14, __DATE__[4]);
+			//"DIS OS REPORT 05/11/112023"
+			//BN_LOG(tempBuffer);
+			//BN_LOG(__DATE__);
 		} else {
-			tempBuffer[14] = __DATE__[4];
+			strcpy(tempBuffer, "DIS OS REPORT 17/02/2022   \0");
 		}
-		
-		if(__DATE__[5] == ' ') {
-			tempBuffer[15] = '0';
-		} else {
-			tempBuffer[15] = __DATE__[5];
-		}
-		
-		tempBuffer[16] = '/';
-		tempBuffer[17] = '0' + (MONTH / 10);
-		tempBuffer[18] = '0' + (MONTH % 10);
-		tempBuffer[19] = '/';
-		tempBuffer[20] = '1';			
-		tempBuffer[21] = '1';
-	
-		// Nov  5 2023
-		
-		strcpy(tempBuffer+22, __DATE__+7);
-		
-		//strcpy(tempBuffer+14, __DATE__[4]);
-		//"DIS OS REPORT 05/11/112023"
-		//BN_LOG(tempBuffer);
-		//BN_LOG(__DATE__);
 		
 		disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16, bn::string_view(tempBuffer), disOsTextSprites);
 		for(int i=0; i<disOsTextSprites.size(); i++) {
@@ -2601,11 +2685,31 @@ void CutsceneManager::voidedLyrics() {
 		obj->sprite.updateRawPosition(-32, -32);
 	};
 
-	auto tickFunc = [startFrame = frame,
+	auto tickFunc = [this, 
+	startFrame = frame,
 	index = 0
 	](Effect* obj) mutable -> bool {
 		
 		(void)obj;
+		
+		// after cif's dream, i dont want to restart the god damn music,, 
+		// wait do i?
+		// wait tf it does? does cif's dream reset the room?
+		
+		if(!bn::music::playing() || bn::music::playing_item() != bn::music_items::msc_voidsong) {
+			// this is quite goofy, but basically, if we start cifs dream cutscene, i want to clear the bg stuff 
+
+			/*
+			disOsTextSprites.clear();
+			for(int i=0; i<disTextSprites.size(); i++) {
+				disTextSprites[i].clear();
+			}
+			disTextSprites.clear();
+			disText.clear();
+			*/
+			
+			return true;				
+		}
 		
 		if(frame - startFrame > voidedLyricsData[index].time) {
 			

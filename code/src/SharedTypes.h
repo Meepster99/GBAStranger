@@ -117,7 +117,8 @@
 //using defer = std::shared_ptr<void>;    
 // defer _(nullptr, [](...){ std::cout << ", World!"; });
 //#define DEFER(code) std::shared_ptr<void> _(nullptr, [](...){ code }); 
-#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...){ code }); 
+//#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...){ code }); 
+#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...) mutable { code }); 
 
 #define USEEWRAM __attribute__((section(".ewram")))
 #define USEIWRAM __attribute__((section(".iwram")))
