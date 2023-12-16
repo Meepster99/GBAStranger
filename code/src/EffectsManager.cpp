@@ -1392,7 +1392,7 @@ void EffectsManager::updatePalette(Palette* pal) {
 	}
 	
 	for(int i=0; i<menuOptions.size(); i++) {
-		menuOptions[i].draw();
+		menuOptions[i]->draw();
 	}
 	
 	for(int i=0; i<verTextSprites.size(); i++) {
@@ -2613,7 +2613,7 @@ void EffectsManager::setBrandColor(int x, int y, bool isTile) {
 
 void EffectsManager::setMenuVis(bool vis) {
 	for(int i=0; i<menuOptions.size(); i++) {
-		menuOptions[i].setVisible(vis);
+		menuOptions[i]->setVisible(vis);
 	}
 	
 	for(int i=0; i<verTextSprites.size(); i++) {
@@ -2713,32 +2713,32 @@ void EffectsManager::doMenu() {
 	
 	// oh god im getting goofy again
 	menuOptions.push_back(
-		MenuOption("Stranger: ", 
+		new MenuOption("Stranger: ", 
 		[]() -> const char* { return globalGame->getMode(); },
 		[](int val) { globalGame->changeMode(val); }
 		)
 	);
 	
 	menuOptions.push_back(
-		MenuOption("Room: ", 
+		new MenuOption("Room: ", 
 		[]() -> const char* { return globalGame->roomManager.currentRoomName(); },
 		[](int val) { return globalGame->roomManager.changeFloor(val); }
 		)
 	);
 	
 	menuOptions.push_back(
-		MenuOption("Palette: ", 
+		new MenuOption("Palette: ", 
 		[]() -> const char* { return paletteNameList[globalGame->paletteIndex]; },
 		[](int val) { return globalGame->changePalette(val); }
 		)
 	);
 	
-	menuOptions[menuOptions.size() - 1].bPress = []() -> void {
+	menuOptions[menuOptions.size() - 1]->bPress = []() -> void {
 		globalGame->cutsceneManager.inputCustomPalette();
 	};
 	
 	menuOptions.push_back(
-		MenuOption("Memory: ", 
+		new MenuOption("Memory: ", 
 		[]() -> const char* { 
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
@@ -2756,7 +2756,7 @@ void EffectsManager::doMenu() {
 	);
 	
 	menuOptions.push_back(
-		MenuOption("Wings: ", 
+		new MenuOption("Wings: ", 
 		[]() -> const char* { 
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
@@ -2775,7 +2775,7 @@ void EffectsManager::doMenu() {
 
 	
 	menuOptions.push_back(
-		MenuOption("Sword: ", 
+		new MenuOption("Sword: ", 
 		[]() -> const char* { 
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
@@ -2793,7 +2793,7 @@ void EffectsManager::doMenu() {
 	);
 	
 	menuOptions.push_back(
-		MenuOption("Rod: ", 
+		new MenuOption("Rod: ", 
 		[]() -> const char* { 
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
@@ -2839,7 +2839,7 @@ void EffectsManager::doMenu() {
 	);
 	
 	menuOptions.push_back(
-		MenuOption("Back", 
+		new MenuOption("Back", 
 		[]() -> const char* { return "\0"; },
 		[](int val) { (void)val; return; }
 		)
@@ -2848,7 +2848,7 @@ void EffectsManager::doMenu() {
 	game->doButanoUpdate();
 	
 	for(int i=0; i<menuOptions.size(); i++) {
-		menuOptions[i].fullDraw(i == 0);
+		menuOptions[i]->fullDraw(i == 0);
 		// this many butanoupdates SHOULD NOT BE NECCESSARY!
 		game->doButanoUpdate();
 	}
@@ -2869,36 +2869,36 @@ void EffectsManager::doMenu() {
 			// i rlly with they gave me direct access to bn::keypad::data
 			
 			if(!isActive && bn::keypad::up_pressed()) {
-				menuOptions[selectedOption].draw(false);
+				menuOptions[selectedOption]->draw(false);
 				
 				selectedOption--;
 				selectedOption = ((selectedOption % menuOptions.size()) + menuOptions.size()) % menuOptions.size();
 				
-				menuOptions[selectedOption].draw(true);
+				menuOptions[selectedOption]->draw(true);
 			} else if(!isActive && bn::keypad::down_pressed()) {
-				menuOptions[selectedOption].draw(false);
+				menuOptions[selectedOption]->draw(false);
 				
 				selectedOption++;
 				selectedOption = ((selectedOption % menuOptions.size()) + menuOptions.size()) % menuOptions.size();
 				
-				menuOptions[selectedOption].draw(true);
+				menuOptions[selectedOption]->draw(true);
 			} else if(isActive && bn::keypad::left_pressed()) {
-				menuOptions[selectedOption].changeOption(-1);
-				menuOptions[selectedOption].fullDraw(flashing);
+				menuOptions[selectedOption]->changeOption(-1);
+				menuOptions[selectedOption]->fullDraw(flashing);
 			} else if(isActive && bn::keypad::right_pressed()) {
-				menuOptions[selectedOption].changeOption(1);
-				menuOptions[selectedOption].fullDraw(flashing);
+				menuOptions[selectedOption]->changeOption(1);
+				menuOptions[selectedOption]->fullDraw(flashing);
 			} else if(bn::keypad::a_pressed()) {
 				isActive = !isActive;
-				menuOptions[selectedOption].draw(true);
+				menuOptions[selectedOption]->draw(true);
 				
 				if(selectedOption == menuOptions.size() - 1) {
 					break;
 				}
 			// else if(isActive && bn::keypad::b_pressed()) {
 			} else if(bn::keypad::b_pressed()) {
-				if(menuOptions[selectedOption].bPress != NULL) {
-					menuOptions[selectedOption].bPress();
+				if(menuOptions[selectedOption]->bPress != NULL) {
+					menuOptions[selectedOption]->bPress();
 				}
 			} else {
 				
@@ -2906,7 +2906,7 @@ void EffectsManager::doMenu() {
 		}
 		
 		if(isActive && frame % 8 == 0) {
-			menuOptions[selectedOption].draw(flashing);
+			menuOptions[selectedOption]->draw(flashing);
 			flashing = !flashing;
 		}
 
@@ -2921,6 +2921,10 @@ void EffectsManager::doMenu() {
 		startRoomMode != game->mode) {
 		game->resetRoom(true);
 	}
+	for(int i=0; i<menuOptions.size(); i++) {
+		delete menuOptions[i];
+	}
+	menuOptions.clear();
 	menuOptions.clear();
 	//tileManager->fullDraw(); // literally only here since for some reason, butden tiles didnt update until a move?
 	game->doButanoUpdate();

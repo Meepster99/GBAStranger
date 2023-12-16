@@ -434,17 +434,24 @@ void CutsceneManager::cifDream() {
 	effectsManager->effectsLayer.clear();
 	
 	// changing this to a pointer bc,,,, running of of stack?
+	// its quite weird that,, effects was the thing using up so much iwram.
+	// is each function pointers code, stored,,, in iwram?
+	// idek whats goin on, but it works, so im good
 	bn::vector<Effect*, 16> effects;
 	
 	// look at me being fancy 
+	// so stupid how i cant va_args this
+	// is this not working?
+	/*
 	DEFER(effects,
 		for(int i=0; i<effects.size(); i++) {
 			delete effects[i];
 			effects[i] = NULL;
 		}	
 		effects.clear();
+		globalGame->cutsceneManager.vBlankFuncs.clear();
 	);
-	
+	*/
 	
 	//maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 0);
 	
@@ -695,53 +702,7 @@ void CutsceneManager::cifDream() {
 			obj->x = x.integer();
 			obj->y = y.integer();
 			obj->sprite.updateRawPosition(obj->x, obj->y);
-			
-			/*
-			if(y.integer() < -16) {
-				x = randomGenerator.get_int(16 * 14);
-				y = 180;
-				
-				tileSelector = randomGenerator.get_int(0, 5);
-				
-				const bn::sprite_tiles_item* spriteTiles[5] = {
-					&bn::sprite_tiles_items::dw_spr_soulglow_big,
-					&bn::sprite_tiles_items::dw_spr_soulglow_bigmed,
-					&bn::sprite_tiles_items::dw_spr_soulglow_med,
-					&bn::sprite_tiles_items::dw_spr_soulglow_medsma,
-					&bn::sprite_tiles_items::dw_spr_soulglow_sma,
-				};
-				
-				const bn::sprite_shape_size spriteShapes[5] = {
-					bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size,
-					bn::sprite_tiles_items::dw_spr_soulglow_bigmed_shape_size,
-					bn::sprite_tiles_items::dw_spr_soulglow_med_shape_size,
-					bn::sprite_tiles_items::dw_spr_soulglow_medsma_shape_size,
-					bn::sprite_tiles_items::dw_spr_soulglow_sma_shape_size,
-				};
-			
-				obj->tiles = spriteTiles[tileSelector];
-				
-				obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
-				
-				obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 1 : 3);
-				
-				obj->sprite.spritePointer.set_palette(tileSelector != 0 ? darkSpritePalette : spritePalette);
-				
-			}
-			
-			y -= 1;
-			graphicsIndex += 0.2;
-			
-			obj->sprite.spritePointer.set_tiles(
-				*obj->tiles,
-				graphicsIndex.integer() % 5
-			);
-			
-			obj->x = x.integer();
-			obj->y = y.integer();
-			obj->sprite.updateRawPosition(obj->x, obj->y);
-			*/
-			
+		
 			return false;
 		};
 		
@@ -861,8 +822,15 @@ void CutsceneManager::cifDream() {
 	// 
 	
 	tempSprites.clear();
-	vBlankFuncs.clear();
+	//vBlankFuncs.clear();
+	//effects.clear();
+	
+	for(int i=0; i<effects.size(); i++) {
+		delete effects[i];
+		effects[i] = NULL;
+	}	
 	effects.clear();
+	globalGame->cutsceneManager.vBlankFuncs.clear();
 	
 	// recreate roomdust, and also probs lag shit out. 
 	//effectsManager->roomDust();

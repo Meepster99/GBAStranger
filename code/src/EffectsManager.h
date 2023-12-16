@@ -333,7 +333,7 @@ public:
 	EffectsLayer effectsLayer;	
 
 
-	bn::vector<MenuOption, 16> menuOptions;
+	bn::vector<MenuOption*, 16> menuOptions;
 
 	EffectsManager(Game* game_);
 	

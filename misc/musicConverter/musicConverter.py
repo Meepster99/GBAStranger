@@ -115,7 +115,7 @@ customSampleRate = {
 	#"msc_voidsong": 18000, 
 	"msc_voidsong": 23000, 
 	#"msc_endless": 9000, # overtones were pretty with this,,, but gods tails music needs more bits
-	"msc_endless": 7500,
+	"msc_endless": 7500, # this REALLY NEEDS MORE BITS FOR MORE ECHO
 	#"msc_001": 8300,
 	#"msc_001": 8000,
 	"msc_001": 6000,
