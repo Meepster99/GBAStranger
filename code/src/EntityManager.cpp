@@ -1223,7 +1223,24 @@ void EntityManager::doMoves() { profileFunction();
 	
 	// the playermoved bool is basically useless 
 	// i think this might mean that you will never die if you,, ugh idek
-	if(!bn::keypad::a_pressed()) {
+	// i fucking hate this so much :) 
+	// i think i have 3 or 4 variables dedicated to just seeing if the player moved 
+	// and now, trying to have,,, allowing buttons to be held might REALLY fuck me here 
+	// i could just,, have gloval variables but what if i forget to use those in the future?
+	//if(!bn::keypad::a_pressed()) {
+	
+	/*
+	if(game->saveData.delay == -1) {
+		if(!bn::keypad::a_pressed()) {
+			playerMoveCount++;
+		}
+	} else {
+		if(!bn::keypad::a_pressed() && !bn::keypad::a_held()) {
+			playerMoveCount++;
+		}
+	}
+	*/
+	if(!getInput(bn::keypad::key_type::A)) {
 		playerMoveCount++;
 	}
 	

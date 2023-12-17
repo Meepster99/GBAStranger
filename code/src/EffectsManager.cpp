@@ -1256,9 +1256,6 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	effectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles)
 	{
 		
-		
-	
-		
 	// may not be the best idea?
 	textGenerator.set_one_sprite_per_character(true);
 	
@@ -1282,14 +1279,6 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 		tileRef[i].data[6] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[6];
 		tileRef[i].data[7] = bn::regular_bg_tiles_items::dw_customeffecttiles.tiles_ref()[i].data[7];
 	}
-
-	/*
-	for(int i=0; i<8; i+=2) {
-		tileRef[126].data[i+0] = 0x00000002;
-		tileRef[126].data[i+1] = 0x00000003;
-	}	
-	tileRef[127].data[0] = 0x23232323;
-	*/
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1298,30 +1287,6 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	}
 	
 	effectsLayer.rawMap.bgPointer.set_tiles(tilesPointer);
-	
-	/*
-	for(int i=0; i<8; i++) {
-		tileRef[122].data[i] = 0x11111111;
-		tileRef[123].data[i] = 0x11111111;
-		tileRef[124].data[i] = 0x11111111;
-		tileRef[125].data[i] = 0x11111111;
-		
-		tileRef[126].data[i] = 0x11111111;
-		tileRef[127].data[i] = 0x11111111;
-	}
-		
-	//for(int i=0+1; i<30-1; i++) {
-	for(int i=0; i<30; i++) {
-		effectsLayer.rawMap.setTile(i, 0, 127, false, true);
-		effectsLayer.rawMap.setTile(i, 19, 127, true, false);
-	}
-
-	//for(int i=0+1; i<20-1; i++) {
-	for(int i=0; i<20; i++) {
-		effectsLayer.rawMap.setTile(0, i, 126, true, false);
-		effectsLayer.rawMap.setTile(29, i, 126, false, true);
-	}
-	*/
 	
 	for(int i=0; i<8; i++) {
 		tileRef[120].data[i] = 0x11111111;
@@ -1540,11 +1505,11 @@ void EffectsManager::setDebugDisplay(bool black) {
 	
 	if(debugToggle) {
 		for(int i=0; i<8; i++) {
-			tileRef[125].data[i] = val ^ debugGraphic[i];
+			tileRef[121].data[i] = val ^ debugGraphic[i];
 		}
 	} else {
 		for(int i=0; i<8; i++) {
-			tileRef[125].data[i] = val;
+			tileRef[121].data[i] = val;
 		}
 	}
 	
@@ -1568,7 +1533,7 @@ void EffectsManager::setBorderColor(bool black) {
 		effectsLayer.rawMap.setTile(29, i, borderVal, false, true);
 	}
 	
-	effectsLayer.rawMap.setTile(0, 0, 125, false, true);
+	effectsLayer.rawMap.setTile(0, 0, 121, false, true);
 	
 	setDebugDisplay(black);
 	
@@ -2547,7 +2512,10 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 // -----
 
 // jesus (curse)
-MenuOption::MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int), int xVal) :
+MenuOption::MenuOption(const char* optionName_, 
+	//const char* (*getOption_)(), void (*changeOption_)(int), 
+	std::function<const char*(void)> getOption_, std::function<void(int)> changeOption_,
+	int xVal) :
 	optionName(optionName_),
 	getOption(getOption_),
 	changeOption(changeOption_),
@@ -2879,6 +2847,49 @@ void EffectsManager::doMenu() {
 		-2
 		)
 	);
+	
+	// i pray this works, ive had so many issues with nullterms
+	bn::string<16> string;
+	
+	menuOptions.push_back(
+		new MenuOption("Delay frames: ", 
+		[string]() mutable -> const char* { 
+		
+			if(globalGame->saveData.delay == -1) {
+				return "Press\0";
+			}
+			
+			if(globalGame->saveData.delay == 0) {
+				return "Kachow\0";
+			}
+			
+			string = bn::to_string<16>(globalGame->saveData.delay / FRAMETICKS);
+			
+			return string.data();
+		},
+		[](int val) {
+			
+			
+			if(val > 0 && globalGame->saveData.delay == -1) {
+				globalGame->saveData.delay = 0;
+				return;
+			}
+			
+			if(val < 0 && globalGame->saveData.delay == 0) {
+				globalGame->saveData.delay = -1;
+				return;
+			}
+			
+			globalGame->saveData.delay += val > 0 ? 2 * FRAMETICKS : -2 * FRAMETICKS;			
+			globalGame->saveData.delay = MAX(globalGame->saveData.delay, -1);
+			globalGame->saveData.delay = MIN(globalGame->saveData.delay, 5 * 60 * FRAMETICKS);
+
+		},
+		80 * 1
+		)
+	);
+	
+	menuOptions[menuOptions.size() - 1]->yDraw -= 16;
 	
 	menuOptions.push_back(
 		new MenuOption("Back", 

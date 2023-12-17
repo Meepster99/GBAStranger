@@ -80,6 +80,10 @@ struct GameSave {
 	
 	unsigned eggCount = 0;
 	
+	int delay = -1; // this will be the number of ticks,,, to delay. i could use frames, but im worried abt the framecounter overflowing, altho that like,,,, when even does it overflow?
+	
+	bool debug = false;
+	
 	int col1Save = 0;
 	int col2Save = 32767;
 	int col3Save = 25368;

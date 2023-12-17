@@ -277,8 +277,10 @@ public:
 
 	
 	const char* optionName = NULL;
-	const char* (*getOption)() = NULL;
-	void (*changeOption)(int) = NULL;
+	//const char* (*getOption)() = NULL;
+	//void (*changeOption)(int) = NULL;
+	std::function<const char*(void)> getOption;
+	std::function<void(int)> changeOption;
 	void (*bPress)() = NULL;
 	
 	int yDraw = 0;
@@ -294,7 +296,9 @@ public:
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSprites;
 	
 	
-	MenuOption(const char* optionName_, const char* (*getOption_)(), void (*changeOption_)(int), int xVal = -1);
+	MenuOption(const char* optionName_,
+	std::function<const char*(void)> getOption_, std::function<void(int)> changeOption_,
+	int xVal = -1);
 	void fullDraw(bool isActive);
 	void draw(bool isActive);
 	void draw();

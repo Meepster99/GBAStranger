@@ -1203,7 +1203,7 @@ void didVBlank() {
 		frame = 0;
 	}*/
 	// i save a branch? (yes)
-	frame = frame & 0b1111111111111111;
+	//frame = frame & 0b1111111111111111;
 	
 	//BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
 	
@@ -1330,6 +1330,7 @@ void Game::run() {
 	bn::core::set_vblank_callback(didVBlank);
 	
 	bn::timer inputTimer;
+	bn::timer moveTimer;
 	
 	state = GameState::Loading;
 	
@@ -1361,8 +1362,6 @@ void Game::run() {
 	changeMusic();
 
 	//doButanoUpdate();
-
-	
 	
 	BN_LOG("starting main gameloop");
 	while(true) {
@@ -1432,40 +1431,85 @@ void Game::run() {
 				break;
 			}
 		}
-			
-		//if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
-		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 0.1) {
+		
+		if(bn::keypad::start_pressed()) {
+			effectsManager.doMenu();
+		
+			inputTimer.restart();
+			doButanoUpdate();
+			continue;
+		}
+
+		if(bn::keypad::select_pressed()) {
+			debugToggle = !debugToggle;
+			effectsManager.setDebugDisplay(!roomManager.isWhiteRooms());
+		
+			inputTimer.restart();
+			save(); // calling debug here has a chance to maybe fuck shit up,, but 
+			// tbh its still a bummer that like,,i should be saving after each move tbh 
+			doButanoUpdate();
+			continue;
+		}
+		
+		if(bn::keypad::b_pressed()) {
+			if(bn::keypad::select_held()) {
+				Profiler::reset();
+			} else {
+				Profiler::show();
+			}
 			
 			inputTimer.restart();
-			
-			if(bn::keypad::start_pressed()) {
-				effectsManager.doMenu();	
-				continue;
-			}
-	
-			if(bn::keypad::select_pressed()) {
-				debugToggle = !debugToggle;
-				effectsManager.setDebugDisplay(!roomManager.isWhiteRooms());
-				continue;
-			}
-			
-			if(bn::keypad::b_pressed()) {
-				if(bn::keypad::select_held()) {
-					Profiler::reset();
-				} else {
-					Profiler::show();
+			doButanoUpdate();
+			continue;
+		}
+		
+		//if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
+		//if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 0.1) {
+		
+		// i rlly wish butano gave me bitwise access to the controls. but this wont be that expensive(hopefully)
+		// i could use an array, not sure if i rlly want to, but eh idk 
+		
+		constexpr bn::keypad::key_type validKeys[] = {
+			bn::keypad::key_type::UP,
+			bn::keypad::key_type::DOWN,
+			bn::keypad::key_type::LEFT,
+			bn::keypad::key_type::RIGHT,
+			bn::keypad::key_type::A
+		};
+		
+		bool doMove = false;
+		
+		// on any press, ill always do the input
+		if(bn::keypad::any_pressed()) {
+			for(const auto key : validKeys) {
+				if(bn::keypad::pressed(key)) {
+					doMove = true;
+					break;
 				}
-				
-				//bn::sprite_palettes::set_inverted(!bn::sprite_palettes::inverted());
-				//bn::bg_palettes::set_inverted(!bn::bg_palettes::inverted());
-				
-				 
-				
-				doButanoUpdate();
-				continue;
 			}
-			
+		} 
+		
+		// this is where ill check for held buttons
+		if(!doMove && saveData.delay != -1 && inputTimer.elapsed_ticks() > saveData.delay) {
+			if(bn::keypad::any_held()) {
+				for(const auto key : validKeys) {
+					if(bn::keypad::held(key)) {
+						doMove = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if(doMove) {
+			doMove = false;
+		
+			moveTimer.restart();
+
 			entityManager.doMoves();
+			
+			// doing this after,,, so repeated mistake presses are less likely
+			inputTimer.restart();
 		
 			if(entityManager.hasKills()) {
 				resetRoom();
@@ -1474,8 +1518,7 @@ void Game::run() {
 			
 			playerIdleFrame = frame;
 			
-			
-			bn::fixed tickCount = inputTimer.elapsed_ticks();
+			bn::fixed tickCount = moveTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
 			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
 			//if(tickCount > FRAMETICKS) {
@@ -1548,6 +1591,12 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.randomSeed;
 	rotateHash(sizeof(saveData.randomSeed) * 8);
 	
+	hash ^= saveData.delay;
+	rotateHash(sizeof(saveData.delay) * 8);
+	
+	hash ^= saveData.debug;
+	rotateHash(sizeof(saveData.debug) * 8);
+	
 	return hash;
 }
 
@@ -1579,6 +1628,8 @@ void Game::save() {
 	}
 	
 	saveData.randomSeed = bruhRand();
+	
+	saveData.debug = debugToggle;
 	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);
@@ -1615,6 +1666,7 @@ void Game::load() {
 	CUSTOM.d.set_data(saveData.col3Save);
 	CUSTOM.e.set_data(saveData.col4Save);
 	
+	debugToggle = saveData.debug;
 	
 	for(int i=0; i<6; i++) {
 		tileManager.playerBrand[i] = saveData.playerBrand[i];

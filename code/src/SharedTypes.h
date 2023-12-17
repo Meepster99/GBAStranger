@@ -203,6 +203,29 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_
 
 __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void uncompressData(u8 res[126], u8* input);
 
+// how was this var not extern until now?
+//extern Game* globalGame;
+// this was going to be a inline,,, but,,, 
+
+/* // inline stuff was throwing a fit
+inline bool getInput(bn::keypad::key_type key) {
+	
+	if(globalGame->saveData.delay == -1) {
+		if(bn::keypad::pressed(key)) {
+			return true;
+		}
+	} else {
+		if(bn::keypad::pressed(key) || bn::keypad::held(key)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+*/
+
+#define getInput(key) ((globalGame->saveData.delay == -1) ? bn::keypad::pressed(key) : (bn::keypad::pressed(key) || bn::keypad::held(key)))
+
 void logRamStatus();
 
 void doNothing();

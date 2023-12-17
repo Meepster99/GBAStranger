@@ -109,7 +109,18 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	
 	Direction currentDirBackup = currentDir;
 	
-	if(bn::keypad::a_pressed()) {
+	
+	// i rlly should of just had a global.
+	// or a func that checks this for me 
+	// ACTUALLY,,,,,,, 
+	// if domove is only called on press couldnt i just do a if pressed or held?
+	// no, bc what if,, they are seperate buttons 
+	// fuck it, ill make a func in game
+	// actually no, im making it global 
+	
+	
+	//if(bn::keypad::a_pressed()) {
+	if(getInput(bn::keypad::key_type::A)) {
 		
 		Pos tilePos(p);
 		
@@ -217,19 +228,23 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	
 	nextMove = bn::optional<Direction>();
 	
-	if(bn::keypad::down_pressed()) {
+	//if(bn::keypad::down_pressed()) {
+	if(getInput(bn::keypad::key_type::DOWN)) {
 		currentDir = Direction::Down;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
-	} else if(bn::keypad::up_pressed()) {
+	//} else if(bn::keypad::up_pressed()) {
+	} else if(getInput(bn::keypad::key_type::UP)) {
 		currentDir = Direction::Up;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
-	} else if(bn::keypad::left_pressed()) {
+	//} else if(bn::keypad::left_pressed()) {
+	} else if(getInput(bn::keypad::key_type::LEFT)) {
 		currentDir = Direction::Left;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
-	} else if(bn::keypad::right_pressed()) {
+	//} else if(bn::keypad::right_pressed()) {
+	} else if(getInput(bn::keypad::key_type::RIGHT)) {
 		currentDir = Direction::Right;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
