@@ -387,7 +387,7 @@ int main() {
 	BN_ASSERT(totalIWram.safe_division(32 * 1024) < 1, "iwram overflow!!!");
 	BN_ASSERT(totalEWram.safe_division(256 * 1024) < 1, "ewram overflow!!!");
 
-	
+	//BN_LOG("what the fuck ", 2[reinterpret_cast<unsigned char*>(0x02000050)]);
 	
 	/*
 	

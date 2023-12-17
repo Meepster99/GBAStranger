@@ -165,6 +165,8 @@ extern bool isVblank;
 extern unsigned boobaCount;
 extern unsigned playerMoveCount;
 
+extern bool debugToggle;
+
 extern bn::random randomGenerator;
 
 extern void delay(int delayFrameCount);

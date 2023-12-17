@@ -1040,14 +1040,10 @@ void BigSprite::loadTree() {
 				bigSprite->animationIndex
 			);
 			
-			
-			
 			return true;
 			
 		}
-		
-		
-		
+
 		return false;
 	};
 	
@@ -1513,8 +1509,49 @@ bool EffectsManager::topDownEffect(bool downward) {
 	return true;
 }
 
-void EffectsManager::setBorderColor(bool black) {
+void EffectsManager::setDebugDisplay(bool black) {
 	
+	bn::optional<bn::span<bn::tile>> tileRefOpt = tilesPointer.vram();
+	BN_ASSERT(tileRefOpt.has_value(), "wtf");
+	bn::span<bn::tile> tileRef = tileRefOpt.value();
+	
+	unsigned val = black ? 0x11111111 : 0x22222222;
+	
+	#define REVERSE_NIBBLES(value) (((value & 0x0000000F) << 28) | \
+                                ((value & 0x000000F0) << 20) | \
+                                ((value & 0x00000F00) << 12) | \
+                                ((value & 0x0000F000) << 4)  | \
+                                ((value & 0x000F0000) >> 4)  | \
+                                ((value & 0x00F00000) >> 12) | \
+                                ((value & 0x0F000000) >> 20) | \
+                                ((value & 0xF0000000) >> 28))
+	
+	// xoring by 3 will turn 1s into 2s, and vice vera
+	constexpr unsigned debugGraphic[8] = {
+		REVERSE_NIBBLES(0x00000000),
+		REVERSE_NIBBLES(0x00333000),
+		REVERSE_NIBBLES(0x00300300),
+		REVERSE_NIBBLES(0x00300300),
+		REVERSE_NIBBLES(0x00300300),
+		REVERSE_NIBBLES(0x00300300),
+		REVERSE_NIBBLES(0x00333000),
+		REVERSE_NIBBLES(0x00000000)
+	};
+	
+	if(debugToggle) {
+		for(int i=0; i<8; i++) {
+			tileRef[125].data[i] = val ^ debugGraphic[i];
+		}
+	} else {
+		for(int i=0; i<8; i++) {
+			tileRef[125].data[i] = val;
+		}
+	}
+	
+}
+
+void EffectsManager::setBorderColor(bool black) {
+
 	//bn::span<bn::tile> tileRef = tilesPointer.vram().value();
 	
 	//unsigned borderVal = game->roomManager.isWhiteRooms() ? 0x22222222 : 0x11111111;
@@ -1530,6 +1567,11 @@ void EffectsManager::setBorderColor(bool black) {
 		effectsLayer.rawMap.setTile(0, i, borderVal, true, false);
 		effectsLayer.rawMap.setTile(29, i, borderVal, false, true);
 	}
+	
+	effectsLayer.rawMap.setTile(0, 0, 125, false, true);
+	
+	setDebugDisplay(black);
+	
 	
 	effectsLayer.reloadCells();
 
@@ -3868,8 +3910,6 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			
 			lastResetFrame = frame;
 			
-			
-			
 			if(randomGenerator.get() & 1) {
 				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
 			} else {
@@ -3930,11 +3970,6 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			x += 240;
 		}
 		
-		
-		
-		//BN_ASSERT(obj->tiles != NULL, "dust tileset pointer was null. wtf");
-		
-		//graphicsIndex += image_speed / 60;
 		graphicsIndex += image_speed;
 	
 		// replacing this with freezeFrames > 0

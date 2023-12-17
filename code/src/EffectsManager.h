@@ -365,6 +365,7 @@ public:
 	bool zoomEffect(bool inward, bool autoSpeed = true);
 	bool topDownEffect(bool downward);
 	
+	void setDebugDisplay(bool black = true);
 	void setBorderColor(bool black = true);
 	
 	//#define EFFECTSMANAGERATTRIBUTES __attribute__((noinline, target("arm"), section(".iwram")))

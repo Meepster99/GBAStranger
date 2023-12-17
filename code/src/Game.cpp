@@ -11,6 +11,8 @@ bool isVblank = false;
 unsigned boobaCount = 0;
 unsigned playerMoveCount = 0;
 
+bool debugToggle = false;
+
 // yep. its exactly what it looks like.
 
 /*
@@ -1360,7 +1362,7 @@ void Game::run() {
 
 	//doButanoUpdate();
 
-	bool selectToggle = false;
+	
 	
 	BN_LOG("starting main gameloop");
 	while(true) {
@@ -1368,7 +1370,7 @@ void Game::run() {
 		//BN_LOG("start frame ", frame);
 		
 		if(bn::keypad::any_held()) {
-			if(selectToggle && (bn::keypad::l_held() || bn::keypad::r_held())) {
+			if(debugToggle && (bn::keypad::l_held() || bn::keypad::r_held())) {
 				
 				//int debugIncrement = bn::keypad::select_held() ? 5 : 1;
 				int debugIncrement = bn::keypad::start_held() ? 5 : 1;
@@ -1442,7 +1444,8 @@ void Game::run() {
 			}
 	
 			if(bn::keypad::select_pressed()) {
-				selectToggle = !selectToggle;
+				debugToggle = !debugToggle;
+				effectsManager.setDebugDisplay(!roomManager.isWhiteRooms());
 				continue;
 			}
 			
