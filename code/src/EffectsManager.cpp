@@ -3076,10 +3076,38 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	
 	*/
 	
-	if(rodNumber != 0) {
-		// having multiple rods on screen is cool, but only rlly visible when going frame by frame, and causes lag
+	static unsigned prevFrame = 0;
+	
+	if(rodNumber != 0 && frame - prevFrame < 9) { // odd number so numbers alternate if on kachow
 		return;
 	}
+	
+	prevFrame = frame;
+	
+	
+	//if(rodNumber != 0) {
+	if(rodNumber >= 4) {
+		// having multiple rods on screen is cool, but only rlly visible when going frame by frame, and causes lag
+		// im changing it bc it looks cool
+		//,,, it seems like it only causes lag on the initial call?
+		// and all subsequent spam works fine? 
+		// why?
+		// well, i know why, but still 
+		// it seems to lag out,, 11 frames after the start of the anim? thats no coincidence.
+		//return;
+		// honestly fuck it 
+		// if you are tasing this and placing 12 things and having frame drops 
+		// thats ur b 
+		// actually i could maybe just hard cap the number
+		// i could also,,, preload all the sprites into vram somehow?
+		//return;
+	}
+	
+	// vcount 
+	if(*(reinterpret_cast<volatile unsigned short*>(0x04000006)) > 222) { 
+		//return;
+	}
+	
 	
 	// swipe
 	createEffect(
