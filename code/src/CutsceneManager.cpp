@@ -1655,6 +1655,8 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 		return;
 	}
 	
+	BN_LOG("displaying dis text: \"", errorLine, "\"");
+	
 	if(disText.size() == disText.max_size()) {
 		disText.pop_back();
 	}
@@ -2494,8 +2496,8 @@ void CutsceneManager::titleScreen() {
 		"i should be sleeping\0",
 		"i need to have to remove all these\0",
 		"<3\0",
-		"Objectively worse!\0"
-		
+		"Objectively worse!\0",
+		",,,Pipeline Punch\0"
 	};
 	
 	constexpr int idekSize = sizeof(idek)/sizeof(idek[0]);

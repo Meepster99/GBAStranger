@@ -169,7 +169,8 @@ void Game::findNextRoom() {
 			cutsceneManager.crashGame();
 		}
 		
-		if(tileManager.getLocustCount() == -1) {
+		// should this be <= 256 or iswhiterooms?
+		if(tileManager.getLocustCount() == -1 && !roomManager.isWhiteRooms()) {
 			BN_LOG("crashing game due to bad locust count");
 			cutsceneManager.displayDisText("FATAL ERROR : LI NULL\0");
 			delay(5);
