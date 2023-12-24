@@ -49,10 +49,10 @@ public:
 	
 	~EntityManager();
 	
-	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
-	Interactable* getEmptyChest(Pos p);
-	AddStatue* getAddStatue(Pos p);
-	Boulder* getBoulder(Pos p);
+	USEEWRAM void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
+	inline Interactable* getEmptyChest(Pos p);
+	inline AddStatue* getAddStatue(Pos p);
+	inline Boulder* getBoulder(Pos p);
 	
 	bool menuOpened = false;
 	

@@ -95,7 +95,7 @@ struct GameSave {
 	// we need this. 
 	// i could also use rtc, but when i put this on a real cart, i dont want to have to rely on any sort of battery 
 	// (ill be using fram, instead of sram too)
-	unsigned short randomSeed = 0; 
+	unsigned short randomSeed = 0xFFFF; 
 	
 	uint64_t hash = 0;
 };
@@ -195,6 +195,7 @@ public:
 	
 	void save();
 	void load();
+	void saveRNG();
 	void loadCustomSave();
 	uint64_t getSaveHash();
 	

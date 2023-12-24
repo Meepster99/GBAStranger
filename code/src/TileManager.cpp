@@ -998,7 +998,8 @@ void TileManager::doVBlank() { profileFunction();
 	
 	// this whole area of code is trash and needs a rewrite
 	
-	bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
+	// declaring this as const,,, might,,, allow for optimization without me having to take the if statement out
+	const bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
 	
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -1021,11 +1022,12 @@ void TileManager::doVBlank() { profileFunction();
 			}
 			*/
 			
+			// why the fuck didnt i,, use the literal exit variable here?
 			switch(floorMap[x][y]->tileType()) {
-				case TileType::Exit:
-					static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
-					break;
-				case TileType::Death:
+				//case TileType::Exit:
+					//static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
+					//break;
+				case TileType::Death: [[unlikely]]
 					if(doDeathTileAnim) {
 						effectsManager->deathTileAnimate(Pos(x, y));
 					}
@@ -1036,6 +1038,9 @@ void TileManager::doVBlank() { profileFunction();
 		}
 	}
 	
+	if(exitTile != NULL) {
+		exitTile->isFirstCall = false;
+	}
 	
 	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);

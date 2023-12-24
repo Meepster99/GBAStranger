@@ -1011,6 +1011,10 @@ void Game::changePalette(int offset) {
 	}
 	
 	*/
+	
+	if(entityManager.player != NULL) {
+		save();
+	}
 
 }
 
@@ -1349,6 +1353,12 @@ void Game::run() {
 		cutsceneManager.titleScreen();
 		
 		cutsceneManager.brandInput();
+	} else {
+		
+		if(!debugToggle) {
+			cutsceneManager.titleScreen();
+		}
+		
 	}
 	
 	loadLevel();
@@ -1672,6 +1682,21 @@ void Game::load() {
 		tileManager.playerBrand[i] = saveData.playerBrand[i];
 	}
 	
+}
+
+void Game::saveRNG() {
+	// i rlly DONT like this!
+	
+	bn::sram::read(saveData);
+	
+	if(roomManager.isCustom) {
+		return;
+	}
+	
+	saveData.randomSeed = bruhRand();
+	
+	saveData.hash = getSaveHash();
+	bn::sram::write(saveData);
 }
 
 void Game::playSound(const bn::sound_item* sound) {

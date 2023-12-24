@@ -1669,34 +1669,82 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 
 		if(randomGenerator.get_int(0, 255) != 0) {
 
-			strcpy(tempBuffer, "DIS OS REPORT \0");
-			if(__DATE__[4] == ' ') {
-				tempBuffer[14] = '0';
+			if(bn::date::active()) {
+				
+				bn::optional<bn::date> optionalDate = bn::date::current();
+				
+				
+				if(!optionalDate.has_value()) {	
+					
+					int month = MONTH;
+					int day = ((__DATE__[4] - '0') * 10) + ((__DATE__[5] - '0') * 1);
+					//int year = ((__DATE__[7] - '0') * 1000) + ((__DATE__[8] - '0') * 100) + ((__DATE__[9] - '0') * 10) + ((__DATE__[10] - '0') * 1);
+					int year = ((__DATE__[9] - '0') * 10) + ((__DATE__[10] - '0') * 1);
+					
+					optionalDate = bn::date(year, month, day, 0); // idc rns
+	
+				}
+				
+				BN_ASSERT(optionalDate.has_value(), "what??");
+	
+				bn::date date = optionalDate.value();
+				
+				strcpy(tempBuffer, "DIS OS REPORT \0");
+				
+				tempBuffer[14] = '0' + (date.month_day() / 10);
+				tempBuffer[15] = '0' + (date.month_day() % 10);
+				
+				tempBuffer[16] = '/';
+				
+				tempBuffer[17] = '0' + (date.month() / 10);
+				tempBuffer[18] = '0' + (date.month() % 10);
+				
+				tempBuffer[19] = '/';
+				
+				tempBuffer[20] = '1';			
+				tempBuffer[21] = '1';
+			
+				//tempBuffer[22] = '0' + ((date.year() / 1000) % 10);	
+				//tempBuffer[23] = '0' + ((date.year() / 100) % 10);
+				tempBuffer[22] = '0' + 2; // an assumption, but only an issue of pride
+				tempBuffer[23] = '0' + 0;
+				tempBuffer[24] = '0' + ((date.year() / 10) % 10);	
+				tempBuffer[25] = '0' + ((date.year() / 1) % 10);
+			
 			} else {
-				tempBuffer[14] = __DATE__[4];
+				
+				strcpy(tempBuffer, "DIS OS REPORT \0");
+				if(__DATE__[4] == ' ') {
+					tempBuffer[14] = '0';
+				} else {
+					tempBuffer[14] = __DATE__[4];
+				}
+				
+				if(__DATE__[5] == ' ') {
+					tempBuffer[15] = '0';
+				} else {
+					tempBuffer[15] = __DATE__[5];
+				}
+				
+				tempBuffer[16] = '/';
+				tempBuffer[17] = '0' + (MONTH / 10);
+				tempBuffer[18] = '0' + (MONTH % 10);
+				tempBuffer[19] = '/';
+				tempBuffer[20] = '1';			
+				tempBuffer[21] = '1';
+			
+				// Nov  5 2023
+				
+				strcpy(tempBuffer+22, __DATE__+7);
+				
+				//strcpy(tempBuffer+14, __DATE__[4]);
+				//"DIS OS REPORT 05/11/112023"
+				//BN_LOG(tempBuffer);
+				//BN_LOG(__DATE__);
+				
+				
 			}
 			
-			if(__DATE__[5] == ' ') {
-				tempBuffer[15] = '0';
-			} else {
-				tempBuffer[15] = __DATE__[5];
-			}
-			
-			tempBuffer[16] = '/';
-			tempBuffer[17] = '0' + (MONTH / 10);
-			tempBuffer[18] = '0' + (MONTH % 10);
-			tempBuffer[19] = '/';
-			tempBuffer[20] = '1';			
-			tempBuffer[21] = '1';
-		
-			// Nov  5 2023
-			
-			strcpy(tempBuffer+22, __DATE__+7);
-			
-			//strcpy(tempBuffer+14, __DATE__[4]);
-			//"DIS OS REPORT 05/11/112023"
-			//BN_LOG(tempBuffer);
-			//BN_LOG(__DATE__);
 		} else {
 			strcpy(tempBuffer, "DIS OS REPORT 17/02/2022   \0");
 		}
@@ -2445,8 +2493,8 @@ void CutsceneManager::titleScreen() {
 		"uwu\0",
 		"i should be sleeping\0",
 		"i need to have to remove all these\0",
-		"<3\0"
-		
+		"<3\0",
+		"Objectively worse!\0"
 		
 	};
 	
@@ -2456,8 +2504,15 @@ void CutsceneManager::titleScreen() {
 	BN_LOG(randomGenerator.get_int(1));
 	textGenerator.set_center_alignment();
 	//textGenerator.generate(0, 100, bn::string_view(idek[randomGenerator.get_int(0, sizeof(idek)/sizeof(idek[0]))]), splashTextSprites);
+	
+	unsigned idekIndex = game->saveData.randomSeed % idekSize;
+	
+	if(game->saveData.randomSeed == 0xFFFF) {
+		idekIndex = 0;
+	}
+	
 	textGenerator.generate(0, 100, bn::string_view(
-		idek[game->saveData.randomSeed % idekSize]
+		idek[idekIndex]
 	), splashTextSprites);
 	textGenerator.set_left_alignment();
 	
@@ -2482,6 +2537,10 @@ void CutsceneManager::titleScreen() {
 		if(bn::keypad::a_pressed()) {
 			break;
 		}
+		
+		// just for the like,, testing that all the splash txt is short enough, and properly ticking the saved rng to do so
+		game->saveRNG();
+		
 		game->doButanoUpdate(); 
 	}
 	
