@@ -92,6 +92,8 @@ public:
 	
 	void inputCustomPalette();
 	
+	void showCredits();
+	
 	void titleScreen();
 	
 	void mimicTalk();

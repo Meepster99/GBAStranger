@@ -617,6 +617,19 @@ def convertTiles(outputPath):
 	with open(os.path.join("./formattedOutput/allSprites/", "dw_" + "idrk" + ".json"), "w") as f:
 		json.dump(outputJson, f)
 	
+	# 
+	
+	temp = Image.new("RGBA", (256, 256), (0, 255, 255, 255))
+	actualTemp = Image.open("credits.png")
+	temp.paste(actualTemp)
+	writeBitmap(temp, os.path.join("./formattedOutput/allSprites/", "credits" + ".bmp"))
+	outputJson = {
+		"type": "regular_bg",
+		"bpp_mode": "bpp_4"
+	}
+	with open(os.path.join("./formattedOutput/allSprites/", "dw_" + "credits" + ".json"), "w") as f:
+		json.dump(outputJson, f)
+	
 	print("done converting tiles")
 	pass
 	
@@ -1668,6 +1681,8 @@ def main():
 	#convertBigSprite('spr_tail_boobytrap', './Sprites_Padded/spr_tail_boobytrap', '.')
 	#return 
 	
+	#convertTiles("./formattedOutput/tiles/")
+	#return
 	
 	#convertFonts("./formattedOutput/fonts/");
 	#generateCustomFloorBackground("./formattedOutput/customFloor/")	
@@ -1711,6 +1726,9 @@ def main():
 	#genSprite("spr_dustparticle")
 	#genSprite("spr_dustparticle2")
 	#exit(1)
+	
+	
+	
 	
 	
 	

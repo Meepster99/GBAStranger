@@ -2898,6 +2898,18 @@ void EffectsManager::doMenu() {
 	menuOptions[menuOptions.size() - 1]->yDraw -= 16;
 	
 	menuOptions.push_back(
+		new MenuOption("Credits (Press B)", 
+		[]() -> const char* { return "\0"; },
+		[](int val) { (void)val; return; }
+		)
+	);
+	
+	menuOptions[menuOptions.size() - 1]->bPress = []() -> void {
+		globalGame->cutsceneManager.showCredits();
+	};
+	
+	
+	menuOptions.push_back(
 		new MenuOption("Back", 
 		[]() -> const char* { return "\0"; },
 		[](int val) { (void)val; return; }
@@ -6005,9 +6017,17 @@ void EffectsManager::corrupt(int frames) {
 	unsigned short* mapData = reinterpret_cast<unsigned short*>(0x06000000 + (bgControl * (2 * 1024)));
 	
 	// at what scanline is this occuring in? does it need to occur in vblank?
-	for(int i=0; i<32*32; i++) {
-		mapData[i] = mapData[i + 1];
+	if(bruhRand() & 0b1000) {
+		for(int i=0; i<32*32; i++) {
+			mapData[i] = mapData[i + 1];
+		}			
+	} else {		
+		for(int i=32*32 - 1; i>0; i--) {
+			mapData[i] = mapData[i - 1];
+		}
 	}
+	
+	
 	
 	auto createFunc = [](Effect* obj) mutable -> void {
 		obj->sprite.updateRawPosition(-32, -32);

@@ -2335,6 +2335,76 @@ void CutsceneManager::inputCustomPalette() {
 	
 }
 
+void CutsceneManager::showCredits() {
+	
+	
+	vBlankFuncs.clear();
+	
+	if(effectsManager->menuOptions.size() == 0) {
+		return;
+	}
+	
+	BN_LOG("entering custompalette input");
+	
+	// TODO, THIS SHOULD FREE THE MENU SPRITES, OR MAYBE I 
+	// SHOULD MAKE SOME OF THE STATIONARY TEXT INTO THE BG?
+
+	effectsManager->setMenuVis(false);
+	
+	
+	bn::sprite_text_generator verTextGenerator(common::variable_8x8_sprite_font);
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
+	verTextGenerator.set_one_sprite_per_character(false);
+	
+	//#define VERMSG1 "made with love with:" 
+	//const char* vermsgString1 = VERMSG1;
+	
+	#if defined(ENABLEPROFILER)
+		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1 prof=1"
+	#elif defined(ENABLELOGGING)
+		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1"
+	#else 
+		#define VERMSG2 "butano version " BN_VERSION_STRING
+	#endif
+	
+
+	const char* vermsgString2 = VERMSG2;
+	
+	#define VERMSG3 "on " __DATE__ " at " __TIME__
+	const char* vermsgString3 = VERMSG3;
+	
+	verTextSprites.clear();
+	
+	
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString2), verTextSprites);
+	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view(vermsgString3), verTextSprites);
+
+
+	for(int i=0; i<verTextSprites.size(); i++) {
+		verTextSprites[i].set_palette(globalGame->pal->getFontSpritePalette());
+		verTextSprites[i].set_bg_priority(0);
+		verTextSprites[i].set_visible(true);
+	}
+	
+	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_credits);
+	
+	delay(1);
+	
+	
+	while(true) {
+		if(bn::keypad::b_pressed()) {
+			break;
+		}
+		game->doButanoUpdate();
+	}
+	
+	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	
+	game->doButanoUpdate();
+	effectsManager->setMenuVis(true);
+	
+}
+
 void CutsceneManager::titleScreen() {
 	
 	//backupAllButEffects();
