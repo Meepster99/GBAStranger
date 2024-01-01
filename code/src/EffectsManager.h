@@ -445,6 +445,7 @@ public:
 	int rotateTanStatuesCount = 0;
 	int rotateTanStatuesFrames = 0;
 	void rotateTanStatues();
+	void corrupt(int frames = 30);
 	
 };
 

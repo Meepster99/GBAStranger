@@ -2668,6 +2668,9 @@ void EffectsManager::doMenu() {
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
 	
+	
+	/*
+	
 	#define VERMSG1 "made with love with:" 
 	const char* vermsgString1 = VERMSG1;
 	
@@ -2700,6 +2703,7 @@ void EffectsManager::doMenu() {
 	
 	verTextSprites.clear();
 	
+	
 	// these sprites are STATIC and should be put into a bg layer(perhaps the cutscene layer?) to keep 
 	// enough sprite slots open such that pausing in tail's room wont crash
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)24, bn::string_view(vermsgString1), verTextSprites);
@@ -2716,6 +2720,8 @@ void EffectsManager::doMenu() {
 		verTextSprites[i].set_bg_priority(0);
 		verTextSprites[i].set_visible(true);
 	}
+	
+	*/
 	
 	//MenuOption::yIndex = -60;
 	MenuOption::yIndex = -68;
@@ -5971,6 +5977,62 @@ void EffectsManager::rotateTanStatues() {
 	
 	rotateTanStatuesCount++;
 }
+
+void EffectsManager::corrupt(int frames) {
+	
+	BN_ASSERT(frames > 0, "greenglitch needs a >0 frame count fool");
+	
+	
+	// is there a way for me to,, relatively easily corrupt the,, bg data?
+	// can i get the bg index from a,, bgpointer?
+	// i,, believe i can get the pointer,,, from,, ugh ill figure it out 
+	// butano calls them handles
+	
+	// im going to have this as an unsigned instead of unsigned short,, unsure if ideal but we ball
+	//unsigned test = reinterpret_cast<unsigned>(globalGame->collision.rawMap.bgPointer.handle());
+	bn::optional<int> idOptional = globalGame->collision.rawMap.bgPointer.hw_id();
+	BN_ASSERT(idOptional.has_value(), "background didnt have a hardware id??");
+	int id = idOptional.value();
+	
+	// grab the map address from this id
+	
+	unsigned short bgControl = *reinterpret_cast<unsigned short*>(0x04000008 + (id * 2));
+	
+	// mask and grab the bg offset bits.
+	bgControl &= 0b0001111100000000;
+	bgControl >>= 8;
+	
+	unsigned short* mapData = reinterpret_cast<unsigned short*>(0x06000000 + (bgControl * (2 * 1024)));
+	
+	// at what scanline is this occuring in? does it need to occur in vblank?
+	for(int i=0; i<32*32; i++) {
+		mapData[i] = mapData[i + 1];
+	}
+	
+	auto createFunc = [](Effect* obj) mutable -> void {
+		obj->sprite.updateRawPosition(-32, -32);
+	};
+	
+	auto tickFunc = [count = frames](Effect* obj) mutable -> bool {
+		(void)obj;
+		
+		if(count) {
+		
+			bn::green_swap::set_enabled(!bn::green_swap::enabled());
+
+			count--;
+			return false;
+		}
+		
+		
+		bn::green_swap::set_enabled(false);
+		
+		return true;
+	};
+	
+	createEffect(createFunc, tickFunc);
+}
+
 
 
 

@@ -1667,6 +1667,10 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 	
 	
 	if(disTextSprites.size() == 0) {
+		
+		// should i add a vblank handler to randomly do a green glitch?
+		// actually that should probs just be an effect.
+		
 		disTextSprites.push_back(bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>());
 		
 		char tempBuffer[32];
@@ -1785,6 +1789,9 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 		disTextSprites[0][i].set_palette(game->pal->getLightGraySpritePalette());
 		disTextSprites[0][i].set_bg_priority(3);
 	}
+	
+	
+	effectsManager->corrupt(10);
 	
 }
 
