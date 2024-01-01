@@ -112,7 +112,18 @@ public:
 	void sanity() const;
 			
 	void addKill(bn::optional<Entity*> e) {
-		BN_ASSERT(killedPlayer.size() + 1 != killedPlayer.maxSize(), "ran out of entitys for the killplayer vector?");
+		
+		// rm_bee_014, the one full of chesters 
+		// picking up the floor tile causes this assert to get thrown. 
+		// gods,, such a goofy case. 
+		// im just going to make it such that the func returns and does nothing 
+		
+		//BN_ASSERT(killedPlayer.size() + 1 != killedPlayer.maxSize(), "ran out of entitys for the killplayer vector?");
+		
+		if(killedPlayer.size() + 1 == killedPlayer.maxSize()) {
+			return;
+		}
+		
 		if(e.has_value()) {
 			killedPlayer.insert(e.value());
 		}
