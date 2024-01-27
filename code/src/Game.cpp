@@ -1014,7 +1014,8 @@ void Game::changePalette(int offset) {
 	*/
 	
 	if(entityManager.player != NULL) {
-		save();
+		// FUCKING DUMBASSsave();
+		//save();
 	}
 
 }
@@ -1456,7 +1457,7 @@ void Game::run() {
 			effectsManager.setDebugDisplay(!roomManager.isWhiteRooms());
 		
 			inputTimer.restart();
-			save(); // calling debug here has a chance to maybe fuck shit up,, but 
+			//save(); // calling debug here has a chance to maybe fuck shit up,, but 
 			// tbh its still a bummer that like,,i should be saving after each move tbh 
 			doButanoUpdate();
 			continue;

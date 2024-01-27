@@ -85,6 +85,9 @@ ifdef DISABLEASSERTS
 	USERFLAGS += -DDISABLEASSERTS=true 
 endif
 
+# vine boom soound effect
+USERFLAGS += -DENABLELOGGING=true 
+
 ifdef LOG
 	USERFLAGS += -DENABLELOGGING=true 
 endif
