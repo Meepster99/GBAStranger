@@ -75,7 +75,12 @@ if __name__ == "__main__":
 	if not os.path.exists("CLI-windows-latest-Release-isBundled-true"):
 		print("couldnt find the undertalemodtool's cli, grabbing it.")
 	
-		res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip")
+		# what kind of fucking idiot runs things literally off the bleeding edge??
+		#res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip")
+		# also, butanos on HEAD detached from edb6de37,,,, but the github is on commit 97213e3???
+		
+		res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.1.0/UndertaleModTool_v0.5.1.0.zip")
+		
 		if res.status_code == 200:
 			with open("CLI-windows-latest-Release-isBundled-true.zip", 'wb') as f:
 				f.write(res.content)
@@ -156,6 +161,9 @@ if __name__ == "__main__":
 		
 
 	
+	print("initial setup completed")
+	
+	exit(0)
 
 
 	import roomConverter.roomConverter 
