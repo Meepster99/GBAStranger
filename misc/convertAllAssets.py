@@ -72,7 +72,7 @@ if __name__ == "__main__":
 	"""
 	
 	os.chdir(os.path.dirname(__file__))
-	if not os.path.exists("CLI-windows-latest-Release-isBundled-true"):
+	if not os.path.exists("CLI-windows-latest-Release-isBundled-true"): 
 		print("couldnt find the undertalemodtool's cli, grabbing it.")
 	
 		# what kind of fucking idiot runs things literally off the bleeding edge??
