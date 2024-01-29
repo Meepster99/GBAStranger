@@ -163,7 +163,7 @@ if __name__ == "__main__":
 	
 	print("initial setup completed")
 	
-	exit(0)
+	#exit(0)
 
 
 	import roomConverter.roomConverter 
