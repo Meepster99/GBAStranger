@@ -718,6 +718,8 @@ void Game::loadLevel(bool debug) {
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 
+	//BN_LOG("loadentities was completed,,, sorta?");
+
 	doButanoUpdate();
 	
 	EffectHolder* effectsPointer = (EffectHolder*)idek.effects;
@@ -1175,6 +1177,8 @@ void logRamStatus() {
 	BN_LOG("used_static_iwram: ", ((bn::fixed)staticIWram).safe_division(32 * 1024));
 	BN_LOG("total iwram: ", ((bn::fixed)totalIWram).safe_division(32 * 1024));
 	
+	bn::memory::log_alloc_ewram_status();
+	
 }
 
 void didVBlank() {
@@ -1202,6 +1206,7 @@ void didVBlank() {
 	}
 	*/
 	
+	//logRamStatus();
 	
 	//frame = (frame + 1) % 600000;
 	frame++;
@@ -1247,6 +1252,35 @@ void Game::doVBlank() { profileFunction();
 	// b213 full of shadows, 0.22 cpu usage per move
 	// actually fucking insane how,, how did i not notice this earlier?
 	
+	
+	// WHAT???
+	
+	
+	if(saveData.hasRod) {
+		saveData.hasRod = 1;
+	} else {
+		saveData.hasRod = 0;
+	}
+	
+	if(saveData.hasSuperRod) {
+		saveData.hasSuperRod = 1;
+	} else {
+		saveData.hasSuperRod = 0;
+	}
+	
+	if(entityManager.player != NULL) {
+		if(entityManager.player->hasRod) {
+			entityManager.player->hasRod = 1;
+		} else {
+			entityManager.player->hasRod = 0;
+		}
+		
+		if(entityManager.player->hasSuperRod) {
+			entityManager.player->hasSuperRod = 1;
+		} else {
+			entityManager.player->hasSuperRod = 0;
+		}
+	}
 	
 	//static bn::timer timer;
 	
@@ -1360,6 +1394,17 @@ void Game::run() {
 		if(!debugToggle) {
 			cutsceneManager.titleScreen();
 		}
+		
+	}
+	
+	//save();
+	//load();
+	
+	if(goofyahhfirstsave) {
+		goofyahhfirstsave = false;
+		
+		BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
+		BN_LOG("locust", saveData.locustCount);
 		
 	}
 	
@@ -1577,6 +1622,13 @@ uint64_t Game::getSaveHash() {
 	hash ^= saveData.hasSword;
 	rotateHash(1);
 	
+	// why werent these hashed earlier???
+	hash ^= saveData.hasRod;
+	rotateHash(1);
+	
+	hash ^= saveData.hasSuperRod;
+	rotateHash(1);
+	
 	// i should hash eggcount here, but im worried abt (curse)ing ppls saves now
 	// nvm, better than than corrruption 
 	
@@ -1632,8 +1684,44 @@ void Game::save() {
 	saveData.paletteIndex = paletteIndex;
 	saveData.mode = mode;
 	
+	BN_ASSERT(entityManager.player->hasRod == 0 || entityManager.player->hasRod == 1, "why was player hasrod ", entityManager.player->hasRod);
+	BN_ASSERT(entityManager.player->hasSuperRod == 0 || entityManager.player->hasSuperRod == 1, "why was player hasSuperRod ", entityManager.player->hasSuperRod);
+	
 	saveData.hasRod = entityManager.player->hasRod;
 	saveData.hasSuperRod = entityManager.player->hasSuperRod;
+	
+	if(saveData.hasRod) {
+		saveData.hasRod = 1;
+	} else {
+		saveData.hasRod = 0;
+	}
+	
+	if(saveData.hasSuperRod) {
+		saveData.hasSuperRod = 1;
+	} else {
+		saveData.hasSuperRod = 0;
+	}
+	
+	
+	
+	//  ????
+	/*
+	saveData.hasRod &= 0b1;
+	saveData.hasSuperRod &= 0b1;
+	saveData.isVoided &= 0b1;
+	saveData.hasMemory &= 0b1;
+	saveData.hasWings &= 0b1;
+	saveData.hasSword &= 0b1;
+	*/
+	
+	#define INSANITY(ugh) ugh = ugh ? 1 : 0;
+	
+	//saveData.hasRod = 0b1;
+	//saveData.hasSuperRod &= 0b1;
+	//saveData.isVoided &= 0b1;
+	//saveData.hasMemory &= 0b1;
+	//saveData.hasWings &= 0b1;
+	//saveData.hasSword &= 0b1;
 	
 	for(int i=0; i<6; i++) {
 		saveData.playerBrand[i] = tileManager.playerBrand[i];
@@ -1642,6 +1730,20 @@ void Game::save() {
 	saveData.randomSeed = bruhRand();
 	
 	saveData.debug = debugToggle;
+
+	INSANITY(saveData.hasRod);
+	INSANITY(saveData.hasSuperRod);
+	INSANITY(saveData.isVoided);
+	INSANITY(saveData.hasMemory);
+	INSANITY(saveData.hasWings);
+	INSANITY(saveData.hasSword);
+	
+	INSANITY(entityManager.player->hasRod);
+	INSANITY(entityManager.player->hasSuperRod);
+	INSANITY(entityManager.player->isVoided);
+	INSANITY(entityManager.player->hasMemory);
+	INSANITY(entityManager.player->hasWings);
+	INSANITY(entityManager.player->hasSword);
 	
 	saveData.hash = getSaveHash();
 	bn::sram::write(saveData);
@@ -1662,6 +1764,19 @@ void Game::load() {
 	if(saveData.hash != getSaveHash()) {
 		BN_LOG("either a save wasnt found, or it was corrupted. creating new save");
 		saveData = GameSave();
+		
+		//#define BROWHAT false
+		#define BROWHAT 0
+		
+		saveData.hasRod = BROWHAT;
+		saveData.hasSuperRod = BROWHAT;
+		
+		saveData.hasMemory = BROWHAT;
+		saveData.hasWings = BROWHAT;
+		saveData.hasSword = BROWHAT;
+		
+		goofyahhfirstsave = true;
+		
 	}
 	
 	//BN_LOG("locust: ", saveData.locustCount);
@@ -1672,6 +1787,63 @@ void Game::load() {
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
 	roomManager.setMode(mode);
+	
+	/*
+	BN_ASSERT((int)saveData.hasRod <= 1, "savedata hasrod was ", saveData.hasRod);
+	BN_ASSERT((int)saveData.hasSuperRod <= 1, "savedata hasrod was ", saveData.hasSuperRod);
+	
+	
+	// i am not ok
+	if((int)saveData.hasRod == 255) {
+		saveData.hasRod = 0;
+	}
+	
+	if((int)saveData.hasSuperRod == 255) {
+		saveData.hasSuperRod = 0;
+	}
+	
+	if(saveData.hasRod) {
+		saveData.hasRod = 1;
+	} else {
+		saveData.hasRod = 0;
+	}
+	
+	if(saveData.hasSuperRod) {
+		saveData.hasSuperRod = 1;
+	} else {
+		saveData.hasSuperRod = 0;
+	}
+	*/
+	
+	//  ????
+	//#define INSANITY(ugh) ugh = (bool)(((int)ugh) & 0b1)
+	//#define INSANITY(ugh) ugh = (((int)ugh) & 0b1)
+	
+	//#define INSANITY(ugh) ugh = ugh ? 1 : 0;
+	
+	//saveData.hasRod = 0b1;
+	//saveData.hasSuperRod &= 0b1;
+	//saveData.isVoided &= 0b1;
+	//saveData.hasMemory &= 0b1;
+	//saveData.hasWings &= 0b1;
+	//saveData.hasSword &= 0b1;
+	
+	INSANITY(saveData.hasRod);
+	INSANITY(saveData.hasSuperRod);
+	INSANITY(saveData.isVoided);
+	INSANITY(saveData.hasMemory);
+	INSANITY(saveData.hasWings);
+	INSANITY(saveData.hasSword);
+	
+	//BN_LOG((int)saveData.hasMemory);
+	
+	if(saveData.col1Save == -1) {
+		BN_LOG("SAVE DATA COLOR DATA WAS CORRUPTED??? HOW???");
+		saveData.col1Save = 0;
+		saveData.col2Save = 32767;
+		saveData.col3Save = 25368;
+		saveData.col4Save = 16912;
+	}
 	
 	CUSTOM.b.set_data(saveData.col1Save);
 	CUSTOM.c.set_data(saveData.col2Save);

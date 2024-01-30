@@ -233,21 +233,17 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		currentDir = Direction::Down;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
-	//} else if(bn::keypad::up_pressed()) {
 	} else if(getInput(bn::keypad::key_type::UP)) {
 		currentDir = Direction::Up;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
-	//} else if(bn::keypad::left_pressed()) {
 	} else if(getInput(bn::keypad::key_type::LEFT)) {
 		currentDir = Direction::Left;
 		nextMove = bn::optional<Direction>(currentDir);
 		//return {true, bn::optional<Direction>(currentDir)};
-	//} else if(bn::keypad::right_pressed()) {
 	} else if(getInput(bn::keypad::key_type::RIGHT)) {
 		currentDir = Direction::Right;
 		nextMove = bn::optional<Direction>(currentDir);
-		//return {true, bn::optional<Direction>(currentDir)};
 	}
 	
 	if(!nextMove.has_value()) {
@@ -432,6 +428,27 @@ Player::Player(Pos p_) : Entity(p_) {
 	}
 	
 	sprite.spritePointer.set_z_order(-1);
+	
+	// having duplicates causes so many problems
+	// i do not like that we set these vars here!
+	locustCount = game->saveData.locustCount;
+	isVoided = game->saveData.isVoided;
+	if(game->mode == 2) { // cif is always voided!
+		isVoided = true;
+	}
+	
+	hasMemory = game->saveData.hasMemory;
+	hasWings  = game->saveData.hasWings;
+	hasSword  = game->saveData.hasSword; 
+	
+	hasRod = game->saveData.hasRod; 
+	hasSuperRod = game->saveData.hasSuperRod; 
+	
+	BN_LOG((int)game->saveData.hasRod, (int)game->saveData.hasSuperRod);
+	BN_LOG((int)hasRod, (int)hasSuperRod);
+	
+	BN_ASSERT((int)hasRod == 0 || (int)hasRod == 1, "why THE FUCK was player hasrod ", (int)hasRod);
+	BN_ASSERT((int)hasSuperRod == 0 || (int)hasSuperRod == 1, "why THE FUCK was player hasSuperRod ", (int)hasSuperRod);
 }
 
 

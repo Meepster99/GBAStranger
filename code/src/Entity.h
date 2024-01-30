@@ -237,7 +237,7 @@ private:
 class Player : public Entity {
 public:
 	
-	Player(Pos p_);
+	__attribute__((noinline, optimize("O0"))) Player(Pos p_);
 	
 	bool isEnemy() const override { return false; }
 	bool isObstacle() const override { return false; }
@@ -248,8 +248,8 @@ public:
 	Player* clone() const override { return new Player(*this); }
 	EntityType entityType() const override { return EntityType::Player; }
 	
-	bool hasRod = true;
-	bool hasSuperRod = false;
+	volatile bool hasRod = true;
+	volatile bool hasSuperRod = false;
 	//FloorTile* rod = NULL;
 	// ik i should be useing a queue, but your honor, im (curse)ing tired, and my tummy hurt
 	bn::vector<FloorTile*, 128> rod; 
@@ -261,9 +261,9 @@ public:
 	int locustCount = 0;
 	bool isVoided = false;
 	
-	bool hasMemory = false;
-	bool hasWings = false;
-	bool hasSword = false;
+	volatile bool hasMemory = false;
+	volatile bool hasWings = false;
+	volatile bool hasSword = false;
 	
 	bool hasWingsTile = false;
 	

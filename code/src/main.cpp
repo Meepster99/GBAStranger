@@ -404,7 +404,6 @@ int main() {
 	
 	*/
 	
-	
 	bn::bg_tiles::set_allow_offset(true);
 
 	bn::hw::irq::set_isr(bn::hw::irq::id::GAMEPAK, _cartPull);

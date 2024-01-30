@@ -137,6 +137,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			
 				player = new Player(tempPos);
 				
+				/*
 				// having duplicates causes so many problems
 				// i do not like that we set these vars here!
 				player->locustCount = game->saveData.locustCount;
@@ -151,6 +152,11 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				
 				player->hasRod = game->saveData.hasRod; 
 				player->hasSuperRod = game->saveData.hasSuperRod; 
+				
+				
+				BN_ASSERT((int)player->hasRod == 0 || (int)player->hasRod == 1, "why THE FUCK was player hasrod ", (int)player->hasRod);
+				BN_ASSERT((int)player->hasSuperRod == 0 || (int)player->hasSuperRod == 1, "why THE FUCK was player hasSuperRod ", (int)player->hasSuperRod);
+				*/
 				
 				entityList.insert(player);
 				break;

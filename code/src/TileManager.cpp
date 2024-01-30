@@ -159,7 +159,7 @@ auto wingsGetFunc = []() -> int {
 auto swordGetFunc = []() -> int {
 	Player* player = globalGame->entityManager.player;
 	
-	BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
+	BN_ASSERT(globalGame->entityManager.player != NULL, "in a spriteTileFunc, player was null");
 	
 	if(player->hasSword) {
 		Pos tempPos = player->p;
@@ -192,6 +192,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	stepOffs.clear();
 	floorSteps.clear();
 	
+	
+	
 	if(entityManager->player != NULL) {
 		Player* player = entityManager->player;
 		
@@ -200,6 +202,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 			player->rod[i] = NULL;
 		}
 		player->rod.clear();
+	} else {
+		BN_LOG("PLAYER NULL DURING LOADTILE\n\n\n\n");
 	}
 	
 	exitTile = NULL;

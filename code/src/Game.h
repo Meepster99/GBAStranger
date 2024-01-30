@@ -69,12 +69,12 @@ struct GameSave {
 	int roomIndex = 1;
 	int paletteIndex = 0;
 	int mode = 0;
-	bool hasMemory = false;
-	bool hasWings = false;
-	bool hasSword = false;
+	volatile bool hasMemory = false;
+	volatile bool hasWings = false;
+	volatile bool hasSword = false;
 	
-	bool hasRod = false;
-	bool hasSuperRod = false;
+	volatile bool hasRod = false;
+	volatile bool hasSuperRod = false;
 	
 	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
 	
@@ -193,11 +193,12 @@ public:
 	
 	void run();
 	
-	void save();
-	void load();
-	void saveRNG();
+	__attribute__((noinline, optimize("O0"))) void save();
+	__attribute__((noinline, optimize("O0"))) void load();
+
+	__attribute__((noinline, optimize("O0"))) void saveRNG();
 	void loadCustomSave();
-	uint64_t getSaveHash();
+	__attribute__((noinline, optimize("O0"))) uint64_t getSaveHash();
 	
 	// putting this in ewram stopped the glitching between rooms when in debug mode 
 	// weird, i didnt think it would help bc of how much loading from rom im doing, and the use of memcpy
@@ -258,6 +259,8 @@ public:
 	void removeSound(const bn::sound_item* sound);
 	
 	void doSoundVBlank();
+
+	bool goofyahhfirstsave = false;
 
 private:
 	SaneSet<const bn::sound_item*, MAXSOUNDS> queuedSounds;

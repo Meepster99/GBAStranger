@@ -23,8 +23,6 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	//BN_ASSERT(tiles->tiles_ref().size() % (4 * width * height) == 0, "a bigsprite had a weird amount of tiles");
 	
 	optionCount = tiles->tiles_ref().size() / (4 * width * height);
-	
-	
 
 	//draw(0);
 	//firstDraw();
@@ -49,10 +47,14 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 		yPos -= (8 * height);
 		
 		isBigSprite = true;
+		BN_LOG("calling bigsprite firstdraw");
+		
 		firstDraw();
+	
 		return;
 	}
 
+	BN_LOG("not calling bigsprite firstdraw");
 	
 	int v;
 	v = width * 16;
@@ -85,7 +87,7 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	
 	auto spriteShape = bn::sprite_shape_size(newWidth, newHeight);
 	
-	BN_LOG(newWidth, " ", newHeight);
+	BN_LOG("bigsprite w,h = ", newWidth, " ", newHeight);
 	
 	//BN_LOG(tiles->tiles_count(), " ", spriteShape.tiles_count(bn::bpp_mode::BPP_4));
 	
@@ -108,6 +110,8 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	} else if(tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
 		loadStink();
 	}
+	
+	BN_LOG("bigsprite constructor exit");
 	
 }
 
@@ -230,6 +234,9 @@ void BigSprite::firstDraw() {
 			*/
 			
 			tempSprite.spritePointer.set_bg_priority(priority);
+			
+			
+			BN_LOG("WHAT, ", x + (y * width) + (animationIndex * width * height));
 			
 			tempSprite.spritePointer.set_tiles(
 				*tiles,
@@ -555,6 +562,8 @@ void BigSprite::loadBoobTrap() {
 
 void BigSprite::loadTailHead() {
 	
+	BN_LOG("tail head detected");
+	
 	animationIndex = 2;
 	autoAnimateFrames = 4;
 	
@@ -595,14 +604,48 @@ void BigSprite::loadChest() {
 	
 	bool isSuperRodChest = game->roomManager.roomIndex == 0;
 	
+	BN_ASSERT(entityManager != NULL, "what");
+	BN_ASSERT(entityManager->player != NULL, "why was player null during loadchest");
+	
+	// i do not like this!
+	//entityManager->player->hasSuperRod = !!entityManager->player->hasSuperRod;
+	//entityManager->player->hasRod = !!entityManager->player->hasRod;
+	
+	// does,,, !! I,, what is happening	
+	
+	BN_LOG("hasrod, hassuperrod ", entityManager->player->hasRod, "   ", entityManager->player->hasSuperRod);
+	BN_LOG("hasrod, hassuperrod ", (int)entityManager->player->hasRod, "   ", (int)entityManager->player->hasSuperRod);
+	
+	// stupidest bug of all time. what the fuck
+	if(entityManager->player->hasSuperRod) { entityManager->player->hasSuperRod = 1; }
+	if(entityManager->player->hasRod) { entityManager->player->hasRod = 1; }
+	
 	if(isSuperRodChest) {
-		sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasSuperRod);
+		BN_LOG("attempting to set tile to ", (int)entityManager->player->hasSuperRod);
+		//sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasSuperRod);
+		
+		if(entityManager->player->hasSuperRod) {
+			sprites[0].spritePointer.set_tiles(*tiles, 1);
+		} else {
+			sprites[0].spritePointer.set_tiles(*tiles, 0);
+		}
 	} else {
-		sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasRod | entityManager->player->hasSuperRod);
+		// SHOULD THESE NOT BE BITWISE OR???
+		// why the fuck is true | true 255, but true || true, true?? true | true should be true because true IS FUCKIN 1 NOT 255 WHO THE FUCK 
+		// HOW MANY OTHER TIMES DO I,,, WHAT?? what the fuck 
+		// WHAT THE FUCK 
+		BN_LOG("attempting to set tile to ", (int)entityManager->player->hasRod || entityManager->player->hasSuperRod);
+		//sprites[0].spritePointer.set_tiles(*tiles, (entityManager->player->hasRod || entityManager->player->hasSuperRod));
+		
+		// WHAT
+		if((entityManager->player->hasRod || entityManager->player->hasSuperRod)) {
+			sprites[0].spritePointer.set_tiles(*tiles, 1);
+		} else {
+			sprites[0].spritePointer.set_tiles(*tiles, 0);
+		}
 	}
 
 	auto func1 = [isSuperRodChest](void* obj) -> void {
-		
 		
 		if(entityManager->player->hasSuperRod) {
 			return;
@@ -618,11 +661,8 @@ void BigSprite::loadChest() {
 			return;
 		}
 		
-		
-		
 		globalGame->cutsceneManager.introCutscene();
 	
-		
 		bigSprite->sprites[0].spritePointer.set_tiles(*(bigSprite->tiles), 1);
 	
 		
@@ -1766,8 +1806,9 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 			stinkLines(Pos(effects->x/16, effects->y/16));
 		} else {
 			
-			BN_LOG("loading bigsprite in Room: ", game->roomManager.currentRoomName(), " id index: ", i);
+			BN_LOG("attempting to create bigsprite: ", game->roomManager.currentRoomName(), " id index: ", i);
 			bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
+			BN_LOG("success");
 		}
 		effects++;
 	}
@@ -2762,9 +2803,16 @@ void EffectsManager::doMenu() {
 		},
 		[](int val) { 	
 			(void)val;
+			
+			BN_LOG("mem toggle with val of, ", val);
+			
 			Player* player = globalGame->entityManager.player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
-			player->hasMemory = !player->hasMemory;
+			
+			BN_LOG(player->hasMemory, " ", (int)player->hasMemory);
+			player->hasMemory = !(player->hasMemory);
+			BN_LOG(player->hasMemory, " ", (int)player->hasMemory);
+			
 			globalGame->tileManager.updateBurdenTiles();
 		},
 		80 * 0
