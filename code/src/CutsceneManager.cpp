@@ -953,7 +953,7 @@ void CutsceneManager::brandInput() {
 	
 	bool allDone = false;
 	while(true) {
-		
+	
 		if(allDone && bn::keypad::a_held()) {
 			allDoneSpriteWidth++;
 		} else if(allDoneSpriteWidth > 0) {
@@ -2405,7 +2405,7 @@ void CutsceneManager::showCredits() {
 	
 }
 
-void CutsceneManager::titleScreen() {
+bool CutsceneManager::titleScreen() {
 	
 	//backupAllButEffects();
 	backup();
@@ -2615,10 +2615,21 @@ void CutsceneManager::titleScreen() {
 		game->doButanoUpdate();
 	}
 	
+	bool res = true;
+	
 	while(true) { 
 		if(bn::keypad::a_pressed()) {
 			break;
 		}
+		
+			
+		// just a goofy ahh thing here for my own needs
+		// the amount of times ive had to enter a brand has been annoying 
+		if(bn::keypad::select_held() && bn::keypad::start_held()) {
+			res = false;
+			break;
+		}
+		
 		
 		// just for the like,, testing that all the splash txt is short enough, and properly ticking the saved rng to do so
 		game->saveRNG();
@@ -2634,6 +2645,7 @@ void CutsceneManager::titleScreen() {
 	game->state = restoreState;
 	game->doButanoUpdate();
 	
+	return res;
 }
 
 void CutsceneManager::mimicTalk() {

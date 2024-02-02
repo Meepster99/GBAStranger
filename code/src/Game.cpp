@@ -1386,15 +1386,45 @@ void Game::run() {
 	
 	if(brandBlank && !roomManager.isCustom) {
 		
-		cutsceneManager.titleScreen();
+		bool shouldDoBrandInput = cutsceneManager.titleScreen();
 		
-		cutsceneManager.brandInput();
+		if(shouldDoBrandInput) {
+			cutsceneManager.brandInput();
+		} else {
+
+			int brandState[6][6];
+			// i have trust issues 
+			for(int i=0; i<6; i++) {
+				for(int j=0; j<6; j++) {
+					brandState[i][j] = 0;
+				}
+			}
+			
+			for(int i=0; i<6; i++) {
+				int j = 6 - i - 1;
+				brandState[i][i] = 1;
+				brandState[i][j] = 1;
+			}
+			
+			unsigned tempBrand[6] = {0, 0, 0, 0, 0, 0};
+	
+			for (int j=0; j<6; j++) {
+				unsigned temp = 0;
+				for(int i=0; i<6; i++) {
+					temp = ((temp << 1) | (brandState[i][j]));
+				}
+				tempBrand[j] = temp;
+			}
+			
+			for(int i=0; i<6; i++) {
+				tileManager.playerBrand[i] = tempBrand[i];
+			}
+			
+		}
 	} else {
-		
 		if(!debugToggle) {
 			cutsceneManager.titleScreen();
 		}
-		
 	}
 	
 	//save();
@@ -1404,7 +1434,7 @@ void Game::run() {
 		goofyahhfirstsave = false;
 		
 		BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
-		BN_LOG("locust", saveData.locustCount);
+		BN_LOG("locust", saveData.locustCount, (int)saveData.locustCount);
 		
 	}
 	

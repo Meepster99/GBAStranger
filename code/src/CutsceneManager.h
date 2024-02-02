@@ -94,7 +94,7 @@ public:
 	
 	void showCredits();
 	
-	void titleScreen();
+	bool titleScreen();
 	
 	void mimicTalk();
 	
