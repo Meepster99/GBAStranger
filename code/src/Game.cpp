@@ -1363,6 +1363,9 @@ void Game::run() {
 	
 	load();
 	
+	BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
+	BN_LOG("locust", saveData.locustCount, (int)saveData.locustCount);
+	
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
@@ -1386,7 +1389,14 @@ void Game::run() {
 	
 	if(brandBlank && !roomManager.isCustom) {
 		
+		BN_LOG("beforetitle mem", saveData.hasMemory, (int)saveData.hasMemory);
+		BN_LOG("beforetitle locust", saveData.locustCount, (int)saveData.locustCount);
+		
 		bool shouldDoBrandInput = cutsceneManager.titleScreen();
+		
+		BN_LOG("aftertitle mem", saveData.hasMemory, (int)saveData.hasMemory);
+		BN_LOG("aftertitle locust", saveData.locustCount, (int)saveData.locustCount);
+		
 		
 		if(shouldDoBrandInput) {
 			cutsceneManager.brandInput();
@@ -1433,8 +1443,8 @@ void Game::run() {
 	if(goofyahhfirstsave) {
 		goofyahhfirstsave = false;
 		
-		BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
-		BN_LOG("locust", saveData.locustCount, (int)saveData.locustCount);
+		BN_LOG("goofyahhfirstsave mem", saveData.hasMemory, (int)saveData.hasMemory);
+		BN_LOG("goofyahhfirstsave locust", saveData.locustCount, (int)saveData.locustCount);
 		
 	}
 	
