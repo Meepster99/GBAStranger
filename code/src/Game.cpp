@@ -1631,81 +1631,81 @@ void Game::run() {
 	}
 }
 
-uint64_t Game::getSaveHash() {
-	uint64_t hash = 0;
+uint64_t GameSave::getSaveHash() {
+	uint64_t res = 0;
 	
-	#define rotateHash(n) do { hash++; hash = (hash << n) | (hash >> ((sizeof(hash) * 8) - n)); } while(false)
+	#define rotateHash(n) do { res++; res = (res << n) | (res >> ((sizeof(res) * 8) - n)); } while(false)
 	
 	// this is barely even a hash algorithm, but it will work ig
 	
-	hash ^= saveData.locustCount;
-	rotateHash(sizeof(saveData.locustCount) * 8);
+	res ^= locustCount;
+	rotateHash(sizeof(locustCount) * 8);
 	
-	hash ^= saveData.isVoided;
+	res ^= isVoided;
 	rotateHash(1);
 	
-	hash ^= saveData.roomIndex;
-	rotateHash(sizeof(saveData.roomIndex) * 8);
+	res ^= roomIndex;
+	rotateHash(sizeof(roomIndex) * 8);
 
-	hash ^= saveData.paletteIndex;
-	rotateHash(sizeof(saveData.paletteIndex) * 8);
+	res ^= paletteIndex;
+	rotateHash(sizeof(paletteIndex) * 8);
 	
-	hash ^= saveData.mode;
-	rotateHash(sizeof(saveData.mode) * 8);
+	res ^= mode;
+	rotateHash(sizeof(mode) * 8);
 	
-	hash ^= saveData.hasMemory;
+	res ^= hasMemory;
 	rotateHash(1);
 	
-	hash ^= saveData.hasWings;
+	res ^= hasWings;
 	rotateHash(1);
 	
-	hash ^= saveData.hasSword;
+	res ^= hasSword;
 	rotateHash(1);
 	
 	// why werent these hashed earlier???
-	hash ^= saveData.hasRod;
+	res ^= hasRod;
 	rotateHash(1);
 	
-	hash ^= saveData.hasSuperRod;
+	res ^= hasSuperRod;
 	rotateHash(1);
 	
-	// i should hash eggcount here, but im worried abt (curse)ing ppls saves now
+	// i should res eggcount here, but im worried abt (curse)ing ppls saves now
 	// nvm, better than than corrruption 
 	
-	hash ^= saveData.eggCount;
-	rotateHash(sizeof(saveData.eggCount) * 8);
+	res ^= eggCount;
+	rotateHash(sizeof(eggCount) * 8);
 	
-	hash ^= saveData.col1Save;
-	rotateHash(sizeof(saveData.col1Save) * 8);
+	res ^= col1Save;
+	rotateHash(sizeof(col1Save) * 8);
 
-	hash ^= saveData.col2Save;
-	rotateHash(sizeof(saveData.col1Save) * 8);
+	res ^= col2Save;
+	rotateHash(sizeof(col1Save) * 8);
 	
-	hash ^= saveData.col3Save;
-	rotateHash(sizeof(saveData.col1Save) * 8);
+	res ^= col3Save;
+	rotateHash(sizeof(col1Save) * 8);
 	
-	hash ^= saveData.col4Save;
-	rotateHash(sizeof(saveData.col1Save) * 8);
+	res ^= col4Save;
+	rotateHash(sizeof(col1Save) * 8);
 	
 	for(int i=0; i<6; i++) {
-		hash ^= saveData.playerBrand[i];
-		rotateHash(sizeof(saveData.playerBrand[i]) * 8);
+		res ^= playerBrand[i];
+		rotateHash(sizeof(playerBrand[i]) * 8);
 	}
 	
-	hash ^= saveData.randomSeed;
-	rotateHash(sizeof(saveData.randomSeed) * 8);
+	res ^= randomSeed;
+	rotateHash(sizeof(randomSeed) * 8);
 	
-	hash ^= saveData.delay;
-	rotateHash(sizeof(saveData.delay) * 8);
+	res ^= delay;
+	rotateHash(sizeof(delay) * 8);
 	
-	hash ^= saveData.debug;
-	rotateHash(sizeof(saveData.debug) * 8);
+	res ^= debug;
+	rotateHash(sizeof(debug) * 8);
 	
-	return hash;
+	return res;
 }
 
 void Game::save() {
-	//BN_LOG("saving save");
+	BN_LOG("saving save");
 	
 	if(roomManager.isCustom) {
 		return;
@@ -1754,8 +1754,6 @@ void Game::save() {
 	saveData.hasSword &= 0b1;
 	*/
 	
-	#define INSANITY(ugh) ugh = ugh ? 1 : 0;
-	
 	//saveData.hasRod = 0b1;
 	//saveData.hasSuperRod &= 0b1;
 	//saveData.isVoided &= 0b1;
@@ -1771,21 +1769,7 @@ void Game::save() {
 	
 	saveData.debug = debugToggle;
 
-	INSANITY(saveData.hasRod);
-	INSANITY(saveData.hasSuperRod);
-	INSANITY(saveData.isVoided);
-	INSANITY(saveData.hasMemory);
-	INSANITY(saveData.hasWings);
-	INSANITY(saveData.hasSword);
-	
-	INSANITY(entityManager.player->hasRod);
-	INSANITY(entityManager.player->hasSuperRod);
-	INSANITY(entityManager.player->isVoided);
-	INSANITY(entityManager.player->hasMemory);
-	INSANITY(entityManager.player->hasWings);
-	INSANITY(entityManager.player->hasSword);
-	
-	saveData.hash = getSaveHash();
+	saveData.hash = saveData.getSaveHash();
 	bn::sram::write(saveData);
 	
 	//BN_LOG("locust: ", saveData.locustCount);
@@ -1794,31 +1778,33 @@ void Game::save() {
 }
 
 void Game::load() {
-	//BN_LOG("loading save");
+	BN_LOG("loading save");
+	
+	/*
+	static bool hasLoaded = false;
+	
+	if(hasLoaded) {
+		return;
+	}
+	
+	hasLoaded = true;
+	*/
+	
 	bn::sram::read(saveData);
+
+	//saveData = GameSave();
 	
 	if(roomManager.isCustom) {
 		return;
 	}
 	
-	if(saveData.hash != getSaveHash()) {
+	
+	
+	if(saveData.hash != saveData.getSaveHash()) {
 		BN_LOG("either a save wasnt found, or it was corrupted. creating new save");
 		saveData = GameSave();
-		
-		//#define BROWHAT false
-		#define BROWHAT 0
-		
-		saveData.hasRod = BROWHAT;
-		saveData.hasSuperRod = BROWHAT;
-		
-		saveData.hasMemory = BROWHAT;
-		saveData.hasWings = BROWHAT;
-		saveData.hasSword = BROWHAT;
-		
-		goofyahhfirstsave = true;
-		
 	}
-	
+
 	//BN_LOG("locust: ", saveData.locustCount);
 	//BN_LOG("void: ", saveData.isVoided);
 	//BN_LOG("room: ", saveData.roomIndex);
@@ -1868,13 +1854,6 @@ void Game::load() {
 	//saveData.hasWings &= 0b1;
 	//saveData.hasSword &= 0b1;
 	
-	INSANITY(saveData.hasRod);
-	INSANITY(saveData.hasSuperRod);
-	INSANITY(saveData.isVoided);
-	INSANITY(saveData.hasMemory);
-	INSANITY(saveData.hasWings);
-	INSANITY(saveData.hasSword);
-	
 	//BN_LOG((int)saveData.hasMemory);
 	
 	if(saveData.col1Save == -1) {
@@ -1896,20 +1875,32 @@ void Game::load() {
 		tileManager.playerBrand[i] = saveData.playerBrand[i];
 	}
 	
+	
+	//save();
 }
 
 void Game::saveRNG() {
 	// i rlly DONT like this!
 	
-	bn::sram::read(saveData);
+	//return;
+	
+	GameSave saveDataStaging;
+	
+	bn::sram::read(saveDataStaging);
+	
+	if(saveDataStaging.hash != saveDataStaging.getSaveHash()) {
+		return;
+	}
 	
 	if(roomManager.isCustom) {
 		return;
 	}
 	
+	saveData = saveDataStaging;
+	
 	saveData.randomSeed = bruhRand();
 	
-	saveData.hash = getSaveHash();
+	saveData.hash = saveData.getSaveHash();
 	bn::sram::write(saveData);
 }
 

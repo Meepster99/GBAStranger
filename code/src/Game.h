@@ -98,6 +98,8 @@ struct GameSave {
 	unsigned short randomSeed = 0xFFFF; 
 	
 	uint64_t hash = 0;
+	
+	uint64_t getSaveHash();
 };
 
 class Game {
@@ -193,12 +195,11 @@ public:
 	
 	void run();
 	
-	__attribute__((noinline, optimize("O0"))) void save();
-	__attribute__((noinline, optimize("O0"))) void load();
+	void save();
+	void load();
 
-	__attribute__((noinline, optimize("O0"))) void saveRNG();
+	void saveRNG();
 	void loadCustomSave();
-	__attribute__((noinline, optimize("O0"))) uint64_t getSaveHash();
 	
 	// putting this in ewram stopped the glitching between rooms when in debug mode 
 	// weird, i didnt think it would help bc of how much loading from rom im doing, and the use of memcpy
