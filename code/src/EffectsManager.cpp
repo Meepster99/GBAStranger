@@ -400,7 +400,8 @@ void BigSprite::loadBoobTrap() {
 		constexpr MessageStr msgs[] = {
 			{"you wouldnt believe how much the idiot who made this remake spent on animating"
 		" my boobs, head, and tail.\r"
-		"I would say I appreciate it, but to be honest, its just borderlining on creepy now.\n"
+		//"I would say I appreciate it, but to be honest, its just borderlining on creepy now.\n"
+		"I would say I appreciate it, but to be honest, its just bordering on creepy now.\n"
 		"like, jesus christ. you dont even have music, or shortcuts working\r"
 		"but now you have boobs????\rwhy????????\r"
 		",,,\r"
