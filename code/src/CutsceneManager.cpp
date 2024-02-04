@@ -2388,6 +2388,8 @@ void CutsceneManager::showCredits() {
 	
 	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_credits);
 	
+	cutsceneLayer.rawMap.bgPointer.set_y(cutsceneLayer.rawMap.bgPointer.y() - 8);
+	
 	delay(1);
 	
 	
