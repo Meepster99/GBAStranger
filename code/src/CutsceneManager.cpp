@@ -2337,20 +2337,16 @@ void CutsceneManager::inputCustomPalette() {
 
 void CutsceneManager::showCredits() {
 	
-	
 	vBlankFuncs.clear();
 	
 	if(effectsManager->menuOptions.size() == 0) {
 		return;
 	}
 	
-	BN_LOG("entering custompalette input");
-	
 	// TODO, THIS SHOULD FREE THE MENU SPRITES, OR MAYBE I 
 	// SHOULD MAKE SOME OF THE STATIONARY TEXT INTO THE BG?
 
 	effectsManager->setMenuVis(false);
-	
 	
 	bn::sprite_text_generator verTextGenerator(common::variable_8x8_sprite_font);
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
@@ -2387,6 +2383,9 @@ void CutsceneManager::showCredits() {
 	}
 	
 	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_credits);
+	
+	cutsceneLayer.rawMap.bgPointer.set_priority(0);
+	cutsceneLayer.rawMap.bgPointer.put_above();
 	
 	cutsceneLayer.rawMap.bgPointer.set_y(cutsceneLayer.rawMap.bgPointer.y() - 8);
 	
