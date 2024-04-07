@@ -80,7 +80,9 @@ if __name__ == "__main__":
 		# also, butanos on HEAD detached from edb6de37,,,, but the github is on commit 97213e3???
 		
 		#res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.1.0/UndertaleModTool_v0.5.1.0.zip")
-		UMTURL = "https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.0.0/v0.5.0.0_UndertaleModToolCLI_Windows.zip"
+		#UMTURL = "https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.0.0/v0.5.0.0_UndertaleModToolCLI_Windows.zip"
+		UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip"
+		
 		res = requests.get(UMTURL)
 		
 		if res.status_code == 200:
@@ -154,7 +156,8 @@ if __name__ == "__main__":
 		
 		# ./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx
 		
-		command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModToolCLI_v0.5.0.0-Windows/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
+		#command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModToolCLI_v0.5.0.0-Windows/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
+		command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
 		
 		res = subprocess.check_call(command.split(" "))
 		
