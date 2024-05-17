@@ -775,6 +775,9 @@ public:
 	void specialBumpFunction() override { 
 		specialBumpFunctionPointer(this);
 	}
+	
+	void interact() override; // will this cause issues?
+	
 
 };
 
@@ -792,6 +795,8 @@ public:
 	EntityType entityType() const override { return EntityType::EusStatue; }
 	
 	void isDead() override;
+	
+	void interact() override;
 
 };
 	
@@ -808,6 +813,8 @@ public:
 
 	EntityType entityType() const override { return EntityType::BeeStatue; }
 
+	void interact() override;
+	
 };
 
 class MonStatue : public Obstacle {
@@ -841,6 +848,8 @@ public:
 	EntityType entityType() const override { return EntityType::TanStatue; }
 	
 	void isDead() override;
+	
+	void interact() override;
 
 };
 
@@ -863,6 +872,8 @@ public:
 	bn::optional<Direction> getNextMove() override;
 	
 	void updateTileIndex() override { }
+	
+	void interact() override;
 	
 };
 
@@ -893,6 +904,8 @@ public:
 
 	EntityType entityType() const override { return EntityType::LevStatue; }
 
+	void interact() override;
+	
 };
 
 class CifStatue : public Obstacle {
@@ -908,6 +921,8 @@ public:
 
 	EntityType entityType() const override { return EntityType::CifStatue; }
 
+	void interact() override;
+	
 };
 
 // 

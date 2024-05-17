@@ -906,3 +906,33 @@ void LevStatue::activate() {
 	doUpdate();
 }
 
+// -----
+
+void AddStatue::interact() {
+	effectsManager->doDialogue("...\0\0");
+}
+
+void EusStatue::interact() {
+	effectsManager->doDialogue("My love...\0\0");
+}
+
+void BeeStatue::interact() {
+	effectsManager->doDialogue("Got any locusts?\0\0");
+}
+
+void TanStatue::interact() {
+	effectsManager->doDialogue("MAKE THEM GO AWAY\0\0");
+}
+
+void GorStatue::interact() {
+	effectsManager->doDialogue("How bothersome.\0\0");
+}
+
+void LevStatue::interact() {
+	effectsManager->doDialogue("One wrong move and I'll destroy you...\0\0");
+}
+
+void CifStatue::interact() {
+	effectsManager->doDialogue("...\0\0");
+}
+
