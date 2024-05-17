@@ -115,12 +115,22 @@ include $(LIBBUTANOABS)/butano.mak
 fullClean:
 	rm -fr build GBAStranger.elf GBAStranger.elf.* GBAStranger.gba
 	rm -fr audio graphics
+	
+	rm -fr ./src/AllRooms.h
+	rm -fr ./src/dataWinIncludes.h
+	
 	rm -fr ../misc/massFormatter/formattedOutput
 	rm -fr ../misc/musicConverter/formattedOutput
 	rm -fr ../misc/soundConverter/formattedOutput
 	rm -fr ../misc/roomConverter/AllRooms.h
-	rm -fr ./src/AllRooms.h
-	rm -fr ./src/dataWinIncludes.h
+	
+	rm -fr ../misc/ExportData
+	rm -fr ../misc/audiogroup1.dat
+	rm -fr ../misc/audiogroup2.dat
+	rm -fr ../misc/data.win
+	
+	rm -fr ../misc/CLI-windows-latest-Release-isBundled-true
+	
 	python  ../misc/convertAllAssets.py
 
 	
