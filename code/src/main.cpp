@@ -1,9 +1,32 @@
 
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#if __cplusplus != 202002L
+	#pragma message ("c++ ver was: " STR(__cplusplus) " and should have been 202002L?")
+#endif
+
+#if __GNUC__ != 13
+	#pragma message ("__GNUC__ was: " STR(__GNUC__) " and should have been 13?")
+	
+#endif
+
+#if __GNUC_MINOR__ != 2
+	#pragma message ("__GNUC_MINOR__ was: " STR(__GNUC_MINOR__) " and should have been 2?")
+#endif
+
+#if __GNUC_PATCHLEVEL__ != 0
+	#pragma message ("__GNUC_PATCHLEVEL__ was: " STR(__GNUC_PATCHLEVEL__) " and should have been 0?")
+#endif
+
 #include "SharedTypes.h"
 
 #include "Game.h"
 
 #include "bn_hw_irq.h"
+
+
 
 // C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -C -D .\build\main.o > idk.txt
 
@@ -386,7 +409,7 @@ int main() {
 	
 	BN_ASSERT(totalIWram.safe_division(32 * 1024) < 1, "iwram overflow!!!");
 	BN_ASSERT(totalEWram.safe_division(256 * 1024) < 1, "ewram overflow!!!");
-
+	
 	//BN_LOG("what the fuck ", 2[reinterpret_cast<unsigned char*>(0x02000050)]);
 	
 	/*
