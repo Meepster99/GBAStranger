@@ -907,9 +907,13 @@ public:
 // actually, we only have unique pointers! no shared, so im doing this
 // insertion will be slow, but at least lookup will be fast.
 
-#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
-//#define SANESETATTRIBUTES __attribute__((section(".ewram")))
-//#define SANESETATTRIBUTES __attribute__((section(".iwram")))
+// this was commented out when updating devkit versions decided to break shit. 
+// i do not understand why this section is the only one that broke? maybe i needed long calls ?
+// at least on more strenuous rooms, movetime didnt seem to take a hit
+// but if there are speed issues, here is the place to check 
+
+#define SANESETATTRIBUTES
+//#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 template <typename T, int maxVecSize>
 class SaneSet {

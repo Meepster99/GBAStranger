@@ -1,5 +1,9 @@
 
 
+// ok so,, devkitARM-gdb 13.2-1
+
+/*
+
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
@@ -19,6 +23,8 @@
 #if __GNUC_PATCHLEVEL__ != 0
 	#pragma message ("__GNUC_PATCHLEVEL__ was: " STR(__GNUC_PATCHLEVEL__) " and should have been 0?")
 #endif
+
+*/
 
 #include "SharedTypes.h"
 
