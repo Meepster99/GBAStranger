@@ -9,8 +9,6 @@ when installing devkitpro, make sure that the only option checked is for GBA. un
 
 purchase and install Void Stranger on [itch](https://system-erasure.itch.io/void-stranger) or [steam](https://store.steampowered.com/app/2121980/Void_Stranger/)
 
-MAKE SURE TO INSTALL THE 1.0.6 BETA VERSION
-
 clone the repo, and do `git submodule update --init --recursive` in the repo's root directory
 
 run convertAllAssets.py, located in the misc folder

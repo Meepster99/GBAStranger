@@ -2,7 +2,7 @@
 import importlib.util
 import sys, os
 import subprocess
-
+import traceback
 
 def install(package):
 
@@ -79,9 +79,11 @@ if __name__ == "__main__":
 		#res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip")
 		# also, butanos on HEAD detached from edb6de37,,,, but the github is on commit 97213e3???
 		
-		#res = requests.get("https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.1.0/UndertaleModTool_v0.5.1.0.zip")
+		
 		#UMTURL = "https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.0.0/v0.5.0.0_UndertaleModToolCLI_Windows.zip"
-		UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip"
+		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/0.5.1.0/UndertaleModTool_v0.5.1.0.zip"
+		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip"
+		UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
 		
 		res = requests.get(UMTURL)
 		
@@ -157,9 +159,23 @@ if __name__ == "__main__":
 		# ./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx
 		
 		#command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModToolCLI_v0.5.0.0-Windows/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
-		command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
+		command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -v -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
 		
-		res = subprocess.check_call(command.split(" "))
+		# making the command verbose prevents the crash. WHY
+		
+		
+		
+		try:
+			res = subprocess.check_call(command.split(" "))
+		except Exception as e:
+			print(e)
+			
+			print(traceback.format_exc())
+			
+			print("HEY, SOMETHINGS MESSED UP")
+			print(f"command: \"{command}\"")
+			exit(1)
+		
 		
 		if res != 0:
 			print("the undertalemodtool command crashed. this shouldnt happen(i hope)")

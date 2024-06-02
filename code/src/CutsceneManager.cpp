@@ -882,6 +882,7 @@ void CutsceneManager::brandInput() {
 	Sprite cursor(bn::sprite_tiles_items::dw_spr_puumerkki_kursori, bn::sprite_shape_size(32, 32));
 	
 	Pos cursorPos(4, 1);
+	(void)cursorPos; // suppress warning. why is it there at all?
 	cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
 	cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
 	cursor.spritePointer.set_bg_priority(0);

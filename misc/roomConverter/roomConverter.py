@@ -189,9 +189,11 @@ def readCreationCode(p, creationCode):
 		"randomize()",
 		"irandom_range",
 	]
-		
-	pattern = r'rm_\d+(?:_void)?'
-		
+	
+	# room identification regex, very important, was the thing causing the crash on rm_test2_075
+	#pattern = r'rm_\d+(?:_void)?'
+	pattern = r'rm_(?:test2_\d+)?\d+(?:_void)?'
+	
 	for i, l in enumerate(lines):
 	
 		l = re.sub(pattern, lambda match: f'"{match.group(0)}"', l)
@@ -235,6 +237,8 @@ def readCreationCode(p, creationCode):
 		temp = temp.replace("obj_inventory.ds_equipment", "None")
 		temp = temp.replace("global.voidrod_get", "1")
 		temp = temp.replace("var ", "")
+		
+		temp = temp.replace("true", "True")
 		
 		temp = temp.replace("spr_n_up", "0")
 		
@@ -286,7 +290,7 @@ def readCreationCode(p, creationCode):
 		print(RED + "readCreationCode (curse)ed up" + RESET)
 		
 	
-		print(creationCode)
+		print(WHITE + creationCode + RESET)
 		print("\n".join(originalLines))
 		print("---\n")
 		print("\n".join(lines))
@@ -295,6 +299,7 @@ def readCreationCode(p, creationCode):
 		print("-----")
 		
 		print(RED + "readCreationCode (curse)ed up" + RESET)
+		print(WHITE + creationCode + RESET)
 		print(e)
 		print("\n")
 		exit(1)
@@ -521,6 +526,8 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_mon_shortcut_003
 	rm_mon_shortcut_004
 	rm_mon_shortcut_005
+	
+	
 	
 	
 	rm_rm4
