@@ -936,3 +936,6 @@ void CifStatue::interact() {
 	effectsManager->doDialogue("...\0\0");
 }
 
+void JukeBox::interact() {
+	effectsManager->doDialogue(" G R O O V Y !!\0\0");
+}

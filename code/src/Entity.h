@@ -925,6 +925,23 @@ public:
 	
 };
 
+class JukeBox : public Obstacle {
+public:
+
+	JukeBox(Pos p_) : Obstacle(p_) {
+		spriteTilesArray.clear(); 
+		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_jb);
+	}
+
+	JukeBox* clone() const override { return new JukeBox(*this); }
+
+	EntityType entityType() const override { return EntityType::JukeBox; }
+
+	void interact() override;
+	
+	
+};
+
 // 
 
 class Interactable : public Obstacle {

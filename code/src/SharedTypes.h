@@ -306,6 +306,7 @@ enum class EntityType {
 	GorStatue,
 	LevStatue,
 	CifStatue,
+	JukeBox,
 	
 	Interactable,
 	

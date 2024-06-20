@@ -248,6 +248,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 			case EntityType::CifStatue:
 				entityList.insert(new CifStatue(tempPos));
 				break;
+			case EntityType::JukeBox:
+				entityList.insert(new JukeBox(tempPos));
+				break;
 			default:
 				BN_ERROR("unknown entity tried to get loaded in, wtf. id=", static_cast<int>(temp.t), " entityCount was ", entitiesCount);
 				break;

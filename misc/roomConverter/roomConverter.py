@@ -475,6 +475,10 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_012
 	rm_test2_016
 	rm_test2_017
+	
+	# see above note for confusion
+	rm_test2_018
+	
 	rm_test2_031
 	rm_test2_022
 	rm_test2_019
@@ -490,6 +494,10 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_025
 	rm_test2_027
 	rm_test2_033
+	
+	# see above note for confusion
+	rm_test2_034
+	
 	rm_test2_035
 	rm_test2_046
 	rm_test2_038
@@ -1028,7 +1036,7 @@ def convertObjects(layerData):
 				
 				statueMap = {
 					# HEY THIS NEEDS TO BE UPDATED
-					"b_form = 9": lambda p : "EntityType::AddStatue,{:d},{:d}".format(p.x, p.y),
+					"b_form = 9": lambda p : "EntityType::JukeBox,{:d},{:d}".format(p.x, p.y),
 					
 					"b_form = 8": lambda p : "EntityType::AddStatue,{:d},{:d}".format(p.x, p.y),
 					"b_form = 7": lambda p : "EntityType::MonStatue,{:d},{:d}".format(p.x, p.y),
