@@ -128,6 +128,12 @@ def readCreationCode(p, creationCode):
 	def ds_grid_get(a, b, c):
 		return 0
 		
+	def ds_list_find_value(a, b):
+		return 0
+	
+	def scr_test2_active():
+		return 0
+		
 	def instance_create_layer(x, y, idek, data):
 	
 	
@@ -242,6 +248,12 @@ def readCreationCode(p, creationCode):
 		
 		temp = temp.replace("spr_n_up", "0")
 		
+		
+		# ex rooms?
+		temp = temp.replace("global.jukebox_song", "jukebox_song")
+		temp = temp.replace("obj_inventory.ds_ccr", "False")
+		
+		
 		for s in removeStrings:
 			if s in temp:
 				temp = "pass"
@@ -282,6 +294,7 @@ def readCreationCode(p, creationCode):
 	globalBruh = globals()
 	globalBruh["layer"] = None
 	globalBruh["destroy"] = False
+	globalBruh["jukebox_song"] = None
 
 	try:
 		exec(execString, globalBruh, bruh)
@@ -295,7 +308,14 @@ def readCreationCode(p, creationCode):
 		print("---\n")
 		print("\n".join(lines))
 		print("---\n")
-		print(execString)
+		
+		maxNumLen = len(str(len(execString.split("\n"))))
+		
+		p = r'line (\d+)'
+		errorLines = [ int(n) for n in re.findall(p, str(e)) ]
+	
+		for i, line in enumerate(execString.split("\n")):
+			print(f"{RED if i+1 in errorLines else ""}{i+1:{maxNumLen}}\t{line}{RESET}")
 		print("-----")
 		
 		print(RED + "readCreationCode (curse)ed up" + RESET)
@@ -392,7 +412,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	
 	newRoomsList = []
 	
-	
+	lineIndex = 0 
 	# its 3am, forgive me for this 
 	for i, line in enumerate(lines):
 		if line == "switch room_number":
@@ -409,12 +429,82 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 						i += 1
 					
 				i+=1
+			lineIndex = i
 			break
-
+	
 	# im just doing this part manually. im tired
 	# the room order,, in the actual undertalemodtool seems to be a good ref for this
 	
+	# ex rooms could(and were for 5 seconds) be done automatically, but due to not all rooms(rm_test2_002) being in the roomsel script, its being added manually
+	
 	tempRoomsToAdd = """
+	
+	rm_test2_000
+	rm_test2_001
+	rm_test2_054
+	rm_test2_036
+	rm_test2_050
+	rm_test2_051
+	rm_test2_053
+	rm_test2_056
+	rm_test2_057
+	rm_test2_058
+	rm_test2_059
+	rm_test2_061
+	rm_test2_062
+	rm_test2_060
+	rm_test2_063
+	rm_test2_055
+	rm_test2_064
+	
+	# i have no idea if this is correct
+	rm_test2_002
+	
+	rm_test2_010
+	rm_test2_003
+	rm_test2_009
+	rm_test2_004
+	rm_test2_014
+	rm_test2_011
+	rm_test2_015
+	rm_test2_013
+	rm_test2_006
+	rm_test2_007
+	rm_test2_008
+	rm_test2_005
+	rm_test2_012
+	rm_test2_016
+	rm_test2_017
+	rm_test2_031
+	rm_test2_022
+	rm_test2_019
+	rm_test2_023
+	rm_test2_020
+	rm_test2_024
+	rm_test2_029
+	rm_test2_032
+	rm_test2_026
+	rm_test2_030
+	rm_test2_021
+	rm_test2_028
+	rm_test2_025
+	rm_test2_027
+	rm_test2_033
+	rm_test2_035
+	rm_test2_046
+	rm_test2_038
+	rm_test2_052
+	rm_test2_039
+	rm_test2_047
+	rm_test2_040
+	rm_test2_041
+	rm_test2_042
+	rm_test2_048
+	rm_test2_043
+	rm_test2_044
+	rm_test2_045
+	rm_test2_037
+	rm_test2_049
 	
 	rm_u_0001
 	rm_u_0002
@@ -535,7 +625,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	
 	# rm_rm4 MUST be the last one
 	
-	[ newRoomsList.append(t.strip()) for t in tempRoomsToAdd.split("\n") if len(t.strip()) != 0 ]
+	[ newRoomsList.append(t.strip()) for t in tempRoomsToAdd.split("\n") if len(t.strip()) != 0 and t.strip()[0] != "#" ]
 	
 	newRoomsList[newRoomsList.index("rm_u_0001")] = "rm_voidend"
 			
@@ -917,6 +1007,9 @@ def convertObjects(layerData):
 				"contents = 7": "EntityType::EmptyChest",
 				"contents = 8": "EntityType::EmptyChest",
 				"contents = 9": "EntityType::EmptyChest",
+				
+				# ex? 
+				"contents = 10": "EntityType::EmptyChest",
 			}
 			
 			if creationCode not in chestCreationCodes:
@@ -934,6 +1027,9 @@ def convertObjects(layerData):
 				# this being here is an assumption of that only boulders will be statues. i hope that holds.
 				
 				statueMap = {
+					# HEY THIS NEEDS TO BE UPDATED
+					"b_form = 9": lambda p : "EntityType::AddStatue,{:d},{:d}".format(p.x, p.y),
+					
 					"b_form = 8": lambda p : "EntityType::AddStatue,{:d},{:d}".format(p.x, p.y),
 					"b_form = 7": lambda p : "EntityType::MonStatue,{:d},{:d}".format(p.x, p.y),
 					"b_form = 6": lambda p : "EntityType::EusStatue,{:d},{:d}".format(p.x, p.y),
@@ -1012,6 +1108,11 @@ def convertObjects(layerData):
 				2: "rm_mon_001",
 				3: "rm_cif_end",
 			
+				11: "rm_test2_002",
+				12: "rm_test2_018",
+				13: "rm_test2_034",
+				14: "next",
+				15: "rm_trailer_001", # are trailer rooms playable??
 			}
 			
 			
@@ -2136,10 +2237,28 @@ def convertObjects(layerData):
 		def obj_npc_mimic(p, creationCode):
 			# new 1.0.6 content?
 			pass
+			
+		def obj_riddle_008(p, creationCode):
+			# new as of ex
+			pass
 
+		def obj_floor_hpn2(p, creationCode):
+			# DEF NEW AS OF EX, 
+			# rm_test2_054
+			# going to cry 
+			# this will mess with floor code. im going to cry
+			# temp fix:
+			ObjectFunctions.obj_floor(p, creationCode)
+			pass
+		
+		def obj_floor_hpn3(p, creationCode):
+			ObjectFunctions.obj_floor(p, creationCode)
 
+		def obj_floor_hpn4(p, creationCode):
+			ObjectFunctions.obj_floor(p, creationCode)
 
-
+		def obj_floor_hpn(p, creationCode):
+			ObjectFunctions.obj_floor(p, creationCode)
 
 
 	
@@ -2363,10 +2482,11 @@ def convertAllRoomsWorker(f, isHardModePass):
 	# test is needed for rm_test_0006
 	# i dont want to cause issues so, ima just manually readd it 
 	removeStrings = ["test", "trailer", "dream", "rm_cc_results", "rm_cif_end", "memories"]
+	includeStrings = ["test2"]
 	
 	for removeStr in removeStrings:
 		# i could, and should one line this
-		jsonFiles = [ file for file in jsonFiles if removeStr not in file ]
+		jsonFiles = [ file for file in jsonFiles if removeStr not in file or "test2" in file]
 	
 	jsonFiles.append("rm_test_0006.json")
 	jsonFiles.append("rm_rm4.json")
