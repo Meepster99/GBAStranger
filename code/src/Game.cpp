@@ -168,15 +168,19 @@ void Game::findNextRoom() {
 			delay(5);
 			cutsceneManager.crashGame();
 		}
-		
+
+		/*
+		// iswhiterooms isnt properly updated for this?
 		// should this be <= 256 or iswhiterooms?
+		// does this ever actually happen??
 		if(tileManager.getLocustCount() == -1 && !roomManager.isWhiteRooms()) {
 			BN_LOG("crashing game due to bad locust count");
 			cutsceneManager.displayDisText("FATAL ERROR : LI NULL\0");
 			delay(5);
 			cutsceneManager.crashGame();
 		}
-	
+		*/
+		
 		// check for cif statue
 		bool cifReset = false;
 		Pos testPos = entityManager.player->p;
@@ -715,6 +719,7 @@ void Game::loadLevel(bool debug) {
 	
 	EntityHolder* entitiesPointer = (EntityHolder*)idek.entities;
 	int entitiesCount = idek.entityCount;
+	
 	
 	entityManager.loadEntities(entitiesPointer, entitiesCount);
 

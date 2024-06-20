@@ -1800,6 +1800,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	
 	effectsCount--;
 	effects++;
+
+	
 	
 	for(int i=0; i<effectsCount; i++) {
 		//if(effects->width == 1 && effects->height == 1) { 
@@ -1813,6 +1815,8 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		}
 		effects++;
 	}
+	
+	
 	
 	unsigned roomNameHash = game->roomManager.currentRoomHash();
 	

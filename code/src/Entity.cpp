@@ -444,8 +444,8 @@ Player::Player(Pos p_) : Entity(p_) {
 	hasRod = game->saveData.hasRod; 
 	hasSuperRod = game->saveData.hasSuperRod; 
 	
-	BN_LOG((int)game->saveData.hasRod, (int)game->saveData.hasSuperRod);
-	BN_LOG((int)hasRod, (int)hasSuperRod);
+	//BN_LOG((int)game->saveData.hasRod, (int)game->saveData.hasSuperRod);
+	//BN_LOG((int)hasRod, (int)hasSuperRod);
 	
 	BN_ASSERT((int)hasRod == 0 || (int)hasRod == 1, "why THE FUCK was player hasrod ", (int)hasRod);
 	BN_ASSERT((int)hasSuperRod == 0 || (int)hasSuperRod == 1, "why THE FUCK was player hasSuperRod ", (int)hasSuperRod);

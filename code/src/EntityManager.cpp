@@ -80,6 +80,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	SaneSet<Pos, MAXENTITYSPRITES> posSet;
 	
+
 	for(int i=0; i<entitiesCount; i++) {
 		// i shouldnt have to do this, but despite getting a literal 1:1 memory recreation, it still chose to (curse) itself 
 		// it just didnt want to work.
@@ -258,6 +259,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		
 	}
 	
+
 	BN_ASSERT(entityList.size() == entitiesCount, "why does the entitylist size not equal entity count?? size=",entityList.size(), " count=",entitiesCount);
 	
 	BN_ASSERT(player != NULL, "finished loading in all sprites, but a player wasnt found");
@@ -1908,11 +1910,8 @@ void EntityManager::updateMap() { profileFunction();
 	// of cpu cycles, and just have vblank do drawing, but ugh 
 	// i should of had a more event based system for the timings of event ticks.
 
-
-
 	Entity* temp = NULL;
-
-
+	
 	//BN_LOG("posTracker size is ", posTracker.size());
 	
 	//for(int x=0; x<14; x++) {
