@@ -315,7 +315,7 @@ def readCreationCode(p, creationCode):
 		errorLines = [ int(n) for n in re.findall(p, str(e)) ]
 	
 		for i, line in enumerate(execString.split("\n")):
-			print(f"{RED if i+1 in errorLines else ""}{i+1:{maxNumLen}}\t{line}{RESET}")
+			print(f'{RED if i+1 in errorLines else ""}{i+1:{maxNumLen}}\t{line}{RESET}') # single quotes for python3.11, i should update laptop to 3.12
 		print("-----")
 		
 		print(RED + "readCreationCode (curse)ed up" + RESET)

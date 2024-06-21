@@ -6113,9 +6113,12 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 	// using spr_soulglow_big and spr_locust_idol
 	// should this effect be blocking? most likely (actually yes)
 	
+	// coming back to this, months later, so much of the initial setup in most lambdas could/should HAVE. been,,, more elegant.
+	
 	const Pos p = entityManager->player->p;
 	
-	auto createFunc = [p](Effect* obj) -> void {
+
+	auto createGlowFunc = [p](Effect* obj) -> void {
 		
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_soulglow_big;
 		obj->sprite.spritePointer.set_tiles(*obj->tiles, bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size);
@@ -6129,17 +6132,41 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 		obj->tempCounter = 0;
 		
 		obj->x = p.x * 16 + 4;
-		obj->y = p.y * 16 - 12;
+		obj->y = p.y * 16 - 8;
 		obj->sprite.updateRawPosition(obj->x, obj->y);
 	};
 	
-	auto tickFunc = [](Effect* obj) mutable -> bool {
+	auto createLocustFunc = [p](Effect* obj) -> void {
 		
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_locust_idol;
+		//obj->sprite.spritePointer.set_tiles(*obj->tiles, bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size);
+		obj->sprite.spritePointer.set_bg_priority(0);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			0
+		);
+		
+		obj->tempCounter = 0;
+		
+		obj->x = p.x * 16;
+		obj->y = p.y * 16 - 12; // what coord space is this even in again??? 
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+	};
+	
+	auto tickFunc = [moveCount = 0](Effect* obj) mutable -> bool {
+		
+		if(moveCount < 4 && frame % 4 == 0) {
+			obj->y--;
+			moveCount++;
+			obj->sprite.updateRawPosition(obj->x, obj->y);
+		}
+			
 		obj->tempCounter++;
 		if(obj->tempCounter == 7) {
 			obj->tempCounter = 0;
 			
-			obj->graphicsIndex = (obj->graphicsIndex + 1) % 5;
+			obj->graphicsIndex = (obj->graphicsIndex + 1) % obj->tiles->graphics_count();
 			
 			obj->sprite.spritePointer.set_tiles(
 				*obj->tiles,
@@ -6151,20 +6178,49 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 		return false;
 	};
 	
-	Effect* e1 = new Effect(createFunc, tickFunc);
+	Effect* e1 = new Effect(createGlowFunc, tickFunc);
+	Effect* e2 = new Effect(createLocustFunc, tickFunc);
 	
 	effectList.push_back(e1);
+	effectList.push_back(e2);
+	
+	// spr_player_item_get, spr_lil_item_get, spr_cif_item_get
+	
+	const bn::sprite_tiles_item* itemGetTiles = &bn::sprite_tiles_items::dw_spr_player_item_get;
+	
+	if(globalGame->mode == 1) {
+		itemGetTiles = &bn::sprite_tiles_items::dw_spr_lil_item_get;
+	} else if(globalGame->mode == 2) {
+		itemGetTiles = &bn::sprite_tiles_items::dw_spr_cif_item_get;
+	}
+	
+	Sprite itemGetSprite(*itemGetTiles);
+	itemGetSprite.spritePointer.set_bg_priority(0);
+	itemGetSprite.updatePosition(entityManager->player->p);
 	
 	if(isFirstLocust) {
 		
-		
-		
+		if(globalGame->mode != 2) {
+			//gray + lillie:
+			doDialogue(""
+			"[You acquired a locust idol]\n"
+			"[It looks rather tasty, actually]\n"
+			"[Who knows, maybe it'll come in handy in the long run]\0"
+			);
+		} else {
+			//cif:
+			doDialogue(""
+			"[You acquired a locust idol]\n"
+			"[It tastes like sawdust]\n"
+			"[... Why are you collecting these again?]\0"
+			);
+		}
 	} else {
-		delay(70 + 7); // 35 for one cycle, 70 for 2, extra 7 to let it rest properly
+		delay(35 * 2 + 7); // 35 for one cycle, 70 for 2, extra 7 to let it rest properly
 	}
 
 	removeEffect(e1);
-	
+	removeEffect(e2);
 }
 
 
