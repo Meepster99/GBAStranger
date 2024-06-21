@@ -64,8 +64,7 @@ void uncompressData(u8 res[126], u8* input) {
 		}
 	}
 	
-	BN_ASSERT(i == 126, "i wasnt equal to 126 after decomp.");
-	
+	BN_ASSERT(i == 126, "i wasnt equal to 126 after decomp.");	
 }
 
 void Game::createExitEffects() {
@@ -146,7 +145,6 @@ void Game::createExitEffects() {
 	}
 	
 	entityManager.player->p = playerPos;
-	
 }
 
 void Game::findNextRoom() {
@@ -314,14 +312,11 @@ void Game::findNextRoom() {
 				break;
 			}
 		}
-	}
-	
+	}	
 }
 
 void Game::changeMusic() {
 	
-	int roomIndex = roomManager.roomIndex;
-
 	auto doPlay = [](const bn::music_item& item) -> void {
 		
 		/*
@@ -350,7 +345,6 @@ void Game::changeMusic() {
 		this is going to need to be fpga, if i end up doing it 
 		and, considering that im basically done with the main game
 		and dont want this project to end, i probs will
-		
 		
 		*/
 		
@@ -382,9 +376,9 @@ void Game::changeMusic() {
 		bn::music::set_pitch(adjustVal);
 		bn::music::set_tempo(adjustVal);
 		
-		
-		
 	};
+
+	int roomIndex = roomManager.roomIndex;
 	
 	if(roomIndex == 254 && mode == 2) {
 		doPlay(bn::music_items::msc_voidsong);
@@ -456,8 +450,6 @@ void Game::changeMusic() {
 	// mon secret area bn::music_items::msc_monstrail
 	// bee music??? (is it bn::music_items::msc_beesong)
 	// dis bn::music_items::msc_endless
-	
-	
 }
 
 void Game::resetRoom(bool debug) {
@@ -820,9 +812,7 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 	}
 	
 	*reinterpret_cast<unsigned short*>(0x04000208) = 1; // enable interrupts
-	
-	//collision.reloadCells();
-	
+	//collision.reloadCells();	
 }
 
 #pragma GCC pop_options
@@ -1024,7 +1014,6 @@ void Game::changePalette(int offset) {
 		// FUCKING DUMBASSsave();
 		//save();
 	}
-
 }
 
 void Game::fadePalette(const int index) {
@@ -1112,7 +1101,6 @@ void Game::fadePalette(const int index) {
 			palettePointer[i] = localPaletteTable[i];
 		}
 	}
-	
 }
 
 Game::~Game() {
@@ -1183,7 +1171,6 @@ void logRamStatus() {
 	BN_LOG("total iwram: ", ((bn::fixed)totalIWram).safe_division(32 * 1024));
 	
 	bn::memory::log_alloc_ewram_status();
-	
 }
 
 void didVBlank() {
@@ -1351,8 +1338,6 @@ void Game::doVBlank() { profileFunction();
 	// this will require more investigation
 	// also, this being below all other vblank managers is very important, since some vblank managers will add sounds to it!
 	doSoundVBlank();
-	
-	
 }
 
 void Game::run() {
@@ -1785,25 +1770,11 @@ void Game::save() {
 void Game::load() {
 	BN_LOG("loading save");
 	
-	/*
-	static bool hasLoaded = false;
-	
-	if(hasLoaded) {
-		return;
-	}
-	
-	hasLoaded = true;
-	*/
-	
 	bn::sram::read(saveData);
 
-	//saveData = GameSave();
-	
 	if(roomManager.isCustom) {
 		return;
 	}
-	
-	
 	
 	if(saveData.hash != saveData.getSaveHash()) {
 		BN_LOG("either a save wasnt found, or it was corrupted. creating new save");
@@ -1818,48 +1789,6 @@ void Game::load() {
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
 	roomManager.setMode(mode);
-	
-	/*
-	BN_ASSERT((int)saveData.hasRod <= 1, "savedata hasrod was ", saveData.hasRod);
-	BN_ASSERT((int)saveData.hasSuperRod <= 1, "savedata hasrod was ", saveData.hasSuperRod);
-	
-	
-	// i am not ok
-	if((int)saveData.hasRod == 255) {
-		saveData.hasRod = 0;
-	}
-	
-	if((int)saveData.hasSuperRod == 255) {
-		saveData.hasSuperRod = 0;
-	}
-	
-	if(saveData.hasRod) {
-		saveData.hasRod = 1;
-	} else {
-		saveData.hasRod = 0;
-	}
-	
-	if(saveData.hasSuperRod) {
-		saveData.hasSuperRod = 1;
-	} else {
-		saveData.hasSuperRod = 0;
-	}
-	*/
-	
-	//  ????
-	//#define INSANITY(ugh) ugh = (bool)(((int)ugh) & 0b1)
-	//#define INSANITY(ugh) ugh = (((int)ugh) & 0b1)
-	
-	//#define INSANITY(ugh) ugh = ugh ? 1 : 0;
-	
-	//saveData.hasRod = 0b1;
-	//saveData.hasSuperRod &= 0b1;
-	//saveData.isVoided &= 0b1;
-	//saveData.hasMemory &= 0b1;
-	//saveData.hasWings &= 0b1;
-	//saveData.hasSword &= 0b1;
-	
-	//BN_LOG((int)saveData.hasMemory);
 	
 	if(saveData.col1Save == -1) {
 		BN_LOG("SAVE DATA COLOR DATA WAS CORRUPTED??? HOW???");
@@ -1879,9 +1808,7 @@ void Game::load() {
 	for(int i=0; i<6; i++) {
 		tileManager.playerBrand[i] = saveData.playerBrand[i];
 	}
-	
-	
-	//save();
+
 }
 
 void Game::saveRNG() {
@@ -1937,7 +1864,6 @@ void Game::removeSound(const bn::sound_item* sound) {
 	
 	queuedSounds.erase(sound);
 	removedSounds.insert(sound);
-	
 }
 
 void Game::doSoundVBlank() {

@@ -1,35 +1,6 @@
 
-
-// ok so,, devkitARM-gdb 13.2-1
-
-/*
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
-#if __cplusplus != 202002L
-	#pragma message ("c++ ver was: " STR(__cplusplus) " and should have been 202002L?")
-#endif
-
-#if __GNUC__ != 13
-	#pragma message ("__GNUC__ was: " STR(__GNUC__) " and should have been 13?")
-	
-#endif
-
-#if __GNUC_MINOR__ != 2
-	#pragma message ("__GNUC_MINOR__ was: " STR(__GNUC_MINOR__) " and should have been 2?")
-#endif
-
-#if __GNUC_PATCHLEVEL__ != 0
-	#pragma message ("__GNUC_PATCHLEVEL__ was: " STR(__GNUC_PATCHLEVEL__) " and should have been 0?")
-#endif
-
-*/
-
 #include "SharedTypes.h"
-
 #include "Game.h"
-
 #include "bn_hw_irq.h"
 
 
@@ -104,7 +75,6 @@ __attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand() {
 	return res;
 }
 
-// cheese and rice, at least i dont have to write asm
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void _cartPull() {
 	
 	// literally just copied from cutscenemanager 
@@ -156,12 +126,6 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	volatile unsigned short* palettePointer = reinterpret_cast<volatile unsigned short*>(0x05000000);
 	// this array seems to be declared on the (curse)ing rom. this is really (curse)ingbad
 	// this needs to be redone in the future!
-	
-	//unsigned short col0 = palettePointer[512-16];
-	//unsigned short col1 = palettePointer[512-15];
-	//unsigned short col2 = palettePointer[512-14];
-	//unsigned short col3 = palettePointer[512-13];
-	//unsigned short col4 = palettePointer[512-12];
 	
 	for(int i=0; i<1024/2; i++) {
 		switch(i % 16) {
@@ -415,22 +379,7 @@ int main() {
 	BN_ASSERT(totalIWram.safe_division(32 * 1024) < 1, "iwram overflow!!!");
 	BN_ASSERT(totalEWram.safe_division(256 * 1024) < 1, "ewram overflow!!!");
 	
-	//BN_LOG("what the fuck ", 2[reinterpret_cast<unsigned char*>(0x02000050)]);
-	
-	/*
-	
-	[WARN] GBA Debug:	butano inited
-	[WARN] GBA Debug:	used_stack_iwram: 0.01953
-	[WARN] GBA Debug:	used_static_iwram: 0.81420
-	[WARN] GBA Debug:	total iwram: 0.83374
-		
-	[WARN] GBA Debug:	butano inited
-	[WARN] GBA Debug:	used_stack_iwram: 0.02709
-	[WARN] GBA Debug:	used_static_iwram: 0.70678
-	[WARN] GBA Debug:	total iwram: 0.73413
-	
-	
-	*/
+	// ---
 	
 	bn::bg_tiles::set_allow_offset(true);
 

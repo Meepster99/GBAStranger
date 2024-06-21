@@ -2,56 +2,34 @@
 
 #include "dataWinIncludes.h"
 
-#include "bn_sound.h"
-#include "bn_unordered_map.h"
-#include "bn_regular_bg_tiles_ptr.h"
-
-
-
 #include "Profiler.h"
 
-//#include <cstring>
-
+#include "bn_unordered_map.h"
+#include "bn_regular_bg_tiles_ptr.h"
 #include "bn_bg_tiles.h"
 #include "bn_bg_maps.h"
 #include "bn_bg_palettes.h"
 #include "bn_sprite_tiles.h"
 #include "bn_sprite_palettes.h"
-//#include "bn_best_fit_allocator.h"
-
 #include "bn_version.h"
-
 #include "bn_music_items.h"
-//#include "bn_music_actions.h"
-
 #include "bn_music.h"
 #include "bn_sound.h"
 #include "bn_sound_items.h"
 #include "bn_sound_actions.h"
 #include "common_variable_8x8_sprite_font.h"
-
 #include "bn_blending.h"
-
-// it is so (curse)ing dumb that i didnt realize this was a thing until now 
 #include "bn_window.h"
 #include "bn_rect_window.h"
-
 #include "bn_bg_palette_ptr.h"
-
 #include "bn_istring_base.h"
-
 #include "bn_random.h"
 #include "bn_sram.h"
-
 #include "bn_sprites_mosaic.h"
-
 #include "bn_link.h"
 #include "bn_link_state.h"
 #include "bn_link_player.h"
-
-// danger zone, again 
 #include "bn_bg_blocks_manager.h"
-
 #include "bn_green_swap.h"
 
 #ifdef ENABLELOGGING
@@ -79,26 +57,11 @@
 #endif
 
 
-
-/*
-#include "bn_log.h"
-#include "bn_config_log.h"
-#include "bn_log_backend.h"
-*/
-
 #include "Palette.h"
-
-// getting this include to work was such a painful process for reasons i still dont get. a make clean fixed them(i think)?
-//#include "bn_profiler.h"
-//#include "bn_config_profiler.h"
-
 #include <bn_deque.h>
-
 #include "fontData.h"
-
 #include "bn_time.h"
 #include "bn_date.h"
-
 #include "bn_timers.h"
 
 
@@ -111,13 +74,7 @@
 
 #endif
 
-// wee woo wee woo 
-// i hate this 
 // https://stackoverflow.com/questions/33050620/golang-style-defer-in-c
-//using defer = std::shared_ptr<void>;    
-// defer _(nullptr, [](...){ std::cout << ", World!"; });
-//#define DEFER(code) std::shared_ptr<void> _(nullptr, [](...){ code }); 
-//#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...){ code }); 
 #define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...) mutable { code }); 
 
 #define USEEWRAM __attribute__((section(".ewram")))
@@ -141,23 +98,13 @@ typedef unsigned char u8;
 
 #define VBLANKTICKS 1309
 
-// TODO, GO OVER ALL FUNCS, AND DEFINE WHAT CAN BE AS CONST REF
-// idrk if c++ optimization does that for me? but regardless its a good idea
-
 #define MAXSPRITES 128
-
-//#define MAXTEXTSPRITES 56
-//#define MAXEFFECTSPRITES 8
 
 #define MAXTEXTSPRITES 128
 #define MAXEFFECTSPRITES 112
 
-//#define MAXENTITYSPRITES 12
+
 #define MAXENTITYSPRITES 64
-
-//#define MAXENTITYSPRITES MAXSPRITES - MAXTEXTSPRITES - MAXEFFECTSPRITES
-
-//static_assert(MAXENTITYSPRITES > 0);
 
 extern unsigned int frame;
 extern int playerIdleFrame;
@@ -202,27 +149,6 @@ __attribute__((section(".iwram"), target("thumb"), long_call)) unsigned short br
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) unsigned getMiscData();
 
 __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void uncompressData(u8 res[126], u8* input);
-
-// how was this var not extern until now?
-//extern Game* globalGame;
-// this was going to be a inline,,, but,,, 
-
-/* // inline stuff was throwing a fit
-inline bool getInput(bn::keypad::key_type key) {
-	
-	if(globalGame->saveData.delay == -1) {
-		if(bn::keypad::pressed(key)) {
-			return true;
-		}
-	} else {
-		if(bn::keypad::pressed(key) || bn::keypad::held(key)) {
-			return true;
-		}
-	}
-	
-	return false;
-}
-*/
 
 #define getInput(key) ((globalGame->saveData.delay == -1) ? bn::keypad::pressed(key) : (bn::keypad::pressed(key) || bn::keypad::held(key)))
 
@@ -413,14 +339,7 @@ public:
 		,mapItem).create_bg(8, 48)),
 		bgMap(bgPointer.map())
 		{
-			
-			// for all tilesets from the game, tile 0 
-			// is just a checkerboard. if possible, i rlly, and i mean really, 
-			// should overwrite that with transparent here.
-			// actually, (curse) it, ill just do it in preprocessing.
-			
-			init(zIndex);
-			
+			init(zIndex);	
 		}
 	
 	// alternate constructor for when (trying) to use an allocated tileset instead of a normal one(for vram modifications)
@@ -452,14 +371,7 @@ public:
 	
 	void create(const bn::regular_bg_item& bgItem, int zIndex = 0) {
 		bgPointer.set_priority(zIndex);
-		
-		//auto temp = bgItem.create_bg(8, 48);
-		//bgPointer = bgItem.create_bg(8, 48, 0);
-		
-		//bgMap = bgItem.map_item();
-		
-		//bgMap.reload_cells_ref();
-		
+	
 		bgPointer.set_tiles(bgItem.tiles_item());
 		bgPointer.set_map(bgItem.map_item());
 		
@@ -521,29 +433,20 @@ public:
 	}
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) {
-	
-		//bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
 		
 		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
 
-		//bn::regular_bg_map_cell_info current_cell_info(current_cell);
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
 
 		current_cell_info.set_tile_index(tileIndex);
 		current_cell = current_cell_info.cell(); 
-	
-		// if lag happens to occur, we could not update this until a frame is done
-		// yep, lag occured.
-		// sorta fixed it, but to be safe, im ballin here
-		//bgMap.reload_cells_ref();
+
 	}
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 		
 		//bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
-
 		// removing butano's overhead saved a regretably large amount of cpu. 
-		// im talking .35 of a frame to .2 on floor 10 
 		// its a bummer that my other arrays arent indexed by [y][x] but by [x][y], as [y][x] would be better for optimization
 		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
 
@@ -554,7 +457,6 @@ public:
 		current_cell_info.set_vertical_flip(flipY);
 		
 		current_cell = current_cell_info.cell(); 
-	
 	}
 	
 	void reloadCells() {
@@ -572,8 +474,8 @@ public:
 	BackgroundMap rawMap;
 	// dont ask
 	Layer(bn::regular_bg_tiles_item tileset, int zIndex, int fillIndex = 0) :
-	rawMap(tileset, zIndex)
-	{				
+		rawMap(tileset, zIndex)
+		{				
 			init(fillIndex);
 		}
 		
@@ -584,13 +486,12 @@ public:
 		}
 		
 	Layer(bn::regular_bg_item bgItem, int zIndex = 0) :
-	rawMap(bgItem, zIndex)
-	{
-		rawMap.reloadCells();
-	}
+		rawMap(bgItem, zIndex)
+		{
+			rawMap.reloadCells();
+		}
 		
 	void init(int fillIndex) {
-		
 		//setup black border., just black the whole screen
 		for(int i=0; i<30; i++) {
 			for(int j=0; j<20; j++) {
@@ -608,7 +509,6 @@ public:
 		
 		for(int x=0; x<14; x++) {
 			for(int y=0; y<9; y++) {
-				
 				u8 tile = gameMap[x][y];
 			
 				rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
@@ -617,7 +517,6 @@ public:
 				rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
 			}
 		}
-		
 		rawMap.reloadCells();
 	}
 	
@@ -635,6 +534,7 @@ public:
 		// this func actually being able to flip (curse) properly is UNCONFIRMED bc I AM SLEEPY
 		
 		// coming back to this code, a solid 3 months later, what the fuck?
+		// coming back to this code another ~6? months later, what the fuck?
 		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
 		tempTileIndicies[1] = 4 * tile + ((flipY << 1) | !flipX);
 		tempTileIndicies[2] = 4 * tile + ((!flipY << 1) | flipX);
@@ -657,7 +557,6 @@ public:
 	
 };
 
-//#define POSATTRIBUTES __attribute__((section(".iwram")))
 #define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 class Pos {
@@ -666,15 +565,7 @@ public:
 	int x;
 	int y;
 
-	constexpr Pos(int x_, int y_) : x(x_), y(y_) { 
-
-		/*
-		if(!(x >= 0 && y >= 0 && x < 14 && y < 9)) {
-			// this is a remnant of the one time i had to use vscode for debugging.
-			BN_LOG("bruh");
-		}
-		*/
-	
+	constexpr Pos(int x_, int y_) : x(x_), y(y_) {
 		// this assert almost definitely causes a considerable amount of lag.
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
@@ -753,15 +644,7 @@ public:
 				break;
 		}
 		
-		
-		/*
-		if(newX < 0 || newY < 0 || newX >= 14 || newY >= 9) {
-			return false;
-		}
-		*/
-		
 		return true;
-		
 	}
 	
 	POSATTRIBUTES bool moveInvert(Direction moveDir, bool invertHorizontal, bool invertVertical) {
@@ -805,7 +688,7 @@ inline Pos safePos(signed char x, signed char y) {
 }
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Pos& p) {
-	//stream << "(" << p.x << ", " << p.y << ")";
+
 	stream.append("(");
 	stream.append(p.x);
 	stream.append(", ");
@@ -817,8 +700,6 @@ inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Pos& p) {
 
 struct EntityHolder {
 	const EntityType t;
-	//const u8 x;
-	//const u8 y;
 	const unsigned short x;
 	const unsigned short y;
 };
@@ -871,12 +752,12 @@ public:
 	const void* detailsTiles;
 
 	constexpr Room(
-	const void* collision_, const void* floor_, const void* details_, 
-	const void* entities_, const int entityCount_, 
-	const void* effects_, const int effectsCount_,
-	const void* secrets_, const int secretsCount_,
-	const void* exitDest_,
-	const void* collisionTiles_, const void* detailsTiles_
+		const void* collision_, const void* floor_, const void* details_, 
+		const void* entities_, const int entityCount_, 
+		const void* effects_, const int effectsCount_,
+		const void* secrets_, const int secretsCount_,
+		const void* exitDest_,
+		const void* collisionTiles_, const void* detailsTiles_
 	) :
 	collision(collision_), floor(floor_), details(details_), 
 	entities(entities_), entityCount(entityCount_), 
@@ -912,6 +793,14 @@ public:
 // i do not understand why this section is the only one that broke? maybe i needed long calls ?
 // at least on more strenuous rooms, movetime didnt seem to take a hit
 // but if there are speed issues, here is the place to check 
+
+// looking back on everything, the fact that this set exists is/was an objectively stupid oversight. 
+// actually maybe not? 
+// idek 
+// its not like many entities are being inserted/removed in a frame but 
+// well except during loading, but having them be inserted in there makes no difference
+// the fact that most of saneset's use is in the gamemap, and that i have the insane "if constexpr" line 
+// thing means this was just premature optimization 
 
 #define SANESETATTRIBUTES
 //#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
@@ -964,7 +853,7 @@ private:
 			int mid = low + (high - low) / 2;
 
 			if (data[mid] == elem) {
-				return -1; // Element already exists, return a special value
+				return -1; 
 			} else if (data[mid] < elem) {
 				low = mid + 1;
 			} else {
@@ -972,7 +861,6 @@ private:
 			}
 		}
 
-		// Element not found, return the index where it should be inserted
 		return low;
 	}
 	
@@ -1086,8 +974,6 @@ public:
 		return data.size();
 	}
 	
-	// is returning these iterators,,, ok??
-	
 	SANESETATTRIBUTES auto begin() {
 		return data.begin();
 	}
@@ -1191,40 +1077,39 @@ struct MessageStr {
 };
 
 constexpr unsigned hashString(const char* str) {
-    unsigned hash = 0;
+	unsigned hash = 0;
 
-    while(*str) {
-        hash = (hash * 31) + (*str);
-        str++;
-    }
+	while(*str) {
+		hash = (hash * 31) + (*str);
+		str++;
+	}
 
-    return hash;
+	return hash;
 }
 
 inline char* strstrCustom(const char* haystack, const char* needle) {
-    if (*needle == '\0') {
-        return (char*)haystack;  // Empty needle is always found
-    }
+	if (*needle == '\0') {
+		return (char*)haystack;
+	}
 
-    while (*haystack != '\0') {
-        const char* h = haystack;
-        const char* n = needle;
+	while (*haystack != '\0') {
+		const char* h = haystack;
+		const char* n = needle;
+		
+		while (*n != '\0' && *h == *n) {
+			h++;
+			n++;
+		}
 
-        // Check for substring match
-        while (*n != '\0' && *h == *n) {
-            h++;
-            n++;
-        }
 
-        // If the entire substring is found, return the starting address
-        if (*n == '\0') {
-            return (char*)haystack;
-        }
+		if (*n == '\0') {
+			return (char*)haystack;
+		}
 
-        haystack++;  // Move to the next character in the haystack
-    }
+		haystack++;  
+	}
 
-    return NULL;  // Substring not found
+	return NULL; 
 }
 
 

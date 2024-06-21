@@ -22,7 +22,7 @@ public:
 	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
 	
 	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
-	// i rlly should impliment dynamic resizing for these vecs.
+	
 	bn::deque<Pos, 128> shadowQueue;
 	
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
@@ -33,11 +33,6 @@ public:
 	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
 
 	Entity* playerPush = NULL;
-	
-	// 	bn::unordered_set<Entity*, MAXSPRITES, bn::hash<Entity*>, bn::equal_to<Entity*>>
-	
-	// i could include a unordered map here for each entity type, but 
-	// tbh, i dont want to.
 	
 	Player* player = NULL; // player will be a member of entityList, and included everywhere else
 	
@@ -132,7 +127,7 @@ public:
 	void addEntity(Entity* e);
 	
 	bool hasKills() const { return killedPlayer.size() != 0; }
-	// should i just make killedplayer public? idek anymore
+	
 	bool playerWon() const { return killedPlayer.contains(NULL); }
 	bool enemyKill() const { return !killedPlayer.contains(player); }
 	bool fallKill() const { return killedPlayer.contains(player); }
@@ -149,8 +144,7 @@ public:
 		}
 		return customKill;
 	}
-
-	// goofy!
+	
 	bool monKill() const { 
 		bool customKill = false;
 		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
@@ -194,11 +188,7 @@ public:
 	USEEWRAM void doVBlank();
 		
 private:
-	// make a class OBJECT, have entity and floortile extend it, have this be an array of that.
-	// or, illl,,,,, ill just have the floor be a special case tbh 
-	// 16 is excessive
 	SaneSet<Entity*, 4> killedPlayer; 
-	
 };
 
 
