@@ -446,6 +446,7 @@ public:
 	int rotateTanStatuesFrames = 0;
 	void rotateTanStatues();
 	void corrupt(int frames = 30);
+	void locustGet(bool isFirstLocust);
 	
 };
 

@@ -6106,6 +6106,65 @@ void EffectsManager::corrupt(int frames) {
 	createEffect(createFunc, tickFunc);
 }
 
+void EffectsManager::locustGet(bool isFirstLocust) {
+	
+	// play the animation for when you pickup a lotus. why was i so lazy?
+	// obj_locust_collect has good info 
+	// using spr_soulglow_big and spr_locust_idol
+	// should this effect be blocking? most likely (actually yes)
+	
+	const Pos p = entityManager->player->p;
+	
+	auto createFunc = [p](Effect* obj) -> void {
+		
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_soulglow_big;
+		obj->sprite.spritePointer.set_tiles(*obj->tiles, bn::sprite_tiles_items::dw_spr_soulglow_big_shape_size);
+		obj->sprite.spritePointer.set_bg_priority(0);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			0
+		);
+		
+		obj->tempCounter = 0;
+		
+		obj->x = p.x * 16 + 4;
+		obj->y = p.y * 16 - 12;
+		obj->sprite.updateRawPosition(obj->x, obj->y);
+	};
+	
+	auto tickFunc = [](Effect* obj) mutable -> bool {
+		
+		obj->tempCounter++;
+		if(obj->tempCounter == 7) {
+			obj->tempCounter = 0;
+			
+			obj->graphicsIndex = (obj->graphicsIndex + 1) % 5;
+			
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				obj->graphicsIndex
+			);
+			
+		}
+		
+		return false;
+	};
+	
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	
+	effectList.push_back(e1);
+	
+	if(isFirstLocust) {
+		
+		
+		
+	} else {
+		delay(70 + 7); // 35 for one cycle, 70 for 2, extra 7 to let it rest properly
+	}
 
+	removeEffect(e1);
+	
+}
 
 

@@ -653,6 +653,8 @@ void Chest::interact() {
 	
 		doUpdate();
 		
+		bool isFirstLocust = entityManager->player->locustCount == 0;
+		
 		bn::sound_items::snd_open.play();
 	
 		if(gotBonus) {
@@ -660,12 +662,14 @@ void Chest::interact() {
 		} else {
 			entityManager->player->locustCount++;
 		}
+		
 		tileManager->updateLocust();
 		// this isnt counted as a successful move, but we should still update locusts
 		tileManager->floorLayer.reloadCells();
 		
 		entityManager->player->currentDir = Direction::Down;
-		
+		entityManager->player->doUpdate(); // ensure the direction change is updated
+		effectsManager->locustGet(isFirstLocust);
 	}
 	
 }
