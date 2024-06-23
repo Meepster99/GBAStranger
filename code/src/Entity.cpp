@@ -40,8 +40,6 @@ void Entity::isDead() {
 
 // Player
 
-//EffectTypeArray questionMark[] = {EffectType(bn::sprite_tiles_items::dw_spr_question_black, 9)};
-
 void Player::pushRod(Pos tilePos) { 
 	
 	// pick tile up
@@ -450,7 +448,6 @@ Player::Player(Pos p_) : Entity(p_) {
 	BN_ASSERT((int)hasRod == 0 || (int)hasRod == 1, "why THE FUCK was player hasrod ", (int)hasRod);
 	BN_ASSERT((int)hasSuperRod == 0 || (int)hasSuperRod == 1, "why THE FUCK was player hasSuperRod ", (int)hasSuperRod);
 }
-
 
 // Enemy
 

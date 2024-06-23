@@ -23,13 +23,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	
 	levKill = false;
 
-	// delete old data 
 	// conspiricy time, NULL EVERYTHING. i rlly should have overloaded delete and made it check 
 	// bc on a gba deleting a null isnt going to,, give me the error i desire
 	killedPlayer.clear();
-	
 	shadowQueue.clear();
-	
 	kickedList.clear();
 	
 	if(player != NULL) {	
@@ -39,7 +36,6 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		}
 		player->rod.clear();
 	}
-	
 	
 	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
 		if(*it != NULL) { // sanity check
@@ -68,11 +64,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	shadowList.clear();
 	deadList.clear();
 	
-	
 	player = NULL;
 	
 	SaneSet<Pos, MAXENTITYSPRITES> posSet;
-	
 
 	for(int i=0; i<entitiesCount; i++) {
 		// i shouldnt have to do this, but despite getting a literal 1:1 memory recreation, it still chose to (curse) itself 
@@ -269,8 +263,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		}
 	}
 	
-	updateMap();
-	
+	updateMap();	
 }
 
 AddStatue* EntityManager::getAddStatue(Pos p) {
@@ -287,6 +280,8 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 	// gods 
 	// also omfg special bump func isnt even a func pointer, its a thing which needs to be overloaded.
 	// this is going to be shit
+	
+	// SHOULD THIS DATA[text, not mechanics at least] be mined from the game?
 	
 	AddStatue* res = new AddStatue(p);
 	
@@ -427,7 +422,6 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 		};
 	} else if(roomHash == hashString("rm_e_022\0")) {
 		
-		
 		// sword the leechs
 		// deathtile the maggots
 		// drop the eyes 
@@ -557,7 +551,6 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 	res->specialBumpFunctionPointer = specialBumpFunctionPointer;
 	
 	return res;
-	
 }
 
 Interactable* EntityManager::getEmptyChest(Pos p) {
@@ -1009,9 +1002,6 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	BN_ASSERT(futureEntityMap[e->p.x][e->p.y].contains(e), "tryed to move an entity in futuremap that wasnt there? x=", e->p.x, " y=", e->p.y);
 	futureEntityMap[e->p.x][e->p.y].erase(e);
 	
-	//stepOffs.insert(e->p);
-	//stepOns.insert(testPos);
-	
 	bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(e->entityType(), bn::pair<Pos, Pos>(e->p, testPos));
 	
 	tileManager->floorSteps.push_back(tempFloorStep);
@@ -1199,8 +1189,6 @@ void EntityManager::doMoves() { profileFunction();
 		}
 	}
 	
-
-
 	if( (shadowMove) && !(shadowQueue.size() == 0 && shadowList.size() == 0)) {	
 		manageShadows(shadowMove);
 		updateMap(); // this call may not be needed, but im not risking it
@@ -1428,7 +1416,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 	
 	Direction moveDir = playerDir.value();
 
-	// this whole function is now O(1) (assuming const insertion times, which isnt the case). that is insane to me.
+	// this whole function is now O(1) (assuming const insertion times, which isnt the case[BUT WOULD BE IF I WASINT A IDIOT]). that is insane to me.
 	
 	if(shadowList.size() != 0) {
 		
@@ -1678,7 +1666,6 @@ void EntityManager::hideForDialogueBox(bool vis, bool isCutscene) {
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
     }
-	
 }
 
 bool EntityManager::exitRoom() {

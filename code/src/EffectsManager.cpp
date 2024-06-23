@@ -287,34 +287,14 @@ void BigSprite::loadBoobTrap() {
 		static unsigned boobaBackup = 0;
 
 		if(boobaCount > 32) {
-		//if(true) {
-			
 			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
 				
 				bn::music::stop();
 				
 				bigSprite->effectsManager->doDialogue(
-				"fool.\n"
-				"get out of my sight.\0"
+					"fool.\n"
+					"get out of my sight.\0"
 				);
-				
-				
-				/*
-				bn::vector<BigSprite*, 128>& allBigSprites = globalGame->effectsManager.bigSprites;
-				
-				BigSprite* boobSprite = NULL;
-						
-				for(auto it = allBigSprites.begin(); it != allBigSprites.end(); ++it) {
-					if( (*it)->tiles == &bn::sprite_tiles_items::dw_spr_tail_boobytrap) {
-						boobSprite = *it;
-						break;
-					}
-				}
-				
-				BN_ASSERT(boobSprite != NULL, "couldnt find tails tail sprite ptr???");
-			
-				boobSprite->sprites[0].spritePointer.set_visible(false);
-				*/
 				
 				Pos startPos = globalGame->entityManager.player->p;
 				Pos downPos = startPos;
