@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", ("win32api", "pywin32"), "pytube"] ]
 
 	try:
-		res = subprocess.check_output(['which', 'ffmpeg'], stderr=subprocess.STDOUT)
+		res = subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.STDOUT)
 	except:
 		print("please install ffmpeg")
 		exit(0)

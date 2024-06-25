@@ -8,9 +8,12 @@
 !creationCodeData.json
 code/build/
 target
+Decompile
 *.sav
 *.ogg
 *.wav
+*.it
+*.xm
 *.dat
 *.csv
 /misc/CLI-windows-latest-Release-isBundled-true/

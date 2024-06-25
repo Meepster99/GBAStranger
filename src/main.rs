@@ -14,8 +14,13 @@
 #![cfg_attr(test, reexport_test_harness_main = "test_main")]
 #![cfg_attr(test, test_runner(agb::test_runner::test_runner))]
 
-// Include code generated for all the rooms by the build script. 
-include!(concat!(env!("OUT_DIR"), "/rooms.rs"));
+// Enable the allocator api so we can put vectors and stuff wherever we want. 
+#![feature(allocator_api)]
+
+// // Include code generated for all the rooms by the build script. 
+// include!(concat!(env!("OUT_DIR"), "/rooms.rs"));
+
+use agb::println;
 
 // The main function must take 1 arguments and never return. The agb::entry decorator
 // ensures that everything is in order. `agb` will call this after setting up the stack
@@ -23,10 +28,9 @@ include!(concat!(env!("OUT_DIR"), "/rooms.rs"));
 #[agb::entry]
 fn main(mut gba: agb::Gba) -> ! {
     loop {
-        // Print number of rooms loaded. 
-        agb::println!("Total rooms preloaded: {}", ALL_ROOMS.len());
+        println!("Ready...");
 
-        // Busy wait
+        // Busy wait. 
         for _ in 0..100 {}
     }
 }
