@@ -278,6 +278,9 @@ static int inline getWordTileIndex(const char c) {
 			return 18;
 		case 'P':
 			return 19;
+			
+		case 'E':
+			return 20;
 		
 		default: [[unlikely]]
 			BN_ERROR("unknown char ", c, " passed into getWordTileIndex");

@@ -165,7 +165,7 @@ auto swordGetFunc = []() -> int {
 		Pos tempPos = player->p;
 		
 		if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
-			return 67 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
+			return 68 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
 		}
 		
 		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
@@ -191,8 +191,6 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	stepOns.clear();
 	stepOffs.clear();
 	floorSteps.clear();
-	
-	
 	
 	if(entityManager->player != NULL) {
 		Player* player = entityManager->player;
@@ -327,10 +325,14 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		
 		BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
 		
-		if(roomIndex <= 256) {
+		if(roomIndex <= 256) { // normal rooms
 			floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
 			floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
-		} else {
+		} else if(roomIndex <= 330) { // EX rooms
+			int tempRoomIndex = roomIndex - 257;
+			floorMap[12][8] = new WordTile(Pos(12, 8), 'E', '0' + tempRoomIndex / 100);
+			floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (tempRoomIndex / 10) % 10, '0' + (tempRoomIndex % 10));
+		} else { // misc other rooms
 			floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '?');
 			floorMap[13][8] = new WordTile(Pos(13, 8), '?', '?');
 		}

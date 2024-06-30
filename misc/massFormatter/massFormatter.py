@@ -1385,6 +1385,15 @@ def generateCustomFloorBackground(outputPath):
 	nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
 	tiles.append(nextTile)
 	
+	
+	# add E for EX rooms
+	nextTile = np.full((16, 16), 2, dtype=np.uint8)
+	tempIndex = 16 * (ord('E') - ord('!'))
+	nextTile[0:16, 0:8] = temp[tempIndex:tempIndex+16, 0:8]
+	#tempIndex = 16 * (ord('P') - ord('!'))
+	#nextTile[0:16, 8:16] = temp[tempIndex:tempIndex+16, 0:8]
+	tiles.append(nextTile)
+	
 	# this should be above, but im scared ok 
 	temp = np.array(Image.open("./formattedOutput/allSprites/dw_spr_sword_flash.bmp"))
 	temp[temp == 0] = 2

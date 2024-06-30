@@ -456,6 +456,15 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_063
 	rm_test2_055
 	rm_test2_064
+	rm_test2_065
+	rm_test2_066
+	rm_test2_067
+	rm_test2_068
+	rm_test2_069
+	rm_test2_070
+	rm_test2_071
+	rm_test2_072
+	rm_test2_073
 	
 	# i have no idea if this is correct
 	rm_test2_002

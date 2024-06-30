@@ -1022,21 +1022,21 @@ def doFile(filename):
 	
 	if filename in customSampleRate:
 		GBASAMPLERATE = customSampleRate[filename]
-		print(CYAN + "running {:s} with {:d} as the samplerate".format(filename, GBASAMPLERATE) + RESET)
+		#print(CYAN + "running {:s} with {:d} as the samplerate".format(filename, GBASAMPLERATE) + RESET)
 	
 	if filename in customConvertFunc:
 		sampleConvertFunc = customConvertFunc[filename]
-		print(CYAN + "running {:s} with a custom convert func".format(filename) + RESET)
+		#print(CYAN + "running {:s} with a custom convert func".format(filename) + RESET)
 	
 	
-	print(WHITE + "cooking {:s}".format(filename) + RESET)
+	#print(WHITE + "cooking {:s}".format(filename) + RESET)
 
 	inputPath = os.path.join(audioFolder, filename)
 	
 	test = ITFile(inputPath)
 	test.write()
 	
-	print(WHITE + "done cooking {:s}".format(filename) + RESET)
+	#print(WHITE + "done cooking {:s}".format(filename) + RESET)
 	
 	GBASAMPLERATE = sampleBackup
 	sampleConvertFunc = convertBackup
