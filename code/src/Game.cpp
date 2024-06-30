@@ -13,8 +13,6 @@ unsigned playerMoveCount = 0;
 
 bool debugToggle = false;
 
-// yep. its exactly what it looks like.
-
 /*
 
 import math
@@ -70,15 +68,12 @@ void uncompressData(u8 res[126], u8* input) {
 void Game::createExitEffects() {
 	
 	// this func was originally in entityManager->exit, but was moved.
-	// tbh, it kinda shouldnt of been 
+	// tbh, it kinda shouldnt have been 
 	// bc in the future, getting timings of what death animations to stay on screen 
 	// before starting the transition will be, lets say spiritually taxing
 	// tbh, that will require so much rewriting/jank i probs just wont
 	
 	// this function is horrid.
-	
-	// might not be needed
-	//doButanoUpdate();
 	
 	Pos playerPos = entityManager.player->p;
 	
@@ -91,11 +86,6 @@ void Game::createExitEffects() {
 	// if a custom kill handler(like for mon or tan statues)
 	// but tbh, instead of calling those effects inside the domoves func, they really should be called here.
 	
-	/*
-	if(customKill) {
-		return;
-	}
-	*/
 	
 	// tbh this if statement is legacy now that im having death effects get drawn
 	// at sprite's screen poses, instead of their game coords, but im leaving it here bc im scaredas
@@ -106,20 +96,14 @@ void Game::createExitEffects() {
 		// this line should NOT be commented out
 		// how do i discern a falldeath from running into an enemy vs, shadow walkoff?	
 		Pos tempPos = playerPos;
-		//if(tempPos.move(entityManager.player->currentDir)) {
-		if(true) {
-			if(entityManager.killAtPos(tempPos)) {
-				playerPos = entityManager.playerStart;
-			}
+		if(entityManager.killAtPos(tempPos)) {
+			playerPos = entityManager.playerStart;
 		}
-		
-		//entityManager.player->p = playerPos;
 	}
 	
 	
-	// i could use the enemykill/fallkill thigns, but tbh like 
+	// i could use the enemykill/fallkill things, but tbh like 
 	// in certain cases, where an enemey kills you above a floor like, yea 
-	
 	if(entityManager.playerWon()) {
 		
 	} else if(entityManager.monKill()) {
@@ -139,7 +123,6 @@ void Game::createExitEffects() {
 	} else {
 		BN_LOG("killing player via fall");
 		
-		
 		entityManager.addKill(entityManager.player);
 		effectsManager.entityFall(entityManager.player);
 	}
@@ -149,7 +132,6 @@ void Game::createExitEffects() {
 
 void Game::findNextRoom() {
 	
-
 	if(entityManager.playerWon()) {
 		
 		entityManager.player->wingsUse = 0;
@@ -167,18 +149,6 @@ void Game::findNextRoom() {
 			cutsceneManager.crashGame();
 		}
 
-		/*
-		// iswhiterooms isnt properly updated for this?
-		// should this be <= 256 or iswhiterooms?
-		// does this ever actually happen??
-		if(tileManager.getLocustCount() == -1 && !roomManager.isWhiteRooms()) {
-			BN_LOG("crashing game due to bad locust count");
-			cutsceneManager.displayDisText("FATAL ERROR : LI NULL\0");
-			delay(5);
-			cutsceneManager.crashGame();
-		}
-		*/
-		
 		// check for cif statue
 		bool cifReset = false;
 		Pos testPos = entityManager.player->p;
@@ -313,143 +283,6 @@ void Game::findNextRoom() {
 			}
 		}
 	}	
-}
-
-void Game::changeMusic() {
-	
-	auto doPlay = [](const bn::music_item& item) -> void {
-		
-		/*
-		
-		an idea. 
-		build a whole different rom for each different song.
-		custom hardware(ill do something like writing to a certain rom address) 
-		(maybe theres a way to directly,,, get butano log calls?)
-		would switch the banks??
-		at which point, i can do whatever i want.
-		the issue? i hated the previous pcb software i used
-		
-		https://github.com/HDR/NintendoPCBs/tree/master/AGB-E02-20
-		
-		or,,, arduino? well for testing yes, but past that no
-		
-		fpga? i could do this with inline circuitry tho
-		maybe,,, depending on how this works i could clock(write) to a buffer 
-		which just has lines constantly going to the rom chip?
-		
-		lets be greedy and say i want every song.
-		thats 76. getting that down to 64 would be nice
-		but,,,, things arent always nice. 128 it is, and might as well just go up to 256 so i can 
-		say i need to track 8 bits
-		
-		this is going to need to be fpga, if i end up doing it 
-		and, considering that im basically done with the main game
-		and dont want this project to end, i probs will
-		
-		*/
-		
-		static int prevMode = globalGame->mode;
-		
-		if(bn::music::playing() && bn::music::playing_item() == item && prevMode == globalGame->mode) {
-			return;
-		}
-		
-		prevMode = globalGame->mode;
-		
-		bn::fixed adjustVal = 1.0;
-		
-		if((globalGame->mode == 2 || globalGame->entityManager.player->isVoided) && 
-			(item == bn::music_items::msc_dungeon_wings || 
-			item == bn::music_items::msc_beecircle || 
-			item == bn::music_items::msc_dungeongroove || 
-			item == bn::music_items::msc_013 || 
-			item == bn::music_items::msc_gorcircle_lo || 
-			item == bn::music_items::msc_levcircle || 
-			item == bn::music_items::msc_cifcircle
-			)) {
-			
-			adjustVal = 0.965;
-		}
-		
-		item.play();
-		
-		bn::music::set_pitch(adjustVal);
-		bn::music::set_tempo(adjustVal);
-		
-	};
-
-	int roomIndex = roomManager.roomIndex;
-	
-	if(roomIndex == 254 && mode == 2) {
-		doPlay(bn::music_items::msc_voidsong);
-		return;
-	}
-	
-	int index = 0;
-	int temp = 0;
-	
-	while(temp < 255) {
-		if(roomIndex == temp || roomIndex == temp + 1) {
-			bn::music::stop();
-			return;
-		}
-		index++;
-		temp = 28 * index; 
-	}
-	
-	if(roomIndex == 30) {
-		// tail!
-		doPlay(bn::music_items::msc_007);
-		return;
-	}
-
-	/*
-	1-28 add
-	29-56 eus
-	57-84 bee
-	84-112 mon
-	113-140 tan
-	141-168 gor
-	169-196 lev
-	196-224 cif
-	*/
-		
-	if(roomIndex <= 28) {
-		if(mode == 2) {
-			doPlay(bn::music_items::msc_themeofcif);
-		} else {
-			doPlay(bn::music_items::msc_001);
-		}
-	} else if(roomIndex <= 56) {
-		doPlay(bn::music_items::msc_dungeon_wings);
-	} else if(roomIndex <= 84) {
-		doPlay(bn::music_items::msc_beecircle);	
-	} else if(roomIndex <= 112) {
-		doPlay(bn::music_items::msc_dungeongroove);
-	} else if(roomIndex <= 140) {
-		doPlay(bn::music_items::msc_013);
-	} else if(roomIndex <= 168) {
-		doPlay(bn::music_items::msc_gorcircle_lo);
-	} else if(roomIndex <= 196) {
-		doPlay(bn::music_items::msc_levcircle);
-	} else if(roomIndex <= 224) {
-		doPlay(bn::music_items::msc_cifcircle);
-	} else if(strstrCustom(roomManager.currentRoomName(), "_bee_\0") != NULL ||
-			strstrCustom(roomManager.currentRoomName(), "_misc_\0") != NULL) {
-		doPlay(bn::music_items::msc_beesong);
-	} else if(strstrCustom(roomManager.currentRoomName(), "_e_\0") != NULL) {
-		doPlay(bn::music_items::msc_endless);
-	} else if(strstrCustom(roomManager.currentRoomName(), "_mon_0\0") != NULL ||
-			strstrCustom(roomManager.currentRoomName(), "_test_\0") != NULL) {	
-		doPlay(bn::music_items::msc_monstrail);
-	} else {
-		bn::music::stop();
-	}
-	
-	// voided song is msc_voidsong
-	// mon secret area bn::music_items::msc_monstrail
-	// bee music??? (is it bn::music_items::msc_beesong)
-	// dis bn::music_items::msc_endless
 }
 
 void Game::resetRoom(bool debug) {
@@ -1621,6 +1454,205 @@ void Game::run() {
 	}
 }
 
+// -----
+
+void Game::playSound(const bn::sound_item* sound) {
+	
+	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED OR ALTERED
+	
+	if(boobaCount >= 8 && (
+	sound == &bn::sound_items::snd_push_small
+	)) {
+		sound = &bn::sound_items::snd_bounce;
+	}
+	
+	if(state == GameState::Loading || state == GameState::Entering) {
+		return;
+	}
+
+	if(!removedSounds.contains(sound)) {
+		queuedSounds.insert(sound);
+	}
+	
+}
+
+void Game::removeSound(const bn::sound_item* sound) {
+	
+	if(state == GameState::Loading || state == GameState::Entering) {
+		return;
+	}
+	
+	queuedSounds.erase(sound);
+	removedSounds.insert(sound);
+}
+
+void Game::doSoundVBlank() {
+	
+	// should this if statement not be here and,,, just be like in the switch case? yes.
+	// but im tired 
+	
+	if(state == GameState::Loading || state == GameState::Entering) {
+		return;
+	}
+
+	unsigned playedSounds = 0;
+	
+	for(auto it = queuedSounds.begin(); it != queuedSounds.end(); ++it) {
+		if(!removedSounds.contains(*it)) {
+			(*it)->play();
+			playedSounds++;
+		}
+	}	
+	
+	/*
+	if(playedSounds != 0) {
+		BN_LOG("played ", playedSounds, " sound(s) (from the priority soundhandler)");
+	}
+	*/
+	
+	queuedSounds.clear();
+	removedSounds.clear();
+}
+
+void Game::changeMusic() {
+	
+	auto doPlay = [](const bn::music_item& item) -> void {
+		
+		/*
+		
+		an idea. 
+		build a whole different rom for each different song.
+		custom hardware(ill do something like writing to a certain rom address) 
+		(maybe theres a way to directly,,, get butano log calls?)
+		would switch the banks??
+		at which point, i can do whatever i want.
+		the issue? i hated the previous pcb software i used
+		
+		https://github.com/HDR/NintendoPCBs/tree/master/AGB-E02-20
+		
+		or,,, arduino? well for testing yes, but past that no
+		
+		fpga? i could do this with inline circuitry tho
+		maybe,,, depending on how this works i could clock(write) to a buffer 
+		which just has lines constantly going to the rom chip?
+		
+		lets be greedy and say i want every song.
+		thats 76. getting that down to 64 would be nice
+		but,,,, things arent always nice. 128 it is, and might as well just go up to 256 so i can 
+		say i need to track 8 bits
+		
+		this is going to need to be fpga, if i end up doing it 
+		and, considering that im basically done with the main game
+		and dont want this project to end, i probs will
+		
+		*/
+		
+		static int prevMode = globalGame->mode;
+		
+		if(bn::music::playing() && bn::music::playing_item() == item && prevMode == globalGame->mode) {
+			return;
+		}
+		
+		prevMode = globalGame->mode;
+		
+		bn::fixed adjustVal = 1.0;
+		
+		if((globalGame->mode == 2 || globalGame->entityManager.player->isVoided) && 
+			(item == bn::music_items::msc_dungeon_wings || 
+			item == bn::music_items::msc_beecircle || 
+			item == bn::music_items::msc_dungeongroove || 
+			item == bn::music_items::msc_013 || 
+			item == bn::music_items::msc_gorcircle_lo || 
+			item == bn::music_items::msc_levcircle || 
+			item == bn::music_items::msc_cifcircle
+			)) {
+			
+			adjustVal = 0.965;
+		}
+		
+		item.play();
+		
+		bn::music::set_pitch(adjustVal);
+		bn::music::set_tempo(adjustVal);
+		
+	};
+
+	int roomIndex = roomManager.roomIndex;
+	
+	if(roomIndex == 254 && mode == 2) {
+		doPlay(bn::music_items::msc_voidsong);
+		return;
+	}
+	
+	int index = 0;
+	int temp = 0;
+	
+	while(temp < 255) {
+		if(roomIndex == temp || roomIndex == temp + 1) {
+			bn::music::stop();
+			return;
+		}
+		index++;
+		temp = 28 * index; 
+	}
+	
+	if(roomIndex == 30) {
+		// tail!
+		doPlay(bn::music_items::msc_007);
+		return;
+	}
+
+	/*
+	1-28 add
+	29-56 eus
+	57-84 bee
+	84-112 mon
+	113-140 tan
+	141-168 gor
+	169-196 lev
+	196-224 cif
+	*/
+		
+	if(roomIndex <= 28) {
+		if(mode == 2) {
+			doPlay(bn::music_items::msc_themeofcif);
+		} else {
+			doPlay(bn::music_items::msc_001);
+		}
+	} else if(roomIndex <= 56) {
+		doPlay(bn::music_items::msc_dungeon_wings);
+	} else if(roomIndex <= 84) {
+		doPlay(bn::music_items::msc_beecircle);	
+	} else if(roomIndex <= 112) {
+		doPlay(bn::music_items::msc_dungeongroove);
+	} else if(roomIndex <= 140) {
+		doPlay(bn::music_items::msc_013);
+	} else if(roomIndex <= 168) {
+		doPlay(bn::music_items::msc_gorcircle_lo);
+	} else if(roomIndex <= 196) {
+		doPlay(bn::music_items::msc_levcircle);
+	} else if(roomIndex <= 224) {
+		doPlay(bn::music_items::msc_cifcircle);
+	} else if(strstrCustom(roomManager.currentRoomName(), "_bee_\0") != NULL ||
+			strstrCustom(roomManager.currentRoomName(), "_misc_\0") != NULL) {
+		doPlay(bn::music_items::msc_beesong);
+	} else if(strstrCustom(roomManager.currentRoomName(), "_e_\0") != NULL) {
+		doPlay(bn::music_items::msc_endless);
+	} else if(strstrCustom(roomManager.currentRoomName(), "_mon_0\0") != NULL ||
+			strstrCustom(roomManager.currentRoomName(), "_test_\0") != NULL) {	
+		doPlay(bn::music_items::msc_monstrail);
+	} else {
+		bn::music::stop();
+	}
+	
+	// voided song is msc_voidsong
+	// mon secret area bn::music_items::msc_monstrail
+	// bee music??? (is it bn::music_items::msc_beesong)
+	// dis bn::music_items::msc_endless
+}
+
+// -----
+
 uint64_t GameSave::getSaveHash() {
 	uint64_t res = 0;
 	
@@ -1835,65 +1867,6 @@ void Game::saveRNG() {
 	saveData.hash = saveData.getSaveHash();
 	bn::sram::write(saveData);
 }
-
-void Game::playSound(const bn::sound_item* sound) {
-	
-	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED OR ALTERED
-	
-	if(boobaCount >= 8 && (
-	sound == &bn::sound_items::snd_push_small
-	)) {
-		sound = &bn::sound_items::snd_bounce;
-	}
-	
-	if(state == GameState::Loading || state == GameState::Entering) {
-		return;
-	}
-
-	if(!removedSounds.contains(sound)) {
-		queuedSounds.insert(sound);
-	}
-	
-}
-
-void Game::removeSound(const bn::sound_item* sound) {
-	
-	if(state == GameState::Loading || state == GameState::Entering) {
-		return;
-	}
-	
-	queuedSounds.erase(sound);
-	removedSounds.insert(sound);
-}
-
-void Game::doSoundVBlank() {
-	
-	// should this if statement not be here and,,, just be like in the switch case? yes.
-	// but im tired 
-	
-	if(state == GameState::Loading || state == GameState::Entering) {
-		return;
-	}
-
-	unsigned playedSounds = 0;
-	
-	for(auto it = queuedSounds.begin(); it != queuedSounds.end(); ++it) {
-		if(!removedSounds.contains(*it)) {
-			(*it)->play();
-			playedSounds++;
-		}
-	}	
-	
-	/*
-	if(playedSounds != 0) {
-		BN_LOG("played ", playedSounds, " sound(s) (from the priority soundhandler)");
-	}
-	*/
-	
-	queuedSounds.clear();
-	removedSounds.clear();
-}
-
 
 
  

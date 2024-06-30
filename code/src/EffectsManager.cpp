@@ -88,11 +88,9 @@ BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int wi
 	auto spriteShape = bn::sprite_shape_size(newWidth, newHeight);
 	
 	BN_LOG("bigsprite w,h = ", newWidth, " ", newHeight);
-	
-	//BN_LOG(tiles->tiles_count(), " ", spriteShape.tiles_count(bn::bpp_mode::BPP_4));
-	
+
 	Sprite tempSprite(*tiles, spriteShape);
-	//yPos -= ((8 * (4 - height)) + 8);
+
 	yPos -= 8; // THIS YPOS IS TO OFFSET THE BORDER AROUND THE SCREEN
 	tempSprite.updateRawPosition(xPos, yPos);
 	
@@ -1422,8 +1420,6 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	if(inward && game->roomManager.isWhiteRooms()) {
 		tileIndex = 126;
 	}
-	
-	
 	
 	if(inward && cifReset) {
 		tileIndex = 126;

@@ -67,7 +67,7 @@
 
 #ifdef DISABLEASSERTS
 
-#warning asserts are disabled! you might have a bad time (sans noises)
+#warning asserts are disabled! you might have a bad time
 
 #undef BN_ASSERT
 #define BN_ASSERT(...) do {} while (false)
@@ -177,7 +177,6 @@ static const char *GameStateToString[] ={
 
 	stream << GameStateToString[static_cast<int>(e)];
 	return stream;
-
 }
 
 enum class Direction {
@@ -199,7 +198,6 @@ static const char *DirectionToString[] ={
 
 	stream << DirectionToString[static_cast<int>(e)];
 	return stream;
-
 }
 
 enum class EntityType {
@@ -311,32 +309,22 @@ static const char *TileTypeToString[] ={
 }
 
 #define BACKGROUNDMAPATTRIBUTES __attribute__((section(".iwram")))
-//#define BACKGROUNDMAPATTRIBUTES __attribute__((section(".ewram")))
-//#define BACKGROUNDMAPATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 class BackgroundMap {
 public:
 
 	bn::regular_bg_map_cell cells[32 * 32];
 	bn::regular_bg_map_item mapItem;
-	//bn::regular_bg_item bg_item;
 	bn::regular_bg_ptr bgPointer;
 	bn::regular_bg_map_ptr bgMap;
 
 	static Palette* backgroundPalette;
-	
-	// bn::bg_palette_item palette
-	// how in tarnation can butano look you in the face, and say "yea do this for a background map"
+
 	BackgroundMap(bn::regular_bg_tiles_item& tileset, int zIndex) :
 		mapItem(cells[0], bn::size(32, 32)),
-		
-		// it seems that,, bg_item holds on to whatever previous tileset it was?
-		
-		bgPointer(bn::regular_bg_item(tileset, 
-		
-		backgroundPalette->getBGPalette()
-		
-		,mapItem).create_bg(8, 48)),
+		bgPointer(
+			bn::regular_bg_item(tileset, backgroundPalette->getBGPalette(), mapItem).create_bg(8, 48)
+		),
 		bgMap(bgPointer.map())
 		{
 			init(zIndex);	
@@ -364,10 +352,8 @@ public:
 	bgPointer(bgItem.create_bg(8, 48)),
 	bgMap(bgPointer.map())
 	{
-		//init(zIndex);
 		bgPointer.set_priority(zIndex);
 	}
-	
 	
 	void create(const bn::regular_bg_item& bgItem, int zIndex = 0) {
 		bgPointer.set_priority(zIndex);
@@ -378,76 +364,66 @@ public:
 		bgPointer.set_x(8 + 8);
 		bgPointer.set_y(8 + 48);
 		
-		// does this do a vblank? if so i mean ill just cover it with another bg ig
 		reloadCells();
-		
 	}
 		
 	void init(int zIndex) {
-		//bgPointer.set_z_order(zIndex);
-			bgPointer.set_priority(zIndex);
-			
-			//setTile(0,21,4);
-			//setTile(31,31,4);
-
-			setTile(1,21,4);
-			setTile(1,22,4);
-			setTile(1,23,4);
-			
-			setTile(4,21,4);
-			setTile(4,22,4);
-			setTile(4,23,4);
-			
-			setTile(2,24,4);
-			setTile(3,24,4);
-			
-			// -----
-			
-			setTile(7,21,4);
-			setTile(7,22,4);
-			setTile(7,23,4);
-			
-			setTile(9,21,4);
-			setTile(9,22,4);
-			setTile(9,23,4);
-			
-			setTile(11,21,4);
-			setTile(11,22,4);
-			setTile(11,23,4);
-			
-			setTile(8,24,4);
-			setTile(10,24,4);
-			
-			// -----
-			
-			setTile(14,21,4);
-			setTile(14,22,4);
-			setTile(14,23,4);
-			
-			setTile(17,21,4);
-			setTile(17,22,4);
-			setTile(17,23,4);
-			
-			setTile(15,24,4);
-			setTile(16,24,4);
+		bgPointer.set_priority(zIndex);
+		
+		setTile(1,21,4);
+		setTile(1,22,4);
+		setTile(1,23,4);
+		
+		setTile(4,21,4);
+		setTile(4,22,4);
+		setTile(4,23,4);
+		
+		setTile(2,24,4);
+		setTile(3,24,4);
+		
+		// -----
+		
+		setTile(7,21,4);
+		setTile(7,22,4);
+		setTile(7,23,4);
+		
+		setTile(9,21,4);
+		setTile(9,22,4);
+		setTile(9,23,4);
+		
+		setTile(11,21,4);
+		setTile(11,22,4);
+		setTile(11,23,4);
+		
+		setTile(8,24,4);
+		setTile(10,24,4);
+		
+		// -----
+		
+		setTile(14,21,4);
+		setTile(14,22,4);
+		setTile(14,23,4);
+		
+		setTile(17,21,4);
+		setTile(17,22,4);
+		setTile(17,23,4);
+		
+		setTile(15,24,4);
+		setTile(16,24,4);
 	}
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) {
-		
 		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
 
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
 
 		current_cell_info.set_tile_index(tileIndex);
 		current_cell = current_cell_info.cell(); 
-
 	}
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
-		
 		//bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
 		// removing butano's overhead saved a regretably large amount of cpu. 
-		// its a bummer that my other arrays arent indexed by [y][x] but by [x][y], as [y][x] would be better for optimization
 		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
 
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
@@ -468,11 +444,7 @@ public:
 class Layer {
 public:
 
-	// rawmap is now a pointer to avoid all the bs in regards to statically allocating the bs in it
-	// WILL THIS BEING IN HEAP SLOW (curse) DOWN??
-	// bc if so,, we are (curse)ed
 	BackgroundMap rawMap;
-	// dont ask
 	Layer(bn::regular_bg_tiles_item tileset, int zIndex, int fillIndex = 0) :
 		rawMap(tileset, zIndex)
 		{				
@@ -504,20 +476,8 @@ public:
 	virtual ~Layer() = default;
 	
 	virtual void draw(u8 (&gameMap)[14][9]) {
-		
 		BN_ERROR("DONT CALL THE ACTUAL DRAW METHOD IN COLLISION");
-		
-		for(int x=0; x<14; x++) {
-			for(int y=0; y<9; y++) {
-				u8 tile = gameMap[x][y];
-			
-				rawMap.setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
-				rawMap.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
-				rawMap.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
-				rawMap.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
-			}
-		}
-		rawMap.reloadCells();
+		(void)gameMap;
 	}
 	
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) { 
@@ -532,7 +492,6 @@ public:
 	
 	BACKGROUNDMAPATTRIBUTES void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// this func actually being able to flip (curse) properly is UNCONFIRMED bc I AM SLEEPY
-		
 		// coming back to this code, a solid 3 months later, what the fuck?
 		// coming back to this code another ~6? months later, what the fuck?
 		tempTileIndicies[0] = 4 * tile + ((flipY << 1) | flipX);
@@ -769,13 +728,6 @@ public:
 	
 };
 
-//#include "Palette.h"
-
-//class Entity;
-
-//template <size_t Size>
-//using EntitySet = bn::unordered_set<Entity*, Size, bn::hash<Entity*>, bn::equal_to<Entity*>>;
-
 //template <size_t Size>
 //using EntitySetIterator = EntitySet<Size>::iterator;
 //using EntitySetIterator = bn::unordered_set::iterator;
@@ -788,11 +740,6 @@ public:
 // i could maybe use,, unique pointer? but tbh i just dont want to 
 // actually, we only have unique pointers! no shared, so im doing this
 // insertion will be slow, but at least lookup will be fast.
-
-// this was commented out when updating devkit versions decided to break shit. 
-// i do not understand why this section is the only one that broke? maybe i needed long calls ?
-// at least on more strenuous rooms, movetime didnt seem to take a hit
-// but if there are speed issues, here is the place to check 
 
 // looking back on everything, the fact that this set exists is/was an objectively stupid oversight. 
 // actually maybe not? 
@@ -1111,7 +1058,4 @@ inline char* strstrCustom(const char* haystack, const char* needle) {
 
 	return NULL; 
 }
-
-
-
 

@@ -12,21 +12,7 @@
 
 // bash -c " git ls-files *.py *.cpp *.h | xargs cat | sed '/^\s*$/d' | wc -l"
 
-
-//#include "ugba/ugba.h"
-
-// https://github.com/GValiente/butano/blob/master/butano/hw/3rd_party/libugba/include/ugba/definitions.h
-
-// 3 (curse)ing hours.
-// the interrupt. 
-// is commented out.
-// in https://github.com/GValiente/butano/blob/8e0c20f9264fe2d3eebeb1e198ad02878a025ed8/butano/hw/3rd_party/libugba/src/irq_handler.s#L106
-// i need to speak to the manager.
-// I AM ACTUALLY SO (curse)ING PISSED.
-// moving the func to game.cpp(actually maybe not)
-
 // now that i think abt it,,, these things didnt have to be pointers,,, since globals are stored in ram.
-
 unsigned* stareTiles = NULL;
 unsigned short* stareMap = NULL;
 int* stareTilesCount = 0;
@@ -411,7 +397,6 @@ int main() {
 	
 	// dont cause a initial framedrop on boot.
 	bn::core::update();
-	
 
 	Game* game = NULL;
 	
@@ -426,23 +411,7 @@ int main() {
 		delete game;
 		game = NULL;
 		bn::core::update();
-		
-		/*
-		BN_LOG("bg_maps status");
-		bn::bg_maps::log_status();
-		BN_LOG("bg_tiles status");
-		bn::bg_tiles::log_status();
-		BN_LOG("sprite_tiles status");
-		bn::sprite_tiles::log_status();
-		BN_LOG("bg_palettes status");
-		bn::bg_palettes::log_status();
-		BN_LOG("sprite_palettes status");
-		bn::sprite_palettes::log_status();
-		BN_LOG("memory status");
-		bn::memory::log_alloc_ewram_status();
-		*/
 	}
-	
 }
 
 
