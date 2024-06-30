@@ -1389,18 +1389,27 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	
 	static bool firstRun = true;
 	static int layer = 0;
+	static bool cifReset = false; // checking this here is not ideal, neither is passing it from game though\0
+	
 	if(firstRun) {
 		firstRun = false;
 		layer = inward ? 30 : 0;
+		
+		Pos testPos = entityManager->player->p;
+		if(testPos.move(Direction::Up)) {
+			SaneSet<Entity*, 4> tempMap = entityManager->getMap(testPos);
+			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+				if((*it)->entityType() == EntityType::CifStatue) {
+					cifReset = true;
+					setBorderColor(false);
+					break;
+				}	
+			}
+		}
+		
 	}
 	(void)autoSpeed;
-	//if(autoSpeed && frame % 5 != 0) {
-	//if(autoSpeed && frame % 3 != 0) {
-	//if(autoSpeed && frame % 2 != 0) {
-	//if(autoSpeed && frame % 2 != 0) {
-	//	return false;
-	//
-	
+
 	Pos p = entityManager->player->p;
 	
 	int xPos = (p.x * 2) + 1;
@@ -1408,10 +1417,15 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	
 	int increment = inward ? -1 : 1;
 	int stopIndex = inward ? -1 : 30;
-	
 	int tileIndex = 4 * inward;
 	
 	if(inward && game->roomManager.isWhiteRooms()) {
+		tileIndex = 126;
+	}
+	
+	
+	
+	if(inward && cifReset) {
 		tileIndex = 126;
 	}
 	
@@ -1462,6 +1476,7 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	
 	
 	firstRun = true;
+	cifReset = false;
 	return true;
 }
 

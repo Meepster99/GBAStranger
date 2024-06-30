@@ -158,22 +158,9 @@ def readCreationCode(p, creationCode):
 		frame = frames[i]
 			
 		try:
-			#frames[4].ObjectFunctions.obj_spawnpoint(x, y, None)
-			#print(frames[4].frame.f_locals)
-			#exec("ObjectFunctions.obj_spawnpoint(Pos({:d}, {:d}), 'dont')".format(x, y), globals(), frame.frame.f_locals)
-			
-			#temp = "getattr(ObjectFunctions, '{:s}')(Pos({:d}, {:d}), None)".format(data, x, y)
-			#temp = "print(getattr(ObjectFunctions, '{:s}'))".format(data)
-			#print(temp)
-			#exec(temp, frame.frame.f_globals, frame.frame.f_locals)
-			
 			temp = "getattr(ObjectFunctions, '{:s}')(Pos({:d}, {:d}), None)".format(data, x, y)
-			#print(temp)
 			exec(temp, frame.frame.f_globals, frame.frame.f_locals)
-			#print("-----")
-			
 		except Exception as e:
-			
 			print(e)
 			print("omfg")
 			exit(1)
@@ -219,7 +206,7 @@ def readCreationCode(p, creationCode):
 		(r"global\.jukebox_song", "jukebox_song"),
 		(r"obj_inventory\.ds_ccr", "False"),
 		
-		(r"((?:instance_create_layer|instance_create_depth)\(.+, .+, .+, )(.+)(\))", r'\1"\2"\3'),
+		(r"((?:instance_create_layer|instance_create_depth)\((?:.+?,\s*)+)(.+)\)", r'\1"\2")'),
 		(r"(instance_exists\()(.+?)(\))", r'\1"\2"\3'),
 	]
 	
@@ -248,41 +235,17 @@ def readCreationCode(p, creationCode):
 				break
 				
 		line = re.sub(r"return;", r"break", line)
-		
 
-		"""
-		if "instance_create_layer" in line or "instance_create_depth" in line:
-			lastSpaceIndex = line.rfind(" ")+1
-			line = line[:lastSpaceIndex] + "\"" + line[lastSpaceIndex:]
-			line = line[:-1] + "\"" + line[-1:]
-		
-		
-		
-		if "instance_exists" in line:
-			index = line.find("instance_exists") + len("instance_exists") + 1
-			line = line[:index] + "\"" + line[index:]
-			
-			while index < len(line):
-				if line[index] == ")":
-					break
-				index += 1
-			else:
-				print("wtf, what the (curse). what the (curse)")
-				exit(1)
-			
-			line = line[:index] + "\"" + line[index:]
-		"""
-
-		
 		execString += ("\t" * indentLevel) + line + "\n"
 	
-		
 	# this lets break break out of the while loop, which is basically the same as like, just returning
+	# this has a very stupid oversight! what if there is any other loop?
 	execString = "while True:\n" + execString + "\tbreak\n"
 	
 	#print(CYAN + str(p) + " " + creationCode + RESET)
 	#print(GREEN + execString + RESET)
 	
+	# capture the current state of the program, so that the exec can modify it
 	bruh = locals()
 	globalBruh = globals()
 	globalBruh["layer"] = None
@@ -317,7 +280,6 @@ def readCreationCode(p, creationCode):
 		print("\n")
 		exit(1)
 		
-	
 	if "layer" in globalBruh:
 		layer = globalBruh["layer"]
 	
@@ -326,16 +288,6 @@ def readCreationCode(p, creationCode):
 	
 	b_form = bruh["b_form"]
 	dl_form = bruh["dl_form"]
-	
-	
-	#print(creationCode)
-	#print("\n".join(originalLines))
-	#print("\n")
-	#print("\n".join(lines))
-	#print("\n")
-	#print(execString)
-	#print(layer, destroy, b_form, dl_form)
-	#print("-----")
 	
 	if layer:
 		return layer
@@ -354,37 +306,12 @@ def readCreationCode(p, creationCode):
 		tempRoom = None
 		if "roomName" in globalBruh:
 			tempRoom = globalBruh["roomName"] 
-			
-	
 		return [res, tempRoom]
 	
 	if "contents" in bruh:
 		return "contents = {:d}".format(bruh["contents"])
 	
 	return None
-	
-	
-	
-	f = open(os.path.join("../ExportData/Export_Code", creationCode + ".gml"))
-	lines = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ]
-	f.close()
-	idek = "   ".join(lines)
-	#creationCodeData[idek] = [None]
-	
-	if idek not in creationCodeData:
-		print(RED + idek + " wasnt found in creationcode data!!! this is rlly (curse)ing bad!!!! add it!!!!" + RESET)
-		
-		
-		newCreationCodesData[idek] = [None]
-
-		#return None
-		exit(1)
-		
-	thisCode = creationCodeData[idek]
-	if len(thisCode) == 1:
-		return creationCodeData[idek][0]
-	
-	return creationCodeData[idek][isHardMode]
 	
 def writeFooter(f, successRoomsList):
 	
@@ -674,6 +601,8 @@ struct MessageStrJank {{
 	data = data.format(hardModeString, successRoomsCount, roomData, hardModeString, roomNameData)
 	
 	f.write(data + "\n")
+	
+	f.write("// Staying misfortunate is negligence, and not trying to become happy is cowardice.\n")
 
 	pass
 
@@ -2587,7 +2516,7 @@ def convertAllRoomsWorker(f, isHardModePass):
 	#print("compressed data had a ratio of {:6.2f}%".format(100 * compressedBytes / uncompressedBytes))
 
 	# program hands without this being here?
-	print("convertAllRoomsWorker done\n")
+	print(GREEN + "convertAllRoomsWorker done\n" + RESET)
 	
 	pass
 	
@@ -2630,12 +2559,8 @@ def main():
 	
 	shutil.copy("AllRooms.h", "../../code/src")
 	
-	
 	print("room conversion success")
 
-	# sometimes (most likely due to multiprocessing) this program hangs??
-	
-	
 	return None
 	
 if __name__ == "__main__":
