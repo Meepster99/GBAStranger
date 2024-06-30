@@ -679,47 +679,38 @@ void Chest::specialBumpFunction() {
 	}
 }; 
 
-// why doesnt this work??
-//const char* const randomBoulderMessages[] = {"jfdklsafs", "a", "123124", "VOID look heres a bunch of  text wow we even have scrolling\nbruh1\nbruh2"};
-
-// i swear, why cant i do this without a struct? idek if the idek var is needed, but im not going to be changing it.
-// messagestr struct used to be here, now in sharedtypes
-
-// each string here has a limit of,, 64 non space chars in between lines(seperated with \n)
-// i,, could do something to fix that though? but like ugh 
-// idek 
-
-#define MSGSTR(s) { s }
-const MessageStr randomBoulderMessages[] = { 
-	MSGSTR("lmao if you are seeing this, i did something wrong\0"), 
-	MSGSTR("i rlly hope this works\0"), 
-	MSGSTR("Did you know every time you sigh, a little bit of happiness escapes?\0"), 
-	MSGSTR("VOID look heres a bunch of text wow we even have scrolling\nbruh1\nbruh2\0"),
-	MSGSTR("jesus christ i need a job\0"),
-	MSGSTR("ugh\0"),
-	MSGSTR("i firmly believe that cif is best lord\0"),
-	MSGSTR("please if you know anyone who has a job in CS, give them\nmy contact info, i need a job\0"),
-	MSGSTR("you might be able to still open the chest when you arent facing it\ndepending on if ive fixed that yet\0"), // it would be funny to program in an exception for this chest only
-	MSGSTR("uwu\nuwuuwuwuwuwuwu\0"),
-	MSGSTR("lev is so hot omgomgomgomgomgomg\0"),
-	MSGSTR("i felt like there should be more messages here, but idk what to write\0"),
-	MSGSTR("borerlining???\rboderlining???\rborderlining???\0"),
-	MSGSTR("you should pay attention to the trees.\rtheres some eggs to be ate!\0"),
-	MSGSTR("to this day, i swear that the compiler doesnt properly nullterm strings. or maybe its the string_view thingy in sprite_text_generator????? makes no sense\0"),
-	MSGSTR("Play the milk games!\0"),
-	MSGSTR("Play Celeste!\0"),
-	MSGSTR("Watch the monogatari series!\0"),
-	MSGSTR("Watch(and read, its getting super good, but ending soon) yofukashi no uta!\0"),
-	MSGSTR("Listen to Bloody Mercury, i rlly like their music. Also Vafi, both are on spotify and youtube.\0"),
-	MSGSTR("I really am sitting here typing messages no one will ever read.\nlol\0"),
-	MSGSTR("ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0"),
-	MSGSTR("I feel like i need to start stacking therapy sessions.\rLike,,,, doing multiple therapy at once.\0"),
-	MSGSTR("By the way, if you want to hear voided, goto B254 as cif. Thats where it plays.\nAnother fun fact is, the data for that song actually takes up 21% of the whole rom file, since i wanted it to sound good.\0"),
-	MSGSTR("I often wonder about why I made this. Im on new meds now, and my work on this has really slowed down. Part of me thinks that its because I am basically done. But another part of me worries that the meds are making me, complacent? tired? more worthless than I already am. At the end of the day, what have I created here. What have I done. Ive done nothing but regurgitate an objectively worse caricature of the actual game. I feel like this whole project is just plagiarism. And it hurts. Because I love this game so fucking much.\0"),
-	MSGSTR("Knowing and not knowing don't matter. After all, even if you don't know about something, you can guess just about everything if you look at it.\0"),
-	MSGSTR("I don't know everything, I just know what I know\0"),
-	MSGSTR("I know everything. There's nothing i don't know\0"),
-	MSGSTR("I don't know anything, you are the one who knows\0")
+// all strings must be double nulltermed!
+const char* randomBoulderMessages[] = { 
+	"lmao if you are seeing this, i did something wrong\0", 
+	"i rlly hope this works\0", 
+	"Did you know every time you sigh, a little bit of happiness escapes?\0", 
+	"VOID look heres a bunch of text wow we even have scrolling\nbruh1\nbruh2\0",
+	"jesus christ i need a job\0",
+	"ugh\0",
+	"i firmly believe that cif is best lord\0",
+	"please if you know anyone who has a job in CS, give them\nmy contact info, i need a job\0",
+	"you might be able to still open the chest when you arent facing it\ndepending on if ive fixed that yet\0", // it would be funny to program in an exception for this chest only
+	"uwu\nuwuuwuwuwuwuwu\0",
+	"lev is so hot omgomgomgomgomgomg\0",
+	"i felt like there should be more messages here, but idk what to write\0",
+	"borerlining???\rboderlining???\rborderlining???\0",
+	"you should pay attention to the trees.\rtheres some eggs to be ate!\0",
+	"to this day, i swear that the compiler doesnt properly nullterm strings. or maybe its the string_view thingy in sprite_text_generator????? makes no sense\0",
+	"Play the milk games!\0",
+	"Play Celeste!\0",
+	"Watch the monogatari series!\0",
+	"Watch(and read, its getting super good, but ending soon) yofukashi no uta!\0",
+	"Listen to Bloody Mercury, i rlly like their music. Also Vafi, both are on spotify and youtube.\0",
+	"I really am sitting here typing messages no one will ever read.\nlol\0",
+	"ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0",
+	"I feel like i need to start stacking therapy sessions.\rLike,,,, doing multiple therapy at once.\0",
+	"By the way, if you want to hear voided, goto B254 as cif. Thats where it plays.\nAnother fun fact is, the data for that song actually takes up 21% of the whole rom file, since i wanted it to sound good.\0",
+	"I often wonder about why I made this. Im on new meds now, and my work on this has really slowed down. Part of me thinks that its because I am basically done. But another part of me worries that the meds are making me, complacent? tired? more worthless than I already am. At the end of the day, what have I created here. What have I done. Ive done nothing but regurgitate an objectively worse caricature of the actual game. I feel like this whole project is just plagiarism. And it hurts. Because I love this game so fucking much.\0",
+	"Knowing and not knowing don't matter. After all, even if you don't know about something, you can guess just about everything if you look at it.\0",
+	"I don't know everything, I just know what I know\0",
+	"I know everything. There's nothing i don't know\0",
+	"I don't know anything, you are the one who knows\0",
+	"Staying misfortunate is negligence, and not trying to become happy is cowardice.\0"
 };
 
 void generateFunny(char* res) {
@@ -767,7 +758,7 @@ void Boulder::interact() {
 		index = 8;
 		lastIndex = index;
 
-		const char* temp = randomBoulderMessages[index].str;
+		const char* temp = randomBoulderMessages[index];
 			
 		effectsManager->doDialogue(temp);
 		return;
@@ -794,23 +785,17 @@ void Boulder::interact() {
 	
 	lastIndex = index;
 
-	const char* temp = randomBoulderMessages[index].str;
+	const char* temp = randomBoulderMessages[index];
 	
 	if(index == 0) {
-		
-		// idc abt stack allocs anymore, im fucking scared of leaking
 		char buffer[512];
 		
 		generateFunny(buffer);
-			
-		// i remember having rlly weird problems with c_str vs data, i hope this is ok
-		//const char* actualTemp = string.data();
+
 		effectsManager->doDialogue(buffer);
 	} else {
 		effectsManager->doDialogue(temp);
-	}
-	
-	
+	}	
 }
 
 void Obstacle::moveSucceded() {

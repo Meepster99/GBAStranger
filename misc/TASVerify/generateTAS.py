@@ -99,7 +99,7 @@ class Process:
 		temp = self.read(0x0865B4F0, 1, raw=True)
 		temp = int.from_bytes(temp)
 		
-		print(temp)
+		#print(temp)
 		
 		"""
 		temp = self.read(0x0865B6AB, 1, raw=True)
@@ -141,6 +141,7 @@ class Process:
 		return ["Z", "U", "D", "L", "R"][risingState.index(1)]
 		
 def updateJSON(room):
+	
 	if room is None:
 		return
 		
@@ -152,7 +153,14 @@ def updateJSON(room):
 		
 	data = {}
 	with open("TASdata.json", "r") as f:
-		data[room] = recentPresses
+		data = json.load(f)
+	
+	data[room] = parsedPresses
+	
+	print(json.dumps(data, indent=4))
+	
+	with open("TASdata.json", "w") as f:
+		json.dump(data, f, indent=4)
 		
 	
 	pass
@@ -174,21 +182,15 @@ def logKeys():
 	
 	# VoidStranger.exe+8B0798
 	# 1408B0798
-	
-	
-	
+
 	room = None
 	while True:
 		tempRoom = vs.readRoom()
 		recentPresses += vs.getKeys()
-		
-		#print(bytearray(vs.read(0x0865B4F0, 8)))	
-		
 		if room != tempRoom:
 			updateJSON(room)
 			recentPresses = ""
 			room = tempRoom
-		#time.sleep(1/60)
 		time.sleep(1/120)
 
 if __name__ == "__main__":

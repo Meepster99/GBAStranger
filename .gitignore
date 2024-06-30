@@ -6,6 +6,7 @@
 *.gba
 *.json
 !creationCodeData.json
+!TASdata.json
 code/build/
 target
 Decompile

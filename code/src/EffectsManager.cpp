@@ -6186,8 +6186,11 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 	}
 	
 	Sprite itemGetSprite(*itemGetTiles);
-	itemGetSprite.spritePointer.set_bg_priority(0);
+	itemGetSprite.spritePointer.set_bg_priority(1);
+	itemGetSprite.spritePointer.set_z_order(-1);
 	itemGetSprite.updatePosition(entityManager->player->p);
+	
+	entityManager->player->sprite.spritePointer.set_visible(false);
 	
 	if(isFirstLocust) {
 		
@@ -6210,6 +6213,7 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 		delay(35 * 2 + 7); // 35 for one cycle, 70 for 2, extra 7 to let it rest properly
 	}
 
+	entityManager->player->sprite.spritePointer.set_visible(true);
 	removeEffect(e1);
 	removeEffect(e2);
 }
