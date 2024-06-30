@@ -19,7 +19,6 @@ void Floor::setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 	collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 }
 
-//__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void doFloorDraw() {
 __attribute__((noinline, section(".iwram"))) void doFloorDraw() {
 	
 	auto& floorMap = globalGame->tileManager.floorMap;
@@ -97,7 +96,6 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 	}
 }
 
-//__attribute__((section(".ewram"))) void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]) {
 void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][16]) {
 		
 	// THIS COULD, AND SHOULD BE OPTIMIZED INTO ONE LOOP OVER THE THING.
@@ -174,11 +172,7 @@ auto swordGetFunc = []() -> int {
 	return 57;
 };
 
-// TODO: should tiles have entitymanagaer access?
-// copy tiles could call shadow spawns from there
-// death tiles could kill from there 
-// also, i would be passing the entity in as an optional param, maybe?
-// assuming that doesnt cause slowdown, that would be a good idea
+// -----
 
 void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
 	
@@ -248,8 +242,6 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 					break;
 				case TileType::Exit:
 					floorMap[x][y] = new Exit(tempPos);
-					//BN_ASSERT(exitTile == NULL, "tried loading in two exits on one level?");
-					// i could just,,, loop over the floor every time a switch is pressed, but i dont rlly want to do that
 					exitTile = static_cast<Exit*>(floorMap[x][y]);
 					break;
 				case TileType::Switch:
@@ -262,8 +254,6 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 			}
 		}
 	}
-	
-	//BN_ASSERT(exitTile != NULL, "no exittile was loaded in this level?");
 
 	Switch::pressedCount = 0; // is this,,, ok? TODO, SEE IF THIS CAUSES ISSUES
 	
@@ -271,38 +261,24 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	
 	BN_ASSERT(Switch::totalCount == switchTracker, "after loading in new tiles, the number of switches and number inside the class wasnt equal???");
 	
-	// draw out the UI.
-	
 	// SHOULD THE UI BE EFFECT BASED?
-	// i could add funcs for pickup and putdown, and have the tiles possess effectswhich draw them out?
-	// ugh, tbh it looks fine except for the D in void. maybe thats a manual fix.
-	
-	//if((strstrCustom(game->roomManager.currentRoomName(), "_u_00\0") == NULL) &&
-	//	(strstrCustom(game->roomManager.currentRoomName(), "_u_en\0") == NULL)) {
 	
 	BN_LOG("whiteroomstatus is ", game->roomManager.isWhiteRooms());
 	
 	if(!game->roomManager.isWhiteRooms()) {
+		// blank tile
 		floorMap[0][8] = new WordTile(Pos(0, 8));
 		
-		floorMap[1][8] = new WordTile(Pos(1, 8), 'V', 'O');
-		floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
-		// we now have a special tile for the 'ID'
-		//floorMap[2][8] = new WordTile(Pos(2, 8), '~' + 1, '~' + 2);
-		
-		voidTile1 = static_cast<WordTile*>(floorMap[1][8]);
-		voidTile2 = static_cast<WordTile*>(floorMap[2][8]);
+		// void tiles
+		floorMap[1][8] = voidTile1 = new WordTile(Pos(1, 8), 'V', 'O');
+		floorMap[2][8] = voidTile2 = new WordTile(Pos(2, 8), 'I', 'D');
 		
 		floorMap[3][8] = new WordTile(Pos(3, 8));
-		//floorMap[4][8] = new WordTile(Pos(4, 8), 'L', 'C');
-		floorMap[4][8] = new LocustTile(Pos(4, 8));
-		locustTile = static_cast<LocustTile*>(floorMap[4][8]);
+		floorMap[4][8] = locustTile = new LocustTile(Pos(4, 8));
 		
-		//floorMap[5][8] = new WordTile(Pos(5, 8), '4', '2');
 		floorMap[5][8] = new WordTile(Pos(5, 8), ' ', ' ');
 		locustCounterTile = static_cast<WordTile*>(floorMap[5][8]);
 		
-		//floorMap[6][8] = new WordTile(Pos(6, 8), 'R', 'D');
 		floorMap[6][8] = new RodTile(Pos(6, 8));
 		rodTile = static_cast<RodTile*>(floorMap[6][8]);
 		
@@ -380,9 +356,7 @@ int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
 	int matchIndex = -1;
 	
 	unsigned matches[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	// spr_lordborders
-	
-	// doing this equality check in the above for loop would save computation
+
 	for(unsigned i=0; i<sizeof(allBrands) / sizeof(allBrands[0]); i++) {
 		for(int j=0; j<6; j++) {
 			if(testBrand[j] == allBrands[i][j]) {
@@ -397,8 +371,6 @@ int TileManager::checkBrandIndex(const unsigned (&testBrand)[6]) {
 			break;
 		}
 	}
-	
-	//BN_LOG("checkbrand returned ", matchIndex);
 
 	return matchIndex;
 }
@@ -417,7 +389,6 @@ const char* TileManager::checkBrand() { profileFunction();
 		case 179:
 		case 223:
 		case 227:
-		
 			break;
 		default:
 			prevMatchIndex = -1;
@@ -431,12 +402,8 @@ const char* TileManager::checkBrand() { profileFunction();
 		prevMatchIndex = -1;
 		return NULL;
 	}
-	
-	
-	// should this variable be kept update whenever updatetile is called as to not be expensive?
-	// what datatype is the least expensive for this?
+
 	unsigned roomState[6] = {0, 0, 0, 0, 0, 0};
-	
 	
 	for(int y=1; y<=6; y++) {
 		unsigned temp = 0;
@@ -446,14 +413,7 @@ const char* TileManager::checkBrand() { profileFunction();
 		roomState[y-1] = temp;
 	}
 	
-
-	
-
-	//BN_LOG(matches[0], matches[1], matches[2], matches[3], matches[4], matches[5], matches[6], matches[7], matches[8], matches[9]);
-	
 	int matchIndex = checkBrandIndex(roomState);
-	
-	
 	
 	const bn::regular_bg_item* lordBackgrounds[8] = {
 	&bn::regular_bg_items::dw_spr_lordborders_index0,
@@ -466,23 +426,16 @@ const char* TileManager::checkBrand() { profileFunction();
 	&bn::regular_bg_items::dw_spr_lordborders_index7
 	};
 	
-	//BN_LOG(matchIndex, " ", prevMatchIndex);
-	
 	if(matchIndex != -1) {
-	
-	
 		if(matchIndex != prevMatchIndex) {
 			if(matchIndex < 8) {
 				cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
 			} else {
 				cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 			}
-			
-			//cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBGPaletteFade(2, false));
+
 			cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBlackBGPalette());
 			
-			
-			//BN_LOG(matchIndex, " ", prevMatchIndex);
 			effectsManager->fadeBrand();
 			prevMatchIndex = matchIndex;
 		}
@@ -507,8 +460,7 @@ TileManager::~TileManager() {
 		player->rod.clear();
 	
 	}
-	
-	// will leftover pointers leave problems?
+
 	exitTile = NULL;
 	rodTile = NULL;
 	locustTile = NULL;
@@ -525,15 +477,11 @@ TileManager::~TileManager() {
 			floorMap[x][y] = NULL;
 		}
 	}
-	
-	
 }
 
 // ----- 
 
 void TileManager::doFloorSteps() { profileFunction();
-	
-	// rlly should of made a tilemanager
 	
 	// STEP UPDATES OCCUR AFTER DOING EXIT CHECKING, 
 	// SINCE IF EVERY BUTTON IS PRESSED, YOU HAVE ONE TICK TO EXIT
@@ -544,9 +492,7 @@ void TileManager::doFloorSteps() { profileFunction();
 	// NO LONGER UNIQUE
 	
 	bn::optional<Entity*> res;
-	
-	// horrid memory usage
-	
+
 	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
 		
 		BN_ASSERT((*it).second.first != (*it).second.second, "in doFloorSteps, calculating steps. why is a move here with the same start and end??");
@@ -570,29 +516,6 @@ void TileManager::doFloorSteps() { profileFunction();
 		}
 	}
 	
-	// ok now we are in that class. im still going to leave parts ofthis hardcoded tho
-	
-	// THIS CODE IS DUMB!!!! AND WASTEFUL!!!!
-	// now that i think abt it, depracating this also,,, depracates the need for the floorsteos array?
-	/*
-	for(auto it = floorSteps.cbegin(); it != floorSteps.cend(); ++it) {
-		if((*it).first == EntityType::Player) {
-			
-			Pos start = (*it).second.first;
-			//Pos end = (*it).second.second;
-			
-			// todo,  could i impliment deathtiles in here?
-			// but since floorsteps only has the entity type and not the entity, i cant?
-			// gods 
-			// actually i just now realized that this is in a if player ifstatement
-			
-			if(hasFloor(start) == TileType::Copy) { 
-				entityManager->shadowQueue.push_back(start);
-			}
-		}
-	}
-	*/
-
 	stepOns.clear();
 	stepOffs.clear();
 	floorSteps.clear();
@@ -600,15 +523,6 @@ void TileManager::doFloorSteps() { profileFunction();
 	if(hasFloor(entityManager->player->p) == TileType::Exit && Switch::pressedCount == Switch::totalCount) {
 		entityManager->addKill(NULL);
 	}
-	
-	
-	// this does not need to be called every time
-	// if it causes slowdown, fix it
-	// this rlly should just call,,,, updatetile,, i think?
-	//floorLayer.reloadCells();
-	
-	// IS THIS NEEDED 
-	//game->collision.reloadCells();
 	
 	// calling this here may be excessive!
 	checkBrand();
@@ -626,22 +540,6 @@ void TileManager::updateTile(const Pos& p) {
 		floorMap[x][y] = NULL;
 	}
 	
-	/*
-	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
-	const Pos& playerPos = globalGame->entityManager.player->p; // and now im doing const refs like this omg
-	
-	
-	if(isWhiteRooms) {
-		if((ABS(x - playerPos.x) > 2 || ABS(y - playerPos.y) > 2)) {
-			FloorTile::drawPit(x, y);
-			//if(y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
-			//	FloorTile::drawPit(x, y+1);
-			//}
-			return;
-		}
-	}
-	*/
-	
 	if(floorMap[x][y] == NULL) {
 		// the collision check isnt needed, but im keeping it here just in case
 		// i also could(and maybe should?) use the hascollison func. 
@@ -658,19 +556,14 @@ void TileManager::updateTile(const Pos& p) {
 		if(y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
 			FloorTile::drawPit(x, y+1);
 		}
-		
 	} else {
-
 		floorMap[x][y]->draw();
-		
 		if(floorMap[x][y]->drawDropOff() && y < 8 && !hasFloor(x, y+1) && !hasCollision(Pos(x, y+1))) {
 			FloorTile::drawDropOff(x, y+1);
 		}
 	}
 
-
 	floorLayer.reloadCells();
-	
 }
 
 void TileManager::updateExit() {
@@ -702,12 +595,8 @@ void TileManager::updateLocust() {
 	}
 	
 	if(locustCounterTile != NULL && !entityManager->player->inRod(locustCounterTile)) {
-		
-		//if(entityManager->player->locustCount != 0) {
 		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
 		locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
-		//
-
 		updateTile(locustCounterTile->tilePos);
 	}
 	
@@ -716,7 +605,7 @@ void TileManager::updateLocust() {
 void TileManager::updateVoidTiles() {
 	
 	bool isVoided = entityManager->player->isVoided;
-	//BN_LOG("brrhuasdiofhsjkfsl, ", isVoided);
+
 	if(voidTile1 != NULL && !entityManager->player->inRod(voidTile1)) {
 		
 		voidTile1->first = isVoided ? 'V' : 'H';
@@ -802,23 +691,22 @@ int TileManager::getRoomIndex() {
 }
 
 bool TileManager::hasCollision(const Pos& p) {
+	// should this even be here?
 	return entityManager->hasCollision(p);
 }
 
 void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 
+	/*
+	
+	this code is responsible for having tiles appear and dissapear in whiterooms 
+	lots of edge cases, should be cleaned up!
+	
+	*/
+
 	if(startPos == currentPos) {
 		return;
 	}
-	
-	/*
-	if(exitTile != NULL) {
-		Pos exitPos = exitTile->tilePos;
-		if(exitPos.move(Direction::Down)) {
-			FloorTile::drawDropOff(exitPos.x, exitPos.y);
-		}
-	}
-	*/
 
 	// assuming this dir, is,,, bad. 
 	// i should get it from the dir, but im fucking tired 
@@ -950,10 +838,7 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 		erasePos.moveInvert(ortho, true, true);
 		iteratorPos.moveInvert(ortho, true, true);
 	}
-	//doClear(erasePos);
-	//erasePos.moveInvert(ortho, true, true);
-	//doClear(erasePos);
-	
+
 	updateExit();
 	
 	// goofy ahh shit code
@@ -979,9 +864,7 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 void TileManager::fullDraw() { 
 	
 	floorLayer.draw(game->collisionMap, floorMap);
-	
-	// i do not like this!
-	
+
 	updateExit();
 	updateRod();
 	updateLocust();
@@ -998,13 +881,9 @@ bool TileManager::enterRoom() {
 }
 
 void TileManager::doVBlank() { profileFunction();
+
+	// ideally, keeping track of each tile type in its own list would be better, but this is const time 126 
 	
-	
-	// i PRAY that this doesnt kill performance. something sorta similar to this may have (curse)ed performance back when i was trying to get death tiles working?
-	
-	// this whole area of code is trash and needs a rewrite
-	
-	// declaring this as const,,, might,,, allow for optimization without me having to take the if statement out
 	const bool doDeathTileAnim = (bruhRand() & 0x3FF) == 0;
 	
 	for(int x=0; x<14; x++) {
@@ -1016,23 +895,10 @@ void TileManager::doVBlank() { profileFunction();
 			BN_ASSERT(floorMap[x][y]->isAlive, "a floor tile wasnt alive during vblank?? how??");
 			
 			if(floorMap[x][y]->isSteppedOn) {
-				// isnt this kinda dumb? why am i not just,,, doing this,,, during cpu??
 				floorMap[x][y]->isSteppedOnAnimation();
 			}
-			
-			/*
-			if(floorMap[x][y]->tileType() == TileType::Exit) { // not ideal code.
-				static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
-			} else if(doDeathTileAnim && floorMap[x][y]->tileType() == TileType::Death) { // not ideal code.
-				effectsManager->deathTileAnimate(Pos(x, y));
-			}
-			*/
-			
-			// why the fuck didnt i,, use the literal exit variable here?
+
 			switch(floorMap[x][y]->tileType()) {
-				//case TileType::Exit:
-					//static_cast<Exit*>(floorMap[x][y])->isFirstCall = false;
-					//break;
 				case TileType::Death: [[unlikely]]
 					if(doDeathTileAnim) {
 						effectsManager->deathTileAnimate(Pos(x, y));
@@ -1068,16 +934,12 @@ bn::optional<TileType> TileManager::hasFloor(const int x, const int y) {
 }
 
 void TileManager::stepOff(Pos p) { 
-	// should a check be here for tile isalive as well?
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepoff on a tile, it was null?");
-	
 	floorMap[p.x][p.y]->stepOff();
 }
 
 void TileManager::stepOn(Pos p) { 
-	// should a check be here for tile isalive as well?
 	BN_ASSERT(floorMap[p.x][p.y] != NULL, "when stepon on a tile, it was null?");
-	
 	floorMap[p.x][p.y]->stepOn();
 }
 

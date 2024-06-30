@@ -131,7 +131,6 @@ if __name__ == "__main__":
 				temp = line.split("\t")[2].replace("\\\\", "/")[1:-1] + "/"
 				searchPaths.append(temp)
 		
-		
 		for path in searchPaths:
 	
 			testPath = os.path.join(path, "steamapps/common/Void Stranger/")
@@ -156,15 +155,10 @@ if __name__ == "__main__":
 	if not os.path.exists("./ExportData"):
 		print("extracting assets from data.win")
 		
-		# ./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx
-		
-		#command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModToolCLI_v0.5.0.0-Windows/UndertaleModCli.exe load data.win -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
 		command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -v -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
 		
 		# making the command verbose prevents the crash. WHY
-		
-		
-		
+
 		try:
 			res = subprocess.check_call(command.split(" "))
 		except Exception as e:
@@ -180,20 +174,13 @@ if __name__ == "__main__":
 		if res != 0:
 			print("the undertalemodtool command crashed. this shouldnt happen(i hope)")
 			exit(1)
-			
-		
 
-	
 	print("initial setup completed")
-	
-	#exit(0)
-
 
 	import roomConverter.roomConverter 
 	import massFormatter.massFormatter
 	import soundConverter.soundConverter 
 	import musicConverter.musicConverter
-
 	
 	print("running massFormatter")
 	massFormatter.massFormatter.main()
@@ -204,10 +191,8 @@ if __name__ == "__main__":
 	print("running musicConverter")
 	musicConverter.musicConverter.main()
 	
-	
 	print("")
 	print(CYAN + "if you are seeing this, then everything(suprisingly) ran correctly." + RESET)
 	
-	# i rlly should include some form of cleanu after all the functions copy to the code area
-	
 	pass
+

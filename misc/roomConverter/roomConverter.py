@@ -22,6 +22,7 @@ init(convert=True)
 
 RED = Fore.RED 
 GREEN = Fore.GREEN 
+YELLOW = Fore.YELLOW
 CYAN = Fore.CYAN
 WHITE = Fore.WHITE
 
@@ -48,6 +49,8 @@ class Pos:
 		self.rawY = y
 		self.x = (x - 8) // 16
 		self.y = (y - 8) // 16
+	def __str__(self):
+		return f"({self.rawX:3d},{self.rawY:3d}), ({self.x:3d},{self.y:3d})"
 
 #creationCodeData = { }
 
@@ -196,99 +199,89 @@ def readCreationCode(p, creationCode):
 		"irandom_range",
 	]
 	
-	# room identification regex, very important, was the thing causing the crash on rm_test2_075
-	#pattern = r'rm_\d+(?:_void)?'
-	pattern = r'rm_(?:test2_\d+)?\d+(?:_void)?'
+	parseStrings = [
+		(r'(rm_(?:test2_\d+)?\d+(?:_void)?)', r'"\1"'),
+		(r"global\.stranger", str(stranger)),
+		(r"global\.loop", str(stranger)),
+		(r"global\.voider", str(stranger)),
+		(r"global\.collect_wings", "0"),
+		(r"\|\|", "or"),
+		(r"&&", "and"), 
+		(r"!([^=])", r"not \1"),
+		(r"else if", "elif"),
+		(r"global.cc_state", "0"),
+		(r"obj_inventory\.ds_player_info", "None"),
+		(r"obj_inventory\.ds_equipment", "None"),
+		(r"global\.voidrod_get", "1"),
+		(r"var ", ""),
+		(r"true", "True"),
+		(r"spr_n_up", "0"),
+		(r"global\.jukebox_song", "jukebox_song"),
+		(r"obj_inventory\.ds_ccr", "False"),
+		
+		(r"((?:instance_create_layer|instance_create_depth)\(.+, .+, .+, )(.+)(\))", r'\1"\2"\3'),
+		(r"(instance_exists\()(.+?)(\))", r'\1"\2"\3'),
+	]
 	
-	for i, l in enumerate(lines):
+	for i, line in enumerate(lines):
 	
-		l = re.sub(pattern, lambda match: f'"{match.group(0)}"', l)
-	
-		if l == "{":
+		if line == "{":
 			indentLevel += 1
 			continue
 	
-		if l == "}":
+		if line == "}":
 			indentLevel -= 1
 			continue
 
-		temp = l
+		if "if" in line:
+			line += ":"
 
-		if "if" in temp:
-			temp += ":"
+		if line == "else":
+			line += ":"
 		
-		if temp == "else":
-			temp += ":"
-		
-		
-		temp = temp.replace("global.stranger", str(stranger))
-		temp = temp.replace("global.loop", str(stranger))
-		temp = temp.replace("global.voider", str(stranger))
-		
-		temp = temp.replace("global.collect_wings", "0")
-		
-		temp = temp.replace("||", "or")
-		temp = temp.replace("&&", "and")
-		
-		# autism, omfg 
-		temp = temp.replace("!=", "JESUS(curse)INGCHRIST")
-		
-		temp = temp.replace("!", "not ")
-		
-		temp = temp.replace("JESUS(curse)INGCHRIST", "!=")
-		
-		temp = temp.replace("else if", "elif")
-		temp = temp.replace("global.cc_state", "0")
-		temp = temp.replace("obj_inventory.ds_player_info", "None")
-		temp = temp.replace("obj_inventory.ds_equipment", "None")
-		temp = temp.replace("global.voidrod_get", "1")
-		temp = temp.replace("var ", "")
-		
-		temp = temp.replace("true", "True")
-		
-		temp = temp.replace("spr_n_up", "0")
-		
-		
-		# ex rooms?
-		temp = temp.replace("global.jukebox_song", "jukebox_song")
-		temp = temp.replace("obj_inventory.ds_ccr", "False")
-		
+		for pattern, repl in parseStrings:
+			line = re.sub(pattern, repl, line)
 		
 		for s in removeStrings:
-			if s in temp:
-				temp = "pass"
+			if s in line:
+				line = "pass"
 				break
-	
-		temp = temp.replace("return;", "break")
-	
-		if "instance_create_layer" in temp or "instance_create_depth" in temp:
-			lastSpaceIndex = temp.rfind(" ")+1
-			temp = temp[:lastSpaceIndex] + "\"" + temp[lastSpaceIndex:]
+				
+		line = re.sub(r"return;", r"break", line)
+		
+
+		"""
+		if "instance_create_layer" in line or "instance_create_depth" in line:
+			lastSpaceIndex = line.rfind(" ")+1
+			line = line[:lastSpaceIndex] + "\"" + line[lastSpaceIndex:]
+			line = line[:-1] + "\"" + line[-1:]
+		
+		
+		
+		if "instance_exists" in line:
+			index = line.find("instance_exists") + len("instance_exists") + 1
+			line = line[:index] + "\"" + line[index:]
 			
-			
-			temp = temp[:-1] + "\"" + temp[-1:]
-			
-		if "instance_exists" in temp:
-			index = temp.find("instance_exists") + len("instance_exists") + 1
-			temp = temp[:index] + "\"" + temp[index:]
-			
-			while index < len(temp):
-				if temp[index] == ")":
+			while index < len(line):
+				if line[index] == ")":
 					break
 				index += 1
 			else:
 				print("wtf, what the (curse). what the (curse)")
 				exit(1)
 			
-			temp = temp[:index] + "\"" + temp[index:]
-			
-				
+			line = line[:index] + "\"" + line[index:]
+		"""
 
-		execString += ("\t" * indentLevel) + temp + "\n"
+		
+		execString += ("\t" * indentLevel) + line + "\n"
 	
 		
 	# this lets break break out of the while loop, which is basically the same as like, just returning
 	execString = "while True:\n" + execString + "\tbreak\n"
+	
+	#print(CYAN + str(p) + " " + creationCode + RESET)
+	#print(GREEN + execString + RESET)
 	
 	bruh = locals()
 	globalBruh = globals()
@@ -801,7 +794,7 @@ def convertCollisionAndDetails(layerData):
 				return None
 
 		if details["tileset"] == "tile_house_2":
-			print("tile_house_2 aint properly converted!")
+			print(RED + "tile_house_2 aint properly converted!" + RESET)
 			return None
 	else:
 		details["data"] = [ 0 for i in range(0, 14*9) ]
@@ -952,7 +945,7 @@ def convertObjects(layerData):
 			
 			if layerData["roomName"] in customExitData:
 				#specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, customExitData[layerData["roomName"]]))
-				print("custom exit from {:s} to {:s}".format(layerData["roomName"], customExitData[layerData["roomName"]]))
+				print(CYAN + "custom exit from {:s} to {:s}".format(layerData["roomName"], customExitData[layerData["roomName"]]) + RESET)
 				floorExitDest.append(customExitData[layerData["roomName"]])
 			
 			floorExport[p.x][p.y] = "Exit"
@@ -2314,7 +2307,7 @@ def convertObjects(layerData):
 			getattr(ObjectFunctions, objectDef)(p, creationCode)
 		else:
 		
-			print("we dont have a definition for {:s} in convert entities".format(objectDef))
+			print(YELLOW + "we dont have a definition for {:s} in convert entities".format(objectDef) + RESET)
 		
 			if objectDef not in failures:
 				failures[objectDef] = []
@@ -2378,6 +2371,7 @@ def convertObjects(layerData):
 		temp = tuple([ int(x) for x in e.split(",")[1:]])
 		if temp in entityPoses:
 			print(RED + "room " + room + " had a duplicate entity at " + str(temp))
+			print(entityExport)
 			exit(1)
 		entityPoses.add(temp)
 	
@@ -2516,6 +2510,7 @@ def convertAllRoomsWorker(f, isHardModePass):
 	#jsonFiles = ["rm_0002.json"]
 	#jsonFiles = ["rm_0009.json"]
 	#jsonFiles = ["rm_0008.json", "rm_0009.json"]
+	#jsonFiles = ["rm_0009.json"]
 	
 	successRooms = 0 
 	totalRooms = len(jsonFiles)
@@ -2629,7 +2624,7 @@ def main():
 
 	# run ExportAllRooms.csx(in this dir), name it roomExport, put it in this dir
 	# run ExportAllCode, move to this folder
-	
+
 	convertAllRooms()
 	print("done, copying roomdata")
 	
