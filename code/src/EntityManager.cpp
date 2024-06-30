@@ -1121,6 +1121,38 @@ void EntityManager::doMoves() { profileFunction();
 		return;
 	}
 	
+	bn::optional<Direction> tempDir;
+	
+	// check for initial mon kill after player move, BEFORE enemy move 
+	// SHOULD THIS BE BEFORE OR AFTER SHADOWS
+	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
+		switch((*it)->entityType()) {
+			case EntityType::MonStatue:
+				// mon statues werent (curse)ing like, working properly at the end of a tick, i think this fixes that
+				tempDir = canSeePlayer((*it)->p);
+				if(tempDir.has_value()) {
+					// puttint this mon line after, the *it, is it a useafterfree?
+
+					updateScreen();
+					
+					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
+					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
+					effectsManager->monLightning((*it)->p, tempDir.value());
+					delay(30);
+					addKill(*it);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	
+	// should updatemap occur here?
+	if(hasKills()) {
+		return;
+	}
+	
+	
 	Diamond* tempDiamond;
 	Bull* tempBull;
 	Chester* tempChester;
@@ -1268,7 +1300,7 @@ void EntityManager::doMoves() { profileFunction();
 	
 	int levcount = 0;
 	
-	bn::optional<Direction> tempDir;
+	
 	
 	LevStatue* hasLevStatue = NULL;
 	// critical levels of goofyness
@@ -1285,12 +1317,7 @@ void EntityManager::doMoves() { profileFunction();
 					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
 					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
 					effectsManager->monLightning((*it)->p, tempDir.value());
-					
-					for(int i=0; i<30; i++)  {
-						game->doButanoUpdate();
-					}
-					
-					
+					delay(30);
 					addKill(*it);
 				}
 				break;
