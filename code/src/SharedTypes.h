@@ -1024,10 +1024,14 @@ struct MessageStr {
 };
 
 constexpr unsigned hashString(const char* str) {
+	// the majority of hashString calls are at compile time. 
+	// a (slightly) more expensive hash func will benifit sanity 
+	
 	unsigned hash = 0;
 
 	while(*str) {
 		hash = (hash * 31) + (*str);
+		hash = (hash << 3) | (hash >> 29);
 		str++;
 	}
 

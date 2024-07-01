@@ -200,7 +200,6 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		}
 	}
 	
-
 	BN_ASSERT(entityList.size() == entitiesCount, "why does the entitylist size not equal entity count?? size=",entityList.size(), " count=",entitiesCount);
 	
 	BN_ASSERT(player != NULL, "finished loading in all sprites, but a player wasnt found");
@@ -267,19 +266,6 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 }
 
 AddStatue* EntityManager::getAddStatue(Pos p) {
-	
-	// should these,,,,, be interactables???
-	// no. they move.
-	// now that specialBumpFunction is being called every tick, i can use that. 
-	// but my gods does it 
-	// i despise my code 
-	// normally id use like,,,, an effect for this? 
-	// but i feel so dumb for doing that 
-	// like i hate using the effects for stuff like that, 
-	// and using the specialbump func is just stupid bc its literally not named that 
-	// gods 
-	// also omfg special bump func isnt even a func pointer, its a thing which needs to be overloaded.
-	// this is going to be shit
 	
 	// SHOULD THIS DATA[text, not mechanics at least] be mined from the game?
 	
@@ -1862,7 +1848,7 @@ bool EntityManager::hasCollision(const Pos& p) const {
 	return true;
 }
 
-bool EntityManager::hasNonInteractableObstacle(const Pos& p) const { //nice function name (curse)
+bool EntityManager::hasNonInteractableObstacle(const Pos& p) const {
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 	
 	if(temp.size() == 0) {
