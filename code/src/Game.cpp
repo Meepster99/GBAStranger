@@ -607,7 +607,7 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 	// PUTTING THIS IN ARM GIVES A 50% REDUCTION. FIGURE IT OUT DUMBASS
 	
 	// why the fuck. does putting this in arm and iwram cause everything in restrequest to fucking melt and die??
-	*reinterpret_cast<unsigned short*>(0x04000208) = 0; // disable interrupts
+	*reinterpret_cast<unsigned short*>(REG_IME) = 0; // disable interrupts
 
 	
 	auto& collisionMap = globalGame->collisionMap;
@@ -644,7 +644,7 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 		}
 	}
 	
-	*reinterpret_cast<unsigned short*>(0x04000208) = 1; // enable interrupts
+	*reinterpret_cast<unsigned short*>(REG_IME) = 1; // enable interrupts
 	//collision.reloadCells();	
 }
 

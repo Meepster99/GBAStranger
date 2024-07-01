@@ -85,6 +85,10 @@
 
 #define REG_GRNSWP	0x04000002
 
+#define REG_IE		0x04000200
+#define REG_IF		0x04000202
+#define REG_IME		0x04000208
+
 // -----
 
 #ifdef DISABLEASSERTS

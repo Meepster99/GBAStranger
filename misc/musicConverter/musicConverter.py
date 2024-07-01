@@ -249,62 +249,7 @@ class ITFile:
 		self.samplesPerSegment = samplesPerSegment
 		self.fileSampleCount = samplesPerSegment
 		self.lastSampleCount = frameCount % samplesPerSegment # IS THIS CORRECT
-		
-		"""
-		#ffmpeg -i input.wav -filter_complex "[0]atrim=start=0:end=9999[a]; [0]atrim=start=10000:end=19999[b]; [0]atrim=start=20000:end=29999[c]; ..." -map "[a]" output_1.wav -map "[b]" output_2.wav -map "[c]" output_3.wav ...
-		# do not ask.
-		
-		sampleOffsetDiff = 0
-		self.fileSampleCount = samplesPerSegment
-		
-		cmd = [
-			"ffmpeg", "-y", "-i", self.filename + "2.wav", "-filter_complex"
-		]
-		
-		filterString = []
-		mapCmds = []
-		
-		
-		start = 0
-		end = 0
-		
-		#frameCount = samplesPerSegment*4
-		index = 1
-		for i in range(0, frameCount, samplesPerSegment):
-		
-			start = i
-			end = min(i+samplesPerSegment, frameCount)
-			
-			
-			
-			tempEnd = end + sampleOffsetDiff
-			tempEnd = min(tempEnd, frameCount)
-		
-			#print(start, end)
-		
-			#end += samplesPerSegment//4
-		
-			# +4 not needed, im just scared
-			filterString.append("[0]atrim=start_pts={:d}:end_pts={:d}[{:d}]".format(start, tempEnd, index))
-			
-			mapCmds.append("-map")
-			mapCmds.append("[{:d}]".format(index))
-			#mapCmds += codecCommand
-			mapCmds.append(self.filename + "/output_{:03d}.wav".format(index))
-			
-			end += 1
-			
-			index += 1
-			
-		self.fileSampleCount += sampleOffsetDiff
-			
-		cmd.append("; ".join(filterString))
-		
-		cmd += mapCmds
-
-		runCommand(cmd)
-		"""
-		
+	
 		#self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
 		
 		#self.sampleCount = len(self.sampleFilenames)
@@ -328,62 +273,6 @@ class ITFile:
 		# have different length samples.
 		# it would be so nice if there was a "play sample after previous one ends" thing
 		# also, being able to compare samples between,,, 2 different songs??
-		
-		"""
-		fileHashes = set()
-		for filename in self.sampleFilenames:
-		
-			wavFile = wave.open(filename)
-			wavBytes = wavFile.readframes(wavFile.getnframes())
-			wavFile.close()
-			
-			#if is8Bit:
-			temp = bytearray()		
-			for v in struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes):
-				temp += struct.pack("b", v // 256)
-		
-			tempHash = hashlib.md5(temp).hexdigest()
-			if tempHash in fileHashes:
-				print("holy shit, 2 samples were identical?")
-				continue
-			fileHashes.add(tempHash)
-		"""
-		
-		
-		"""
-		vals = []
-		
-		for filename in self.sampleFilenames[:-1]:
-			waveFile = wave.open(filename)
-			#print( waveFile.getnframes())
-			temp = waveFile.getnframes()# / waveFile.getframerate()
-			waveFile.close()
-			vals.append(temp)
-		
-		minVal = min(vals)
-		maxVal = max(vals)
-		difVal = maxVal - minVal
-		secondsCount = difVal / GBASAMPLERATE
-		
-		print(CYAN + "min: {:f}  max: {:f}  dif: {:f} which is {:f} seconds".format(minVal, maxVal, difVal, secondsCount) + RESET)
-		
-		if secondsCount > 0.01:
-			print("somethings fucked")
-			exit(1)
-			
-		
-		print(CYAN + "converting {:s} to pcm".format(self.filename))
-		for filename in self.sampleFilenames:
-			output = filename.rsplit(".", 1)[0] + ".pcm"
-			
-			temp = AudioSegment.from_wav(filename)
-			temp.export(output, format='s8')
-		
-		for filename in self.sampleFilenames:
-			removeFile(filename)
-			
-		self.sampleFilenames = [os.path.join("./"+self.filename, f) for f in os.listdir("./"+self.filename) if os.path.isfile(os.path.join("./"+self.filename, f))]
-		"""
 		
 		self.sampleFilenames = [ "{:s}{:03d}".format(self.filename, i) for i in range(0, self.sampleCount) ]
 		

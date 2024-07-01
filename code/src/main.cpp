@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "bn_hw_irq.h"
 
+// https://gbadev.net/gbadoc/intro.html
 
 // C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -C -D .\build\main.o > idk.txt
 

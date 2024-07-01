@@ -3061,6 +3061,12 @@ void EffectsManager::doMenu() {
 
 // -----
 
+/*
+
+all effects should have just been children of the main effect class
+
+*/
+
 void EffectsManager::glassBreak(Pos p) {
 	
 	// we cannot use static vars in this joint, so static "vars" will have to be,,, alloced in real time. i think?
