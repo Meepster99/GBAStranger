@@ -63,6 +63,36 @@ __attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand() {
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void _cartPull() {
 	
+	//volatile unsigned short* verify = reinterpret_cast<volatile unsigned short*>(0x05000000);
+	volatile unsigned short* verify = reinterpret_cast<volatile unsigned short*>(0x0203FFF0);
+	
+	verify[0] = 0x42;
+	
+	/*
+	while(true) {
+		verify[0]++;
+		verify[1] = 0x42;
+		
+		while(true) {
+			volatile unsigned short idekwhat = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+			if(idekwhat > 161) {
+				break;
+			}
+		}
+		
+		
+	}
+	*/
+	
+	while(true) {
+		volatile unsigned short idekwhat = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+		if(idekwhat > 165) {
+			break;
+		}
+	}
+	
+	verify[0] = 0x43;
+
 	// literally just copied from cutscenemanager 
 	// i hope all these vars are stored in iwram
 	
@@ -99,7 +129,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	case that the display controller was accessing memory simultaneously. 
 	(Ie. unlike as in old 8bit gameboy, the data will not get lost.)
 	*/
-	*(reinterpret_cast<unsigned short*>(0x04000000)) |= 0b0000000010000000;
+	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) |= 0b0000000010000000;
 	
 	//dw_spr_un_stare_index0_bn_gfxTiles
 	//dw_spr_un_stare_index0_bn_gfxMap
@@ -113,28 +143,38 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	// this array seems to be declared on the (curse)ing rom. this is really (curse)ingbad
 	// this needs to be redone in the future!
 	
-	for(int i=0; i<1024/2; i++) {
-		switch(i % 16) {
+	/* this, for unknown reasons, causes EVERYTHING to shit itself
+	for(unsigned i=0; i<1024/2; i++) {
+		switch(i & 0xF) {
 			case 0:
-				palettePointer[i] = *col0;
+				//palettePointer[i] = *col0;
+				palettePointer[i] = 0x1;
 				break;
 			case 1:
-				palettePointer[i] = *col1;
+				//palettePointer[i] = *col1;
+				palettePointer[i] = 0x10;
 				break;
 			case 2:
-				palettePointer[i] = *col2;
+				//palettePointer[i] = *col2;
+				palettePointer[i] = 0x100;
 				break;
 			case 3:
-				palettePointer[i] = *col3;
+				//palettePointer[i] = *col3;
+				palettePointer[i] = 0x1000;
 				break;
 			case 4:
-				palettePointer[i] = *col4;
+				//palettePointer[i] = *col4;
+				palettePointer[i] = 0x10000;
 				break;
 			default:
 				palettePointer[i] = 0;
 				break;
 		}
 	}
+	*/
+	
+	
+	verify[0] = 0x44;
 	
 	// set up bg offsets 
 	// https://problemkaputt.de/gbatek-lcd-i-o-bg-control.htm
@@ -170,6 +210,8 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	for(int i=0; i<*stareTilesCount/4; i++) {
 		tilesPtr[i] = stareTiles[i];
 	}
+	
+	verify[0] = 0x45;
 	
 	mapPtr = reinterpret_cast<unsigned short*>(0x06000000 + (2 * 4 * 1024));
 	volatile unsigned short* mapPtr2 = reinterpret_cast<unsigned short*>(0x06000000 + (2 * 5 * 1024));
@@ -228,6 +270,22 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 	
 	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
+	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
+	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
+	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
+	
+	// overwriting all the palette stuff in a big for loop above was causing things to not load. cycle counting and vram whatever 
+	// probs a butano update changed what cycle we entered this func, this is not an ideal solution? but it works
+	// code above should let it be more consistent, and wait until we are in vblank
+	palettePointer[0+1] = *col1;
+	palettePointer[0+2] = *col2;
+	palettePointer[0+3] = *col3;
+	palettePointer[0+4] = *col4;
+	
+	palettePointer[16+1] = *col1;
+	palettePointer[16+2] = *col2;
+	palettePointer[16+3] = *col3;
+	palettePointer[16+4] = *col4;
 	
 	unsigned short VCOUNT = 0;
 	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(0x04000002);

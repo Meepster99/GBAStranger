@@ -1031,7 +1031,7 @@ constexpr unsigned hashString(const char* str) {
 
 	while(*str) {
 		hash = (hash * 31) + (*str);
-		hash = (hash << 3) | (hash >> 29);
+		//hash = (hash << 3) | (hash >> 29);
 		str++;
 	}
 
