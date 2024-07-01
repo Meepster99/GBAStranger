@@ -881,8 +881,7 @@ void CutsceneManager::brandInput() {
 	
 	Sprite cursor(bn::sprite_tiles_items::dw_spr_puumerkki_kursori, bn::sprite_shape_size(32, 32));
 	
-	Pos cursorPos(4, 1);
-	(void)cursorPos; // suppress warning. why is it there at all? why doesnt this suppress it?
+	Pos cursorPos = Pos(4, 1);
 	
 	cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
 	cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
@@ -1034,8 +1033,6 @@ void CutsceneManager::brandInput() {
 					continue;
 				}
 				
-				//cursorPos.x = CLAMP(cursorPos.x, 4, 4+6-1);
-				//cursorPos.y = CLAMP(cursorPos.y, 1, 1+6-1);
 				if(cursorPos.x < 4) {
 					cursorPos.x = 4+6-1;
 				} else if(cursorPos.x > 4+6-1) {
@@ -1047,7 +1044,6 @@ void CutsceneManager::brandInput() {
 				} else if(cursorPos.y > 1+6-1) {
 					cursorPos.y = 1;
 				}
-				
 				
 				if(bn::keypad::a_pressed()) {
 					

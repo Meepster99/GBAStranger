@@ -68,24 +68,8 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	
 	verify[0] = 0x42;
 	
-	/*
 	while(true) {
-		verify[0]++;
-		verify[1] = 0x42;
-		
-		while(true) {
-			volatile unsigned short idekwhat = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
-			if(idekwhat > 161) {
-				break;
-			}
-		}
-		
-		
-	}
-	*/
-	
-	while(true) {
-		volatile unsigned short idekwhat = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+		volatile unsigned short idekwhat = *(reinterpret_cast<volatile unsigned short*>(REG_VCOUNT));
 		if(idekwhat > 165) {
 			break;
 		}
@@ -129,7 +113,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	case that the display controller was accessing memory simultaneously. 
 	(Ie. unlike as in old 8bit gameboy, the data will not get lost.)
 	*/
-	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) |= 0b0000000010000000;
+	*(reinterpret_cast<volatile unsigned short*>(REG_DISPCNT)) |= 0b0000000010000000;
 	
 	//dw_spr_un_stare_index0_bn_gfxTiles
 	//dw_spr_un_stare_index0_bn_gfxMap
@@ -143,59 +127,28 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	// this array seems to be declared on the (curse)ing rom. this is really (curse)ingbad
 	// this needs to be redone in the future!
 	
-	/* this, for unknown reasons, causes EVERYTHING to shit itself
-	for(unsigned i=0; i<1024/2; i++) {
-		switch(i & 0xF) {
-			case 0:
-				//palettePointer[i] = *col0;
-				palettePointer[i] = 0x1;
-				break;
-			case 1:
-				//palettePointer[i] = *col1;
-				palettePointer[i] = 0x10;
-				break;
-			case 2:
-				//palettePointer[i] = *col2;
-				palettePointer[i] = 0x100;
-				break;
-			case 3:
-				//palettePointer[i] = *col3;
-				palettePointer[i] = 0x1000;
-				break;
-			case 4:
-				//palettePointer[i] = *col4;
-				palettePointer[i] = 0x10000;
-				break;
-			default:
-				palettePointer[i] = 0;
-				break;
-		}
-	}
-	*/
-	
-	
 	verify[0] = 0x44;
 	
 	// set up bg offsets 
 	// https://problemkaputt.de/gbatek-lcd-i-o-bg-control.htm
 	//                                                   FEDCBA9876543210
-	*(reinterpret_cast<unsigned short*>(0x04000008)) = 0b0000001100000000; // add
-	*(reinterpret_cast<unsigned short*>(0x0400000A)) = 0b0000010000000101; // glitch bg 1
-	*(reinterpret_cast<unsigned short*>(0x0400000C)) = 0b0000010100000110; // glitch bg 2
-	*(reinterpret_cast<unsigned short*>(0x0400000E)) = 0b0000011000001011; // black bg
+	*(reinterpret_cast<unsigned short*>(REG_BG0CNT)) = 0b0000001100000000; // add
+	*(reinterpret_cast<unsigned short*>(REG_BG1CNT)) = 0b0000010000000101; // glitch bg 1
+	*(reinterpret_cast<unsigned short*>(REG_BG2CNT)) = 0b0000010100000110; // glitch bg 2
+	*(reinterpret_cast<unsigned short*>(REG_BG3CNT)) = 0b0000011000001011; // black bg
 	
 	// https://problemkaputt.de/gbatek-lcd-i-o-bg-scrolling.htm
-	*(reinterpret_cast<unsigned short*>(0x04000010)) = 0x01F8;
-	*(reinterpret_cast<unsigned short*>(0x04000012)) = 0x01F0;
+	*(reinterpret_cast<unsigned short*>(REG_BG0HOFS)) = 0x01F8;
+	*(reinterpret_cast<unsigned short*>(REG_BG0VOFS)) = 0x01F0;
 	
-	*(reinterpret_cast<unsigned short*>(0x04000014)) = 0x0000;
-	*(reinterpret_cast<unsigned short*>(0x04000016)) = 0x0000;
+	*(reinterpret_cast<unsigned short*>(REG_BG1HOFS)) = 0x0000;
+	*(reinterpret_cast<unsigned short*>(REG_BG1VOFS)) = 0x0000;
 	
-	*(reinterpret_cast<unsigned short*>(0x04000018)) = 0x0000;
-	*(reinterpret_cast<unsigned short*>(0x0400001A)) = 0x0000;
+	*(reinterpret_cast<unsigned short*>(REG_BG2HOFS)) = 0x0000;
+	*(reinterpret_cast<unsigned short*>(REG_BG2VOFS)) = 0x0000;
 	
-	*(reinterpret_cast<unsigned short*>(0x0400001C)) = 0x0000;
-	*(reinterpret_cast<unsigned short*>(0x0400001E)) = 0x0000;
+	*(reinterpret_cast<unsigned short*>(REG_BG3HOFS)) = 0x0000;
+	*(reinterpret_cast<unsigned short*>(REG_BG3VOFS)) = 0x0000;
 	
 	// fun fact, tile base addr isnt properly displayed in mgba.
 	volatile unsigned short* mapPtr = reinterpret_cast<unsigned short*>(0x06000000 + (2 * 3 * 1024));
@@ -269,10 +222,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 		tilesPtr[i] = 0;
 	}
 	
-	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
-	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
-	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
-	*(reinterpret_cast<volatile unsigned short*>(0x04000000)) &= ~0b0000000010000000;
+	*(reinterpret_cast<volatile unsigned short*>(REG_DISPCNT)) &= ~0b0000000010000000;
 	
 	// overwriting all the palette stuff in a big for loop above was causing things to not load. cycle counting and vram whatever 
 	// probs a butano update changed what cycle we entered this func, this is not an ideal solution? but it works
@@ -288,13 +238,13 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	palettePointer[16+4] = *col4;
 	
 	unsigned short VCOUNT = 0;
-	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(0x04000002);
+	volatile unsigned short* greenswap = reinterpret_cast<volatile unsigned short*>(REG_GRNSWP);
 	unsigned greenFrames = 0;
 	bool frameStarted = false;
 	unsigned short greenSwapState = 0xFFFF;
 	while(true) {
 		
-		VCOUNT = *(reinterpret_cast<volatile unsigned short*>(0x04000006));
+		VCOUNT = *(reinterpret_cast<volatile unsigned short*>(REG_VCOUNT));
 		
 		if(VCOUNT == 0 && !frameStarted) {
 			frameStarted = true;

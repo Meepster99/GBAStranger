@@ -64,6 +64,28 @@
 #include "bn_date.h"
 #include "bn_timers.h"
 
+// memory addresses
+// https://gbadev.net/gbadoc/registers.html#REG_DISPCNT
+#define REG_DISPCNT 0x04000000
+#define REG_VCOUNT	0x04000006
+
+#define REG_BG0CNT	0x04000008
+#define REG_BG1CNT	0x0400000A
+#define REG_BG2CNT	0x0400000C
+#define REG_BG3CNT	0x0400000E
+
+#define REG_BG0HOFS	0x04000010
+#define REG_BG0VOFS	0x04000012
+#define REG_BG1HOFS	0x04000014
+#define REG_BG1VOFS	0x04000016
+#define REG_BG2HOFS	0x04000018
+#define REG_BG2VOFS	0x0400001A
+#define REG_BG3HOFS	0x0400001C
+#define REG_BG3VOFS	0x0400001E
+
+#define REG_GRNSWP	0x04000002
+
+// -----
 
 #ifdef DISABLEASSERTS
 
