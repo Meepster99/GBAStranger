@@ -3218,7 +3218,8 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 			obj->graphicsIndex
 		);
 		return false;
-	}
+	},
+	true
 	);
 		
 	// gods i really should of just had a class var wtf is wrong with me
@@ -3275,7 +3276,8 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 			return true;
 		}
 		return false;
-	}
+	},
+	true // waitflag
 	);
 	
 	if(globalGame->entityManager.player->hasSuperRod) {
@@ -3409,7 +3411,8 @@ void EffectsManager::superRodNumber() { profileFunction();
 			return true;
 		}
 		return false;
-	}
+	},
+	true
 	);
 	
 }
@@ -3651,7 +3654,7 @@ void EffectsManager::sword(Pos p, Direction dir) {
 		return false;
 	};
 	
-	createEffect(createFunc, tickFunc);
+	createEffect(createFunc, tickFunc, true);
 	
 }
 
@@ -4745,6 +4748,7 @@ void EffectsManager::questionMark() {
 	
 	questionMarkCount++;
 	Effect* e = new Effect(createFunc, tickFunc);
+	e->waitFlag = true;
 	effectList.push_back(e);
 	
 }
@@ -5509,7 +5513,6 @@ void EffectsManager::shadowDeath(Shadow* shadow) {
 
 void EffectsManager::smokeCloud(Pos p, const Direction dir) {
 	
-
 	if(!p.moveInvert(dir, true, true)) {
 		return;
 	}
@@ -5556,7 +5559,7 @@ void EffectsManager::smokeCloud(Pos p, const Direction dir) {
 	};
 
 	Effect* e1 = new Effect(createFunc, tickFunc);
-	
+	e1->waitFlag = true;
 	effectList.push_back(e1);
 	
 }

@@ -1446,6 +1446,36 @@ void Game::run() {
 				BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
 			}
 			
+			
+			/*
+			wait for certain animations to be done until the next move can occur
+			such as:
+				rod use 
+				bump
+				tile move 
+				
+			options:
+				give each effect a flag for if it should wait (will this cause slowdown? its one loop)
+				have a seperate list 
+				trying giving a flag
+			
+			*/
+			
+			while(true) {
+				bool noWait = true;
+				for(int i = 0; i < effectsManager.effectList.size(); i++) {
+					if(effectsManager.effectList[i]->waitFlag) {
+						noWait = false;
+						break;
+					}	
+				}
+				
+				if(noWait) {
+					break;
+				}
+				
+				doButanoUpdate();
+			}
 		}
 
 		//BN_LOG("end frame ", frame);

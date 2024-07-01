@@ -138,6 +138,9 @@ public:
 	int x; 
 	int y;
 	Sprite sprite;
+
+	
+	bool waitFlag = false; // if true, wait for effect to finish before allowing movement
 	
 	//void (*createFunc)(Effect*);
 	//bool (*animateFunc)(Effect*);
@@ -342,9 +345,20 @@ public:
 	EffectsManager(Game* game_);
 	
 	~EffectsManager();
+	
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_) {
+		Effect* e = new Effect(create_, animate_, 1);
+		effectList.push_back(e);
+	}
 
-	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency = 1) {
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency) {
 		Effect* e = new Effect(create_, animate_, animationFrequency);
+		effectList.push_back(e);
+	}
+	
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, bool waitFlag) {
+		Effect* e = new Effect(create_, animate_, 1);
+		e->waitFlag = waitFlag;
 		effectList.push_back(e);
 	}
 	
@@ -357,8 +371,6 @@ public:
 	// this is going to be where i define my effects, as static vars, to be called with EffectManager::effectname()
 	// these things should be static,, but i need them to access the effectList,,, so like, ugh
 	// this should maybe have been a namespace, but idk
-	
-
 	
 	void updatePalette(Palette* pal);
 	
@@ -401,7 +413,6 @@ public:
 	void setMenuVis(bool vis);
 	
 	__attribute__((noinline, target("thumb"), optimize("O2"))) bool restRequest(const char* questionString = NULL, bool getOption = true);
-	
 	
 	void glassBreak(Pos p);
 	int rodNumber = 0;
