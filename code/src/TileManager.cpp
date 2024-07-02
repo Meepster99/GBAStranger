@@ -6,7 +6,6 @@
 
 #include "Game.h"
 
-
 // -----
 
 void Floor::setBigTile(int x, int y, int tile, bool flipX, bool flipY) {
@@ -49,7 +48,7 @@ __attribute__((noinline, section(".iwram"))) void doFloorDraw() {
 
 __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 
-	// a refrence requires lookup,, right? would using just a normal thing be better?
+	// a reference requires lookup,, right? would using just a normal thing be better?
 	const int playerX = globalGame->entityManager.player->p.x;
 	const int playerY = globalGame->entityManager.player->p.y;
 	
@@ -63,15 +62,6 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 
 	for(int x=startX; x<=endX; x++) {
 		for(int y=startY; y<=endY; y++) {
-			
-			/*
-			if(floorMap[x][y] != NULL && !floorMap[x][y]->isAlive) {
-				delete floorMap[x][y];
-				floorMap[x][y] = NULL;
-				continue;
-			}
-			*/
-			
 			if(floorMap[x][y] != NULL) {
 				
 				floorMap[x][y]->draw();
@@ -87,7 +77,6 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 		}
 	}
 	
-	//globalGame->tileManager.updateExit();
 	if(globalGame->tileManager.exitTile != NULL) {
 		Pos exitPos = globalGame->tileManager.exitTile->tilePos;
 		if(exitPos.move(Direction::Down)) {
@@ -201,14 +190,11 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	exitTile = NULL;
 	rodTile = NULL;
 	locustTile = NULL;
-	//locustCounterTile = NULL;
 	memoryTile = NULL;
 	wingsTile  = NULL;
 	swordTile  = NULL;
 	floorTile1 = NULL;
-	//floorTile2 = NULL;
 	voidTile1 = NULL;
-	//voidTile2 = NULL;
 	
 	int switchTracker = 0;
 
@@ -291,8 +277,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		rodTile = static_cast<RodTile*>(floorMap[6][8]);
 		
 		floorMap[7][8] = new WordTile(Pos(7, 8));
-		
-
+	
 		memoryTile = new SpriteTile(Pos(8, 8), memoryGetFunc);
 		floorMap[8][8] = memoryTile;
 		
@@ -346,9 +331,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 			bn::pair<const char*, Pos> tempPair(secrets->dest, tempSecretPos);
 			secretDestinations.push_back(tempPair);
 		}
-		
-		
-		
+
 		secrets++;
 	}
 	
@@ -364,7 +347,6 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	// i dont like having this here and slowing down debug swapping, but ugh 
 	// if i want to do tas verification, i need to not have framedrops
 	game->doButanoUpdate();
-	
 	
 	bn::fixed tickCount = testTimer.elapsed_ticks();
 	BN_LOG("tilemanager loadtiles ", tickCount.safe_division(FRAMETICKS), " frames");
@@ -696,7 +678,9 @@ int TileManager::getLocustCount() {
 
 int TileManager::getRoomIndex() {
 	
-	BN_ASSERT(floorTile1 != NULL, "in getRoomIndex, floortile1 was null. how??");
+	if(floorTile1 == NULL) {
+		return -1;
+	}
 	
 	char temp = floorTile1->second;
 	if(temp == '?') {
