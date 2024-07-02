@@ -776,8 +776,8 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 				globalGame->effectsManager.doDialogue("[You aquired 99 locust idols]\n[I N C R E D I B L E !]\0");
 				inter->animationIndex = 1;
 				globalGame->entityManager.player->locustCount = 99;
-				globalGame->tileManager.locustCounterTile->first = '9';
-				globalGame->tileManager.locustCounterTile->second = '9';
+				//globalGame->tileManager.locustCounterTile->first = '9';
+				//globalGame->tileManager.locustCounterTile->second = '9';
 				globalGame->tileManager.updateLocust();
 				inter->doUpdate();
 			}

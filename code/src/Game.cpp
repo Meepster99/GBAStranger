@@ -169,8 +169,8 @@ void Game::findNextRoom() {
 			BN_ASSERT(entityManager.player != NULL, "player was null during cif reset");
 			
 			entityManager.player->locustCount = 0;
-			globalGame->tileManager.locustCounterTile->first = '0';
-			globalGame->tileManager.locustCounterTile->second = '0';
+			//globalGame->tileManager.locustCounterTile->first = '0';
+			//globalGame->tileManager.locustCounterTile->second = '0';
 			entityManager.player->isVoided = false;
 
 			//game->save(); // extranious call for sanity
@@ -224,8 +224,8 @@ void Game::findNextRoom() {
 				BN_LOG("bee reset occured");
 				roomManager.changeFloor(entityManager.player->locustCount);
 				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this (curse)
-				tileManager.locustCounterTile->first = '0';
-				tileManager.locustCounterTile->second = '0';
+				//tileManager.locustCounterTile->first = '0';
+				//tileManager.locustCounterTile->second = '0';
 				
 				// but does this update the save file?
 			}

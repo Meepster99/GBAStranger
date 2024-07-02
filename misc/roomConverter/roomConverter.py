@@ -1024,14 +1024,13 @@ def convertObjects(layerData):
 			# general room switch: gml_GlobalScript_scr_roomselect
 		
 			# contains the,, mapping of secrets to like yea: gml_Object_obj_na_secret_exit_Alarm_5
-			# 
-			# 
 	
 			if creationCode is None:
 				specialFloorExport.append("{:d},{:d},NULL".format(p.x, p.y))
 				return
 			
 			#i could get the room to goto dynamically, but im tired ok
+			# i REALLY should do that 
 			
 			creationCode = creationCode[0]
 			
@@ -1053,8 +1052,6 @@ def convertObjects(layerData):
 				14: "next",
 				15: "rm_trailer_001", # are trailer rooms playable??
 			}
-			
-			
 			
 			if creationCode not in secretData:
 				print("creationCode not in secret data! how! ", str(creationCode))
@@ -1155,10 +1152,7 @@ def convertObjects(layerData):
 				
 				x -= 0
 				y += 16
-				
-				
-		
-		
+
 			return [x, y, w, h]
 		
 			pass
@@ -2465,7 +2459,7 @@ def convertAllRoomsWorker(f, isHardModePass):
 	
 	for data in allData:
 		#pool.send([data, isHardModePass])
-		print("doing room " + data["name"])
+		print(f"doing room {'hard_' if isHardModePass else ''}" + data["name"])
 		temp = convertRoom(data, isHardModePass)
 		resData[data["name"]] = temp
 		

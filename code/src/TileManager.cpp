@@ -201,14 +201,14 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	exitTile = NULL;
 	rodTile = NULL;
 	locustTile = NULL;
-	locustCounterTile = NULL;
+	//locustCounterTile = NULL;
 	memoryTile = NULL;
 	wingsTile  = NULL;
 	swordTile  = NULL;
 	floorTile1 = NULL;
-	floorTile2 = NULL;
+	//floorTile2 = NULL;
 	voidTile1 = NULL;
-	voidTile2 = NULL;
+	//voidTile2 = NULL;
 	
 	int switchTracker = 0;
 
@@ -269,15 +269,23 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		// blank tile
 		floorMap[0][8] = new WordTile(Pos(0, 8));
 		
-		// void tiles
-		floorMap[1][8] = voidTile1 = new WordTile(Pos(1, 8), 'V', 'O');
-		floorMap[2][8] = voidTile2 = new WordTile(Pos(2, 8), 'I', 'D');
+		if(globalGame->saveData.isVoided) {
+			// void tiles
+			floorMap[1][8] = voidTile1 = new WordTile(Pos(1, 8), 'V', 'O');
+			floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
+		} else {
+			// hp tiles
+			floorMap[1][8] = voidTile1 = new WordTile(Pos(1, 8), 'H', 'P');
+			WordTile* tempHPTile = new WordTile(Pos(2, 8), '0', '7');
+			floorMap[2][8] = tempHPTile;
+		}
 		
 		floorMap[3][8] = new WordTile(Pos(3, 8));
 		floorMap[4][8] = locustTile = new LocustTile(Pos(4, 8));
 		
-		floorMap[5][8] = new WordTile(Pos(5, 8), ' ', ' ');
-		locustCounterTile = static_cast<WordTile*>(floorMap[5][8]);
+		WordTile* tempLocustCounterTile = new WordTile(Pos(5, 8), ' ', ' ');
+		floorMap[5][8] = tempLocustCounterTile;
+		//locustCounterTile = static_cast<WordTile*>(floorMap[5][8]);
 		
 		floorMap[6][8] = new RodTile(Pos(6, 8));
 		rodTile = static_cast<RodTile*>(floorMap[6][8]);
@@ -304,7 +312,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		if(roomIndex <= 256) { // normal rooms
 			floorMap[12][8] = new WordTile(Pos(12, 8), 'B', '0' + roomIndex / 100);
 			floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (roomIndex / 10) % 10, '0' + (roomIndex % 10));
-		} else if(roomIndex <= 330) { // EX rooms
+		} else if(roomIndex <= 330) { // EX rooms. THIS IS INCORRECT, SOME EX ROOMS HAVE ?? 
 			int tempRoomIndex = roomIndex - 257;
 			floorMap[12][8] = new WordTile(Pos(12, 8), 'E', '0' + tempRoomIndex / 100);
 			floorMap[13][8] = new WordTile(Pos(13, 8), '0' + (tempRoomIndex / 10) % 10, '0' + (tempRoomIndex % 10));
@@ -314,7 +322,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		}
 		
 		floorTile1 = static_cast<WordTile*>(floorMap[12][8]);
-		floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
+		//floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
+		
 	}
 	
 	exitDestination = exitDest;
@@ -464,7 +473,7 @@ TileManager::~TileManager() {
 	exitTile = NULL;
 	rodTile = NULL;
 	locustTile = NULL;
-	locustCounterTile = NULL;
+	//locustCounterTile = NULL;
 	memoryTile = NULL;
 	wingsTile  = NULL;
 	swordTile  = NULL;
@@ -594,10 +603,26 @@ void TileManager::updateLocust() {
 		updateTile(locustTile->tilePos);
 	}
 	
+	/*
 	if(locustCounterTile != NULL && !entityManager->player->inRod(locustCounterTile)) {
 		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
 		locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
 		updateTile(locustCounterTile->tilePos);
+	}
+	*/
+	
+	Pos tempTilePos = locustTile->tilePos;
+	if(tempTilePos.move(Direction::Right) && hasFloor(tempTilePos) == TileType::WordTile) {
+		// the pos to the right of this tile is valid
+		// the pos to the right has a tile which is a word tile. ALL word tiles should be kept in numberTiles, except floortile1
+		
+		// i seriously NEVER made a gettile func??? fom pos?
+		WordTile* locustCounterTile = static_cast<WordTile*>(floorMap[tempTilePos.x][tempTilePos.y]);
+		
+		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
+		locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
+		
+		updateTile(tempTilePos);
 	}
 	
 }
@@ -614,6 +639,7 @@ void TileManager::updateVoidTiles() {
 		updateTile(voidTile1->tilePos);
 	}
 	
+	/*
 	if(voidTile2 != NULL && !entityManager->player->inRod(voidTile2)) {
 		
 		voidTile2->first = isVoided ? 'I' : '0';
@@ -621,8 +647,18 @@ void TileManager::updateVoidTiles() {
 		
 		updateTile(voidTile2->tilePos);
 	}
+	*/
 	
-	
+	Pos tempPos = Pos(2, 8);
+	if(hasFloor(tempPos) == TileType::WordTile) {
+		
+		WordTile* voidTile2 = static_cast<WordTile*>(floorMap[tempPos.x][tempPos.y]);
+		
+		voidTile2->first = isVoided ? 'I' : '0';
+		voidTile2->second = isVoided ? 'D' : '7';
+		
+		updateTile(voidTile2->tilePos);
+	}
 }
 
 void TileManager::updateBurdenTiles() {
@@ -643,49 +679,35 @@ void TileManager::updateBurdenTiles() {
 
 int TileManager::getLocustCount() {
 	
-	if(locustCounterTile == NULL) {
+	if(locustTile == NULL || entityManager->player->inRod(locustTile)) {
 		return -1;
 	}
 	
-	if(entityManager->player->inRod(locustCounterTile) || 
-		entityManager->player->inRod(locustTile)) {
-		return -1;
-	}
-
-	
-	Pos counterPos = locustCounterTile->tilePos;
 	Pos locustPos = locustTile->tilePos;
-	locustPos.move(Direction::Right);
-	
-	if(locustPos != counterPos) {
-		return -1; // this might cause,, issues
+	if(!locustPos.move(Direction::Right)) {
+		return -1;
 	}
 	
+	if(hasFloor(locustPos) != TileType::WordTile) {
+		return -1;
+	}
+	
+	WordTile* locustCounterTile = static_cast<WordTile*>(floorMap[locustPos.x][locustPos.y]);
 	return locustCounterTile->getNumber();
 }
 
 int TileManager::getRoomIndex() {
 	
-	if(floorTile2 == NULL) {
-		return -1;
-	}
-	
-	if(entityManager->player->inRod(floorTile2)) {
-		return -1;
-	}
-	
-	Pos floor2Pos = floorTile2->tilePos;
-	Pos floor1Pos = floorTile1->tilePos;
-	floor1Pos.move(Direction::Right);
-	
-	if(floor1Pos != floor2Pos) {
-		return -1;
-	}
-	
 	char temp = floorTile1->second;
 	if(temp == '?') {
 		return -1;
 	}
+	
+	if(hasFloor(Pos(13, 8)) != TileType::WordTile) {
+		return -1;
+	}
+	
+	WordTile* floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
 	
 	return ((floorTile1->second - '0') * 100) + floorTile2->getNumber();
 }

@@ -1871,30 +1871,24 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 	
 	*/
 	
-	
-	auto swap = [](WordTile*& a, WordTile*& b) {
-		WordTile* s;
-		s = a;
-		a = b;
-		b = s;
-	};
-	
 	//FloorTile* bufferedTile = NULL; // tile to check at end of func
 	const char* errorLine = NULL;
 	Pos tilePos = testTile->tilePos;
+	TileType tileType = testTile->tileType();
 	bool isVoided = game->entityManager.player->isVoided;
 	bool doCarcusEnding = false;
 	bool doCrashGame = false;
 	
-	// each time a number tile is placed, it needs to,
-	// dynamically check the number to the LEFT of it, for what behaviour to do.
-	// also, perform swaps in tileManager
-	SaneSet<WordTile*, 4> numberTiles;
-	numberTiles.insert(tileManager->locustCounterTile);
-	numberTiles.insert(tileManager->floorTile2);
-	if(!isVoided) {
-		numberTiles.insert(tileManager->voidTile2);
-	}
+	// is doing this ok?
+	switch(tileType) {
+		case TileType::WordTile:
+		case TileType::RodTile:
+		case TileType::LocustTile:
+		case TileType::SpriteTile:
+			break;
+		default:
+			return;
+	}	
 	
 	if((void*)testTile == (void*)tileManager->memoryTile) {
 		errorLine = isPickup ? ">ERR: MEM1 REMOVED" : ">MEM1 RESTORED";
@@ -1902,22 +1896,6 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 		errorLine = isPickup ? ">ERR: MEM2 REMOVED" : ">MEM2 RESTORED";
 	} else if((void*)testTile == (void*)tileManager->swordTile) {
 		errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
-	} else if((void*)testTile == (void*)tileManager->locustTile) {
-		errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
-		// follow this up with a dynamic call to THIS SAME FUNC, 
-		// WITH THE TILE TO THE RIGHT
-		// BUT ONLY IF THAT TILE ISNT NULL.
-		// moving the locust number tile does nothing. the only thing that does things, 
-		// is the locust sprite tile.
-		// wait am i (curse)ing halucinating?
-		// i am. 
-		// wtf
-			
-		errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
-	} else if((void*)testTile == (void*)tileManager->locustCounterTile) {
-		if(tilePos.x != 0 && (void*)tileManager->floorMap[tilePos.x-1][tilePos.y] == (void*)tileManager->locustTile) {
-			//bufferedTile = tileManager->locustTile;	
-		}
 	} else if((void*)testTile == (void*)tileManager->floorTile1) {
 		// carcus ending
 		
@@ -1928,6 +1906,16 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 		} else {
 			doCarcusEnding = true;
 			errorLine = ">FATAL ERROR : BR NULL";
+		}
+	} else if(testTile->tilePos == Pos(13, 8) && tileType == TileType::WordTile) {
+		WordTile* floorTile2 = static_cast<WordTile*>(testTile);
+		errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
+		if(floorTile2->first == '?' || floorTile2->second == '?') {
+			errorLine = ">FATAL ERROR: BR NULL";
+			doCrashGame = true;
+		} else if(!isPickup && tileManager->getRoomIndex() != game->roomManager.roomIndex) {
+			BN_LOG("swaprooms via tile swap!");
+			game->entityManager.addKill(NULL);
 		}
 	} else if((void*)testTile == (void*)tileManager->rodTile) {
 		// crash, but i havent implimented that yet
@@ -1942,118 +1930,18 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 			//doCrashGame = true;
 			game->entityManager.addKill(game->entityManager.player); // this makes them fall, not slump over, but its ok for now
 		}
-	} else if(isVoided && (void*)testTile == (void*)tileManager->voidTile2) {
-		// crash (is this crash different if voided vs unvoided?)
-		errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
-		doCrashGame = true;
-	}
-	
-	// deal with numbertiles 
-	
-	if((void*)testTile == (void*)tileManager->floorTile2) {
-		if(tileManager->floorTile2->first == '?' || tileManager->floorTile2->second == '?') {
-			errorLine = ">FATAL ERROR: BR NULL";
+	} else if(testTile->tilePos == Pos(2, 8)) {
+		if(isVoided) {
+			errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
 			doCrashGame = true;
-		}		
-	}
-	
-	if(numberTiles.contains(static_cast<WordTile*>(testTile))) {
-		// it rlly would be nice if the locust sprite tile was a wordtile. 
-		// i could be hacky with it and have the locust tile be represented with chars, but idrk 
-		// if its worth it for this one jank case
-		
-		BN_LOG("number tile");
-		
-		if(tilePos.x != 0 && tileManager->floorMap[tilePos.x-1][tilePos.y] != NULL) {
-			
-			FloorTile* leftTile = tileManager->floorMap[tilePos.x-1][tilePos.y];
-			
-			int leftTileIndex = -1;
-			int currentTileIndex = -1;
-			
-			if(leftTile == (FloorTile*)tileManager->voidTile1) {
-				// even being here implies being unvoided
-				leftTileIndex = 0;
-			} else if(leftTile == (FloorTile*)tileManager->locustTile) {
-				leftTileIndex = 1;
-			} else if(leftTile == (FloorTile*)tileManager->floorTile1) {
-				leftTileIndex = 2;
-			} else {
-				BN_LOG("number tile left index not a modifier, returning");
-				return; // IS THIS OK?
-			}
-			
-			if(testTile == (FloorTile*)tileManager->voidTile2) {
-				currentTileIndex = 0;
-			} else if(testTile == (FloorTile*)tileManager->locustCounterTile) {
-				currentTileIndex = 1;
-			} else if(testTile == (FloorTile*)tileManager->floorTile2) {
-				currentTileIndex = 2;
-			} else {
-				BN_ERROR("this should like, never, ever, happen");
-			}
-			
-			BN_ASSERT(leftTileIndex != -1 && currentTileIndex != -1, "some really (curse)ed (curse) occured in the dis os area");
-			
-	
-			// there is totally a better way of doing this.
-			// i remember in datastructurs hw6 i actually had a thing like this, where i was trying to swap pointers, and 
-			// thinking of the differences between a pointer, a double pointer, and a refrence to a pointer
-			
-			// wtf
-			//void** tilePointers[3] = {(void**)&tileManager->voidTile2, (void**)&tileManager->locustCounterTile, (void**)&tileManager->floorTile2};
-			
-			// since these two numbers are guarenteed to be unique, we can now do: jank (curse)
-			// better than hardcoding
-			if(leftTileIndex != currentTileIndex) {
-				int switchVal = leftTileIndex + currentTileIndex;
-				switch(switchVal) {
-					case 1:
-						swap(tileManager->voidTile2, tileManager->locustCounterTile);
-						break;
-					case 2:
-						swap(tileManager->voidTile2, tileManager->floorTile2);
-						break;
-					case 3:
-						swap(tileManager->locustCounterTile, tileManager->floorTile2);
-						break;
-					default:
-						BN_ERROR("once again, the dis os code is (curse) :)");
-						break;
-				}
-			}
-		
-			if(testTile == (FloorTile*)tileManager->voidTile2) {
-				errorLine = isPickup ? ">ERR: INVALID/MISSING HP VALUE" : ">HP RESTORED";
-			} else if(testTile == (FloorTile*)tileManager->locustCounterTile) {
-				errorLine = isPickup ? ">ERR: INVALID/MISSING LI VALUE" : ">LI VALUE RESTORED";
-			} else if(testTile == (FloorTile*)tileManager->floorTile2) {
-				errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
-			} else {
-				BN_ERROR("this should like, never, ever, happen, omfg");
-			}
-			
-			
-			//BN_LOG("voidtile2         is at ", tileManager->voidTile2->tilePos);
-			//BN_LOG("locustCounterTile is at ", tileManager->locustCounterTile->tilePos);
-			//BN_LOG("floorTile2        is at ", tileManager->floorTile2->tilePos);
-			
-			if((testTile == (FloorTile*)tileManager->floorTile2) && tilePos == Pos(13, 8) && !isPickup) {
-				
-				// if the restored value is equal to our current room, we dont do (curse).
-				int testRoomIndex = tileManager->getRoomIndex();
-				//BN_LOG("swaprooms! ", testRoomIndex, " ", game->roomManager.roomIndex);
-				if(testRoomIndex != game->roomManager.roomIndex) {
-					//BN_LOG("swaprooms!");
-					game->entityManager.addKill(NULL);
-				}
-				
-			}
+		} else {
+			errorLine = isPickup ? ">ERR: INVALID/MISSING HP VALUE" : ">HP RESTORED";
 		}
+	} else if((void*)testTile == (void*)tileManager->locustTile) {
+		errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
+	} else if( (tileManager->locustTile->tilePos + Pos(1, 0)) == tilePos && tileType == TileType::WordTile) {
+		errorLine = isPickup ? ">ERR: INVALID/MISSING LI VALUE" : ">LI VALUE RESTORED";
 	}
-	
-	
-	
 	
 	if(errorLine == NULL) {
 		return;
@@ -2068,12 +1956,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 	if(doCrashGame) {
 		crashGame();
 	}
-	
-	//if(bufferedTile != NULL) {
-	//	disCrash(bufferedTile, isPickup);
-	//
-	
-	
+
 }
 
 void CutsceneManager::inputCustomPalette() {
