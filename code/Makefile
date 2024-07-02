@@ -86,6 +86,8 @@ ifdef DISABLEASSERTS
 	USERFLAGS += -DDISABLEASSERTS=true 
 endif
 
+USERFLAGS += -DGITCOMMIT=\"$(shell git describe --always --dirty)\"
+
 # vine boom soound effect
 USERFLAGS += -DENABLELOGGING=true 
 

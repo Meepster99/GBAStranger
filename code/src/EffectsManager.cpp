@@ -12,7 +12,6 @@ EntityManager* BigSprite::entityManager = NULL;
 TileManager* BigSprite::tileManager = NULL;
 EffectsManager* BigSprite::effectsManager = NULL;
 
-
 // ----- 
 
 BigSprite::BigSprite(const bn::sprite_tiles_item* tiles_, int x_, int y_, int width_, int height_, bool collide_, int priority_, bool autoAnimate_) :
@@ -183,53 +182,12 @@ void BigSprite::firstDraw() {
 			
 			// check if this sprite will even be drawn onscreen.
 			// check occurs first as it is inexpensive
-			// a bit generious, just in case 
 			if(spriteXPos < -16 || spriteXPos > 240+16 || spriteYPos < -16 || spriteYPos > 160+16) {
 				continue;
-			}
-			
-			
-			/*
-			if(!autoAnimate) {
-				// dont do the sprite if this tile is blank. should really help with not hitting the sprite limit
-				// is this 4, or ithis 8???
-				// omfg (curse), its 4 for the number of subtiles, idiot
-				for(int j=0; j<4; j++) {
-					// quite goofy, but basically the set_tiles func like, does the 16x16 tile math, but we need to do it manually here.
-					int offset = 4 * (x + (y * width)) + j + indexOffset;
-					
-					BN_ASSERT(offset < tiles->tiles_ref().size(), "bigsprite tried to load a invalid tile. max tileindex = ", tiles->tiles_ref().size(), " tried loading at ", offset);
-					
-					// is this pointer like,,, what tf
-					const uint32_t* tileRef = (tiles->tiles_ref())[offset].data;
-					
-					for(int i=0; i<8; i++) {
-						if(tileRef[i] != 0) {
-							goto doBigTile; // (curse) code
-						}
-					}
-				}
-				
-				// is continueing here ideal? the collision map wont update for blank tiles. is that ok?
-				continue;
-			
-			}
-			doBigTile:
-			*/
-			
+			}	
 			Sprite tempSprite = Sprite(*tiles);
 			
 			tempSprite.updateRawPosition(spriteXPos, spriteYPos);
-			/*
-			int tempX = xPos/16 + x;
-			int tempY = yPos/16 + y;
-			
-			// this array doesnt need to be updated each time we do an update draw omg
-			
-			if(collide) {
-				game->collisionMap[tempX][tempY] = 2;
-			}
-			*/
 			
 			tempSprite.spritePointer.set_bg_priority(priority);
 			
@@ -241,9 +199,7 @@ void BigSprite::firstDraw() {
 				x + (y * width) + (animationIndex * width * height)
 			);
 			
-			//BN_LOG("attempting push");
 			sprites.push_back(tempSprite);
-			//BN_LOG("push success");
 		}
 	}
 }
@@ -265,7 +221,6 @@ void BigSprite::animate() { profileFunction();
 		}
 		bigDraw(animationIndex);
 	} else {
-		
 		animationIndex = (animationIndex + 1) % tiles->graphics_count();
 		
 		draw(animationIndex);
@@ -579,8 +534,6 @@ void BigSprite::loadTailHead() {
 
 void BigSprite::loadChest() {
 	
-	//BN_LOG("hey dumb(curse), load a chest");
-	
 	// this thing quite literaly:
 	// isnt a bigsprite
 	// isnt animated 
@@ -589,25 +542,17 @@ void BigSprite::loadChest() {
 	// and now that im going back to previously written code, and using it for completely unintended purposes, i am reminded that i am a trash programmer
 	// i hijacked the KICK function to do this random bs????
 	
-	//sprites.push_back(Sprite(bn::sprite_tiles_items::dw_spr_chest, bn::sprite_tiles_items::dw_spr_chest_shape_size));
-	
 	bool isSuperRodChest = game->roomManager.roomIndex == 0;
 	
 	BN_ASSERT(entityManager != NULL, "what");
 	BN_ASSERT(entityManager->player != NULL, "why was player null during loadchest");
 	
-	// i do not like this!
-	//entityManager->player->hasSuperRod = !!entityManager->player->hasSuperRod;
-	//entityManager->player->hasRod = !!entityManager->player->hasRod;
-	
-	// does,,, !! I,, what is happening	
-	
 	BN_LOG("hasrod, hassuperrod ", entityManager->player->hasRod, "   ", entityManager->player->hasSuperRod);
 	BN_LOG("hasrod, hassuperrod ", (int)entityManager->player->hasRod, "   ", (int)entityManager->player->hasSuperRod);
 	
 	// stupidest bug of all time. what the fuck
-	if(entityManager->player->hasSuperRod) { entityManager->player->hasSuperRod = 1; }
-	if(entityManager->player->hasRod) { entityManager->player->hasRod = 1; }
+	//if(entityManager->player->hasSuperRod) { entityManager->player->hasSuperRod = 1; }
+	//if(entityManager->player->hasRod) { entityManager->player->hasRod = 1; }
 	
 	if(isSuperRodChest) {
 		BN_LOG("attempting to set tile to ", (int)entityManager->player->hasSuperRod);
@@ -714,7 +659,6 @@ void BigSprite::loadTree() {
 	sprites[0].spritePointer.set_bg_priority(1);
 	sprites[0].spritePointer.set_z_order(-2);
 
-	
 	auto getInteractFunc = []() -> auto {
 		
 		bool alreadyTalked = false;
@@ -751,8 +695,6 @@ void BigSprite::loadTree() {
 					if(eggBackup == 0) {
 						globalGame->effectsManager.doDialogue("\0* You got the egg\0");
 					} else {
-						
-						
 						//char buffer[64];
 						//memset(buffer, '\0', 64);
 						//\0* You got another egg\0"
@@ -907,7 +849,7 @@ void BigSprite::loadTree() {
 					// this is going to be the most complex convo in the whole game lmao
 					// have them take a bath and take a break after 5 eggs 
 					// gods, i should take a break
-					//globalGame->saveData.eggCount++;
+					// globalGame->saveData.eggCount++;
 
 				} else {
 					globalGame->effectsManager.doDialogue("* You were better off leaving it alone.\0");
@@ -1194,8 +1136,6 @@ void BigSprite::loadGorHead() {
 		}
 			
 		talkCount++;
-		
-		
 	};
 	
 	auto gorKickFunc = [](void* obj) -> bool {
@@ -1276,7 +1216,6 @@ void BigSprite::loadStink() {
 	
 	// BEE STINK NEEDS A EFFECT FUNC 
 	sprites[0].spritePointer.set_bg_priority(3);
-	
 }
 
 // -----
@@ -1331,7 +1270,6 @@ EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_
 	}
 		
 	effectsLayer.reloadCells();
-	
 }
 
 EffectsManager::~EffectsManager() {
@@ -1388,7 +1326,6 @@ void EffectsManager::updatePalette(Palette* pal) {
 	for(int i=0; i<verTextSprites.size(); i++) {
 		verTextSprites[i].set_palette(pal->getFontSpritePalette());
 	} 
-	
 }
 
 // -----
@@ -1460,7 +1397,6 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 				effectsLayer.setZoomTile(x, bottomRightY, tileIndex);
 			}
 		}
-		
 	
 		for(int y = topLeftY; y<=bottomRightY; y++) {
 			if(topLeftX >= 0 && y >= 0) {
@@ -1470,35 +1406,28 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 				effectsLayer.setZoomTile(bottomRightX, y, tileIndex);
 			}
 		}
-	
 			
 		layer += increment;
 		
 		effectsLayer.update();
 		return false;
 	}
-	
-		
-	
-	
+
 	firstRun = true;
 	cifReset = false;
 	return true;
 }
 
 bool EffectsManager::topDownEffect(bool downward) {
-	
 	static int nextLine = 0;
 	static int fillLevel = 0;
 	
 	if(nextLine < 9) {
 
 		for(int x=0; x<14; x++) {
-			//effectsLayer.setBigTile(x, nextLine, 1+16-fillLevel);
 			effectsLayer.setBigTile(x, nextLine,
 				downward ? 1+16-fillLevel : 1+fillLevel, false, !downward);
 		}
-		//fillLevel+=4;
 		fillLevel+=8;
 		
 		if(fillLevel > 16) {
@@ -1510,7 +1439,7 @@ bool EffectsManager::topDownEffect(bool downward) {
 		return false;
 	}
 	
-	// reset static var
+	// reset static vars
 	nextLine = 0;
 	fillLevel = 0;
 	return true;
@@ -1559,9 +1488,6 @@ void EffectsManager::setDebugDisplay(bool black) {
 
 void EffectsManager::setBorderColor(bool black) {
 
-	//bn::span<bn::tile> tileRef = tilesPointer.vram().value();
-	
-	//unsigned borderVal = game->roomManager.isWhiteRooms() ? 0x22222222 : 0x11111111;
 	unsigned borderVal = black ? 127 : 126;
 	
 	for(int i=0; i<30; i++) {
@@ -1569,7 +1495,6 @@ void EffectsManager::setBorderColor(bool black) {
 		effectsLayer.rawMap.setTile(i, 19, borderVal, true, false);
 	}
 
-	//for(int i=0+1; i<20-1; i++) {
 	for(int i=0; i<20; i++) {
 		effectsLayer.rawMap.setTile(0, i, borderVal, true, false);
 		effectsLayer.rawMap.setTile(29, i, borderVal, false, true);
@@ -1579,9 +1504,7 @@ void EffectsManager::setBorderColor(bool black) {
 	
 	setDebugDisplay(black);
 	
-	
 	effectsLayer.reloadCells();
-
 }
 
 bool EffectsManager::exitRoom() {
@@ -1613,9 +1536,7 @@ bool EffectsManager::exitRoom() {
 	if(frame - firstFrame < 45 * 1) {
 		return false;
 	}
-	
-	//setBorderColor();
-	
+
 	bool res = entityManager->playerWon() ? zoomEffect(true) : topDownEffect(true);
 
 	if(res) {
@@ -1646,7 +1567,6 @@ bool EffectsManager::enterRoom() {
 
 	if(res) {
 		firstRun = true;
-		//setBorderColor(!game->roomManager.isWhiteRooms());
 		return true;
 	}
 	
@@ -1695,67 +1615,6 @@ void EffectsManager::doVBlank() { profileFunction();
 	}
 	
 	return;
-
-	/*
-	
-	if(frame % 4 != 0) {
-		return;
-	}
-	
-	static Pos spiralPos(3, 3);
-	static int layerIndex = 0;
-	static int layer = 1;
-	static int layerCount = 0;
-	static int dirIndex = 0;
-	const Direction dirArray[4] = {Direction::Down, Direction::Right, Direction::Up, Direction::Left};
-
-	// should this be static? should this be a class var honestly?
-	static bn::span<bn::tile> tileRef = tilesPointer.vram().value();
-	
-	if(layerIndex == layer) {
-		dirIndex = (dirIndex + 1) % 4;
-		layerIndex = 0;
-			
-		layerCount++;
-		if(layerCount == 2) {
-			layerCount = 0;
-			layer++;
-		}
-		if(layer == 8 && layerCount == 1) {
-			layer = 1;
-			spiralPos = Pos(3, 3);
-			dirIndex = 0;
-			layerCount = 0;
-		}
-	}
-	
-
-	if(layerIndex < layer) {
-		//BN_ASSERT(spiralPos.y >=0 && spiralPos.y < 8, "spiralPos y out of range at ", spiralPos.y);
-		//BN_ASSERT(spiralPos.x >=0 && spiralPos.x < 8, "spiralPos x out of range at ", spiralPos.x);
-		
-		//uint32_t val = tileRef[126].data[spiralPos.y] ^ (((uint32_t)2) << 4*spiralPos.x);
-		
-		uint32_t val = tileRef[126].data[spiralPos.y];
-		uint32_t temp = (val & (((uint32_t)0xF) << 4*spiralPos.x)) >> 4*spiralPos.x;
-		
-		temp = (temp % 4) + 1;
-		val = (val & ~(((uint32_t)0xF) << 4*spiralPos.x)) | (temp << 4*spiralPos.x) ;
-		
-		tileRef[126].data[spiralPos.y] = val;
-		tileRef[127].data[spiralPos.y] = val;
-		
-		spiralPos.move(dirArray[dirIndex]);
-		
-		layerIndex++;
-	}
-	*/
-	
-	
-	
-	
-	
-	
 }
 
 void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
@@ -1801,8 +1660,6 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	
 	effectsCount--;
 	effects++;
-
-	
 	
 	for(int i=0; i<effectsCount; i++) {
 		//if(effects->width == 1 && effects->height == 1) { 
@@ -1816,8 +1673,6 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		}
 		effects++;
 	}
-	
-	
 	
 	unsigned roomNameHash = game->roomManager.currentRoomHash();
 	
@@ -1850,23 +1705,16 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	// init the hopefully cool voided lyrics 
 	if(game->mode == 2 && roomNameHash == hashString("rm_rest_area_9\0")) {
 		globalGame->cutsceneManager.voidedLyrics();
-	}
-	
-	
-	
+	}	
 }
 
 // -----
 
 Dialogue::Dialogue(EffectsManager* effectsManager_, const char* data_) : effectsManager(effectsManager_), originalData(data_) {
-	
-	
 	// gods should i just make a dialogue class 
 	// honestly, i didnt need it, and this code is (curse)ing trash.
-	// nv, hopefully not anymore, im going to make it less trash 
-	
+	// nvm, hopefully not anymore, im going to make it less trash 
 	data = data_;
-
 }
 
 const char* Dialogue::getNextWord() {
@@ -1916,8 +1764,7 @@ int Dialogue::getNextLine() {
     	    break;
     	}
 	}
-
-
+	
 	return bufferIndex;
 }
 
@@ -1943,7 +1790,6 @@ int Dialogue::getNextDialogue(char* res) {
 	
 	// i swear, it was robs just the online compiler i was using, but i had to do this ok
 	res[charCount-1] = (char)0;
-	
 	
 	char* test = res;
 	
@@ -1974,20 +1820,6 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 	int compareVal = isCutscene ? 0 : 6;
 	compareVal = (compareVal * 16) - 8;
 	
-	/*
-	for(auto it = effectList.cbegin(); it != effectList.cend(); ++it) {
-		if((*it) == NULL) {
-			continue;
-		}
-		if((*it)->getY() >= compareVal) {
-			(*it)->sprite.spritePointer.set_visible(vis);
-		}
-    }
-	*/
-	
-	// tbh, i think this func should just be removed??
-	// nope nope nope
-	
 	if(isCutscene) {
 		for(auto it = bigSprites.cbegin(); it != bigSprites.cend(); ++it) {
 			if((*it) == NULL) {
@@ -2002,11 +1834,12 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 			}
 			(*it)->sprite.spritePointer.set_visible(vis);
 		}
-		
 	}
 }
 
 void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sound_item* sound) {
+	
+	// when one func is ~350 lines long, it NEEDS to be rewritten
 	
 	/*
 	
@@ -2040,9 +1873,6 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	
 	BN_ASSERT(*safteyTestData == '\0', "oh gods. dialogue data wasnt double nulltermed.  PLEASE MESSAGE ME THIS. str=", data);
 	
-	
-	//BN_LOG("doing dialogue of ", data);
-	
 	if(sound == NULL) {
 		switch(game->mode) {
 			default:
@@ -2067,7 +1897,6 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	// im just going to pray i dont hit that limit(but i def will)
 	// will probs need to do some redrawing, with like, a max of 4 lines of sprites actually drawn?
 	// ugh
-	
 	
 	// TODO, FOR TEXT OUTLINE, RENDER THE TEXT 4 TIMES ON EACH DIR WITH BLACK TO GEN THE OUTLINE
 	
@@ -2193,18 +2022,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 				break;
 			}
 		}
-		
-		//*filteredBufferPtr = 
-		//filteredBufferPtr = filteredBuffer;
-		
-		
-			
-		//BN_LOG("bruh ", filteredBufferPtr);
-		
-		//const char* WHAT = (const char*)filteredBuffer.data();
+
 		const char* WHAT = (const char*)filteredBuffer._data;
-		
-		//BN_LOG("WHAT ", WHAT);
 		
 		textGeneratorObj.set_one_sprite_per_character(true);
 		textGeneratorObj.generate((bn::fixed)-120+8+4+4, (bn::fixed)40 + offset*16, bn::string_view(WHAT), textSprites);
@@ -2254,8 +2073,6 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		}
 		
 		globalGame->playSound(soundItem);
-		
-		//BN_LOG("WHAT ", WHAT);
 		
 		textSprites.clear();
 		textGeneratorObj.set_one_sprite_per_character(false);
@@ -2375,24 +2192,11 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		questionString = defaultMessage;
 	}
 	
-	
-	
 	GameState restoreState = game->state;
 	game->state = GameState::Dialogue;
 	
 	textGenerator.set_one_sprite_per_character(false);
-	
-	/*
-	auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
-	auto alternateTextPalette = spritePalette->getAlternateSpritePalette().create_palette();
-	auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
-	
-	if(game->roomManager.isWhiteRooms()) {
-		activeTextPalette = spritePalette->getLightGraySpritePalette().create_palette();
-		alternateTextPalette = spritePalette->getDarkGraySpritePalette().create_palette();
-	}
-	*/
-	
+
 	auto activeTextPalette = spritePalette->getSpritePalette();
 	auto alternateTextPalette = spritePalette->getAlternateSpritePalette();
 	auto blackTextPalette = spritePalette->getBlackSpritePalette();
@@ -2423,22 +2227,15 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	bn::vector<bn::sprite_ptr, RESTSPRITESIZE> restSprites;
 	bn::vector<bn::vector<bn::sprite_ptr, RESTSPRITESIZE>, 4> restSpritesOutline;
 	
-	
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
 	bn::vector<bn::sprite_ptr, 4> noSprites;
 	
-	//textGenerator.generate((bn::fixed)-16, (bn::fixed)-30, bn::string_view("Rest?\0"), textSpritesLine1);
-	
 	textGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view(questionString), restSprites);
-	//textGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view("Rest?\0"), restSprites);
 	for(int i=0; i<restSprites.size(); i++) {
 		restSprites[i].set_bg_priority(0);
 		restSprites[i].set_palette(activeTextPalette);
 	}
-	
 
-	
-	
 	for(int j=0; j<4; j++) {
 		
 		restSpritesOutline.push_back(bn::vector<bn::sprite_ptr, 4>());
@@ -2558,11 +2355,9 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 
 // -----
 
-// jesus (curse)
 MenuOption::MenuOption(const char* optionName_, 
 	//const char* (*getOption_)(), void (*changeOption_)(int), 
-	std::function<const char*(void)> getOption_, std::function<void(int)> changeOption_,
-	int xVal) :
+	std::function<const char*(void)> getOption_, std::function<void(int)> changeOption_, int xVal) :
 	optionName(optionName_),
 	getOption(getOption_),
 	changeOption(changeOption_),
@@ -2594,19 +2389,16 @@ void MenuOption::fullDraw(bool isActive) { // use white color for active, use da
 		spritePalettePalette = effectsManager->spritePalette->getSpritePalette();
 	}
 
-	
 	for(int i=0; i<textSprites.size(); i++) {
 		textSprites[i].set_palette(spritePalettePalette);
 		textSprites[i].set_bg_priority(0);
 		textSprites[i].set_visible(true);
-	}
-	
+	}	
 }
 
 void MenuOption::draw(bool isActive) {
 	isActiveState = isActive;
 	for(int i=0; i<textSprites.size(); i++) {
-	
 		if(isActive) {
 			textSprites[i].set_palette(effectsManager->spritePalette->getSpritePalette());
 		} else {
@@ -2645,12 +2437,8 @@ void EffectsManager::setBrandColor(int x, int y, bool isTile) {
 		quadrant = 3;
 	}
 	
-	// goofy ah
-	
 	int xIndex = quadrant % 2 == 0 ? 2+(2*x) : (x-3)*2;
 	int yIndex = quadrant < 2 ? 2+(2*y) : (y-3)*2;
-	
-	//BN_LOG(x, " ", y, " ", xIndex, " ", yIndex, " ", quadrant);
 	
 	for(int xOffset=0; xOffset<=1; xOffset++) {
 		for(int yOffset=0; yOffset<=1; yOffset++) {
@@ -3074,6 +2862,8 @@ void EffectsManager::doMenu() {
 /*
 
 all effects should have just been children of the main effect class
+would have let them have their own vars, static and not
+and i would have known that from the beginning, rather than only figuring out the jank lambda capture shit 75% of the way in
 
 */
 
@@ -3954,38 +3744,7 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 	
 	// this REALLLLY needs to be optimized.
 	
-	//Sprite tempSprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
-	//const bn::sprite_tiles_item* tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
-	
-	/*
-	if(!(randomGenerator.get() & 1)) {
-		tempSprite = Sprite(bn::sprite_tiles_items::dw_spr_dustparticle2, bn::sprite_shape_size(8, 8));
-		tempTiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
-	}
-	*/
-
-	
-	auto createFunc = [
-	//tempSprite = bn::move(tempSprite),
-	//tempTiles = bn::move(tempTiles)
-	//tempSprite = tempSprite,
-	//tempTiles = tempTiles
-	](Effect* obj) mutable -> void {
-
-		/*
-		obj->sprite = tempSprite;
-		obj->tiles = tempTiles;
-	
-		obj->sprite.spritePointer.set_tiles(
-			*obj->tiles,
-			0
-		);
-		*/
-		
-		//obj->sprite = tempSprite(bn::sprite_tiles_items::dw_spr_dustparticle, bn::sprite_shape_size(8, 8));
-	
-		//obj->sprite.spritePointer.set_z_order(1);
-		//obj->sprite.spritePointer.set_z_order(0);
+	auto createFunc = [](Effect* obj) mutable -> void {
 		obj->sprite.spritePointer.set_bg_priority(3);
 	
 		obj->x = -32;

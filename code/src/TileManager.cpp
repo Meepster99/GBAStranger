@@ -119,6 +119,9 @@ void Floor::reloadCells() {
 	collisionPointer->reloadCells();
 }
 
+// as for why these lambdas are here, putting them in loadtiles caused a compiler error 
+// not a "you did something wrong" error, a "please submit a bug report, something is wrong" error
+
 auto memoryGetFunc = []() -> int {
 	Player* player = globalGame->entityManager.player;
 	

@@ -2246,7 +2246,7 @@ void CutsceneManager::showCredits() {
 
 	const char* vermsgString2 = VERMSG2;
 	
-	#define VERMSG3 "on " __DATE__ " at " __TIME__
+	#define VERMSG3 "on " __DATE__ " at " __TIME__ " " GITCOMMIT
 	const char* vermsgString3 = VERMSG3;
 	
 	verTextSprites.clear();
