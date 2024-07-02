@@ -680,7 +680,7 @@ void Chest::specialBumpFunction() {
 }; 
 
 // all strings must be double nulltermed!
-const char* randomBoulderMessages[] = { 
+constexpr const char* randomBoulderMessages[] = { 
 	"lmao if you are seeing this, i did something wrong\0", 
 	"i rlly hope this works\0", 
 	"Did you know every time you sigh, a little bit of happiness escapes?\0", 
@@ -712,6 +712,26 @@ const char* randomBoulderMessages[] = {
 	"I don't know anything, you are the one who knows\0",
 	"Staying misfortunate is negligence, and not trying to become happy is cowardice.\0"
 };
+
+constexpr bool checkAllBoulderMessages() {
+	
+	for(unsigned i=0; i<sizeof(randomBoulderMessages)/sizeof(randomBoulderMessages[0]); i++) {
+		const char* str = randomBoulderMessages[i];
+		
+		while(*str) {
+			str++;
+		}
+		
+		str++;
+		if(*str != '\0') {
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+static_assert(checkAllBoulderMessages(), "a random boulder message was not properly double nulltermed!");
 
 void generateFunny(char* res) {
 	
@@ -925,3 +945,5 @@ void CifStatue::interact() {
 void JukeBox::interact() {
 	effectsManager->doDialogue(" G R O O V Y !!\0\0");
 }
+
+

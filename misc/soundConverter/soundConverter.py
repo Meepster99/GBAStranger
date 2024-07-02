@@ -113,11 +113,8 @@ def convertAllSounds():
 		#song.export(outputFilePath, format="wav", parameters=convertParameters)
 		song.export(outputFilePath, format=formatParameters, parameters=convertParameters)
 
-		
 		successCount += 1
-
-
-	
+		
 	totalCount = successCount + failCount
 	print("converted {:5.2f}% ({:d}/{:d}) of sound effects, hope thats good enough".format(100 * successCount / totalCount, successCount, totalCount))
 		
@@ -136,16 +133,6 @@ def convertMisc():
 	for link in links:
 	
 		print(CYAN + "converting " + link + RESET)
-	
-		#fileNames = [ f for f in os.listdir("./") if f.endswith('.mp4')]
-		"""
-		if len(fileNames) == 0:
-			yt=YouTube(link)
-			t=yt.streams.filter(only_audio=True)
-			t[0].download("./")
-			fileNames = [ f for f in os.listdir("./") if f.endswith('.mp4')]
-		"""
-		
 		yt=YouTube(link)
 		t=yt.streams.filter(only_audio=True)
 		t[0].download("./")
@@ -164,7 +151,6 @@ def convertMisc():
 		song = song.set_channels(1)
 
 		outputFilePath = os.path.join(outputPath, fileName.rsplit(".", 1)[0].replace(" ", "_").lower() + ".wav")
-		#song.export(outputFilePath, format="wav", parameters=convertParameters)
 		song.export(outputFilePath, format=formatParameters, parameters=convertParameters)
 
 		os.remove(fileName.rsplit(".", 1)[0] + ".mp3")

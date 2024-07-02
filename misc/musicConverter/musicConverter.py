@@ -341,37 +341,9 @@ class ITFile:
 	def writeSample(self, bytes, sampleFilename):
 	
 		offsetRes = len(bytes)
-		
-		
+			
 		# https://github.com/OpenMPT/openmpt/blob/47fc65b7b01455021284e3a5251ef16736bcd077/soundlib/ITCompression.cpp
-		
-		# i have like,,, no clue what to do here
-		
-		# this duplicate file open is stupid.
-		
-		#wavFile = wave.open(sampleFilename)
-		#sampleCount = wavFile.getnframes() # once again, var name duplication 
-		#wavBytes = wavFile.readframes(sampleCount)
-		#wavFile.close()
-		
-		#wavFile = wave.open(sampleFilename)
-		#sampleCount = wavFile.getnframes() # once again, var name duplication 
-		#wavBytes = wavFile.readframes(sampleCount)
-		#wavFile.close()
-		
-		#wavFile = wave.open(sampleFilename)
-		#sampleCount = wavFile.getnframes()
-		#wavBytes = wavFile.readframes(sampleCount)
-		#wavFile.close()
-		
-		#bytes += struct.pack("H", len(wavBytes))
-		# why did doing this stop the version error from occuring when opening mpt????
-		#bytes += struct.pack("H", len(wavBytes) - 2)
-		
-		
-		#start = time.time()
-		
-		# goofy 
+	
 		index = self.sampleFilenames.index(sampleFilename)
 		
 		start = index * self.samplesPerSegment
@@ -386,62 +358,6 @@ class ITFile:
 		else:
 			bytes += struct.pack("{:d}h".format(len(tempData)), *tempData)
 		
-		"""
-		
-		if is8Bit:
-			
-			if "msc_voidsong" in sampleFilename:
-			#if False:
-				
-				#print(YELLOW + "doing exception weird conversion" + RESET)
-				
-				output = sampleFilename.rsplit(".", 1)[0] + ".pcm"
-			
-				temp = AudioSegment.from_wav(sampleFilename)
-				temp.export(output, format='u8')
-				
-				sampleCount = os.path.getsize(output)
-				
-				#with open(sampleFilename, 'rb') as file:
-				with open(output, 'rb') as file:
-					wavBytes = bytearray(file.read())
-				
-				#print(max(wavBytes), min(wavBytes))
-				
-				for i in range(0, len(wavBytes)):
-					#print(wavBytes[i])
-					bytes += struct.pack("b", wavBytes[i] - 128)
-					#wtf = bytearray([wavBytes[i]])
-					#bytes += struct.pack("b", struct.unpack("b", wtf)[0])
-				
-				#bytes += wavBytes
-			
-			else:
-			
-				temp = struct.unpack('<' + 'h' * (len(wavBytes) // 2), wavBytes)		
-				
-				# is this,,,, ok????
-				# im just doing this instead of some other form of quantization
-				# this def,,, is not ideal.
-				# actually,,,, it seems to,,, be better? in most cases? 
-				# espically tail's music?
-				# dis however, im getting heavy artifacting. but tbh it sounds rlly cool
-				# i should (probs) round here instead of just floor dividing.
-				for i in range(0, len(temp)):
-					#bytes += struct.pack("b", temp[i] // 256)
-					val = sampleConvertFunc(temp[i] / 256)
-					val = min(max(int(val), -128), 127)
-					bytes += struct.pack("b", val)
-		
-		else:
-			bytes += wavBytes
-			
-		"""
-		
-		#end = time.time()
-		#print(GREEN + "took {:f} seconds".format(end-start) +RESET)
-		
-		# stupid, why didnt i need to do this previously???
 		return offsetRes
 	
 	def writeSampleHeader(self, bytes, sampleFilename):
@@ -566,75 +482,7 @@ class ITFile:
 	def writePattern(self, bytes):
 		
 		offsetRes = len(bytes)
-		
-		
-		"""
-		idk = bytearray([
-		0x81, 0x03, 0x3C, 0x01, 0x00, 0x81, 0x12, 0x02, 0x00, 0x01, 0x03, 0x00,
-		0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00,
-		])
-		
-		index = [0]
-		channelMask = 0
-		maskVariable = 0
-		
-		# 3C is middle C
-		
-		def getByte():
-			
-			res = idk[index[0]]
-			index[0] += 1
-			return res
-		
-		row = 0
-		while index[0] < len(idk):
-			
-			channelMask = getByte()
-			print("\nstarting another while loop, row={:d}".format(row))
-			row += 1
-			
-			while channelMask > 0:
-				channel = (channelMask - 1) & 63
-				if channelMask & 0x80:
-					maskVariable = getByte()
-				
-					
-				if maskVariable & 0x01:
-					print("get note {:02X}".format(getByte()))
-				elif maskVariable & 0x10:
-					print("last note {:02X}".format(maskVariable))
-
-				if maskVariable & 0x02:
-					print("get instrument {:02X}".format(getByte()))
-				elif maskVariable & 0x20:
-					print("last instrument {:02X}".format(maskVariable))
-				
-				if maskVariable & 0x04:
-					print("get volume {:02X}".format(getByte()))
-				elif maskVariable & 0x40:
-					print("last volume {:02X}".format(maskVariable))
-					
-				if maskVariable & 0x08:
-					#get effect byte
-					#get effect value byte
-					print("fuck")
-					pass
-				elif maskVariable & 0x80:
-					#use last effect byte
-					#use last effect value byte
-					print("fuck")
-					pass
-			
-				
-				channelMask = getByte()
-		"""
 	
-
 		# we need a row per sample 
 		
 		if self.sampleCount < 3:
@@ -668,46 +516,8 @@ class ITFile:
 		# NOT sure if needed, prevent shit from getting cut off?
 		patternBytes += struct.pack("B", 0)
 	
-		
 		# pattern length
 		bytes += struct.pack("H", len(patternBytes))
-		
-		# row count 
-		#bytes += struct.pack("H", self.sampleCount)
-		#bytes += struct.pack("H", 0xFF + 1)
-		#bytes += struct.pack("H", self.sapleCount*2)
-		
-		# it seems like,,,,, mmutil has some, fuckery when over something over,,, not 0x0100, but 0x010F fails?? 
-		# i need to put samples closer together, without,,, fucking shit 
-		# or,, i could have a second pattern,, maybe?
-		# that will be annoying to program tho 
-		# also, i need to lower the samples to 3sec, ithink
-		# 0x0107 fails 
-		# 0x0103 fails
-		# 0x0102 fails
-		# 0x0101 passes. what the fuck?
-		# actually, while 0x0101 passes, it shits itself on the gba???
-		# im setting a hard limit of 0xFF 
-		# im not even going to try 0x0100
-		# im going to need multiple patterns
-		
-		# or maybe,,, set pitch to 2, tempo to 0.5,,,
-		# YES
-		# this doesnt solve my issue of,,, the cutting in and out. is a 4sec sample to much?
-		# the cutting is only occasional. 
-		# can i goto 3sec without severely fucking my math up?
-		# its sucha bummer, i think 3.5 seconds would work tbh 
-		# the cuts are so short 
-		
-		# 4/2)/2 = 1 
-		# 3.5/2)/2 = 0.875
-		# 60 * 24 = 1440, so currently 1440 ticks per row. 
-		# 1440 * .875 = 1260, 1260/60 - 21,,, so 60 bpm, 21 ticks,,,,, yea?
-		
-		# 3.5 is still cutting out,,, but but only during the start weirdly enough? 
-		# i can go down to 3 without hitting 255, so i mean,,, yea
-		
-		#bytes += struct.pack("H", 0xFF)
 		
 		if self.sampleCount+1 > 0xFF:
 			print("SHITS FUCKED")
@@ -888,14 +698,6 @@ class ITFile:
 		f = open(output, "wb")
 		f.write(bytes)
 		f.close()
-		
-		
-		#if os.path.isdir(self.filename):
-		#	shutil.rmtree(self.filename)
-		#removeFile(self.filename + ".wav")
-		#removeFile(self.filename + "2.wav")
-		#removeFile(self.filename + "3.wav")
-		
 		
 		pass
 	

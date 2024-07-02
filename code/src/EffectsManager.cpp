@@ -277,7 +277,12 @@ void BigSprite::animate() { profileFunction();
 void BigSprite::loadBoobTrap() {
 
 	BN_LOG("booba detected");
-		
+
+	if(globalGame->mode != 0) { // load alt tail
+		xPos = -16;
+		yPos = -16;
+	}
+	
 	auto func1 = [](void* obj) -> void {
 		
 		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
@@ -404,6 +409,7 @@ void BigSprite::loadBoobTrap() {
 	
 		return;
 	};
+	
 	auto func2 = [](void* obj) -> bool {
 		if(frame % 2 != 0) {
 			return false;
@@ -540,6 +546,10 @@ void BigSprite::loadBoobTrap() {
 }
 
 void BigSprite::loadTailHead() {
+	
+	if(globalGame->mode != 0) { // load alt tail
+		tiles = &bn::sprite_tiles_items::dw_spr_tail_upperbody_2;
+	}
 	
 	BN_LOG("tail head detected");
 	
