@@ -655,6 +655,10 @@ public:
 	
 	POSATTRIBUTES bool operator==(Pos const& rhs) const { return x == rhs.x && y == rhs.y; }
 
+	POSATTRIBUTES constexpr unsigned getSwitchValue() { // used to get a unsigned value for use in switch statements
+		return (x << 4) | y;
+	}
+
 	POSATTRIBUTES bool sanity() const {
 		// checks if im going insane.
 		return x >= 0 && y >= 0 && x < 14 && y < 9;

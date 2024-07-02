@@ -1871,76 +1871,75 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 	
 	*/
 	
-	//FloorTile* bufferedTile = NULL; // tile to check at end of func
 	const char* errorLine = NULL;
 	Pos tilePos = testTile->tilePos;
-	TileType tileType = testTile->tileType();
 	bool isVoided = game->entityManager.player->isVoided;
 	bool doCarcusEnding = false;
 	bool doCrashGame = false;
-	
-	// is doing this ok?
-	switch(tileType) {
-		case TileType::WordTile:
+
+	switch(testTile->tileType()) {
 		case TileType::RodTile:
+			errorLine = ">FATAL ERR: VR HAS BEEN SEVERED FROM SYSTEM";
+			doCrashGame = true;
+			break;
 		case TileType::LocustTile:
+			errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
+			break;
 		case TileType::SpriteTile:
+			if((void*)testTile == (void*)tileManager->memoryTile) {
+				errorLine = isPickup ? ">ERR: MEM1 REMOVED" : ">MEM1 RESTORED";
+			} else if((void*)testTile == (void*)tileManager->wingsTile) {
+				errorLine = isPickup ? ">ERR: MEM2 REMOVED" : ">MEM2 RESTORED";
+			} else if((void*)testTile == (void*)tileManager->swordTile) {
+				errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
+			}
+			break;
+		case TileType::WordTile:
+			switch(tilePos.getSwitchValue()) {
+				case Pos(1, 8).getSwitchValue(): // VO/HP
+					if(isVoided) {
+						errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
+						doCrashGame = true;
+					} else {
+						errorLine = ">FATAL ERROR: HP NULL";
+						game->entityManager.addKill(game->entityManager.player); // this makes them fall, not slump over, but its ok for now
+					}
+					break;
+				case Pos(2, 8).getSwitchValue(): // ID/07
+					if(isVoided) {
+						errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
+						doCrashGame = true;
+					} else {
+						errorLine = isPickup ? ">ERR: INVALID/MISSING HP VALUE" : ">HP RESTORED";
+					}
+					break;
+				case Pos(12, 8).getSwitchValue(): // B0/B?
+					errorLine = ">FATAL ERROR : BR NULL";
+					if(tileManager->floorTile1->second == '?') {
+						doCrashGame = true;
+					} else {
+						doCarcusEnding = true;
+					}
+					break;
+				case Pos(13, 8).getSwitchValue(): // bottom right room num
+					errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
+					if(static_cast<WordTile*>(testTile)->first == '?') {
+						errorLine = ">FATAL ERROR: BR NULL";
+						doCrashGame = true;
+					} else if(!isPickup && tileManager->getRoomIndex() != game->roomManager.roomIndex) {
+						BN_LOG("swaprooms via tile swap!");
+						game->entityManager.addKill(NULL);
+					}
+					break;
+				default: // check if locust value is restored 
+					if((tileManager->locustTile->tilePos + Pos(1, 0)) == tilePos) {
+						errorLine = isPickup ? ">ERR: INVALID/MISSING LI VALUE" : ">LI VALUE RESTORED";
+					}	
+					break;
+			}
 			break;
 		default:
 			return;
-	}	
-	
-	if((void*)testTile == (void*)tileManager->memoryTile) {
-		errorLine = isPickup ? ">ERR: MEM1 REMOVED" : ">MEM1 RESTORED";
-	} else if((void*)testTile == (void*)tileManager->wingsTile) {
-		errorLine = isPickup ? ">ERR: MEM2 REMOVED" : ">MEM2 RESTORED";
-	} else if((void*)testTile == (void*)tileManager->swordTile) {
-		errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
-	} else if((void*)testTile == (void*)tileManager->floorTile1) {
-		// carcus ending
-		
-		if(tileManager->floorTile1->second == '?') {
-			//crashGame("
-			errorLine = ">FATAL ERROR: BR NULL\0";
-			doCrashGame = true;
-		} else {
-			doCarcusEnding = true;
-			errorLine = ">FATAL ERROR : BR NULL";
-		}
-	} else if(testTile->tilePos == Pos(13, 8) && tileType == TileType::WordTile) {
-		WordTile* floorTile2 = static_cast<WordTile*>(testTile);
-		errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
-		if(floorTile2->first == '?' || floorTile2->second == '?') {
-			errorLine = ">FATAL ERROR: BR NULL";
-			doCrashGame = true;
-		} else if(!isPickup && tileManager->getRoomIndex() != game->roomManager.roomIndex) {
-			BN_LOG("swaprooms via tile swap!");
-			game->entityManager.addKill(NULL);
-		}
-	} else if((void*)testTile == (void*)tileManager->rodTile) {
-		// crash, but i havent implimented that yet
-		errorLine = ">FATAL ERR: VR HAS BEEN SEVERED FROM SYSTEM";
-		doCrashGame = true;
-	} else if((void*)testTile == (void*)tileManager->voidTile1) {
-		if(isVoided) {
-			errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
-			doCrashGame = true;
-		} else {
-			errorLine = ">FATAL ERROR: HP NULL";
-			//doCrashGame = true;
-			game->entityManager.addKill(game->entityManager.player); // this makes them fall, not slump over, but its ok for now
-		}
-	} else if(testTile->tilePos == Pos(2, 8)) {
-		if(isVoided) {
-			errorLine = ">FATAL ERROR: VOID BREACHED SHUTTING SYSTEM DOWN";
-			doCrashGame = true;
-		} else {
-			errorLine = isPickup ? ">ERR: INVALID/MISSING HP VALUE" : ">HP RESTORED";
-		}
-	} else if((void*)testTile == (void*)tileManager->locustTile) {
-		errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
-	} else if( (tileManager->locustTile->tilePos + Pos(1, 0)) == tilePos && tileType == TileType::WordTile) {
-		errorLine = isPickup ? ">ERR: INVALID/MISSING LI VALUE" : ">LI VALUE RESTORED";
 	}
 	
 	if(errorLine == NULL) {
