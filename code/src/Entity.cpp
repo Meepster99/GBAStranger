@@ -143,8 +143,12 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			
 			Obstacle* temp = static_cast<Obstacle*>(*(entityManager->getMap(tilePos).begin()));
 			
-			temp->interact();
-			
+			if(temp->entityType() == EntityType::Interactable || temp->entityType() == EntityType::Chest || hasMemory) {
+				temp->interact();
+			} else {
+				effectsManager->questionMark();
+			}
+
 			return {false, bn::optional<Direction>()};
 		}
 		
