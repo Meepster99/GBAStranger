@@ -173,7 +173,7 @@ void Game::findNextRoom() {
 			//globalGame->tileManager.locustCounterTile->second = '0';
 			entityManager.player->isVoided = false;
 
-			//game->save(); // extranious call for sanity
+			//game->save(); // extranious call for sanityl
 			roomManager.cifReset();
 		} else {
 			if(tileManager.exitDestination == NULL) {
@@ -183,8 +183,17 @@ void Game::findNextRoom() {
 			}
 		}
 		
+		/*
+		
+		the below code has become a massive issue with the addition of EX rooms 
+		E026 and B026 both have the same tilemanagerindex, but different room indicies
+		potential solutions just,, adding 256 when in E?
+		
+		
+		*/
+		
 		if(tileManagerRoomIndex != -1 && tileManagerRoomIndex != startRoomIndex) {
-			if(tileManagerRoomIndex >= 256) {
+			if(tileManagerRoomIndex >= 256 && startRoomIndex <= 256) {
 				// goto the white rooms 
 				roomManager.gotoRoom("rm_u_0001\0");
 			} else {

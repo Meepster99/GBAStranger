@@ -336,8 +336,18 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		
 		Pos tempSecretPos(secrets->x, secrets->y);
 		
-		bn::pair<const char*, Pos> tempPair(secrets->dest, tempSecretPos);
-		secretDestinations.push_back(tempPair);
+		if(WTF(secrets->dest) == 2) {
+			BN_LOG("numtile with val of ", secrets->dest);
+			BN_ASSERT(floorMap[tempSecretPos.x][tempSecretPos.y] != NULL, "when loading a numtile, the floor under it was null. this should never occur!");
+			delete floorMap[tempSecretPos.x][tempSecretPos.y];
+			floorMap[tempSecretPos.x][tempSecretPos.y] = NULL;
+			floorMap[tempSecretPos.x][tempSecretPos.y] = new WordTile(tempSecretPos, secrets->dest[0], secrets->dest[1]);
+		} else {
+			bn::pair<const char*, Pos> tempPair(secrets->dest, tempSecretPos);
+			secretDestinations.push_back(tempPair);
+		}
+		
+		
 		
 		secrets++;
 	}
@@ -603,31 +613,29 @@ void TileManager::updateLocust() {
 		updateTile(locustTile->tilePos);
 	}
 	
-	/*
-	if(locustCounterTile != NULL && !entityManager->player->inRod(locustCounterTile)) {
-		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
-		locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
-		updateTile(locustCounterTile->tilePos);
+	if(locustTile != NULL) {
+		Pos tempTilePos = locustTile->tilePos;
+		if(tempTilePos.move(Direction::Right) && hasFloor(tempTilePos) == TileType::WordTile) {
+			// the pos to the right of this tile is valid
+			// the pos to the right has a tile which is a word tile. ALL word tiles should be kept in numberTiles, except floortile1
+			
+			// i seriously NEVER made a gettile func??? fom pos?
+			WordTile* locustCounterTile = static_cast<WordTile*>(floorMap[tempTilePos.x][tempTilePos.y]);
+			
+			locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
+			locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
+			
+			updateTile(tempTilePos);
+		}
 	}
-	*/
-	
-	Pos tempTilePos = locustTile->tilePos;
-	if(tempTilePos.move(Direction::Right) && hasFloor(tempTilePos) == TileType::WordTile) {
-		// the pos to the right of this tile is valid
-		// the pos to the right has a tile which is a word tile. ALL word tiles should be kept in numberTiles, except floortile1
-		
-		// i seriously NEVER made a gettile func??? fom pos?
-		WordTile* locustCounterTile = static_cast<WordTile*>(floorMap[tempTilePos.x][tempTilePos.y]);
-		
-		locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
-		locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
-		
-		updateTile(tempTilePos);
-	}
-	
 }
 
 void TileManager::updateVoidTiles() {
+	
+	if(entityManager->player == NULL) {
+		// just run. i REALLY should have just read from the gamesave instead of player all the time 
+		return;
+	}
 	
 	bool isVoided = entityManager->player->isVoided;
 
@@ -638,16 +646,6 @@ void TileManager::updateVoidTiles() {
 		
 		updateTile(voidTile1->tilePos);
 	}
-	
-	/*
-	if(voidTile2 != NULL && !entityManager->player->inRod(voidTile2)) {
-		
-		voidTile2->first = isVoided ? 'I' : '0';
-		voidTile2->second = isVoided ? 'D' : '7';
-		
-		updateTile(voidTile2->tilePos);
-	}
-	*/
 	
 	Pos tempPos = Pos(2, 8);
 	if(hasFloor(tempPos) == TileType::WordTile) {
@@ -698,6 +696,8 @@ int TileManager::getLocustCount() {
 
 int TileManager::getRoomIndex() {
 	
+	BN_ASSERT(floorTile1 != NULL, "in getRoomIndex, floortile1 was null. how??");
+	
 	char temp = floorTile1->second;
 	if(temp == '?') {
 		return -1;
@@ -709,7 +709,13 @@ int TileManager::getRoomIndex() {
 	
 	WordTile* floorTile2 = static_cast<WordTile*>(floorMap[13][8]);
 	
-	return ((floorTile1->second - '0') * 100) + floorTile2->getNumber();
+	int res = ((floorTile1->second - '0') * 100) + floorTile2->getNumber();
+	
+	if(floorTile1->first == 'E') {
+		res += 257;
+	}
+	
+	return res;
 }
 
 bool TileManager::hasCollision(const Pos& p) {
@@ -885,12 +891,18 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 
 void TileManager::fullDraw() { 
 	
+	//BN_LOG("tileManager layer draw");
 	floorLayer.draw(game->collisionMap, floorMap);
 
+	//BN_LOG("tileManager exit update");
 	updateExit();
+	//BN_LOG("tileManager rod update");
 	updateRod();
+	//BN_LOG("tileManager locust update");
 	updateLocust();
+	//BN_LOG("tileManager void update");
 	updateVoidTiles();
+	//BN_LOG("tileManager burden update");
 	updateBurdenTiles();
 }
 

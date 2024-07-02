@@ -125,10 +125,7 @@ void RoomManager::gotoRoom(const char* roomName) {
 		nextRoom();
 		return;
 	}
-	
-	
-	
-	
+
 	char buffer[32];
 	char* roomNameBuffer = buffer;
 	
@@ -140,9 +137,17 @@ void RoomManager::gotoRoom(const char* roomName) {
 	
 	strcpy(roomNameBuffer, roomName);
 	
+	/*
+	wtf
+	[WARN] GBA Debug:	attempting to go to rm_test2_003
+	[WARN] GBA Debug:	found match rm_test2_003
+	[WARN] GBA Debug:	roomIndex gotoed to 26
+	[WARN] GBA Debug:	reseting to room rm_0026
+	[WARN] GBA Debug:	saving save
+	*/
 	
+	BN_LOG("actual search string is ", buffer);
 	
-	// (curse) time complexity, but im tired.
 	for(int i=0; i<(int)(sizeof(rooms)/sizeof(rooms[0])); i++) {
 		
 		if(WTF(buffer) != WTF(roomNameArray[i].str)) {

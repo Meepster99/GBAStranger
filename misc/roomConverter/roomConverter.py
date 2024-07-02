@@ -25,6 +25,7 @@ GREEN = Fore.GREEN
 YELLOW = Fore.YELLOW
 CYAN = Fore.CYAN
 WHITE = Fore.WHITE
+MAGENTA = Fore.MAGENTA
 
 RESET = Style.RESET_ALL
 
@@ -119,6 +120,7 @@ def readCreationCode(p, creationCode):
 	layer = None
 	b_form = None
 	dl_form = None
+	dummy_value = None
 	
 	def room_goto(roomNameVal):
 		global roomName
@@ -288,6 +290,7 @@ def readCreationCode(p, creationCode):
 	
 	b_form = bruh["b_form"]
 	dl_form = bruh["dl_form"]
+	dummy_value = bruh["dummy_value"]
 	
 	if layer:
 		return layer
@@ -311,6 +314,10 @@ def readCreationCode(p, creationCode):
 	if "contents" in bruh:
 		return "contents = {:d}".format(bruh["contents"])
 	
+	if dummy_value:
+		#print(f"{MAGENTA}ummm, dummy_value was {dummy_value} {RESET}")
+		return "dummy_value = {:d}".format(dummy_value)
+		
 	return None
 	
 def writeFooter(f, successRoomsList):
@@ -858,9 +865,11 @@ def convertObjects(layerData):
 				
 				"rm_bee_001": "rm_0149",
 				"rm_misc_0001": "rm_rest_area_6",
-				"rm_test2_002": "rm_test2_003",
-				"rm_test2_018": "rm_test2_019",
-				"rm_test2_034": "rm_test2_035",
+				
+				# THESE ARE INCORRECT. were they put in before EX was even in?
+				#"rm_test2_002": "rm_test2_003",
+				#"rm_test2_018": "rm_test2_019",
+				#"rm_test2_034": "rm_test2_035",
 				
 				"rm_bee_015": "rm_0165",
 				"rm_return_000": "rm_e_000",
@@ -1633,9 +1642,6 @@ def convertObjects(layerData):
 		def obj_seal(p, creationCode):
 			pass
 
-		def obj_floor_hpn(p, creationCode):
-			pass
-
 		def obj_music_controller_v2(p, creationCode):
 			pass
 
@@ -2174,6 +2180,20 @@ def convertObjects(layerData):
 		def obj_riddle_008(p, creationCode):
 			# new as of ex
 			pass
+			
+		def _hpn_func(p, creationCode):
+		
+			print(f"{CYAN}numbertile called with \"{creationCode}\" {RESET}")
+			floorExport[p.x][p.y] = "Floor"
+			
+			# due to me not wanting to mess with floor compression
+			# im hijacking secrets to do this properly
+			
+			numVal = int(creationCode.rsplit(" ", 1)[1])
+			temp = f"{p.x},{p.y},\"{numVal:02d}\""
+			specialFloorExport.append(temp)
+			
+			pass
 
 		def obj_floor_hpn2(p, creationCode):
 			# DEF NEW AS OF EX, 
@@ -2181,17 +2201,21 @@ def convertObjects(layerData):
 			# going to cry 
 			# this will mess with floor code. im going to cry
 			# temp fix:
-			ObjectFunctions.obj_floor(p, creationCode)
+			#ObjectFunctions.obj_floor(p, creationCode)
+			ObjectFunctions._hpn_func(p, creationCode)
 			pass
 		
 		def obj_floor_hpn3(p, creationCode):
-			ObjectFunctions.obj_floor(p, creationCode)
+			#ObjectFunctions.obj_floor(p, creationCode)
+			ObjectFunctions._hpn_func(p, creationCode)
 
 		def obj_floor_hpn4(p, creationCode):
-			ObjectFunctions.obj_floor(p, creationCode)
+			#ObjectFunctions.obj_floor(p, creationCode)
+			ObjectFunctions._hpn_func(p, creationCode)
 
 		def obj_floor_hpn(p, creationCode):
-			ObjectFunctions.obj_floor(p, creationCode)
+			#ObjectFunctions.obj_floor(p, creationCode)
+			ObjectFunctions._hpn_func(p, creationCode)
 
 
 	
