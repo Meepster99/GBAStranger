@@ -1,6 +1,9 @@
 [submodule "butano"]
 	path = butano
 	url = https://github.com/GValiente/butano.git
+	ignore = dirty
+
 [submodule "misc/EasyPoolProcessing"]
 	path = misc/EasyPoolProcessing
 	url = https://github.com/Meepster99/EasyPoolProcessing.git
+	ignore = dirty

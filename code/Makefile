@@ -85,8 +85,8 @@ EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; py
 ifdef DISABLEASSERTS
 	USERFLAGS += -DDISABLEASSERTS=true 
 endif
-
-USERFLAGS += -DGITCOMMIT=\"$(shell git describe --always --dirty)\"
+ 
+USERFLAGS += -DGITCOMMIT=\"$(shell git describe --always --dirty | sed 's/dirty/d/')\"
 
 # vine boom soound effect
 USERFLAGS += -DENABLELOGGING=true 
@@ -135,6 +135,9 @@ fullClean:
 	
 	python  ../misc/convertAllAssets.py
 
+testWhat:
+	$(info $(USERFLAGS))
+	echo what 
 	
 	
 

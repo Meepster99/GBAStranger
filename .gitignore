@@ -18,6 +18,7 @@ Decompile
 *.dat
 *.csv
 /misc/CLI-windows-latest-Release-isBundled-true/
+/misc/EasyPoolProcessing/*
 *.pyc
 __pycache__/
 fontData.h
