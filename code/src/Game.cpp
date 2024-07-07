@@ -1195,8 +1195,8 @@ void Game::run() {
 	
 	load();
 	
-	BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
-	BN_LOG("locust", saveData.locustCount, (int)saveData.locustCount);
+	//BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
+	//BN_LOG("locust", saveData.locustCount, (int)saveData.locustCount);
 	
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
@@ -1262,6 +1262,23 @@ void Game::run() {
 				tileManager.playerBrand[i] = tempBrand[i];
 			}
 			
+			// savedata setup
+			debugToggle = true;
+			saveData.debug = true;
+			
+			saveData.hasMemory = true;
+			saveData.hasWings = true;
+			saveData.hasSword = true;
+			
+			saveData.hasSuperRod = true;
+			
+			saveData.mode = 2;
+			mode = 2;
+			roomManager.setMode(2);
+			
+			paletteIndex = 1;
+			saveData.paletteIndex = 1;
+			changePalette(0);
 		}
 	} else {
 		if(!debugToggle) {
@@ -1269,15 +1286,11 @@ void Game::run() {
 		}
 	}
 	
-	//save();
-	//load();
-	
 	if(goofyahhfirstsave) {
 		goofyahhfirstsave = false;
 		
 		BN_LOG("goofyahhfirstsave mem", saveData.hasMemory, (int)saveData.hasMemory);
 		BN_LOG("goofyahhfirstsave locust", saveData.locustCount, (int)saveData.locustCount);
-		
 	}
 	
 	loadLevel();
@@ -1295,12 +1308,9 @@ void Game::run() {
 	BN_LOG("starting main gameloop");
 	while(true) {
 		
-		//BN_LOG("start frame ", frame);
-		
 		if(bn::keypad::any_held()) {
 			if(debugToggle && (bn::keypad::l_held() || bn::keypad::r_held())) {
 				
-				//int debugIncrement = bn::keypad::select_held() ? 5 : 1;
 				int debugIncrement = bn::keypad::start_held() ? 5 : 1;
 				
 				// could maybe cause some issues if the frame counter,, resets? during this?
@@ -1332,9 +1342,6 @@ void Game::run() {
 				} else {
 					waitFrames = 5 - waitFrames;
 				}
-				
-				
-				//BN_LOG(frame, " ", startFrame, " ", waitFrames);
 				
 				unsigned i=0;
 				while(i < waitFrames) { i++; doButanoUpdate(); }
@@ -1391,9 +1398,6 @@ void Game::run() {
 			doButanoUpdate();
 			continue;
 		}
-		
-		//if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 3) {
-		//if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 0.1) {
 		
 		// i rlly wish butano gave me bitwise access to the controls. but this wont be that expensive(hopefully)
 		// i could use an array, not sure if i rlly want to, but eh idk 
@@ -1486,8 +1490,6 @@ void Game::run() {
 				doButanoUpdate();
 			}
 		}
-
-		//BN_LOG("end frame ", frame);
 		
 		doButanoUpdate();
 	}
@@ -1499,9 +1501,7 @@ void Game::playSound(const bn::sound_item* sound) {
 	
 	// THIS FUNC SHOULD ONLY BE USED FOR SOUNDS WITH A POSSIBILITY OF BEING EXCLUDED OR ALTERED
 	
-	if(boobaCount >= 8 && (
-	sound == &bn::sound_items::snd_push_small
-	)) {
+	if(boobaCount >= 8 && sound == &bn::sound_items::snd_push_small) {
 		sound = &bn::sound_items::snd_bounce;
 	}
 	
@@ -1511,8 +1511,7 @@ void Game::playSound(const bn::sound_item* sound) {
 
 	if(!removedSounds.contains(sound)) {
 		queuedSounds.insert(sound);
-	}
-	
+	}	
 }
 
 void Game::removeSound(const bn::sound_item* sound) {
@@ -1803,25 +1802,6 @@ void Game::save() {
 		saveData.hasSuperRod = 0;
 	}
 	
-	
-	
-	//  ????
-	/*
-	saveData.hasRod &= 0b1;
-	saveData.hasSuperRod &= 0b1;
-	saveData.isVoided &= 0b1;
-	saveData.hasMemory &= 0b1;
-	saveData.hasWings &= 0b1;
-	saveData.hasSword &= 0b1;
-	*/
-	
-	//saveData.hasRod = 0b1;
-	//saveData.hasSuperRod &= 0b1;
-	//saveData.isVoided &= 0b1;
-	//saveData.hasMemory &= 0b1;
-	//saveData.hasWings &= 0b1;
-	//saveData.hasSword &= 0b1;
-	
 	for(int i=0; i<6; i++) {
 		saveData.playerBrand[i] = tileManager.playerBrand[i];
 	}
@@ -1832,10 +1812,7 @@ void Game::save() {
 
 	saveData.hash = saveData.getSaveHash();
 	bn::sram::write(saveData);
-	
-	//BN_LOG("locust: ", saveData.locustCount);
-	//BN_LOG("void: ", saveData.isVoided);
-	//BN_LOG("room: ", saveData.roomIndex);
+
 }
 
 void Game::load() {
@@ -1851,11 +1828,7 @@ void Game::load() {
 		BN_LOG("either a save wasnt found, or it was corrupted. creating new save");
 		saveData = GameSave();
 	}
-
-	//BN_LOG("locust: ", saveData.locustCount);
-	//BN_LOG("void: ", saveData.isVoided);
-	//BN_LOG("room: ", saveData.roomIndex);
-
+	
 	roomManager.roomIndex = saveData.roomIndex;
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
@@ -1879,14 +1852,10 @@ void Game::load() {
 	for(int i=0; i<6; i++) {
 		tileManager.playerBrand[i] = saveData.playerBrand[i];
 	}
-
 }
 
 void Game::saveRNG() {
-	// i rlly DONT like this!
-	
-	//return;
-	
+
 	GameSave saveDataStaging;
 	
 	bn::sram::read(saveDataStaging);
