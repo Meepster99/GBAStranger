@@ -126,16 +126,8 @@ void CutsceneManager::introCutscene() {
 	
 	maps[0]->create(bn::regular_bg_items::dw_spr_vd_bg_index0, 3);
 	
-	
-	//maps[0]->create(bn::regular_bg_items::dw_default_bg, 3);
-	//maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_bg_tiles);
-	//maps[0]->bgPointer.set_map(mapBackup[0]);
-	//freeLayer(0);
-	
 	maps[1]->create(bn::regular_bg_items::dw_spr_vd_bg2_index0, 2);
-	//maps[3]->create(*map3Items[2 * mode + isSuperRodChest], 3);
-	//maps[3]->create(*map3Items[2], 3);
-
+	
 	int temp = 2 * isSuperRodChest + mode;
 	if(mode == 2) {
 		temp = 4 + isSuperRodChest;
@@ -157,10 +149,7 @@ void CutsceneManager::introCutscene() {
 		BN_ERROR("WHAT");
 	}
 	
-	
 	maps[1]->bgPointer.set_y(maps[1]->bgPointer.y() + 16 + 32);
-	//maps[1]->reloadCells();
-	
 		
 	game->effectsManager.hideForDialogueBox(false, true);	
 	
@@ -170,7 +159,6 @@ void CutsceneManager::introCutscene() {
 	yPos -= 32;
 	face.updateRawPosition(xPos, yPos);
 	
-	
 	for(int i=0; i<32; i++) {
 		
 		maps[0]->bgPointer.set_y(maps[0]->bgPointer.y() + 1);
@@ -178,12 +166,9 @@ void CutsceneManager::introCutscene() {
 		maps[3]->bgPointer.set_y(maps[3]->bgPointer.y() + 1);
 		yPos++;
 		face.updateRawPosition(xPos, yPos);
-		//bn::core::update();
-		//bn::core::update();
 		game->doButanoUpdate();
 	}
 
-	
 	game->effectsManager.doDialogue("[You aquired a strange rod]\n"
 	"[Simply holding it makes you feel uneasy]\n"
 	"[You begin to imagine your whole life existing on a 2001 handheld]\n"
@@ -206,15 +191,6 @@ void CutsceneManager::introCutscene() {
 	}
 	
 	for(int i=0; i<=3; i++) {
-	
-		/*
-		maps[0]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
-		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
-		maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
-		
-		face.spritePointer.set_palette(game->pal->getSpritePaletteFade(i));
-		*/
-		
 		
 		maps[0]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
 		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
@@ -228,9 +204,6 @@ void CutsceneManager::introCutscene() {
 		
 	}
 	
-
-	
-	
 	// todo, eyebrows!(as sprites, i think is the way heree
 	
 	for(int i=0; i<98 - (6 * 3) - (16 * 4) - 32; i++) {
@@ -240,20 +213,11 @@ void CutsceneManager::introCutscene() {
 	
 	restore();
 	
-	
-	////restoreAllButEffects();
-	
 	game->effectsManager.hideForDialogueBox(true, true);
 	face.setVisible(false);
 	game->doButanoUpdate();
 	
-	//BN_LOG("bg_tiles status");
-	//bn::bg_tiles::log_status();
-	//BN_LOG("-----");
-
 	game->state = restoreState;
-
-	
 }
 
 void CutsceneManager::cifDream() {
@@ -288,15 +252,6 @@ void CutsceneManager::cifDream() {
 	
 	*/
 	
-	// put the want to rest dialogue up here 
-	
-	
-	//while(EffectsManager::zoomEffect(bool inward) {
-	
-	//game->effectsManager.doDialogue("still programming this in its actually pretty close to being finished, but just in case of crashes i commented it out.\0");
-	
-	//return;
-	
 	BN_LOG("cifdream");
 	vBlankFuncs.clear();
 	
@@ -308,9 +263,7 @@ void CutsceneManager::cifDream() {
 		// in the glistening of the bark, you seem drained as well
 		
 		return;
-	}
-	
-	
+	}	
 	
 	delay(1);
 
@@ -327,20 +280,12 @@ void CutsceneManager::cifDream() {
 	
 	delay(60);
 	
-	
 	while(!game->effectsManager.zoomEffect(true, false)) {
-		//delay(1);
 		delay(20);
-		//BN_LOG("HEY FOOL, CHANGE THIS DELAY BACK TO 20");
 	}
 	
-	
 	bn::music::stop();
-	// this delay fucking causes the,, voided lyrics thingy to finally cut off 
-	delay(1);
-	
-	// extra one for paranoia? why are the fuzzys glitchy if i let the dis text display on screen?
-	delay(1);
+	delay(2);
 
 	disOsTextSprites.clear();
 	for(int i=0; i<disTextSprites.size(); i++) {
@@ -351,25 +296,11 @@ void CutsceneManager::cifDream() {
 	
 	delay(1);
 	
-	/*
-	// now im just being fucking weird 
-	for(auto it = effectsManager->roomDustTracker.begin(); it != effectsManager->roomDustTracker.end(); ++it) {
-		effectsManager->removeEffect(*it);
-	}
-	delay(1);
-	effectsManager->roomDustTracker.clear();
-	delay(1);
-	*/
-	
 	game->state = GameState::Cutscene;
-	
 	
 	// ok. i no longer like this func. im just going to delete everything?
 	game->effectsManager.hideForDialogueBox(false, true);
 	
-	
-	
-	//backupAllButEffects();
 	backup();
 	
 	
@@ -417,12 +348,10 @@ void CutsceneManager::cifDream() {
 	
 	cifdream/cdream, check that all out
 	
-	
 	*/
 	
 	delay(60 * 5);
 	
-		
 	bn::music_items::cifdream.play();
 	bn::music::set_pitch(1);
 	
@@ -555,21 +484,6 @@ void CutsceneManager::cifDream() {
 		
 		auto createFunc = [spritePalette, darkSpritePalette](Effect* obj) mutable -> void {
 			
-			/*
-			if(randomGenerator.get() & 1) {
-				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle;
-				obj->sprite.spritePointer.set_palette(darkSpritePalette);
-			} else {
-				obj->tiles = &bn::sprite_tiles_items::dw_spr_dustparticle2;
-				obj->sprite.spritePointer.set_palette(spritePalette);
-			}
-		
-			obj->sprite.spritePointer.set_tiles(
-				*obj->tiles,
-				0
-			);
-			*/
-			
 			int tileSelector = randomGenerator.get_int(0, 5);
 				
 			const bn::sprite_tiles_item* spriteTiles[5] = {
@@ -613,7 +527,6 @@ void CutsceneManager::cifDream() {
 			darkSpritePalette
 			](Effect* obj) mutable -> bool {
 			
-			
 			if(y.integer() < -16) {
 	
 				tileSelector = randomGenerator.get_int(0, 5);
@@ -639,14 +552,7 @@ void CutsceneManager::cifDream() {
 				obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
 			
 				obj->sprite.spritePointer.set_bg_priority(tileSelector == 0 ? 1 : 3);
-				//obj->sprite.spritePointer.set_palette(tileSelector == 0 ? globalGame->pal->getSpritePaletteFade(3, false) : globalGame->pal->getSpritePaletteFade(2, false));
-				//obj->sprite.spritePointer.set_palette(spritePalette);
-			
 				obj->sprite.spritePointer.set_palette(tileSelector != 0 ? darkSpritePalette : spritePalette);
-			
-				//obj->sprite.spritePointer.set_blending_enabled(tileSelector != 0);
-					
-				
 				
 				x = randomGenerator.get_int(16 * 14);
 				//y = 16*5+randomGenerator.get_int(16);
@@ -806,24 +712,7 @@ void CutsceneManager::cifDream() {
 	
 	// CUT, kill the tree
 	
-	// or maybe, INA, as a nice refrence to me
-	
-	/*while(true) {
-		delay(60*5);
-	}*/
-
-	/*
-	maps[1]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index1, 3);
-	maps[3]->create(bn::regular_bg_items::dw_spr_cdream_add_eus_b_index2, 3);
-	//maps[1]->bgPointer.set_y(maps[1]->bgPointer.y() + 16 + 32);
-	delay(60*5);
-	*/
-	
-	// 
-	
 	tempSprites.clear();
-	//vBlankFuncs.clear();
-	//effects.clear();
 	
 	for(int i=0; i<effects.size(); i++) {
 		delete effects[i];
@@ -831,18 +720,13 @@ void CutsceneManager::cifDream() {
 	}	
 	effects.clear();
 	globalGame->cutsceneManager.vBlankFuncs.clear();
-	
-	// recreate roomdust, and also probs lag shit out. 
-	//effectsManager->roomDust();
-	
+
 	game->effectsManager.bigSprites[0]->animate();
 	
 	game->effectsManager.hideForDialogueBox(true, true);
-	////restoreAllButEffects();
 	restore();
 	
 	game->state = restoreState;
-	
 }
 
 void CutsceneManager::brandInput() {
@@ -854,7 +738,6 @@ void CutsceneManager::brandInput() {
 
 	maps[2]->bgPointer.set_priority(3);
 	
-	//backupAllButEffects();
 	backup();
 	
 	Sprite* brandState[6][6];
@@ -886,9 +769,7 @@ void CutsceneManager::brandInput() {
 	cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
 	cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
 	cursor.spritePointer.set_bg_priority(0);
-	
-	//Sprite allDoneSprite(bn::sprite_tiles_items::dw_spr_puumerkki);
-	//allDoneSprite.spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_puumerkki, 1);
+
 	Sprite allDoneSprite(bn::sprite_items::dw_default_sprite_64);
 	Sprite allDoneSpriteLeft(bn::sprite_items::dw_default_sprite_64);
 	Sprite allDoneSpriteRight(bn::sprite_items::dw_default_sprite_64);
@@ -906,8 +787,6 @@ void CutsceneManager::brandInput() {
 	allDoneSpriteLeft.spritePointer.set_horizontal_scale(2);
 	allDoneSpriteRight.spritePointer.set_horizontal_scale(2);
 	
-	//allDoneSprite.spritePointer.set_mosaic_enabled(true);
-	
 	int allDoneSpriteWidth = 0;
 	
 	bn::vector<Effect*, 16> effects;
@@ -920,7 +799,7 @@ void CutsceneManager::brandInput() {
 		effects[i]->animate();
 	}
 			
-	vBlankFuncs.push_back([this, effects]() 	 mutable {
+	vBlankFuncs.push_back([this, effects]() mutable {
 		
 		for(int i=0; i<effects.size(); i++) {
 			effects[i]->animate();
@@ -981,18 +860,20 @@ void CutsceneManager::brandInput() {
 		}
 		
 		if(allDoneSpriteWidth >= 50) {
-			// kachow;
 			break;
 		}
-			
-		
 		
 		if(bn::keypad::any_pressed() && inputTimer.elapsed_ticks() > FRAMETICKS * 0.1) {
 			inputTimer.restart();
+			
 			if(allDone) {
 		
-				if(bn::keypad::up_pressed()) {
-					cursorPos.move(Direction::Up);
+				if(bn::keypad::up_pressed() || bn::keypad::down_pressed()) {
+					if(bn::keypad::up_pressed()) {
+						cursorPos.move(Direction::Up);
+					} else {
+						cursorPos.y = 1;
+					}
 					cursor.spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16 + 1);
 					cursor.spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16 + 1);
 					allDone = false;
@@ -1006,7 +887,6 @@ void CutsceneManager::brandInput() {
 					cursor.setVisible(true);
 				}
 			} else {
-
 				if(bn::keypad::up_pressed()) {
 					cursorPos.move(Direction::Up);
 				} else if(bn::keypad::down_pressed()) {
@@ -1016,6 +896,14 @@ void CutsceneManager::brandInput() {
 				} else if(bn::keypad::right_pressed()) {
 					cursorPos.move(Direction::Right);
 				}
+				
+				if(cursorPos.y < 1) {
+					cursorPos.y = 1+6;
+				} else if(cursorPos.y > 1+6) {
+					cursorPos.y = 1;
+				}
+				
+				
 				
 				if(cursorPos.y == 1+6) {
 				
@@ -1029,7 +917,6 @@ void CutsceneManager::brandInput() {
 					}
 					
 					cursor.setVisible(false);
-					
 					continue;
 				}
 				
@@ -1037,12 +924,6 @@ void CutsceneManager::brandInput() {
 					cursorPos.x = 4+6-1;
 				} else if(cursorPos.x > 4+6-1) {
 					cursorPos.x = 4;
-				}
-				
-				if(cursorPos.y < 1) {
-					cursorPos.y = 1+6-1;
-				} else if(cursorPos.y > 1+6-1) {
-					cursorPos.y = 1;
 				}
 				
 				if(bn::keypad::a_pressed()) {
@@ -1057,7 +938,6 @@ void CutsceneManager::brandInput() {
 					} else {
 						brandState[xIndex][yIndex] = new Sprite(bn::sprite_tiles_items::dw_spr_puumerkki);
 						brandState[xIndex][yIndex]->spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_puumerkki, 1);
-						//brandState[xIndex][yIndex]->updatePosition(cursorPos);
 						brandState[xIndex][yIndex]->spritePointer.set_x(cursorPos.x * 16 - 240/2 + 16);
 						brandState[xIndex][yIndex]->spritePointer.set_y(cursorPos.y * 16 - 160/2 + 16);
 						brandState[xIndex][yIndex]->setVisible(true);
@@ -1101,7 +981,6 @@ void CutsceneManager::brandInput() {
 	game->pal->getBlackSpritePalette().create_palette(),
 	game->pal->getDarkGraySpritePalette().create_palette()};
 	
-	
 	for(int i=0; i<30; i++) {		
 
 		for(int j=0; j<textSprites.size(); j++) {
@@ -1132,11 +1011,6 @@ void CutsceneManager::brandInput() {
 
 	cursor.setVisible(false);
 	
-	//allDoneSprite.spritePointer.set_mosaic_enabled(false); // almost 100% def not actually needed, but this project has driven me insane
-	// if this flag isnt cleared and then would cause issues in the future like, yea 
-	// and i would prefer to not have to reset this flag on every sprite init(altho that wouldnt be to expensive)
-	
-	////restoreAllButEffects();
 	restore();
 	maps[2]->bgPointer.set_priority(0);
 
@@ -1234,34 +1108,23 @@ void CutsceneManager::createPlayerBrandRoom() {
 		if(count == 24) {
 			globalGame->state = GameState::Paused;
 			
-			
 			bn::sound::stop_all();
 			bn::core::set_vblank_callback(doNothing);
-			
 			
 			for(int i=0; i<game->effectsManager.effectList.size(); i++) {
 				game->effectsManager.effectList[i]->sprite.setVisible(false);
 			}
-			////restoreAllButEffects();
 			game->doButanoUpdate();
-			//backupAllButEffects();
 			game->doButanoUpdate();
 			
 			
 			bn::sound::stop_all();
 			
-			
-			
-			
 			game->effectsManager.hideForDialogueBox(false, true);
 			
-			
 			maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 3);
-			//maps[2]->create(bn::regular_bg_items::dw_default_black_bg, 2);
 			maps[1]->create(bn::regular_bg_items::dw_spr_un_stare_index0, 0);
 			maps[1]->bgPointer.set_y(48 + 16);
-			
-			//restoreLayer(0);
 			
 			globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			globalGame->collision.rawMap.bgPointer.set_priority(1);
@@ -1284,9 +1147,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 				}
 			}
 		
-		
 			while(true) {
-				//globalGame->playSound(&bn::sound_items::snd_ex_heartbeat_b);
 				globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
 				
 				for(int i=0; i<20; i++) {
@@ -1294,9 +1155,6 @@ void CutsceneManager::createPlayerBrandRoom() {
 				}
 			}
 		}
-		
-		//globalGame->playSound(&bn::sound_items::snd_ex_heartbeat_b);
-		//globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
 		
 		bn::sound_items::snd_ex_heartbeat_b.play();
 		bn::sound_items::snd_ex_heartbeat.play();
@@ -1322,8 +1180,6 @@ void CutsceneManager::createPlayerBrandRoom() {
 	
 	game->entityManager.addEntity(temp1);
 	game->entityManager.addEntity(temp2);
-	
-	
 }
 
 void CutsceneManager::createResetRoom() {
@@ -1337,11 +1193,8 @@ void CutsceneManager::createResetRoom() {
 	
 	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index0, 2);
 	cutsceneLayer.rawMap.bgPointer.put_below();
-	//cutsceneLayer.rawMap.bgPointer.put_below(); // i hope this doesnt fuck shit up
-	
+
 	backgroundLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index1, 3);
-	
-	//cutsceneLayer.rawMap.bgPointer.set_position(8 + 32 + 8, 48 + 24);
 	
 	constexpr int bgX = 16;
 	constexpr int bgY = 40;
@@ -1351,8 +1204,6 @@ void CutsceneManager::createResetRoom() {
 	
 	auto interactFunc = [](void* obj) -> void {
 		(void)obj;
-	
-		
 	};
 	
 	auto kickFunc = [](void* obj) -> bool {
@@ -1371,12 +1222,8 @@ void CutsceneManager::createResetRoom() {
 			
 			inter->specialBumpCount++;
 			
-			// should generate spr_soulstar_spark_b
-			// and also some fuzzys from her head
-			
 			globalGame->effectsManager.corpseSparks();
 			globalGame->effectsManager.corpseFuzz();
-			
 			
 			return true;
 		};
@@ -1389,7 +1236,6 @@ void CutsceneManager::createResetRoom() {
 	
 		if(inter->specialBumpCount == 6 && playerIdleFrame == inter->playerIdleStart && (frame - inter->playerIdleStart) >= 60 * 6) {
 			inter->specialBumpCount = 0;
-			
 			
 			bool res = globalGame->effectsManager.restRequest("Reset?\0");
 			
@@ -1425,7 +1271,6 @@ void CutsceneManager::createResetRoom() {
 			globalGame->cutsceneManager.crashGame();
 			
 		}
-		
 	};
 	
 	Interactable* temp = new Interactable(Pos(6, 5),
@@ -1438,8 +1283,6 @@ void CutsceneManager::createResetRoom() {
 	);
 	
 	game->entityManager.addEntity(temp);
-	
-	
 }
 
 void CutsceneManager::crashGame() {
@@ -1463,79 +1306,6 @@ void CutsceneManager::crashGame() {
 	//bn::core::set_vblank_callback(doNothing);
 	//game->doButanoUpdate();
 	bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
-	
-	//unsigned* bgVram = reinterpret_cast<unsigned*>(0x06000000);
-	//unsigned* randomStuff = reinterpret_cast<unsigned*>(0x03000000);
-	//memcpy(bgVram, randomStuff, 0x18000/4);
-	
-	/*
-	u8* bgVram = reinterpret_cast<u8*>(0x06000000);
-	u8* randomStuff = reinterpret_cast<u8*>(0x03000000);
-	
-	for(int i=0; i<0x18000; i++) {
-		while(*randomStuff == 0) {
-			randomStuff++;
-		}
-		*bgVram = *randomStuff;
-		bgVram++;
-		randomStuff++;
-	}
-	*/
-	
-	/*
-	volatile unsigned short* palettePointer = reinterpret_cast<volatile unsigned short*>(0x05000000);
-	for(int i=0; i<1024/2; i++) {
-		switch(i % 5) {
-			case 0:
-				if(i % 16 == 0) {
-					palettePointer[i] = *col0;
-				} else {
-					palettePointer[i] = *col1;
-				}
-				break;
-			case 1:
-				palettePointer[i] = *col1;
-				break;
-			case 2:
-				palettePointer[i] = *col2;
-				break;
-			case 3:
-				palettePointer[i] = *col3;
-				break;
-			case 4:
-				palettePointer[i] = *col4;
-				break;
-			default:
-				palettePointer[i] = 0;
-				break;
-		}
-	}
-	
-	unsigned* bgVram = reinterpret_cast<unsigned*>(0x06000000);
-	unsigned temp;
-	unsigned maxTile = 512;
-	unsigned tileIndex;
-
-	for(int i=0; i<0x18000; i++) {
-		temp = *bgVram ^ *(bgVram + ((short)bruhRand()));
-		
-		
-		tileIndex = (temp & 0x01FF) % maxTile;
-		if(tileIndex == 0) { // one extra attempt
-			temp = bruhRand() & 0x0FFF;
-			tileIndex = (temp & 0x01FF) % maxTile;
-		}
-		temp = (temp & ~0x01FF) | tileIndex;
-		
-		*bgVram = temp;
-		bgVram++;
-	}
-	*/
-	
-	// having butano still running in here means i can potentially do some,, sound stuff?
-	// and program easier
-		
-	
 	
 	*(reinterpret_cast<unsigned short*>(0x04000000)) |= 0b0000000010000000;
 	
@@ -1634,20 +1404,16 @@ void CutsceneManager::crashGame() {
 		//bn::core::update();
 	}
 
-	BN_ERROR("game 'crashed', i havent implimented it yet ");
-	
+	BN_ERROR("game 'crashed', i havent implimented it yet ");	
 }
 
 void CutsceneManager::carcusEnding() {
 	
 	vBlankFuncs.clear();
 	
-	for(int i=0; i<60; i++) {
-		game->doButanoUpdate();
-	}
+	delay(60);
 	
 	BN_ERROR("look, idrk if ima make the carcus ending, TODO.");
-	
 }
 
 void CutsceneManager::displayDisText(const char* errorLine) {
@@ -1711,8 +1477,6 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 				tempBuffer[20] = '1';			
 				tempBuffer[21] = '1';
 			
-				//tempBuffer[22] = '0' + ((date.year() / 1000) % 10);	
-				//tempBuffer[23] = '0' + ((date.year() / 100) % 10);
 				tempBuffer[22] = '0' + 2; // an assumption, but only an issue of pride
 				tempBuffer[23] = '0' + 0;
 				tempBuffer[24] = '0' + ((date.year() / 10) % 10);	
@@ -1743,13 +1507,6 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 				// Nov  5 2023
 				
 				strcpy(tempBuffer+22, __DATE__+7);
-				
-				//strcpy(tempBuffer+14, __DATE__[4]);
-				//"DIS OS REPORT 05/11/112023"
-				//BN_LOG(tempBuffer);
-				//BN_LOG(__DATE__);
-				
-				
 			}
 			
 		} else {
@@ -1762,7 +1519,6 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 			disOsTextSprites[i].set_bg_priority(3);
 		}
 	}
-
 		
 	if(disTextSprites.size() == disTextSprites.max_size()) {
 		disTextSprites.pop_back();
@@ -1790,7 +1546,6 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 	
 	
 	effectsManager->corrupt(10);
-	
 }
 
 void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
@@ -1967,34 +1722,8 @@ void CutsceneManager::inputCustomPalette() {
 	}
 	
 	BN_LOG("entering custompalette input");
-	
-	// TODO, THIS SHOULD FREE THE MENU SPRITES, OR MAYBE I 
-	// SHOULD MAKE SOME OF THE STATIONARY TEXT INTO THE BG?
 
 	effectsManager->setMenuVis(false);
-	
-	/*
-	bn::sprite_text_generator textGenerator(common::variable_8x8_sprite_font);
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> cursor;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> instructions;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> status;
-	
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view("Left/Right to swap colors\0"), instructions);
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view("A to enter a color\0"), instructions);
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view("Left/Right to swap R/G/B\0"), instructions);
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view("Up/Down to change selected val\0"), instructions);
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view("A to exit that color\0"), instructions);
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view("B to return to main menu\0"), instructions);
-
-	textGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view("\\/\0"), cursor);
-	cursor[0].set_bg_priority(0);
-	cursor[0].set_palette(game->pal->getLightGraySpritePalette());
-	
-	for(int i=0; i<instructions.size(); i++) {
-		instructions[i].set_bg_priority(0);
-		instructions[i].set_palette(defaultPalette.getFontSpritePalette());
-	}
-	*/
 	
 	bn::sprite_text_generator textGenerator(common::variable_8x8_sprite_font);
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> colorDetails[4];
@@ -2012,9 +1741,7 @@ void CutsceneManager::inputCustomPalette() {
 	cursor.spritePointer.set_palette(defaultPalette.getWhiteSpritePalette());
 	cursor.spritePointer.set_bg_priority(0);
 	cursor.spritePointer.set_z_order(1);
-	//cursor.spritePointer.set_scale((bn::fixed)33.0/32.0);
-	//cursor.spritePointer.set_scale(1.05); // annoyed i cant have the pixel boundary be on all sides easily
-	
+
 	int currentSelector = 0;
 	int rgbSelector = -1;
 
@@ -2079,20 +1806,7 @@ void CutsceneManager::inputCustomPalette() {
 	
 	writeStatus();
 	
-	
-	
 	game->doButanoUpdate();
-	
-	/* 
-	
-	new plan, go up and down to choose/change colour
-	hitting right will put you into the rgb of that color, and then left/right will change which channel you have selected 
-	up and down change that channel. 
-	instead of using caps, maybe change the text's color 
-	and put a outline of white behind the selected color?
-	
-	
-	*/
 	
 	bool doUpdate = false;
 	
@@ -2102,9 +1816,7 @@ void CutsceneManager::inputCustomPalette() {
 		colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
 		colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
 		colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
-		
-		//writeStatus();
-		
+
 		if(bn::keypad::b_pressed()) {
 			break;
 		}
@@ -2162,7 +1874,6 @@ void CutsceneManager::inputCustomPalette() {
 					colorRef.set_blue(CLAMP(colorRef.blue() + changeVal, 0, 31));
 				}
 				
-				// shit code
 				globalGame->pal->a = globalGame->pal->getColorArray()[0];
 				globalGame->pal->b = globalGame->pal->getColorArray()[1];
 				globalGame->pal->c = globalGame->pal->getColorArray()[2];
@@ -2177,9 +1888,6 @@ void CutsceneManager::inputCustomPalette() {
 				colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
 		
 				doUpdate = true;
-				//writeStatus();
-				//delay(5);
-			
 			}
 			
 			if(doUpdate) {
@@ -2187,8 +1895,7 @@ void CutsceneManager::inputCustomPalette() {
 				writeStatus();
 				delay(5);
 			}
-			
-			//writeStatus();
+
 			game->doButanoUpdate();
 		}
 		
@@ -2207,12 +1914,9 @@ void CutsceneManager::inputCustomPalette() {
 	}
 	game->doButanoUpdate();
 	
-		
 	globalGame->changePalette(0);
 	game->doButanoUpdate();
-	effectsManager->setMenuVis(true);
-
-	
+	effectsManager->setMenuVis(true);	
 }
 
 void CutsceneManager::showCredits() {
@@ -2232,9 +1936,6 @@ void CutsceneManager::showCredits() {
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
 	verTextGenerator.set_one_sprite_per_character(false);
 	
-	//#define VERMSG1 "made with love with:" 
-	//const char* vermsgString1 = VERMSG1;
-	
 	#if defined(ENABLEPROFILER)
 		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1 prof=1"
 	#elif defined(ENABLELOGGING)
@@ -2242,7 +1943,6 @@ void CutsceneManager::showCredits() {
 	#else 
 		#define VERMSG2 "butano version " BN_VERSION_STRING
 	#endif
-	
 
 	const char* vermsgString2 = VERMSG2;
 	
@@ -2251,11 +1951,9 @@ void CutsceneManager::showCredits() {
 	
 	verTextSprites.clear();
 	
-	
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString2), verTextSprites);
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view(vermsgString3), verTextSprites);
-
-
+	
 	for(int i=0; i<verTextSprites.size(); i++) {
 		verTextSprites[i].set_palette(globalGame->pal->getFontSpritePalette());
 		verTextSprites[i].set_bg_priority(0);
@@ -2271,7 +1969,6 @@ void CutsceneManager::showCredits() {
 	
 	delay(1);
 	
-	
 	while(true) {
 		if(bn::keypad::b_pressed()) {
 			break;
@@ -2283,12 +1980,10 @@ void CutsceneManager::showCredits() {
 	
 	game->doButanoUpdate();
 	effectsManager->setMenuVis(true);
-	
 }
 
 bool CutsceneManager::titleScreen() {
 	
-	//backupAllButEffects();
 	backup();
 	game->doButanoUpdate();
 	
@@ -2296,8 +1991,6 @@ bool CutsceneManager::titleScreen() {
 	
 	GameState restoreState = game->state;
 	game->state = GameState::Cutscene;
-	
-	
 	
 	// dance_milkyway  index 0 and 1 are just palette swaps.
 	
@@ -2351,7 +2044,6 @@ bool CutsceneManager::titleScreen() {
 			}
 		}
 	);
-	
 	
 	const char* titleMessage = "GBASTRANGER\0";
 	
@@ -2445,7 +2137,6 @@ bool CutsceneManager::titleScreen() {
 		}
 	);
 	
-	
 	// ok, passing text to the sprite_text_generator, or maybe string view? is what causes my nullterm problem??
 	constexpr const char* idek[] = {
 		"Welcome!\0",
@@ -2468,7 +2159,6 @@ bool CutsceneManager::titleScreen() {
 	bn::vector<bn::sprite_ptr, 64> splashTextSprites;
 	BN_LOG(randomGenerator.get_int(1));
 	textGenerator.set_center_alignment();
-	//textGenerator.generate(0, 100, bn::string_view(idek[randomGenerator.get_int(0, sizeof(idek)/sizeof(idek[0]))]), splashTextSprites);
 	
 	unsigned idekIndex = game->saveData.randomSeed % idekSize;
 	
@@ -2505,15 +2195,13 @@ bool CutsceneManager::titleScreen() {
 			break;
 		}
 		
-			
 		// just a goofy ahh thing here for my own needs
 		// the amount of times ive had to enter a brand has been annoying 
 		if(bn::keypad::select_held() && bn::keypad::start_held()) {
 			res = false;
 			break;
 		}
-		
-		
+
 		// just for the like,, testing that all the splash txt is short enough, and properly ticking the saved rng to do so
 		game->saveRNG();
 		
@@ -2522,8 +2210,7 @@ bool CutsceneManager::titleScreen() {
 	
 	vBlankFuncs.clear();
 	bn::green_swap::set_enabled(false);
-	
-	////restoreAllButEffects();
+
 	restore();
 	game->state = restoreState;
 	game->doButanoUpdate();
@@ -2555,16 +2242,11 @@ void CutsceneManager::mimicTalk() {
 	"I normally hang out around the trees. Please come.\r"
 	"Ill cook us some eggs.\0");
 	
-	//BN_ASSERT(musicBackup.has_value(), "in mimicTalk, musicbackup didnt have a value? how?");
-	// in the future, i should have a option to disable music, this will, semi help/be safer 
 	if(musicBackup.has_value()) {
 		musicBackup.value().play();
 	} else {
 		bn::music::stop();
 	}
-	
-	
-	
 }
 
 struct LyricTimeStamp {
@@ -2680,11 +2362,6 @@ void CutsceneManager::voidedLyrics() {
                     : My loss is mine
 	*/
 	
-	// longer lines are cut off 
-	// i worry that me being on antidepressants is making me care less about fixing those kind of bugs 
-	// some might say its good that im more relaxed, but idrk 
-	// ive made no progress on this project in the past week.
-	
 	auto createFunc = [](Effect* obj) -> void {
 		obj->sprite.updateRawPosition(-32, -32);
 	};
@@ -2732,14 +2409,11 @@ void CutsceneManager::voidedLyrics() {
 	};
 	
 	effectsManager->createEffect(createFunc, tickFunc);
-
 }
 
 // -----
 
 void CutsceneManager::backup(int i) {
-	
-	
 	zIndexBackup[i] = maps[i]->bgPointer.z_order();
 	priorityBackup[i] = maps[i]->bgPointer.priority();
 	
@@ -2747,23 +2421,15 @@ void CutsceneManager::backup(int i) {
 	yPosBackup[i] = maps[i]->bgPointer.y();
 	
 	mapBackup[i] = maps[i]->bgPointer.map();
-	
 }
 
 void CutsceneManager::restore(int i) {
-	
-
 	maps[i]->bgPointer.set_z_order(zIndexBackup[i]);
 	maps[i]->bgPointer.set_priority(priorityBackup[i]);
 										   
 	maps[i]->bgPointer.set_x(xPosBackup[i]);
 	maps[i]->bgPointer.set_y(yPosBackup[i]);
-	
-	//maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
-	
-	//maps[i]->create(bn::regular_bg_items::dw_default_bg);
-	
-	
+
 	// map MUST BE BEFORE TILES, WHY??? ( this is the second time ive had this issue)
 	maps[i]->bgPointer.set_map(mapBackup[i]);		
 	maps[i]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_default_background_tiles_transparent);
@@ -2776,24 +2442,18 @@ void CutsceneManager::restore(int i) {
 		maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
 		globalGame->loadTiles();
 	}
-	
 }
 
 void CutsceneManager::backup() {
-	
 	backup(0);
 	backup(1);
 	backup(3);
-	
 }
 
 void CutsceneManager::restore() {
-	
 	restore(3);
 	restore(1);
 	restore(0);
-	
-	
 }
 
 void CutsceneManager::delay(int delayFrameCount) {
@@ -2802,6 +2462,4 @@ void CutsceneManager::delay(int delayFrameCount) {
 		game->doButanoUpdate();
 	}
 }
-
-
 

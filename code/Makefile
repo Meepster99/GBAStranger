@@ -135,10 +135,3 @@ fullClean:
 	
 	python  ../misc/convertAllAssets.py
 
-testWhat:
-	$(info $(USERFLAGS))
-	echo what 
-	
-	
-
-
