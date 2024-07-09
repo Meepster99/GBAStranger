@@ -260,9 +260,7 @@ public:
 	void removeSound(const bn::sound_item* sound);
 	
 	void doSoundVBlank();
-
-	bool goofyahhfirstsave = false;
-
+	
 private:
 	SaneSet<const bn::sound_item*, MAXSOUNDS> queuedSounds;
 	SaneSet<const bn::sound_item*, MAXSOUNDS*2> removedSounds;

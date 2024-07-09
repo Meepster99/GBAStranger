@@ -335,33 +335,30 @@ void BigSprite::loadBoobTrap() {
 		
 		static unsigned msgIndex = 0;
 		
-		constexpr MessageStr msgs[] = {
+		constexpr const char* msgs[] = {
 			{"you wouldnt believe how much the idiot who made this remake spent on animating"
-		" my boobs, head, and tail.\r"
-		//"I would say I appreciate it, but to be honest, its just borderlining on creepy now.\n"
-		"I would say I appreciate it, but to be honest, its just bordering on creepy now.\n"
-		"like, jesus christ. you dont even have music, or shortcuts working\r"
-		"but now you have boobs????\rwhy????????\r"
-		",,,\r"
-		",,,\r"
-		"actually wait a minute, what is that jam in the background?\ri guess music is somehow in!"
-		"\0"},
-		{"anyway, you know the drill\rhead down the stairs, good luck\0"},
-		{"<3\0"}
+			" my boobs, head, and tail.\r"
+			"I would say I appreciate it, but to be honest, its just bordering on creepy now.\n"
+			"like, jesus christ. you dont even have music, or shortcuts working\r"
+			"but now you have boobs????\rwhy????????\r"
+			",,,\r"
+			",,,\r"
+			"actually wait a minute, what is that jam in the background?\ri guess music is somehow in!"
+			"\0"},
+			{"anyway, you know the drill\rhead down the stairs, good luck\0"},
+			{"<3\0"}
 		};
 		
 		// i rlly need to rewrite the dialogue system to automatically cut words.
 		if(msgIndex < sizeof(msgs)) {
 			
-			bigSprite->effectsManager->doDialogue(msgs[msgIndex].str);
+			bigSprite->effectsManager->doDialogue(msgs[msgIndex]);
 			
 			if(msgIndex != sizeof(msgs)/sizeof(msgs[0]) - 1) {
 				msgIndex++;
 			}
 		}
 		
-		
-	
 		return;
 	};
 	
@@ -476,7 +473,6 @@ void BigSprite::loadBoobTrap() {
 				if(tailSpeedFrames % 5 == 0) {
 					tailBigSprite->animate();
 				}
-	
 				
 				if(tailSpeedFrames == 60) {
 					tailBigSprite = NULL;
@@ -631,8 +627,7 @@ void BigSprite::loadChest() {
 	);
 	
 	entityManager->addEntity(temp1);
-	entityManager->addEntity(temp2);
-	
+	entityManager->addEntity(temp2);	
 }
 
 void BigSprite::loadTree() {
@@ -860,7 +855,6 @@ void BigSprite::loadTree() {
 				
 				
 				const char* inProgressMsg = "[The tree seems to have something to show you, but cant yet.]\n"
-				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
 				"[Behind the tree, someone sits with a slight hunch over a computer, quietly murmuring to themselves, completely unaware of your presence.]\n"
 				"[Their hair is down to their knees.]\n"
 				"[It seems like they are busy with their work, and haven't had a break in weeks.]\n"
@@ -868,7 +862,6 @@ void BigSprite::loadTree() {
 				"[Better move on]\0";
 				
 				const char* inProgressMsg2 = "[The tree seems to have something to show you, but cant yet.]\n"
-				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
 				"[Behind the tree, someone sits with a slight hunch over a computer, quietly murmuring to themselves, completely unaware of your presence.]\n"
 				"[Their hair is down to their knees.]\n"
 				"[You would recognize that disheveled look anywhere. They are the egg bringer, arbiter of breakfast!]\r[Or maybe the eggs are about something else?]\n"
@@ -876,7 +869,6 @@ void BigSprite::loadTree() {
 				"[Maybe go say hello?]\0";
 				
 				const char* inProgressMsg3 = "[The tree seems to have something to show you, but cant yet.]\n"
-				//"[Behind the tree, somene sits hunched over a keyboard, mumbling to themself, blissfully unaware of your presence.]\n"
 				"[Behind the tree, someone is laying down on a bed, completely unaware of your presence.]\n"
 				"[Their hair is down to their knees, and shines in the glow of the tree.]\n"
 				"[It is your friend.]\n"
@@ -907,14 +899,7 @@ void BigSprite::loadTree() {
 						break;
 					case 2:
 						if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
-							// ok shits being real fucking weird 
-							// so im going to make it weirder 
-							// i am running out of stack iwram in this,, maybe using defer would somehow magically make this better?
-							// what i rlly should do is,, have cutscenes be called NOT when fucking the stack is still in the movement code
-							//DEFER(unused=0,
 							globalGame->cutsceneManager.cifDream();
-							//);
-							
 						} else {
 							globalGame->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
 						}
@@ -1029,11 +1014,9 @@ void BigSprite::loadTree() {
 	);
 	
 	entityManager->addEntity(temp1);
-	
 }
 
 void BigSprite::loadGorHead() {
-	
 	
 	/*
 	Many college students have gone to college
@@ -1220,7 +1203,10 @@ void BigSprite::loadStink() {
 
 // -----
 	
-EffectsManager::EffectsManager(Game* game_) : game(game_), textGenerator(dw_fnt_text_12_sprite_font), verTextGenerator(common::variable_8x8_sprite_font),
+EffectsManager::EffectsManager(Game* game_) : 
+	game(game_), 
+	textGenerator(dw_fnt_text_12_sprite_font), 
+	verTextGenerator(common::variable_8x8_sprite_font),
 	effectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles)
 	{
 		
@@ -1314,7 +1300,6 @@ void EffectsManager::updatePalette(Palette* pal) {
 	
 	EffectsManager::spritePalette = pal;
 	
-	
 	for(int i=0; i<bigSprites.size(); i++) {
 		bigSprites[i]->updatePalette(pal);
 	}
@@ -1351,7 +1336,6 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 				}	
 			}
 		}
-		
 	}
 	(void)autoSpeed;
 
@@ -1483,7 +1467,6 @@ void EffectsManager::setDebugDisplay(bool black) {
 			tileRef[121].data[i] = val;
 		}
 	}
-	
 }
 
 void EffectsManager::setBorderColor(bool black) {
@@ -1613,8 +1596,6 @@ void EffectsManager::doVBlank() { profileFunction();
 	if(dialogueEndPointer != NULL) {
 		dialogueEndPointer->animate();
 	}
-	
-	return;
 }
 
 void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
@@ -1653,10 +1634,6 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 	}
 	
 	removeEffectsList.clear();
-	
-	if(effectsCount == 1) { // the first effect is just a dummy to avoid 0 length arrays
-		//return;
-	}
 	
 	effectsCount--;
 	effects++;
@@ -2174,8 +2151,6 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	}
 	
 	game->state = restoreState;
-	
-
 }
 
 bool EffectsManager::restRequest(const char* questionString, bool getOption) {
@@ -2206,7 +2181,6 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		alternateTextPalette = spritePalette->getDarkGraySpritePalette();
 	}
 	
-	
 	for(int i=0; i<60; i++) {
 		game->doButanoUpdate();
 	}
@@ -2217,12 +2191,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	if(strcmp(questionString, "Rest?\0") != 0) {
 		restX -= (textGenerator.width(bn::string_view(questionString)) / 2);
 	}
-	
-	// moving these variables, above, the onespriteperchar line,,,, crashes the fucking game when this is called???
-	// gods at this point im starting to wonder how much of my fucking optmizations are worth it
-	
-	// THESE ALLOCS ARE WHATS CAUSING MY OVERFLOWS
-	//#define RESTSPRITESIZE 64
+
 	#define RESTSPRITESIZE 8
 	bn::vector<bn::sprite_ptr, RESTSPRITESIZE> restSprites;
 	bn::vector<bn::vector<bn::sprite_ptr, RESTSPRITESIZE>, 4> restSpritesOutline;
@@ -2343,11 +2312,8 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	
 	// ` marks are used to delay the text
 	if(doCutsceneDialogue) {
-		// why is this crashing?
-		//doDialogue("[Slowly,`surely,`dreams embrace you]\0", false);
 		doDialogue("[Slowly,`surely,`dreams embrace you]\0\0\0", false);
 	}
-	// PLAY THE EXIT THINGy
 	
 	game->state = restoreState;
 	return true;
@@ -2467,11 +2433,7 @@ void EffectsManager::setMenuVis(bool vis) {
 }
 
 void EffectsManager::doMenu() {
-	
-	// room switching, profiler reseting, palete switching, and such
-	// also show compile time, date, and butano version 
-	// BN_VERSION_STRING   __DATE__   __TIME__
-	
+
 	game->entityManager.menuOpened = true; 
 	
 	setBorderColor();
@@ -2493,74 +2455,15 @@ void EffectsManager::doMenu() {
 		}
 	}
 	
-	
 	effectsLayer.rawMap.setTile(27, 1, 122);
 	effectsLayer.rawMap.setTile(28, 1, 123);
 	effectsLayer.rawMap.setTile(27, 2, 124);
 	effectsLayer.rawMap.setTile(28, 2, 125);
 	
-	
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
 	
-	
-	/*
-	
-	#define VERMSG1 "made with love with:" 
-	const char* vermsgString1 = VERMSG1;
-	
-	#if defined(ENABLEPROFILER)
-		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1 prof=1"
-	#elif defined(ENABLELOGGING)
-		#define VERMSG2 "butano version " BN_VERSION_STRING " with log=1"
-	#else 
-		#define VERMSG2 "butano version " BN_VERSION_STRING
-	#endif
-	
-
-	const char* vermsgString2 = VERMSG2;
-	
-	#define VERMSG3 "on " __DATE__ " at " __TIME__
-	const char* vermsgString3 = VERMSG3;
-	
-	#define VERMSG4 "actual game by System Erasure"
-	const char* vermsgString4 = VERMSG4;
-	
-	#define VERMSG5 "BlueberryJam palette by gooeyphantasm"
-	const char* vermsgString5 = VERMSG5;
-	
-	#define VERMSG6 "pls msg meepster99 on disc 2 report bugs"
-	const char* vermsgString6 = VERMSG6;
-	
-	// why the fuck is it like this?? now that im coming back to this
-	#define VERMSG7 "KyuuMetis & gooeyphantasm for bugtesting"
-	const char* vermsgString7 = VERMSG7;
-	
-	verTextSprites.clear();
-	
-	
-	// these sprites are STATIC and should be put into a bg layer(perhaps the cutscene layer?) to keep 
-	// enough sprite slots open such that pausing in tail's room wont crash
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)24, bn::string_view(vermsgString1), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)32, bn::string_view(vermsgString2), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)40, bn::string_view(vermsgString3), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)48, bn::string_view(vermsgString4), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)56, bn::string_view(vermsgString5), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)64, bn::string_view(vermsgString7), verTextSprites);
-	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view(vermsgString6), verTextSprites);
-
-
-	for(int i=0; i<verTextSprites.size(); i++) {
-		verTextSprites[i].set_palette(spritePalette->getFontSpritePalette());
-		verTextSprites[i].set_bg_priority(0);
-		verTextSprites[i].set_visible(true);
-	}
-	
-	*/
-	
-	//MenuOption::yIndex = -60;
 	MenuOption::yIndex = -68;
-	//MenuOption::yIndex = -70;
 	
 	// oh god im getting goofy again
 	menuOptions.push_back(
@@ -2852,9 +2755,7 @@ void EffectsManager::doMenu() {
 	effectsLayer.reloadCells();
 	game->doButanoUpdate();
 	
-	game->state = restoreState;
-
-	
+	game->state = restoreState;	
 }
 
 // -----
@@ -2951,31 +2852,6 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	}
 	
 	prevFrame = frame;
-	
-	
-	//if(rodNumber != 0) {
-	if(rodNumber >= 4) {
-		// having multiple rods on screen is cool, but only rlly visible when going frame by frame, and causes lag
-		// im changing it bc it looks cool
-		//,,, it seems like it only causes lag on the initial call?
-		// and all subsequent spam works fine? 
-		// why?
-		// well, i know why, but still 
-		// it seems to lag out,, 11 frames after the start of the anim? thats no coincidence.
-		//return;
-		// honestly fuck it 
-		// if you are tasing this and placing 12 things and having frame drops 
-		// thats ur b 
-		// actually i could maybe just hard cap the number
-		// i could also,,, preload all the sprites into vram somehow?
-		//return;
-	}
-	
-	// vcount 
-	if(*(reinterpret_cast<volatile unsigned short*>(0x04000006)) > 222) { 
-		//return;
-	}
-	
 	
 	// swipe
 	createEffect(
@@ -3124,12 +3000,6 @@ void EffectsManager::superRodNumber() { profileFunction();
 	Pos playerPos = globalGame->entityManager.player->p;
 	int val = globalGame->entityManager.player->rod.size();
 	
-	/*
-	bn::string<4> string;
-	bn::ostringstream stream(string);
-	stream << val;
-	*/
-	
 	char string[4] = {'0', 0, 0, 0};
 
     int index = 0;
@@ -3187,13 +3057,7 @@ void EffectsManager::superRodNumber() { profileFunction();
 	createEffect([](Effect* obj) mutable -> void {
 		obj->sprite.updateRawPosition(-32, -32);
 	},
-	// this syntax is something i should of been doing for a while
-	// i could also declare less complex, static vars in here 
-	// bn::move is also,,, something that i wish i knew earlier. it isnt in the docs
 	[
-	//mainNumberSprites = bn::move(mainNumberSprites), 
-	//outlineNumberSprites = bn::move(outlineNumberSprites)
-	
 	mainNumberSprites = mainNumberSprites, 
 	outlineNumberSprites = outlineNumberSprites
 	](Effect* obj) mutable -> bool {
@@ -3219,8 +3083,7 @@ void EffectsManager::superRodNumber() { profileFunction();
 		return false;
 	},
 	true
-	);
-	
+	);	
 }
 
 void EffectsManager::wings() {
@@ -3230,15 +3093,7 @@ void EffectsManager::wings() {
 	
 	// spr_void_wings_cif for cif 
 	// spr_void_wings_dissipate_cif for cif
-	
-	// is precomputing this right here,, ok
-	// ima just decide the sprite item in-func 
-	// why isnt there a (curse)ing func that lets me just change the graphics index without having to also lable the sprite item??
-	
-	// this code is (curse)ing (curse).
-	
 
-	
 	bn::sound_items::snd_wingspawn.play();
 	
 	Player* player = entityManager->player;
@@ -3318,19 +3173,9 @@ void EffectsManager::wings() {
 		}
 		obj->tempCounter2 = 0;
 		
-
-		
 		// i aint no,,, math doctor
 		// but non power of 2 modulos are expensive. this one getting called every frame is goofy
 		// i might be hitting EXTREMELY high virgin levels by changing this, but i am
-		
-		
-		/*
-		obj->graphicsIndex++;	
-		if(obj->graphicsIndex == 3) {
-			obj->graphicsIndex = 0
-		}
-		*/
 		
 		// check the asm if you want to, this is more efficent.
 		if(obj->graphicsIndex == 2) {
@@ -3376,7 +3221,6 @@ void EffectsManager::wings() {
 	
 	createEffect(getCreateFunc(0), wingTickFunc);
 	createEffect(getCreateFunc(1), wingTickFunc);
-	
 }
 
 void EffectsManager::explosion(Pos p)  {
@@ -3424,7 +3268,6 @@ void EffectsManager::explosion(Pos p)  {
 	
 	createEffect(func1, tickFunc);
 	createEffect(func2, tickFunc);
-	
 }
 
 void EffectsManager::sword(Pos p, Direction dir) {
@@ -3461,7 +3304,6 @@ void EffectsManager::sword(Pos p, Direction dir) {
 	};
 	
 	createEffect(createFunc, tickFunc, true);
-	
 }
 
 void EffectsManager::monLightning(Pos p, Direction dir) {
@@ -3528,7 +3370,6 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	}
 	
 	// dw_spr_mon_shock
-	
 	auto shockCreateFunc = [p](Effect* obj) mutable -> void {
 			
 			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_mon_shock, bn::sprite_tiles_items::dw_spr_mon_shock_shape_size);
@@ -3563,14 +3404,8 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		return false;
 	};
 	
-	//createEffect(shockCreateFunc, shockTickFunc, 2);
 	Effect* e = new Effect(shockCreateFunc, shockTickFunc, 2);
 	effectList.push_back(e);
-	
-	//allEffects.push_back(e);
-	
-	
-	
 	
 	// initing this outside of the lambdas will cause char to not swap if someone pauses while dying 
 	// but tbh actually, they cant pause while dying anyway 
@@ -3584,7 +3419,6 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		&bn::sprite_tiles_items::dw_spr_lil_gblink_u, &bn::sprite_tiles_items::dw_spr_lil_gblink_d, &bn::sprite_tiles_items::dw_spr_lil_gblink_l, &bn::sprite_tiles_items::dw_spr_lil_gblink_r,
 		&bn::sprite_tiles_items::dw_spr_cif_gblink_u, &bn::sprite_tiles_items::dw_spr_cif_gblink_d, &bn::sprite_tiles_items::dw_spr_cif_gblink_l, &bn::sprite_tiles_items::dw_spr_cif_gblink_r
 	};
-	
 	
 	const bn::sprite_tiles_item* useTile = tiles[4*game->mode + static_cast<int>(entityManager->player->currentDir)];
 	
@@ -3718,26 +3552,9 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 			
 		}
 	} else {
-		
 		entityManager->player->wingsUse = 0;
-		
-		entityFall(EntityType::Boulder, entityManager->player->p);
-		
-		
-		
+		entityFall(EntityType::Boulder, entityManager->player->p);	
 	}
-	
-	/*
-	for(int i=0; i<allEffects.size(); i++) {
-		removeEffect(allEffects[i]);
-	}
-	allEffects.clear();
-	*/
-	
-	//game->cutsceneManager.delay(60 - 4 * 8);
-	
-	
-	
 }
 
 Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
@@ -3766,7 +3583,6 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			
 		static unsigned lastResetFrame = -1;
 		
-		//if(y < -16) {
 		if(y < -4) {
 			
 			// this might be,,, weird. 
@@ -3777,6 +3593,11 @@ Effect* EffectsManager::getRoomDustEffect(bool isCutscene) {
 			// this is heret to attempt to reduce the amount of strain that roomdust has on the system.
 			// allowing for 8x8 sprites would also,,, tbh,,,, help?
 			// time to return to the trenches of massformatter, and then return with a shit ton of compiler errors.
+			
+			// ok, coming back to here, ~8 months later.
+			// what the fuck. what the fuck??? 
+			// this function only executes when its early enough in vblank? i thought this was a good idea?
+			// i mean, it works.,,, but wow.
 			
 			// https://problemkaputt.de/gbatek-lcd-i-o-interrupts-and-status.htm
 			if(*reinterpret_cast<unsigned short*>(0x04000006) > 210) {
@@ -3966,9 +3787,6 @@ void EffectsManager::entityKill(Entity* entity) {
 			obj->x = p.x * 16;
 			obj->y = p.y * 16;
 			obj->sprite.updateRawPosition(obj->x-1, obj->y);
-			
-			//obj->sprite.spritePointer.set_x(entityX-1);
-			//obj->sprite.spritePointer.set_y(entityY);
 		};
 		
 		auto tickFunc = [p, entityX, entityY, tiles](Effect* obj) mutable -> bool {
@@ -3983,24 +3801,19 @@ void EffectsManager::entityKill(Entity* entity) {
 			);
 			
 			if(obj->tempCounter == 0) {
-				//obj->sprite.spritePointer.set_x(entityX+1);
 				obj->sprite.setRawX(p.x * 16 + 1);
 			} else {
-				//obj->sprite.spritePointer.set_x(entityX-1);
 				obj->sprite.setRawX(p.x * 16 - 1);
 			}
 			
 			obj->tempCounter = !obj->tempCounter;
-			
-			
+		
 			return false;
 		};
 		
 		createEffect(createFunc, tickFunc);
 	
 	} else {
-		
-		
 		
 		// the fact that i cannot set a graphics index with a tiles ptr, bc  
 		// tiles ptrs are only supposed to be used for single graphicsindex sprites
@@ -4029,9 +3842,6 @@ void EffectsManager::entityKill(Entity* entity) {
 			obj->x = p.x * 16;
 			obj->y = p.y * 16;
 			obj->sprite.updateRawPosition(obj->x, obj->y);
-			//obj->sprite.spritePointer.set_x(entityX);
-			//obj->sprite.spritePointer.set_y(entityY);
-			
 		};
 		
 		auto tickFunc = [tilesItem](Effect* obj) mutable -> bool {
@@ -4046,12 +3856,8 @@ void EffectsManager::entityKill(Entity* entity) {
 			return false;
 		};
 		
-		createEffect(createFunc, tickFunc);
-		
+		createEffect(createFunc, tickFunc);	
 	}
-	
-	
-	
 }
 
 void EffectsManager::entityFall(EntityType t, Pos p) {
@@ -4060,7 +3866,6 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 		const bn::sprite_tiles_item* spriteTiles = NULL;
 		int frameCount = 0;
 	};
-	
 	
 	auto createFallEffect = [p](SaneVector<fallFrame, 8> fallData) -> Effect* {
 		
@@ -4078,8 +3883,7 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 				*fallData[e->tempCounter].spriteTiles,
 				e->graphicsIndex
 			);
-			
-			
+		
 		},
 		[fallData, p](Effect* e) -> bool {
 			
@@ -4114,7 +3918,6 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 								e2->graphicsIndex
 							);
 							
-							
 						},
 						[](Effect* e2) -> bool {
 							
@@ -4142,7 +3945,6 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 				createPlonk(false);
 				createPlonk(true);
 				
-				
 				return true;
 			}
 		
@@ -4159,7 +3961,6 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 				}
 			}
 			
-			
 			e->sprite.spritePointer.set_tiles(
 				*fallData[e->tempCounter].spriteTiles,
 				e->graphicsIndex % fallData[e->tempCounter].spriteTiles->graphics_count()
@@ -4169,7 +3970,6 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 		}
 		);
 	};
-	
 
 	if(t == EntityType::Player) {
 		entityManager->player->wingsUse = 0;
@@ -4238,7 +4038,6 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 			BN_ERROR("unknown entitytype passed into entityFall, wtf");
 			break;
 	}
-	
 }
 
 void EffectsManager::entityFall(Entity* entity) {
@@ -4253,7 +4052,6 @@ void EffectsManager::entityFall(Entity* entity) {
 	}
 	
 	entityFall(t, p);
-	
 }
 
 void EffectsManager::playerBrandRoomBackground() {
@@ -4320,7 +4118,6 @@ void EffectsManager::playerBrandRoomBackground() {
 		obj->sprite.spritePointer.set_position(obj->x, obj->y);
 	};
 	
-	
 	auto generatorTickFunc = [this, createFunc, tickFunc](Effect* obj) mutable -> bool {
 		(void)obj;
 		
@@ -4339,11 +4136,9 @@ void EffectsManager::playerBrandRoomBackground() {
 		effectCount++;
 		
 		return false;	
-	};
-	
+	};	
 	
 	createEffect(generatorCreateFunc, generatorTickFunc);
-
 }
 
 Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
@@ -4408,7 +4203,6 @@ Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
 	Effect* e = new Effect(createFunc, tickFunc);
 	effectList.push_back(e);
 	return e;	
-
 }
 
 Effect* EffectsManager::generateDialogueEndpointer() {
@@ -4524,8 +4318,7 @@ void EffectsManager::questionMark() {
 	questionMarkCount++;
 	Effect* e = new Effect(createFunc, tickFunc);
 	e->waitFlag = true;
-	effectList.push_back(e);
-	
+	effectList.push_back(e);	
 }
 
 void EffectsManager::treeLeaves() {
@@ -4574,17 +4367,14 @@ void EffectsManager::treeLeaves() {
 	};
 	
 	Effect* e = new Effect(createFunc, tickFunc);
-	effectList.push_back(e);
-	
+	effectList.push_back(e);	
 }
 
 void EffectsManager::chestBonus(Chest* chest) {
 	
-	
 	// hide the original chest sprite, 
 	// spr_chest_regular_flash
 	// some explosions (i have a func for that already right?)
-	
 	
 	auto createFunc = [chest](Effect* obj) mutable -> void {
 		
@@ -4635,13 +4425,9 @@ void EffectsManager::chestBonus(Chest* chest) {
 	
 	Effect* e = new Effect(createFunc, tickFunc);
 	effectList.push_back(e);
-	
-	
-	
 }
 
 Effect* EffectsManager::levStatueActive(LevStatue* levStatue) {
-	
 	
 	auto createFunc = [levStatue](Effect* obj) mutable -> void {
 		
@@ -4728,9 +4514,7 @@ void EffectsManager::levKill() {
 	the last two we already have a func for. this is going to be easy
 	
 	*/
-	
-	//game->cutsceneManager.backupLayer(3);
-	
+
 	game->cutsceneManager.backup(1);
 	
 	entityManager->shouldTickPlayer = false;
@@ -4823,27 +4607,15 @@ void EffectsManager::levKill() {
 	effectsLayer.clear();
 	effectsLayer.reloadCells();
 	
-	entityManager->player->sprite.spritePointer.set_bg_priority(1);
-	
-	//entityKill(entityManager->player);
-	
-	
+	entityManager->player->sprite.spritePointer.set_bg_priority(1);	
 }
 
 void EffectsManager::fadeBrand() {
-	
-	
-	// cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBlackBGPalette());
-	
-	
-	auto createFunc = [](Effect* obj) mutable -> void {
-		
+
+	auto createFunc = [](Effect* obj) mutable -> void {		
 		// goofy af.
 		obj->sprite.updateRawPosition(-32, -32);
-		
 		obj->tempCounter = 0;
-		
-		
 	};
 	
 	auto tickFunc = [](Effect* obj) mutable -> bool {
@@ -4856,7 +4628,6 @@ void EffectsManager::fadeBrand() {
 		if(obj->tempCounter == offset + factor * 1) {
 			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(1, false));	
 		}
-	
 	
 		if(obj->tempCounter == offset + factor * 2) {
 			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(2, false));	
@@ -4875,19 +4646,14 @@ void EffectsManager::fadeBrand() {
 			return true;
 		}
 	
-		
 		return false;
 	};
 	
 	Effect* e = new Effect(createFunc, tickFunc);
 	effectList.push_back(e);
-	
-	
-	
 }
 	
 void EffectsManager::glassShineSpark(const Pos& p) {
-	
 	
 	auto getCreateFunc = [](int x, int y) -> auto {
 		return [x, y](Effect* obj) mutable -> void {
@@ -4933,7 +4699,6 @@ void EffectsManager::glassShineSpark(const Pos& p) {
 	
 	effectList.push_back(e1);
 	effectList.push_back(e2);
-	
 }
 
 void EffectsManager::switchGlow(const Pos& p) {
@@ -4982,7 +4747,6 @@ void EffectsManager::switchGlow(const Pos& p) {
 	Effect* e1 = new Effect(getCreateFunc(x, y), tickFunc);
 	
 	effectList.push_back(e1);
-
 }
 
 void EffectsManager::exitGlow(const Pos& p) {
@@ -5110,14 +4874,7 @@ void EffectsManager::exitGlow(const Pos& p) {
 		exitGlowCount++;
 		
 		auto dotCreateFunc = [flip, tiles](Effect* obj) mutable -> void {
-			
-			//obj->tiles = &bn::sprite_tiles_items::dw_spr_exit_target_arrow;
-		
 			obj->tiles = tiles;
-		
-			//obj->x = x + (flip ? -12 : 12);
-			//obj->y = y + (flip ? 12 : -12);
-			
 			obj->x = -32;
 			obj->y = -32;
 				
@@ -5153,12 +4910,10 @@ void EffectsManager::exitGlow(const Pos& p) {
 	generateEffect(true, &bn::sprite_tiles_items::dw_spr_exit_target_b);
 	
 	generateEffect(false, &bn::sprite_tiles_items::dw_spr_exit_target_arrow);
-	generateEffect(true, &bn::sprite_tiles_items::dw_spr_exit_target_arrow);
-	
+	generateEffect(true, &bn::sprite_tiles_items::dw_spr_exit_target_arrow);	
 }
 
 void EffectsManager::copyGlow(const Pos& p) {
-	
 	
 	// spr_add_shock
 	// 5 frames
@@ -5207,8 +4962,6 @@ void EffectsManager::copyGlow(const Pos& p) {
 	Effect* e1 = new Effect(getCreateFunc(x+8, y+8), tickFunc);
 	
 	effectList.push_back(e1);
-	
-	
 }
 
 void EffectsManager::shadowCreate(const Pos& p) {
@@ -5261,7 +5014,6 @@ void EffectsManager::shadowCreate(const Pos& p) {
 	Effect* e1 = new Effect(getCreateFunc(x, y), tickFunc);
 	
 	effectList.push_back(e1);
-
 }
 
 void EffectsManager::shadowDeath(Shadow* shadow) {
@@ -5273,7 +5025,6 @@ void EffectsManager::shadowDeath(Shadow* shadow) {
 		return;
 	}
 	
-	//shadow->doUpdate();
 	for(auto it = entityManager->shadowList.begin(); it != entityManager->shadowList.end(); ++it) {
 		(*it)->doUpdate();
 	}
@@ -5283,7 +5034,6 @@ void EffectsManager::shadowDeath(Shadow* shadow) {
 	delay(60);
 	
 	entityFall(shadow);
-	
 }
 
 void EffectsManager::smokeCloud(Pos p, const Direction dir) {
@@ -5306,8 +5056,6 @@ void EffectsManager::smokeCloud(Pos p, const Direction dir) {
 		} else if(dir == Direction::Down) {
 			obj->sprite.spritePointer.set_vertical_flip(true);
 		}
-		
-		//obj->sprite.spritePointer.set_z_order(-2); // -2 SHOULD be low enough
 
 		obj->graphicsIndex = -1;
 		obj->animateFunc(obj);
@@ -5387,16 +5135,10 @@ void EffectsManager::deathTile(Pos p) {
 	Effect* e1 = new Effect(createFunc, tickFunc);
 	
 	effectList.push_back(e1);
-	
-	
-	
 }
 
 void EffectsManager::deathTileAnimate(Pos p) {
-	
-	// should,,, this also be done for the sword anim??
 
-	
 	auto createFunc = [p](Effect* obj) mutable -> void {
 			
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_deathfloor;
@@ -5438,7 +5180,6 @@ void EffectsManager::deathTileAnimate(Pos p) {
 	Effect* e1 = new Effect(createFunc, tickFunc);
 	
 	effectList.push_back(e1);
-
 }
 
 void EffectsManager::bombTileAnimate(Pos p) {
@@ -5487,12 +5228,9 @@ void EffectsManager::bombTileAnimate(Pos p) {
 	Effect* e1 = new Effect(createFunc, tickFunc);
 	
 	effectList.push_back(e1);
-	
 }
 
 void EffectsManager::corpseSparks() {
-	
-	//Pos p = Pos(6, 5);
 	
 	// spr_soulstar_spark_b
 
@@ -5556,13 +5294,11 @@ void EffectsManager::corpseSparks() {
 	
 	createEffect(0, 1);
 	createEffect(0, -1);
-	
 }
 
 void EffectsManager::corpseFuzz() {
 	
 	//Pos p = Pos(6, 4);
-	
 	
 	auto createEffect = [](int tileSelector) -> Effect* {
 		
@@ -5654,16 +5390,9 @@ void EffectsManager::corpseFuzz() {
 	for(int i=0; i<count; i++) {
 		effectList.push_back(createEffect(randomGenerator.get_int(0, 5)));
 	}
-
-	
-	// have them move upright
-	// should be on layer 3 
-	//,,, i should REALLLY try to reuse the fuzz code i already have
-	
 }
 
 void EffectsManager::stinkLines(const Pos p) {
-	
 	
 	auto createFunc = [p](Effect* obj) mutable -> void {
 			
@@ -5718,9 +5447,7 @@ void EffectsManager::stinkLines(const Pos p) {
 	};
 
 	Effect* e1 = new Effect(createFunc, tickFunc);
-	
-	effectList.push_back(e1);
-	
+	effectList.push_back(e1);	
 }
 
 void EffectsManager::rotateTanStatues() {
@@ -5806,16 +5533,13 @@ void EffectsManager::rotateTanStatues() {
 	};
 
 	Effect* e1 = new Effect(createFunc, tickFunc);
-	
 	effectList.push_back(e1);	
-	
 	rotateTanStatuesCount++;
 }
 
 void EffectsManager::corrupt(int frames) {
 	
 	BN_ASSERT(frames > 0, "greenglitch needs a >0 frame count fool");
-	
 	
 	// is there a way for me to,, relatively easily corrupt the,, bg data?
 	// can i get the bg index from a,, bgpointer?
@@ -5848,8 +5572,6 @@ void EffectsManager::corrupt(int frames) {
 			mapData[i] = mapData[i - 1];
 		}
 	}
-	
-	
 	
 	auto createFunc = [](Effect* obj) mutable -> void {
 		obj->sprite.updateRawPosition(-32, -32);
@@ -5885,7 +5607,6 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 	// coming back to this, months later, so much of the initial setup in most lambdas could/should HAVE. been,,, more elegant.
 	
 	const Pos p = entityManager->player->p;
-	
 
 	auto createGlowFunc = [p](Effect* obj) -> void {
 		

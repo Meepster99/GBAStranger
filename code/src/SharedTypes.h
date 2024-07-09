@@ -1048,11 +1048,6 @@ inline int strcmp(const char *str1, const char *str2) {
 	return 0;
 }
 
-struct MessageStr {
-	const char* str;
-	const char idek = '\0'; // sanity
-};
-
 constexpr unsigned hashString(const char* str) {
 	// the majority of hashString calls are at compile time. 
 	// a (slightly) more expensive hash func will benifit sanity 

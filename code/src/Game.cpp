@@ -1186,18 +1186,12 @@ void Game::run() {
 	
 	BN_LOG("look at u bein all fancy lookin in the logs");
 	
-	//BN_LOG(collision.rawMap.mapItem.flat_layout());
-	//BN_LOG(collision.rawMap.mapItem.dimensions().width());
-	
 	globalGame = this;
 	
 	roomManager.isCustomRooms();
 	
 	load();
-	
-	//BN_LOG("mem", saveData.hasMemory, (int)saveData.hasMemory);
-	//BN_LOG("locust", saveData.locustCount, (int)saveData.locustCount);
-	
+
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 	
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
@@ -1209,8 +1203,6 @@ void Game::run() {
 	
 	state = GameState::Loading;
 	
-	//cutsceneManager.titleScreen();
-	
 	bool brandBlank = true;
 	for(int i=0; i<6; i++) {
 		if(tileManager.playerBrand[i] != 0) {
@@ -1221,14 +1213,7 @@ void Game::run() {
 	
 	if(brandBlank && !roomManager.isCustom) {
 		
-		BN_LOG("beforetitle mem", saveData.hasMemory, (int)saveData.hasMemory);
-		BN_LOG("beforetitle locust", saveData.locustCount, (int)saveData.locustCount);
-		
 		bool shouldDoBrandInput = cutsceneManager.titleScreen();
-		
-		BN_LOG("aftertitle mem", saveData.hasMemory, (int)saveData.hasMemory);
-		BN_LOG("aftertitle locust", saveData.locustCount, (int)saveData.locustCount);
-		
 		
 		if(shouldDoBrandInput) {
 			cutsceneManager.brandInput();
@@ -1285,14 +1270,7 @@ void Game::run() {
 			cutsceneManager.titleScreen();
 		}
 	}
-	
-	if(goofyahhfirstsave) {
-		goofyahhfirstsave = false;
-		
-		BN_LOG("goofyahhfirstsave mem", saveData.hasMemory, (int)saveData.hasMemory);
-		BN_LOG("goofyahhfirstsave locust", saveData.locustCount, (int)saveData.locustCount);
-	}
-	
+
 	loadLevel();
 	doButanoUpdate();
 	fullDraw();
@@ -1302,8 +1280,6 @@ void Game::run() {
 	state = GameState::Normal;
 	
 	changeMusic();
-
-	//doButanoUpdate();
 	
 	BN_LOG("starting main gameloop");
 	while(true) {
@@ -1329,8 +1305,7 @@ void Game::run() {
 				}
 				
 				resetRoom(true);
-				
-				//unsigned waitFrames = 5 - (int)(frame - startFrame);
+			
 				unsigned waitFrames = frame - startFrame;
 				
 				if(frame <= startFrame) {
@@ -1453,11 +1428,8 @@ void Game::run() {
 			
 			bn::fixed tickCount = moveTimer.elapsed_ticks();
 			(void)tickCount; // supress warning if logging is disabled
-			//BN_LOG("a move took ", tickCount / FRAMETICKS, " frames");
-			//if(tickCount > FRAMETICKS) {
-			if(true) {
-				BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
-			}
+		
+			BN_LOG("a move took ", tickCount.safe_division(FRAMETICKS), " frames");
 			
 			
 			/*
