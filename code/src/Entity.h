@@ -862,7 +862,6 @@ public:
 		spriteTilesArray.clear(); 
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower);
 		spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_slower_stop);
-		//fallData.push_back(bn::pair<bn::sprite_tiles_item, u8>(bn::sprite_tiles_items::dw_spr_fall, 6));
 	}
 
 	GorStatue* clone() const override { return new GorStatue(*this); }
@@ -874,6 +873,8 @@ public:
 	void updateTileIndex() override { }
 	
 	void interact() override;
+	
+	void moveSucceded() override;
 	
 };
 

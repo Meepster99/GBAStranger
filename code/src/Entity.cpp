@@ -852,11 +852,13 @@ bn::optional<Direction> GorStatue::getNextMove() {
 		return Obstacle::getNextMove();
 	}
 	
-	tileIndex = 1;
-	
 	bumpDirections.clear();
 	return bn::optional<Direction>();
 }
+
+void GorStatue::moveSucceded() {
+	tileIndex = 1;
+}	
 
 bn::optional<Direction> MonStatue::getNextMove() {
 	
