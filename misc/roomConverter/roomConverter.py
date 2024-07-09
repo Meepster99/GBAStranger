@@ -1778,7 +1778,7 @@ def convertObjects(layerData):
 			pass
 
 		def obj_dummyfloor(p, creationCode):
-			pass
+			ObjectFunctions.obj_floor(p, creationCode)
 
 		def obj_og_onion(p, creationCode):
 			pass
