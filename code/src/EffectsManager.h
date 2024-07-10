@@ -458,6 +458,8 @@ public:
 	void rotateTanStatues();
 	void corrupt(int frames = 30);
 	void locustGet(bool isFirstLocust);
+	void generateSecretSparks(const Pos p);
+	void secretSparks(const Pos p);
 	
 };
 

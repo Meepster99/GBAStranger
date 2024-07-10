@@ -1642,8 +1642,9 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		//if(effects->width == 1 && effects->height == 1) { 
 		if(effects->tiles == &bn::sprite_tiles_items::dw_spr_stinklines) {
 			stinkLines(Pos(effects->x/16, effects->y/16));
+		} else if(effects->tiles == &bn::sprite_tiles_items::dw_spr_spark_particle) {
+			secretSparks(Pos(effects->x/16, effects->y/16));
 		} else {
-			
 			BN_LOG("attempting to create bigsprite: ", game->roomManager.currentRoomName(), " id index: ", i);
 			bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
 			BN_LOG("success");
@@ -5717,4 +5718,94 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 	removeEffect(e2);
 }
 
+void EffectsManager::generateSecretSparks(const Pos p) {
+
+	/*
+	
+	https://youtu.be/CQMLFR-3mPo?si=AIkhmAj0iJtzOFBO&t=637
+	go frame by frame, they flicker.
+	
+	pick one of 3, 
+	choose random spot within pos 
+	flicker 5 times (i think?)
+	
+	ugh honestly, no point of looking at the gml for this, ill just do it like i would always do
+	
+	spr_spark_particle
+	
+	*/
+	
+	auto createFunc = [p](Effect* obj) mutable -> void {
+			
+		obj->tiles = &bn::sprite_tiles_items::dw_spr_spark_particle;
+		
+		obj->sprite.spritePointer.set_bg_priority(3);
+		
+		obj->sprite.spritePointer.set_tiles(
+			*obj->tiles,
+			obj->tempCounter
+		);
+	
+		obj->x = p.x * 16 - 2;  	
+		obj->y = p.y * 16 - 2;
+		obj->sprite.updateRawPosition(-32, -32);	
+	};
+	
+	auto tickFunc = [
+	x = -1,
+	y = -1,
+	remTicks = -1,
+	offsetBits = 0,
+	delayTicks = randomGenerator.get_int(8, 16)
+	](Effect* obj) mutable -> bool {
+	
+		if(remTicks == -1) {
+			
+			if(delayTicks) {
+				delayTicks--;
+				return false;
+			}
+			
+			obj->sprite.spritePointer.set_tiles(
+				*obj->tiles,
+				randomGenerator.get_int(0, 2+1)
+			);
+			
+			x = obj->x + randomGenerator.get_int(4, 12+1);
+			y = obj->y + 5 + randomGenerator.get_int(4, 8);
+			
+			remTicks = 15;
+			offsetBits = randomGenerator.get_int() & 0b11;
+		}
+		
+		if(((offsetBits + frame) & 0b1) == 0b0) { // determines if we need to do a state change here.
+			bool visState = ((offsetBits + frame) & 0b10);
+			obj->sprite.spritePointer.set_visible(visState);
+			if(visState) {
+				y--;
+				obj->sprite.updateRawPosition(x, y);
+			}
+		}
+
+		remTicks--;
+		
+		if(remTicks == -1) {
+			delayTicks = randomGenerator.get_int(2, 8);
+			obj->sprite.spritePointer.set_visible(false); 
+		}
+		
+		return false;
+	};
+
+	Effect* e1 = new Effect(createFunc, tickFunc);
+	effectList.push_back(e1);
+}
+
+void EffectsManager::secretSparks(const Pos p) {
+	BN_LOG("CREATING SECRETSPARKS");
+	
+	for(int i=0; i<3+1; i++) {
+		generateSecretSparks(p);
+	}
+}
 

@@ -307,9 +307,14 @@ def readCreationCode(p, creationCode):
 	if "na_secret" in bruh:
 		res = bruh["na_secret"]
 		tempRoom = None
-		if "roomName" in globalBruh:
-			tempRoom = globalBruh["roomName"] 
-		return [res, tempRoom]
+		shouldSparkle = None
+		if "roomName" in bruh:
+			tempRoom = bruh["roomName"] 
+			
+		if "secret_stars" in bruh: # why does this have to be bruh and not globalbruh? is that why the roomname thing never worked?
+			shouldSparkle = bruh["secret_stars"]
+			
+		return [res, tempRoom, shouldSparkle]
 	
 	if "contents" in bruh:
 		return "contents = {:d}".format(bruh["contents"])
@@ -1014,10 +1019,7 @@ def convertObjects(layerData):
 			 
 		def obj_enemy_co(p, creationCode):
 			entityExport.append("EntityType::Diamond,{:d},{:d}".format(p.x, p.y))
-	
-	
-	
-	
+
 		def obj_collision(p, creationCode):
 			# for now, donothing, but i could maybe,,, modify this to put a black tile in collision/details that has collision?
 			pass
@@ -1041,7 +1043,9 @@ def convertObjects(layerData):
 			#i could get the room to goto dynamically, but im tired ok
 			# i REALLY should do that 
 			
-			creationCode = creationCode[0]
+			#print(f"{MAGENTA}{creationCode}{RESET}")
+			
+			creationCode, _unusedRoomName, shouldSparkle = creationCode
 			
 			secretData = {
 				4: "rm_mon_shortcut_001",
@@ -1073,6 +1077,10 @@ def convertObjects(layerData):
 				specialFloorExport.append("{:d},{:d},NULL".format(p.x, p.y))
 			else:
 				specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, res))
+			
+			if shouldSparkle:
+				x, y = p.rawX, p.rawY 
+				effectExport.append("&bn::sprite_tiles_items::dw_spr_spark_particle,{:d},{:d},1,1".format(x, y))
 			
 			pass
 			
