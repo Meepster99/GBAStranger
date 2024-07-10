@@ -286,6 +286,21 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 }
 
+__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) void _fullReset() {
+	
+	// https://www.coranac.com/tonc/text/swi.htm
+	// https://problemkaputt.de/gbatek-bios-reset-functions.htm
+	
+	asm volatile(
+	//"mov r0, #0b11111111\n"
+	//"swi 0x01 << 16\n"
+	//"swi 0x00 << 16\n"
+	"swi 0x26 << 16\n"
+	: : :
+	);
+	
+}
+
 volatile unsigned miscPointer = 0;
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData() {

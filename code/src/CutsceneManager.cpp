@@ -2091,7 +2091,8 @@ bool CutsceneManager::titleScreen() {
 		x = 0,
 		y = -100,
 		angle = 0,
-		textSprites = bn::move(textSprites)
+		//textSprites = bn::move(textSprites)
+		&textSprites
 		]() mutable -> void {
 			
 			angle++;
@@ -2157,7 +2158,6 @@ bool CutsceneManager::titleScreen() {
 	constexpr int idekSize = sizeof(idek)/sizeof(idek[0]);
 	
 	bn::vector<bn::sprite_ptr, 64> splashTextSprites;
-	BN_LOG(randomGenerator.get_int(1));
 	textGenerator.set_center_alignment();
 	
 	unsigned idekIndex = game->saveData.randomSeed % idekSize;
@@ -2181,6 +2181,31 @@ bool CutsceneManager::titleScreen() {
 		splashTextSprites[j].set_bg_priority(0);
 	}
 	
+	auto updatePalettes = [&]() mutable -> void {
+	
+		activeTextPalette = game->pal->getWhiteSpritePalette().create_palette();
+		blackTextPalette = game->pal->getBlackSpritePalette().create_palette();
+	
+		for(int i=0; i<splashTextSprites.size(); i++) {
+			splashTextSprites[i].set_palette(globalGame->pal->getFontSpritePalette());
+		}
+		
+		for(int j=0; j<5; j++) {
+			for(int i=0; i<textSprites[j].size(); i++) {
+				if(j == 0) {
+					textSprites[j][i].set_palette(activeTextPalette);
+				} else {
+					textSprites[j][i].set_palette(blackTextPalette);
+				}	
+			}
+		}
+		
+		idrk.spritePointer.set_palette(game->pal->getSpritePalette());
+	};
+	
+	updatePalettes();
+	
+	
 	for(int i=0; i<40; i++) {
 		for(int j=0; j<splashTextSprites.size(); j++) {
 			splashTextSprites[j].set_y(splashTextSprites[j].y() - 1);
@@ -2190,10 +2215,21 @@ bool CutsceneManager::titleScreen() {
 	
 	bool res = true;
 	
+	
 	while(true) { 
 		if(bn::keypad::a_pressed()) {
 			break;
 		}
+		
+		
+		if(bn::keypad::left_pressed()) {
+			game->changePalette(1);
+			updatePalettes();
+		} else if(bn::keypad::right_pressed()) {
+			game->changePalette(-1);
+			updatePalettes();
+		}	
+		
 		
 		// just a goofy ahh thing here for my own needs
 		// the amount of times ive had to enter a brand has been annoying 

@@ -766,7 +766,7 @@ void BigSprite::loadTree() {
 					
 					if(globalGame->saveData.eggCount == 0) {
 					
-						globalGame->effectsManager.doDialogue("\0* The fool slowly turns around and stares at you\0");
+						globalGame->effectsManager.doDialogue("`* The fool slowly turns around and stares at you\0");
 						
 						idrk.setVisible(true);
 						globalGame->effectsManager.doDialogue("\0* Thank you for saying hello.\0", &bn::sound_items::snd_cifer);
@@ -1817,6 +1817,36 @@ void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 
 void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sound_item* sound) {
 	
+	/*
+	
+	ok, this is trash. very trash.
+	
+	the isCutscene bool should probs just,, read the gamestate? 
+	im not sure if i use it anywhere that isnt already a cutscene 
+	
+	dontUpdateAtEnd, makes no sense. 
+	why did i do that in the first place again?
+	
+	also, whats the point 
+	this code is horrid, but out of everything? it functions 
+	
+	dontUpdateAtEnd doesnt even do anything? to the point i commented it out and it just works?
+	
+	new dialogue system ideas:
+	
+	an array of generics would be ideal, or well 
+	i do not know how templates work on a compiler level 
+	would be nice to just pass an initializer list(raw, without needing to define a class), of:
+	const char*, bn::sound, (hell if i really wanted to, lambdas??) 
+	
+	allow single const char* too, this would only be for more complex stuff (just overload the func)
+	
+	keep the, \r\n system, that stuff worked backticks?? work fine 
+	this code is just extremely convoluted
+	
+	*/
+	
+	
 	// when one func is ~350 lines long, it NEEDS to be rewritten
 	
 	/*
@@ -2148,7 +2178,8 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	textSpritesLine2.clear();
 	
 	if(!dontUpdateAtEnd) {
-		game->doButanoUpdate();
+		// so confused. was this needed at all??
+		//game->doButanoUpdate();
 	}
 	
 	game->state = restoreState;

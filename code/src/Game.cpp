@@ -1324,22 +1324,33 @@ void Game::run() {
 				continue;
 			}
 			
-			// pokemon style reset 
-			// changing this to have multiple options
-			if(bn::keypad::a_held() && bn::keypad::b_held() && (bn::keypad::start_held() || bn::keypad::start_pressed())) {
-				//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
-				//bn::core::reset();
-				BN_LOG("game reset called");
-				break;
-			}
-			if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::select_held()) {
-				//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
-				//bn::core::reset();
-				BN_LOG("save reset called");
-				entityManager.player->locustCount = 0;
-				entityManager.player->isVoided = false;
-				save();
-				break;
+			if(debugToggle) {
+				// pokemon style reset 
+				// changing this to have multiple options
+				if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::start_pressed()) {
+					//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
+					//bn::core::reset();
+					BN_LOG("full game reset called");
+					
+					globalGame->saveData.hash = 0;
+					bn::sram::write(globalGame->saveData);
+					
+					delay(1);
+					
+					// previously this would just break out of the loop. it would be nice though if this completely restarted the gba. i can do that right?
+					_fullReset();
+					
+					break;
+				}
+				if(bn::keypad::a_held() && bn::keypad::b_held() && bn::keypad::select_held()) {
+					//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
+					//bn::core::reset();
+					BN_LOG("save reset called");
+					entityManager.player->locustCount = 0;
+					entityManager.player->isVoided = false;
+					save();
+					break;
+				}
 			}
 		}
 		

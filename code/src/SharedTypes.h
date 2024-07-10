@@ -170,11 +170,14 @@ extern int* glitchTilesCount;
 : __DATE__ [2] == 'v' ? 11 \
 : 12)
 
+// these funcs are long call here and not in main.cpp. is that ok?
 __attribute__((section(".iwram"), target("thumb"), long_call)) unsigned short bruhRand();
 
 __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) unsigned getMiscData();
 
 __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void uncompressData(u8 res[126], u8* input);
+
+void _fullReset();
 
 #define getInput(key) ((globalGame->saveData.delay == -1) ? bn::keypad::pressed(key) : (bn::keypad::pressed(key) || bn::keypad::held(key)))
 
