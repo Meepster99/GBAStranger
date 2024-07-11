@@ -48,11 +48,11 @@
             _bn_string_stream.append_args(__VA_ARGS__); \
             bn::log(_bn_istring); \
         } while(false)
-			
+
 #define BN_LOG(...) do { BN_LOG_MOD(__FILE__, " ", __LINE__);  BN_LOG_MOD(__VA_ARGS__); } while(false)
 */
 
-#else 
+#else
 #define BN_LOG(...) do {} while (false)
 #endif
 
@@ -101,10 +101,11 @@
 #endif
 
 // https://stackoverflow.com/questions/33050620/golang-style-defer-in-c
-#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...) mutable { code }); 
+#define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...) mutable { code });
 
 #define USEEWRAM __attribute__((section(".ewram")))
 #define USEIWRAM __attribute__((section(".iwram")))
+#define USEARM __attribute__((noinline, target("arm"), section(".iwram"), long_call)) // unsure if noinline and long_call are the way to go
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -188,7 +189,7 @@ void doNothing();
 enum class GameState {
 	Normal, // normal gameplay
 	Exiting, // we either just completed a level, or just died
-	Entering, // we just exited the exiting state and are now reloading stuffs. 
+	Entering, // we just exited the exiting state and are now reloading stuffs.
 	Loading, // loading in new data, do nothing for now.
 	Paused, // either actually paused(which i havent even thought about making) or in dialogue.
 	Dialogue,
@@ -197,9 +198,9 @@ enum class GameState {
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const GameState& e) {
-static const char *GameStateToString[] ={ 
+static const char *GameStateToString[] ={
 	"Normal",
-	"Exiting", 
+	"Exiting",
 	"Entering",
 	"Loading",
 };
@@ -218,7 +219,7 @@ enum class Direction {
 // all these ostreams should of been added days ago omfg.
 // nothing i googled mentioned i could overload ostream for enums
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const Direction& e) {
-static const char *DirectionToString[] ={ 
+static const char *DirectionToString[] ={
   	"Up",
 	"Down",
 	"Left",
@@ -231,26 +232,26 @@ static const char *DirectionToString[] ={
 
 enum class EntityType {
 	Entity,
-	
+
 	Player,
-	
+
 	Leech,
 	Maggot,
 	Eye,
 	Bull,
 	Chester,
-	
+
 	Mimic,
 	WhiteMimic,
 	GrayMimic,
 	BlackMimic,
-	
+
 	Diamond,
 	Shadow,
-	
+
 	Boulder,
 	Chest,
-	
+
 	AddStatue,
 	EusStatue,
 	BeeStatue,
@@ -260,15 +261,15 @@ enum class EntityType {
 	LevStatue,
 	CifStatue,
 	JukeBox,
-	
+
 	Interactable,
-	
-	// i am not sure if this is the best way to do this, but I am going with it 
+
+	// i am not sure if this is the best way to do this, but I am going with it
 	EmptyChest
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const EntityType& e) {
-static const char *EntityTypeToString[] ={ 
+static const char *EntityTypeToString[] ={
   	"Entity",
 	"Player",
 	"Leech",
@@ -317,7 +318,7 @@ enum class TileType {
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const TileType& e) {
-static const char *TileTypeToString[] ={ 
+static const char *TileTypeToString[] ={
 	"Pit",
 	"Floor",
 	"Glass",
@@ -356,26 +357,26 @@ public:
 		),
 		bgMap(bgPointer.map())
 		{
-			init(zIndex);	
+			init(zIndex);
 		}
-	
+
 	// alternate constructor for when (trying) to use an allocated tileset instead of a normal one(for vram modifications)
 	BackgroundMap(bn::regular_bg_tiles_ptr& tilesPointer, int zIndex) :
 		mapItem(cells[0], bn::size(32, 32)),
 
 		bgPointer(bn::regular_bg_item(
-			tilesPointer.vram().value(), 
+			tilesPointer.vram().value(),
 			backgroundPalette->getColors(),
 			backgroundPalette->getBPP(),
 			*cells,
 			bn::size(32, 32)
 		).create_bg(8, 48)),
-		
+
 		bgMap(bgPointer.map())
 	{
-		init(zIndex);	
+		init(zIndex);
 	}
-	
+
 	BackgroundMap(const bn::regular_bg_item& bgItem, int zIndex = 0) :
 	mapItem(cells[0], bn::size(32, 32)),
 	bgPointer(bgItem.create_bg(8, 48)),
@@ -383,76 +384,76 @@ public:
 	{
 		bgPointer.set_priority(zIndex);
 	}
-	
+
 	void create(const bn::regular_bg_item& bgItem, int zIndex = 0) {
 		bgPointer.set_priority(zIndex);
-	
+
 		bgPointer.set_tiles(bgItem.tiles_item());
 		bgPointer.set_map(bgItem.map_item());
-		
+
 		bgPointer.set_x(8 + 8);
 		bgPointer.set_y(8 + 48);
-		
+
 		reloadCells();
 	}
-		
+
 	void init(int zIndex) {
 		bgPointer.set_priority(zIndex);
-		
+
 		setTile(1,21,4);
 		setTile(1,22,4);
 		setTile(1,23,4);
-		
+
 		setTile(4,21,4);
 		setTile(4,22,4);
 		setTile(4,23,4);
-		
+
 		setTile(2,24,4);
 		setTile(3,24,4);
-		
+
 		// -----
-		
+
 		setTile(7,21,4);
 		setTile(7,22,4);
 		setTile(7,23,4);
-		
+
 		setTile(9,21,4);
 		setTile(9,22,4);
 		setTile(9,23,4);
-		
+
 		setTile(11,21,4);
 		setTile(11,22,4);
 		setTile(11,23,4);
-		
+
 		setTile(8,24,4);
 		setTile(10,24,4);
-		
+
 		// -----
-		
+
 		setTile(14,21,4);
 		setTile(14,22,4);
 		setTile(14,23,4);
-		
+
 		setTile(17,21,4);
 		setTile(17,22,4);
 		setTile(17,23,4);
-		
+
 		setTile(15,24,4);
 		setTile(16,24,4);
 	}
-	
+
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) {
 		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
 
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
 
 		current_cell_info.set_tile_index(tileIndex);
-		current_cell = current_cell_info.cell(); 
+		current_cell = current_cell_info.cell();
 	}
-	
+
 	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 		//bn::regular_bg_map_cell& current_cell = cells[mapItem.cell_index(x, y)];
-		// removing butano's overhead saved a regretably large amount of cpu. 
+		// removing butano's overhead saved a regretably large amount of cpu.
 		bn::regular_bg_map_cell& current_cell = cells[ (y * 32) + x ];
 
 		bn::regular_bg_map_cell_info current_cell_info(current_cell);
@@ -460,14 +461,14 @@ public:
 		current_cell_info.set_tile_index(tileIndex);
 		current_cell_info.set_horizontal_flip(flipX);
 		current_cell_info.set_vertical_flip(flipY);
-		
-		current_cell = current_cell_info.cell(); 
+
+		current_cell = current_cell_info.cell();
 	}
-	
+
 	void reloadCells() {
 		bgMap.reload_cells_ref();
 	}
-	
+
 };
 
 class Layer {
@@ -476,22 +477,22 @@ public:
 	BackgroundMap rawMap;
 	Layer(bn::regular_bg_tiles_item tileset, int zIndex, int fillIndex = 0) :
 		rawMap(tileset, zIndex)
-		{				
+		{
 			init(fillIndex);
 		}
-		
+
 	Layer(bn::regular_bg_tiles_ptr tilesPointer, int zIndex, int fillIndex = 0) :
 		rawMap(tilesPointer, zIndex)
 		{
 			init(fillIndex);
 		}
-		
+
 	Layer(bn::regular_bg_item bgItem, int zIndex = 0) :
 		rawMap(bgItem, zIndex)
 		{
 			rawMap.reloadCells();
 		}
-		
+
 	void init(int fillIndex) {
 		//setup black border., just black the whole screen
 		for(int i=0; i<30; i++) {
@@ -501,24 +502,24 @@ public:
 		}
 		rawMap.reloadCells();
 	}
-		
+
 	virtual ~Layer() = default;
-	
+
 	virtual void draw(u8 (&gameMap)[14][9]) {
 		BN_ERROR("DONT CALL THE ACTUAL DRAW METHOD IN COLLISION");
 		(void)gameMap;
 	}
-	
-	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) { 
-		rawMap.setTile(x, y, tileIndex); 
+
+	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex) {
+		rawMap.setTile(x, y, tileIndex);
 	}
-	
-	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) { 
+
+	BACKGROUNDMAPATTRIBUTES void setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 		rawMap.setTile(x, y, tileIndex, flipX, flipY);
 	}
-	
+
 	u8 tempTileIndicies[4];
-	
+
 	BACKGROUNDMAPATTRIBUTES void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false) {
 		// this func actually being able to flip (curse) properly is UNCONFIRMED bc I AM SLEEPY
 		// coming back to this code, a solid 3 months later, what the fuck?
@@ -527,22 +528,22 @@ public:
 		tempTileIndicies[1] = 4 * tile + ((flipY << 1) | !flipX);
 		tempTileIndicies[2] = 4 * tile + ((!flipY << 1) | flipX);
 		tempTileIndicies[3] = 4 * tile + ((!flipY << 1) | !flipX);
-		
-		rawMap.setTile(x * 2 + 1, y * 2 + 1, tempTileIndicies[0], flipX, flipY); 
-		rawMap.setTile(x * 2 + 2, y * 2 + 1, tempTileIndicies[1], flipX, flipY); 
-		rawMap.setTile(x * 2 + 1, y * 2 + 2, tempTileIndicies[2], flipX, flipY); 
-		rawMap.setTile(x * 2 + 2, y * 2 + 2, tempTileIndicies[3], flipX, flipY); 	
+
+		rawMap.setTile(x * 2 + 1, y * 2 + 1, tempTileIndicies[0], flipX, flipY);
+		rawMap.setTile(x * 2 + 2, y * 2 + 1, tempTileIndicies[1], flipX, flipY);
+		rawMap.setTile(x * 2 + 1, y * 2 + 2, tempTileIndicies[2], flipX, flipY);
+		rawMap.setTile(x * 2 + 2, y * 2 + 2, tempTileIndicies[3], flipX, flipY);
 	}
-	
+
 	// goofy
 	void update() {
 		rawMap.reloadCells();
 	}
-	
+
 	void reloadCells() {
 		rawMap.reloadCells();
 	}
-	
+
 };
 
 #define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
@@ -557,9 +558,9 @@ public:
 		// this assert almost definitely causes a considerable amount of lag.
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
-	
+
 	constexpr Pos(const Pos& other) : x(other.x), y(other.y) {}
-	
+
 	constexpr Pos& operator=(const Pos& other) {
         if (this != &other) {
             x = other.x;
@@ -567,42 +568,42 @@ public:
         }
         return *this;
     }
-	
+
 	POSATTRIBUTES bool operator<(const Pos& other) const {
 		//return (x + 14 * y) < (other.x + 14 * y);
-		// x and y both,, are restricted to 4 bits max per num,,,, i canoptimize this 
+		// x and y both,, are restricted to 4 bits max per num,,,, i canoptimize this
 		// this is only rlly being used for SaneSet anyway
 		return ((x << 4) | y) < ((other.x << 4) | other.y);
 	}
-	
+
 	POSATTRIBUTES Pos operator+(const Pos& other) {
 
 		int tempX = x + other.x;
 		int tempY = y + other.y;
-		
+
 		if(tempX < 0) { tempX = 0; }
 		if(tempY < 0) { tempY = 0; }
 		if(tempX >= 14) { tempX = 13; }
 		if(tempY >= 9) { tempY = 8; }
-		
+
 		return Pos(tempX, tempY);
 	}
-	
+
 	POSATTRIBUTES Pos operator-(const Pos& other) {
 
 		int tempX = x - other.x;
 		int tempY = y - other.y;
-		
+
 		if(tempX < 0) { tempX = 0; }
 		if(tempY < 0) { tempY = 0; }
 		if(tempX >= 14) { tempX = 13; }
 		if(tempY >= 9) { tempY = 8; }
-		
+
 		return Pos(tempX, tempY);
 	}
-	
+
 	POSATTRIBUTES bool move(Direction moveDir) {
-		
+
 		switch (moveDir) {
 			case Direction::Up:
 				if(y == 0) {
@@ -631,12 +632,12 @@ public:
 			default:
 				break;
 		}
-		
+
 		return true;
 	}
-	
+
 	POSATTRIBUTES bool moveInvert(Direction moveDir, bool invertHorizontal, bool invertVertical) {
-	
+
 		if(invertHorizontal) {
 			if(moveDir == Direction::Left) {
 				moveDir = Direction::Right;
@@ -644,7 +645,7 @@ public:
 				moveDir = Direction::Left;
 			}
 		}
-		
+
 		if(invertVertical) {
 			if(moveDir == Direction::Up) {
 				moveDir = Direction::Down;
@@ -652,10 +653,10 @@ public:
 				moveDir = Direction::Up;
 			}
 		}
-		
+
 		return move(moveDir);
 	}
-	
+
 	POSATTRIBUTES bool operator==(Pos const& rhs) const { return x == rhs.x && y == rhs.y; }
 
 	POSATTRIBUTES constexpr unsigned getSwitchValue() { // used to get a unsigned value for use in switch statements
@@ -666,7 +667,7 @@ public:
 		// checks if im going insane.
 		return x >= 0 && y >= 0 && x < 14 && y < 9;
 	}
-	
+
 };
 
 inline Pos safePos(signed char x, signed char y) {
@@ -675,7 +676,7 @@ inline Pos safePos(signed char x, signed char y) {
 	if(y < 0) { y = 0; }
 	if(x >= 14) { x = 13; }
 	if(y >= 9) { y = 8; }
-	
+
 	return Pos(x, y);
 }
 
@@ -708,17 +709,17 @@ struct EffectHolder {
 };
 
 struct SecretHolder {
-	
+
 	// holds the,,, yea secrets
 	// if this secret is on top of an exit,, how do i track that?
 	// ill just set a flag on load.
 	// as for the 0 array issue, first thing will have a pos of -1, -1
 	// if dest is null, just send to the next thing in the list? i suppose
 	// ordering will have to be done manually, but tbh that is fine
-	
+
 	const int x;
 	const int y;
-	
+
 	const char* dest;
 	const char sanity = '\0'; // i dont trust this program.
 };
@@ -731,34 +732,34 @@ public:
 
 	const void* entities;
 	const int entityCount;
-	
+
 	const void* effects;
 	const int effectsCount;
-	
+
 	const void* secrets;
 	const int secretsCount;
-	
+
 	const void* exitDest;
-	
+
 	const void* collisionTiles;
 	const void* detailsTiles;
 
 	constexpr Room(
-		const void* collision_, const void* floor_, const void* details_, 
-		const void* entities_, const int entityCount_, 
+		const void* collision_, const void* floor_, const void* details_,
+		const void* entities_, const int entityCount_,
 		const void* effects_, const int effectsCount_,
 		const void* secrets_, const int secretsCount_,
 		const void* exitDest_,
 		const void* collisionTiles_, const void* detailsTiles_
 	) :
-	collision(collision_), floor(floor_), details(details_), 
-	entities(entities_), entityCount(entityCount_), 
+	collision(collision_), floor(floor_), details(details_),
+	entities(entities_), entityCount(entityCount_),
 	effects(effects_), effectsCount(effectsCount_),
 	secrets(secrets_), secretsCount(secretsCount_),
 	exitDest(exitDest_),
 	collisionTiles(collisionTiles_), detailsTiles(detailsTiles_)
 	{ }
-	
+
 };
 
 //template <size_t Size>
@@ -768,19 +769,19 @@ public:
 // set without insanity. slower? def, but im so (curse)ing done
 // ill haeve the backend be a vector.
 // resizing on every insert,,, gods
-// i however, cannot give a (curse) anymore :) 
+// i however, cannot give a (curse) anymore :)
 // spent way to long on this only to stop being a (curse) and understand what pointer stability is
-// i could maybe use,, unique pointer? but tbh i just dont want to 
+// i could maybe use,, unique pointer? but tbh i just dont want to
 // actually, we only have unique pointers! no shared, so im doing this
 // insertion will be slow, but at least lookup will be fast.
 
-// looking back on everything, the fact that this set exists is/was an objectively stupid oversight. 
-// actually maybe not? 
-// idek 
-// its not like many entities are being inserted/removed in a frame but 
+// looking back on everything, the fact that this set exists is/was an objectively stupid oversight.
+// actually maybe not?
+// idek
+// its not like many entities are being inserted/removed in a frame but
 // well except during loading, but having them be inserted in there makes no difference
-// the fact that most of saneset's use is in the gamemap, and that i have the insane "if constexpr" line 
-// thing means this was just premature optimization 
+// the fact that most of saneset's use is in the gamemap, and that i have the insane "if constexpr" line
+// thing means this was just premature optimization
 
 #define SANESETATTRIBUTES
 //#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
@@ -788,7 +789,7 @@ public:
 template <typename T, int maxVecSize>
 class SaneSet {
 private:
-	
+
 	bn::vector<T, maxVecSize> data;
 
 	SANESETATTRIBUTES int binarySearch(const T& elem) const {
@@ -807,7 +808,7 @@ private:
         }
 		return -1;
 	}
-	
+
 	SANESETATTRIBUTES int getInsertIndex(const T& elem) const {
         int left = 0;
         int right = data.size();
@@ -824,7 +825,7 @@ private:
 
         return left;
     }
-	
+
 	SANESETATTRIBUTES int binarySearchOrInsertIndex(const T& elem) {
 		int low = 0;
 		int high = data.size() - 1;
@@ -833,7 +834,7 @@ private:
 			int mid = low + (high - low) / 2;
 
 			if (data[mid] == elem) {
-				return -1; 
+				return -1;
 			} else if (data[mid] < elem) {
 				low = mid + 1;
 			} else {
@@ -843,46 +844,46 @@ private:
 
 		return low;
 	}
-	
+
 public:
 
-	SANESETATTRIBUTES SaneSet() {}	
+	SANESETATTRIBUTES SaneSet() {}
 
 	SANESETATTRIBUTES SaneSet(const SaneSet& other) : data(other.data) {}
-	
-	SANESETATTRIBUTES SaneSet& operator=(const SaneSet& other) { 
+
+	SANESETATTRIBUTES SaneSet& operator=(const SaneSet& other) {
         if (this != &other) {
             data = other.data;
         }
         return *this;
     }
-	
+
 	SANESETATTRIBUTES void insert(const T& elem) {
-		
+
 		// i doubt my code even ever actually,,, does a duplicate??
-		
+
 		if constexpr (maxVecSize == 4) {
-			
+
 			for(auto it = data.begin(); it != data.end(); ++it) {
 				if(*it == elem) {
 					return;
 				}
 			}
-			
+
 			data.push_back(elem);
-			
+
 		} else {
 
 			int index = binarySearchOrInsertIndex(elem);
-			
+
 			if(index != -1) {
 				data.insert(data.begin() + index, elem);
 			}
 		}
 	}
-	
+
 	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator erase(const T& elem) {
-        
+
 		if constexpr (maxVecSize == 4) {
 			for(auto it = data.begin(); it != data.end(); ++it) {
 				if(*it == elem) {
@@ -892,88 +893,88 @@ public:
 			}
 			return data.end();
 		} else {
-		
+
 			int index = binarySearch(elem);
-			
+
 			if (index != -1) {
 				return data.erase(data.begin() + index);
 			}
-			
-			return data.end();	
+
+			return data.end();
 		}
     }
-	
+
 	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator insert(const bn::vector<T, maxVecSize>::iterator it) {
-		
+
 		if constexpr (maxVecSize == 4) {
-			
+
 			for(auto temp = data.cbegin(); temp != data.cend(); ++temp) {
 				if(*temp == *it) {
 					return;
 				}
 			}
-			
+
 			return data.insert(data.end(), *it);
 		} else {
-		
+
 			int index = binarySearchOrInsertIndex(*it);
-			
+
 			if(index == -1) {
 				return data.begin() + index;
 			}
-			
+
 			return data.insert(data.begin() + index, *it);
 		}
 	}
-	
+
 	SANESETATTRIBUTES bn::vector<T, maxVecSize>::iterator erase(const bn::vector<T, maxVecSize>::iterator it) {
 		return data.erase(it);
 	}
-	
+
 	SANESETATTRIBUTES bool contains(const T& elem) const {
-		
+
 		if(data.size() == 0) {
 			return false;
 		}
-		
+
 		if constexpr (maxVecSize == 4) {
-			
+
 			for(auto it = data.cbegin(); it != data.cend(); ++it) {
 				if(*it == elem) {
 					return true;
 				}
 			}
-			
+
 			return false;
 		} else {
 			return binarySearch(elem) != -1;
 		}
 	}
-	
+
 	SANESETATTRIBUTES int size() const {
 		return data.size();
 	}
-	
+
 	SANESETATTRIBUTES auto begin() {
 		return data.begin();
 	}
-	
+
 	SANESETATTRIBUTES auto end() {
 		return data.end();
 	}
-	
+
 	SANESETATTRIBUTES auto cbegin() const {
 		return data.cbegin();
 	}
-	
+
 	SANESETATTRIBUTES auto cend() const {
 		return data.cend();
 	}
-	
+
 	SANESETATTRIBUTES void clear() {
 		data.clear();
 	}
-	
+
 	SANESETATTRIBUTES int maxSize() const {
 		return maxVecSize;
 	}
@@ -983,8 +984,8 @@ public:
 template <typename T, int maxVecSize>
 class SaneVector : public bn::vector<T, maxVecSize> { // war crime
 public:
-	
-	SaneVector(std::initializer_list<T> l) {		
+
+	SaneVector(std::initializer_list<T> l) {
 		for(auto it = l.begin(); it != l.end(); ++it) {
 			this->push_back(*it);
 		}
@@ -1035,11 +1036,11 @@ inline void* memset(void* ptr, int value, size_t num) {
 }
 
 inline int strcmp(const char *str1, const char *str2) {
-	
+
 	if(WTF(str1) != WTF(str2)) {
 		return -1;
 	}
-	
+
 	while (*str1 != '\0' && *str2 != '\0') {
 		if (*str1 != *str2) {
 			return (*str1 - *str2);
@@ -1052,9 +1053,9 @@ inline int strcmp(const char *str1, const char *str2) {
 }
 
 constexpr unsigned hashString(const char* str) {
-	// the majority of hashString calls are at compile time. 
-	// a (slightly) more expensive hash func will benifit sanity 
-	
+	// the majority of hashString calls are at compile time.
+	// a (slightly) more expensive hash func will benifit sanity
+
 	unsigned hash = 0;
 
 	while(*str) {
@@ -1074,7 +1075,7 @@ inline char* strstrCustom(const char* haystack, const char* needle) {
 	while (*haystack != '\0') {
 		const char* h = haystack;
 		const char* n = needle;
-		
+
 		while (*n != '\0' && *h == *n) {
 			h++;
 			n++;
@@ -1085,9 +1086,8 @@ inline char* strstrCustom(const char* haystack, const char* needle) {
 			return (char*)haystack;
 		}
 
-		haystack++;  
+		haystack++;
 	}
 
-	return NULL; 
+	return NULL;
 }
-

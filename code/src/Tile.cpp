@@ -26,34 +26,28 @@ void FloorTile::draw() {
 	int x = tilePos.x;
 	int y = tilePos.y;
 	int tile = getTileValue();
-	floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * tile); 
-	floorLayer->setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1); 
-	floorLayer->setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2); 
-	floorLayer->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3); 
+	floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * tile);
+	floorLayer->setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
+	floorLayer->setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
+	floorLayer->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);
 }
 
 void FloorTile::drawPit(int x, int y) {
-	
-	
 	if(game->collisionMap[x][y] == 12) {
 		drawDropOff(x, y);
 	} else {
-		floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * 0); 
-		floorLayer->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1); 
-		floorLayer->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2); 
+		floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * 0);
+		floorLayer->setTile(x * 2 + 2, y * 2 + 1, 4 * 0 + 1);
+		floorLayer->setTile(x * 2 + 1, y * 2 + 2, 4 * 0 + 2);
 		floorLayer->setTile(x * 2 + 2, y * 2 + 2, 4 * 0 + 3);
 	}
-	
-	
 }
 
 void FloorTile::drawDropOff(int x, int y) {
-	
-	floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * 2); 
-	floorLayer->setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1); 
-	floorLayer->setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2); 
-	floorLayer->setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3); 
-		
+	floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * 2);
+	floorLayer->setTile(x * 2 + 2, y * 2 + 1, 4 * 2 + 1);
+	floorLayer->setTile(x * 2 + 1, y * 2 + 2, 4 * 2 + 2);
+	floorLayer->setTile(x * 2 + 2, y * 2 + 2, 4 * 2 + 3);
 }
 
 void Glass::stepOn() {
@@ -64,23 +58,16 @@ void Glass::stepOn() {
 void Glass::stepOff() {
 	isSteppedOn = false;
 	if(isAlive) {
-		//effectsManager->createEffect(tilePos, EffectTypeCast(glassAnimation));
 		effectsManager->glassBreak(tilePos);
 	}
 	isAlive = false;
 	tileManager->updateTile(tilePos);
-	// there just isnt a glass break sound
-	/*if(game->state == GameState::Normal) {
-		bn::sound_items::snd_breakglassfloor.play();
-	}*/
 }
 
 void Glass::isSteppedOnAnimation() {
-	
 	if((bruhRand() & 0xFF) == 0) {
 		effectsManager->glassShineSpark(tilePos);
 	}
-	
 }
 
 void Bomb::stepOn() {
@@ -88,14 +75,14 @@ void Bomb::stepOn() {
 	charge++;
 	if(charge == 2) {
 		isAlive = false;
-		
+
 		game->entityManager.posTracker.insert(tilePos);
-	
+
 		game->effectsManager.bombTileAnimate(tilePos);
-	
+
 		game->playSound(&bn::sound_items::snd_vanish);
-		
-		// this may be bad 
+
+		// this may be bad
 		// break adjacent bomb tiles,,,, i think?
 		Direction testDirections[4] = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
 		for(int i=0; i<4; i++) {
@@ -103,7 +90,7 @@ void Bomb::stepOn() {
 			if(!testPos.move(testDirections[i])) {
 				continue;
 			}
-			
+
 			if(tileManager->hasFloor(testPos) == TileType::Bomb) {
 				Bomb* tempBomb = static_cast<Bomb*>(tileManager->floorMap[testPos.x][testPos.y]);
 				if(tempBomb->charge == 1) {
@@ -112,38 +99,36 @@ void Bomb::stepOn() {
 			}
 		}
 	}
-		
+
 	tileManager->updateTile(tilePos);
 }
 
 void Death::stepOn() {
-	
+
 	// ok, what the fuck?
 	// this function was, using the previous position??? of the,,, entity to kill?
 	// because updatemap wasnt,,, called???
-	// how did this function EVER kill anything? 
+	// how did this function EVER kill anything?
 	// because,,,, enemies only move,,, once?
 	// and are the last updatemap?
 	// how the hell did this ever used to work?
-	// im getting the things to kill from the tilepos, however since this code is called BEFORE the map actually updates,, 
+	// im getting the things to kill from the tilepos, however since this code is called BEFORE the map actually updates,,
 	// then the entities would always be on the improper level!
 	// i changed this to, not updating,,,
 	// OHSHIT
 	// i used to copy the future map to the present BEFORE doing this call!
 	// i hope that doing that now wont add to much time.
-	
-	
+
+
 	isSteppedOn = true;
-	
+
 	effectsManager->deathTile(tilePos);
-	
-	//entityManager->posTracker.insert(tilePos); // NOT CLEAN, STUPID
-	
+
 	// this needs to call updatemap as well. gods(maybe?)
 	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
-	
+
 	//BN_LOG("DEATHTILE CALLED, TEMPMAP LENGTH IS ", tempMap.size(), " at ", tilePos);
-	
+
 	for(auto it = tempMap.begin(); it != tempMap.end(); ) {
 		if((*it)->entityType() == EntityType::Player) {
 			// how can i make it play a death anim?
@@ -154,10 +139,9 @@ void Death::stepOn() {
 			it = entityManager->killEntity(*it);
 		}
 	}
-	
 }
 
-void Switch::stepOn() {	
+void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
 	tileManager->updateExit();
@@ -184,18 +168,18 @@ int RodTile::getTileValue() const {
 	if(!entityManager->player->hasRod && !entityManager->player->hasSuperRod) {
 		return startIndex;
 	}
-	
+
 	FloorTile* rodTile = NULL;
 	if(entityManager->player->rod.size() != 0) {
 		rodTile = entityManager->player->rod.back();
 	}
-	
+
 	if(rodTile == NULL) {
 		return startIndex + offset + 1;
 	}
-	
+
 	TileType rodTileType = rodTile->tileType();
-	
+
 	// a switch statement with tiletype is what caused dofloorsteps to lag. will this also cause problems?
 	switch(rodTileType) {
 		case TileType::Death:
@@ -222,23 +206,21 @@ int RodTile::getTileValue() const {
 			break;
 		default:
 			return startIndex + offset + 1 + 9;
-			break;	
+			break;
 	}
-	
 }
 
 int LocustTile::getTileValue() const {
-	//return startIndex + (entityManager->player->locustCount != 0);	
+	//return startIndex + (entityManager->player->locustCount != 0);
 	return startIndex + 1;
 }
 
 static int inline getWordTileIndex(const char c) {
-	
+
 	switch(c) {
-		
 		case ' ':
 			return 0;
-		
+
 		case '0':
 			return 2;
 		case '1':
@@ -259,7 +241,7 @@ static int inline getWordTileIndex(const char c) {
 			return 10;
 		case '9':
 			return 11;
-		
+
 		case 'V':
 			return 12;
 		case 'O':
@@ -268,75 +250,70 @@ static int inline getWordTileIndex(const char c) {
 			return 14;
 		case 'D':
 			return 15;
-			
+
 		case 'B':
 			return 16;
 		case '?':
 			return 17;
-			
+
 		case 'H':
 			return 18;
 		case 'P':
 			return 19;
-			
+
 		case 'E':
 			return 20;
-		
+
 		default: [[unlikely]]
 			BN_ERROR("unknown char ", c, " passed into getWordTileIndex");
 			break;
 	}
-	
+
 	return 0;
 }
 
 void WordTile::draw() {
-	
+
 	int x = tilePos.x;
 	int y = tilePos.y;
-	
+
 	int temp;
-	
+
 	// i hadnt ate this day, and somehow ended up with this. dont ask
 	temp = getWordTileIndex(first);
 	int firstTile = 228 + (((temp >> 1) << 2) | (temp & 1));
-	
+
 	temp = getWordTileIndex(second);
 	int secondTile = 228 + (((temp >> 1) << 2) | (temp & 1));
-	
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, firstTile); 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, firstTile + 2); 
-	
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, secondTile); 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, secondTile + 2); 
+
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, firstTile);
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, firstTile + 2);
+
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, secondTile);
+	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, secondTile + 2);
 }
 
 void Exit::isSteppedOnAnimation() {
-	
 	if((isFirstCall || (frame - playerIdleFrame == 60 * 8)) && tilePos != entityManager->player->p) { // THIS EQUALS SIGN SHOULD ENSURE ONLY ONE THING SPAWNS AT ONCE,, I HOPE?
 		effectsManager->exitGlow(tilePos);
 	}
 	isFirstCall = false;
-	
-	
 }
 
 void Copy::isSteppedOnAnimation() {
-	// this pos check is so much less expensive than doing a getPos. i think theres some other places too 
-	// ALSO, i still dont have the proper shadow creation thing. 
+	// this pos check is so much less expensive than doing a getPos. i think theres some other places too
+	// ALSO, i still dont have the proper shadow creation thing.
 	// i should start letting things like that hold up main
 	if(tilePos == entityManager->player->p && (bruhRand() & 0x1FF) == 0) {
 		effectsManager->copyGlow(tilePos);
 	}
-	
 }
 
 void Copy::stepOn() {
-
 	isSteppedOn = true;
-	
+
 	// im hoping this call will be more efficient than what i was doing in dofloorsteps, which was a full loop over all steps
-	
+
 	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
 
 	for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
@@ -345,6 +322,3 @@ void Copy::stepOn() {
 		}
 	}
 }
-
-
-

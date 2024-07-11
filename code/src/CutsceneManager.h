@@ -55,12 +55,10 @@ public:
 	bn::fixed yPosBackup[4];
 
 	bn::sprite_text_generator disTextGenerator;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> disOsTextSprites;
+	bn::vector<bn::sprite_ptr, 8> disOsTextSprites;
 	bn::vector<bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>, 7> disTextSprites; // is this alloc going to be to large(if on stack)
-	//bn::vector<const char*, 7> disText;
 
 	// these things cant be arrays bc i cant have a ref to the pointer, i need the pointer itself
-	//bn::vector<bn::regular_bg_tiles_ptr, 4> tilesBackup;
 	bn::vector<bn::regular_bg_map_ptr, 4> mapBackup;
 
 	CutsceneManager(Game* game_);
@@ -71,8 +69,6 @@ public:
 
 	void resetRoom();
 
-	// how long ago did i put this here, only to forget that.
-	// my god this should be everywhere
 	__attribute__((optimize("O2"))) void introCutscene();
 
 	__attribute__((optimize("O2"))) void cifDream();
@@ -103,8 +99,6 @@ public:
 
 	// -----
 
-//private:
-
 	void backup(int i);
 
 	void restore(int i);
@@ -114,6 +108,5 @@ public:
 	void restore();
 
 	void delay(int delayFrameCount);
-
 
 };

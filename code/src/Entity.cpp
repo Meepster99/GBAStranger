@@ -21,21 +21,6 @@ int LevStatue::totalLev = 0;
 
 void Entity::isDead() {
 
-	// more needs to be researched here
-
-	// obstacle and enemy collide, no stepoff,,,
-	// enemy and enemy collide, no stepoff.
-	// in updatemap, should i,,,, oh gods.
-	// handle doFloorSteps AFTER the actual updatemap occurs?
-	// or maybe i should remove updates for,, tiles under enemies who die?
-	// UGH
-
-
-	/*
-	if(tileManager->hasFloor(p)) {
-		tileManager->stepOff(p);
-	}
-	*/
 }
 
 // Player
@@ -58,7 +43,6 @@ void Player::pushRod(Pos tilePos) {
 	effectsManager->voidRod(tilePos, currentDir);
 
 	cutsceneManager->disCrash(tile, true);
-
 }
 
 void Player::popRod(Pos tilePos) {
@@ -383,7 +367,6 @@ void Player::updateTileIndex() {
 	tileIndex = static_cast<int>(currentDir) + (4 * !!pushAnimation);
 
 	BN_ASSERT(tileIndex < spriteTilesArray.size(), "tried loading a tileIndex out of the sprite array bounds! ", __PRETTY_FUNCTION__);
-
 }
 
 Player::Player(Pos p_) : Entity(p_) {
@@ -445,12 +428,6 @@ Player::Player(Pos p_) : Entity(p_) {
 
 	hasRod = game->saveData.hasRod;
 	hasSuperRod = game->saveData.hasSuperRod;
-
-	//BN_LOG((int)game->saveData.hasRod, (int)game->saveData.hasSuperRod);
-	//BN_LOG((int)hasRod, (int)hasSuperRod);
-
-	BN_ASSERT((int)hasRod == 0 || (int)hasRod == 1, "why THE FUCK was player hasrod ", (int)hasRod);
-	BN_ASSERT((int)hasSuperRod == 0 || (int)hasSuperRod == 1, "why THE FUCK was player hasSuperRod ", (int)hasSuperRod);
 }
 
 // Enemy
@@ -672,7 +649,6 @@ void Chest::interact() {
 		entityManager->player->doUpdate(); // ensure the direction change is updated
 		effectsManager->locustGet(isFirstLocust);
 	}
-
 }
 
 void Chest::specialBumpFunction() {
@@ -714,7 +690,9 @@ constexpr const char* randomBoulderMessages[] = {
 	"I don't know everything, I just know what I know\0",
 	"I know everything. There's nothing i don't know\0",
 	"I don't know anything, you are the one who knows\0",
-	"Staying misfortunate is negligence, and not trying to become happy is cowardice.\0"
+	"Staying misfortunate is negligence, and not trying to become happy is cowardice.\0",
+	"I just want to be understood.\0",
+	"Sorry.\0"
 };
 
 constexpr bool checkAllBoulderMessages() {
@@ -742,7 +720,6 @@ void generateFunny(char* res) {
 	bn::string<512> string;
 	bn::ostringstream string_stream(string);
 
-
 	string_stream << "oh gods please let this work\n";
 	string_stream << "ok we chillin now\n";
 	string_stream << "have you ever wanted to know the ram usage of you gba at this point in time?\rno?\rwell, luckily, i dont care\n";
@@ -758,14 +735,10 @@ void generateFunny(char* res) {
 	int i=0;
 	for(; i<string.size(); i++) {
 		res[i] = string[i];
-		//BN_LOG(string[i]);
 	}
 	// i fucking knew it, it is my code which needs 2 nullterms for some reason?
 	res[i] = '\0';
 	res[i+1] = '\0';
-	//res[i+2] = '\0';
-
-
 }
 
 void Boulder::interact() {
@@ -813,9 +786,7 @@ void Boulder::interact() {
 
 	if(index == 0) {
 		char buffer[512];
-
 		generateFunny(buffer);
-
 		effectsManager->doDialogue(buffer);
 	} else {
 		effectsManager->doDialogue(temp);
@@ -838,12 +809,7 @@ void EusStatue::isDead() {
 
 	tileManager->floorMap[p.x][p.y] = new FloorTile(p);
 
-	// this is trash, please make tilemanager update based on tile
-	// oh wow, i forgot that i wrote this method so long ago it was before i had the new tilesystem
-	//tileManager->fullDraw();
 	tileManager->updateTile(p);
-
-	//Obstacle::startFall();
 }
 
 bn::optional<Direction> GorStatue::getNextMove() {
@@ -898,7 +864,6 @@ void LevStatue::isDead() {
 		effectsManager->removeEffect(activeEffect);
 		activeEffect = NULL;
 	}
-
 
 	if(rodUses != 0 && rodUses >= totalLev) {
 		entityManager->levKill = true;

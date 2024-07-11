@@ -712,11 +712,7 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		// without the wings bc we arent doing tan
 
 		interactFunc = [interactCount = 0](void* obj) mutable -> void {
-			//(void)unused;
 			Interactable* inter = static_cast<Interactable*>(obj);
-
-			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
-			// GOOFY WARNING
 
 			if(globalGame->entityManager.player->p == Pos(7, 5+1)) {
 				if(interactCount == 0 && !globalGame->entityManager.player->hasSword) {
@@ -763,8 +759,6 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 				globalGame->effectsManager.doDialogue("[You aquired 99 locust idols]\n[I N C R E D I B L E !]\0");
 				inter->animationIndex = 1;
 				globalGame->entityManager.player->locustCount = 99;
-				//globalGame->tileManager.locustCounterTile->first = '9';
-				//globalGame->tileManager.locustCounterTile->second = '9';
 				globalGame->tileManager.updateLocust();
 				inter->doUpdate();
 			}
@@ -786,8 +780,6 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 Boulder* EntityManager::getBoulder(Pos p) {
 
 	Boulder* res = new Boulder(p);
-
-	// should this be switch or if else?
 
 	switch(game->roomManager.currentRoomHash()) {
 		case hashString("rm_e_intermission\0"):
@@ -1591,7 +1583,6 @@ void EntityManager::updateMap() { profileFunction();
 					}
 					break;
 			}
-
 			futureEntityMap[x][y] = entityMap[x][y];
 		}
 	}

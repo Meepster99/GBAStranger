@@ -55,44 +55,33 @@ ROMCODE     :=  GBST
 # and tbh, it doesnt help the poor quality caused by,, overtones or something?
 
 
-#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+
 USERFLAGS   :=  -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -mcpu=arm7tdmi -O2 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -mcpu=arm7tdmi -O2 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -O3 -mthumb -mthumb-interwork -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -O3 -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_27_KHZ
-# DOES -mcpu=arm7tdmi HELP OR HARM PERFORMANCE? ALSO MY GODS WHY DID I LEAVE OFAST ON?
-#USERFLAGS   :=  -mcpu=arm7tdmi -Ofast -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_27_KHZ
-#USERFLAGS   :=  -ggdb3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   :=  -O3 
-#USERFLAGS   := 
-USERASFLAGS :=  
-USERLDFLAGS :=  -flto=auto 
-USERLIBDIRS :=  
-USERLIBS    :=  
-# this is here to link to std::functional, which i need for only one very stupid use case 
-# as for if this thing actually links to the standard lib(as in runs this comp flag) or if it 
-# just includes defaultlib, bc its not empty, i do not know 
+
+USERASFLAGS :=
+USERLDFLAGS :=  -flto=auto
+USERLIBDIRS :=
+USERLIBS    :=
+# this is here to link to std::functional, which i need for only one very stupid use case
+# as for if this thing actually links to the standard lib(as in runs this comp flag) or if it
+# just includes defaultlib, bc its not empty, i do not know
 # maybe this will fix my previous issues with the WTF strlen func
 DEFAULTLIBS :=  -static-libstdc++
-USERBUILD   :=  
+USERBUILD   :=
 EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; python  ../misc/soundConverter/soundConverter.py regenIncludes; python  ../misc/musicConverter/musicConverter.py regenIncludes
 
 
 ifdef DISABLEASSERTS
-	USERFLAGS += -DDISABLEASSERTS=true 
+	USERFLAGS += -DDISABLEASSERTS=true
 endif
- 
+
 USERFLAGS += -DGITCOMMIT=\"$(shell git describe --always --dirty | sed 's/dirty/d/')\"
 
 # vine boom soound effect
-USERFLAGS += -DENABLELOGGING=true 
+USERFLAGS += -DENABLELOGGING=true
 
 ifdef LOG
-	USERFLAGS += -DENABLELOGGING=true 
+	USERFLAGS += -DENABLELOGGING=true
 endif
 
 ifdef PROFILE
@@ -117,21 +106,20 @@ include $(LIBBUTANOABS)/butano.mak
 fullClean:
 	rm -fr build GBAStranger.elf GBAStranger.elf.* GBAStranger.gba
 	rm -fr audio graphics
-	
+
 	rm -fr ./src/AllRooms.h
 	rm -fr ./src/dataWinIncludes.h
-	
+
 	rm -fr ../misc/massFormatter/formattedOutput
 	rm -fr ../misc/musicConverter/formattedOutput
 	rm -fr ../misc/soundConverter/formattedOutput
 	rm -fr ../misc/roomConverter/AllRooms.h
-	
+
 	rm -fr ../misc/ExportData
 	rm -fr ../misc/audiogroup1.dat
 	rm -fr ../misc/audiogroup2.dat
 	rm -fr ../misc/data.win
-	
-	rm -fr ../misc/CLI-windows-latest-Release-isBundled-true
-	
-	python  ../misc/convertAllAssets.py
 
+	rm -fr ../misc/CLI-windows-latest-Release-isBundled-true
+
+	python  ../misc/convertAllAssets.py

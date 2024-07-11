@@ -44,7 +44,6 @@ void uncompressData(u8 res[126], u8* input) {
 	int count = -1;
 
 	while(i < 126) {
-
 		if(*input & 0xC0) {
 			count = (*input & 0xC0) >> 6;
 			val = (*input & ~0xC0);

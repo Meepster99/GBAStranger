@@ -9,13 +9,11 @@
 CutsceneManager::CutsceneManager(Game* game_) : game(game_), disTextGenerator(dw_fnt_etext_12_sprite_font) {
 
 	maps[0] = &game->collision.rawMap;
-	//maps[1] = &game->tileManager.floorLayer.rawMap;
 	maps[1] = &backgroundLayer.rawMap;
 	maps[2] = &game->effectsManager.effectsLayer.rawMap;
 	maps[3] = &cutsceneLayer.rawMap;
 
 	for(int i=0; i<4; i++) {
-		//tilesBackup.push_back(maps[i]->bgPointer.tiles());
 		mapBackup.push_back(maps[i]->bgPointer.map());
 	}
 
@@ -41,7 +39,6 @@ void CutsceneManager::resetRoom() {
 		disTextSprites[i].clear();
 	}
 	disTextSprites.clear();
-	//disText.clear();
 }
 
 void CutsceneManager::introCutscene() {
@@ -59,8 +56,6 @@ void CutsceneManager::introCutscene() {
 
 	__attribute__ is in the h file
 
-
-
 	*/
 
 	//BN_LOG("bg_tiles status");
@@ -72,7 +67,6 @@ void CutsceneManager::introCutscene() {
 	GameState restoreState = game->state;
 	game->state = GameState::Cutscene;
 
-	//backupAllButEffects();
 	backup();
 
 	// this should REWALLLLY be passed in,, but im tired ok
@@ -198,10 +192,7 @@ void CutsceneManager::introCutscene() {
 
 		face.spritePointer.set_palette(game->pal->getSpritePaletteFade(i));
 
-		for(int j=0; j<16; j++) {
-			game->doButanoUpdate();
-		}
-
+		delay(16);
 	}
 
 	// todo, eyebrows!(as sprites, i think is the way heree
@@ -678,10 +669,8 @@ void CutsceneManager::cifDream() {
 	"Even if I...\0"
 	"", true);
 
-
 	// delay for 4 seconds
 	delay(60 * 4);
-
 
 	game->effectsManager.doDialogue(""
 	"You're my little lightbringer.\n"
@@ -708,7 +697,6 @@ void CutsceneManager::cifDream() {
 	game->doButanoUpdate();
 
 	// CUT, kill the tree
-
 	tempSprites.clear();
 
 	for(int i=0; i<effects.size(); i++) {
