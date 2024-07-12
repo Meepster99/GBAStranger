@@ -169,6 +169,7 @@ auto swordGetFunc = []() -> int {
 void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest) {
 
 	bn::timer testTimer;
+	bn::fixed tickCount;
 	testTimer.restart();
 
 	u8 uncompressedFloor[126];
@@ -333,7 +334,6 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		// it will take you back to rm_e_020\0
 
 		exitDestination = "rm_e_020\0";
-
 	}
 
 	// why in tarnation is this vblank needed for floor 136??
@@ -341,7 +341,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	// if i want to do tas verification, i need to not have framedrops
 	game->doButanoUpdate();
 
-	bn::fixed tickCount = testTimer.elapsed_ticks();
+	tickCount = testTimer.elapsed_ticks();
 	BN_LOG("tilemanager loadtiles ", tickCount.safe_division(FRAMETICKS), " frames");
 }
 

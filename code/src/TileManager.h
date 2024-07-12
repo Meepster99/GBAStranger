@@ -39,6 +39,8 @@ public:
 	// actually, changing the 9 to 16 is what i need
 	// as for if this helped,,, im honestly not sure, and it probs maybe increased my iwram usage?
 	// the arm7tdmi, the m stands for fast multiplier, but how fast is it? is it faster/at the same speed as just a bitshift?
+
+	// its insane that i never made a func to access this??? i dont believe it would add on any overhead, just make my bs easier since i dont have to type [pos.x][pos.y]
 	FloorTile* floorMap[14][16];
 	//FloorTile* floorMap[16][9];
 

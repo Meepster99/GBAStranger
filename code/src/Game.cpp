@@ -61,7 +61,7 @@ void uncompressData(u8 res[126], u8* input) {
 		}
 	}
 
-	BN_ASSERT(i == 126, "i wasnt equal to 126 after decomp.");
+	//BN_ASSERT(i == 126, "i wasnt equal to 126 after decomp.");
 }
 
 void Game::createExitEffects() {

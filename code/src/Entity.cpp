@@ -72,8 +72,6 @@ bool Player::inRod(FloorTile* tile) {
 		return false;
 	}
 
-	BN_ASSERT(tile != NULL, "you should never be calling inRod with a null tile");
-
 	for(int i=0; i<rod.size(); i++) {
 		if(tile == rod[i]) {
 			return true;
@@ -174,7 +172,6 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				}
 			}
 
-
 			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			effectsManager->questionMark();
 			return {false, bn::optional<Direction>()};
@@ -184,8 +181,6 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 
 		FloorTile* tile = tileManager->floorMap[tilePos.x][tilePos.y];
 
-		//BN_LOG("fhdjlf ", hasSuperRod);
-
 		if(hasRod || hasSuperRod) {
 			if(tile == NULL && rod.size() != 0) {
 				// put tile down
@@ -194,16 +189,13 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				// pick tile up
 				pushRod(tilePos);
 			} else if(tile == NULL && rod.size() == 0) {
-				//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 				effectsManager->questionMark();
 				return {false, bn::optional<Direction>()};
 			} else if (tile != NULL && rod.size() != 0) {
-				//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 				effectsManager->questionMark();
 				return {false, bn::optional<Direction>()};
 			}
 		} else {
-			//effectsManager->createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
 			effectsManager->questionMark();
 		}
 
@@ -236,7 +228,6 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		return {false, bn::optional<Direction>()};
 	}
 
-
 	// do sweat anim here.
 	// we can do this without needing to vblank, since it is meant to hold up execution
 
@@ -248,7 +239,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 
 	if( ((wingsUse == hasWings) || hasWingsTile) && !entityManager->hasFloor(tempPos) && !entityManager->hasCollision(tempPos) && !entityManager->hasEntity(tempPos)) {
 
-		BN_LOG("doing sweat!");
+	   BN_LOG("doing sweat!");
 
 		// spr_sweat
 
@@ -262,7 +253,6 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 
 		Direction stopDir = invertDirections[static_cast<int>(currentDir)];
 
-		// nice function name, (curse)
 		auto didPlayerPressStopDir = [stopDir]() -> bool {
 			if(bn::keypad::down_pressed() && stopDir == Direction::Down) {
 				return true;
@@ -286,7 +276,6 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		xVal += 8 * xDif;
 		yVal += 8 * yDif;
 
-		//bn::fixed factor = 0.66;
 		bn::fixed factor = 1.0;
 		int tickAmount = (8.0 / factor).ceil_integer();
 
@@ -386,7 +375,6 @@ Player::Player(Pos p_) : Entity(p_) {
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_attack_r);
 			break;
 		case 1:
-
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_up);
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_down);
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_left);
@@ -396,10 +384,8 @@ Player::Player(Pos p_) : Entity(p_) {
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_d);
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_l);
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_lil_attack_r);
-
 			break;
 		case 2:
-
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_up);
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_down);
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_cif_left);
@@ -414,7 +400,7 @@ Player::Player(Pos p_) : Entity(p_) {
 
 	sprite.spritePointer.set_z_order(-1);
 
-	// having duplicates causes so many problems
+	// having duplicates causes so many problems, why did i not just read from the savedata var
 	// i do not like that we set these vars here!
 	locustCount = game->saveData.locustCount;
 	isVoided = game->saveData.isVoided;

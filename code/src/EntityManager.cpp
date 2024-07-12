@@ -999,6 +999,7 @@ void EntityManager::moveObstacles() {
 void EntityManager::doMoves() { profileFunction();
 
 	// handling ("most of") all entity code in here instead of in each class is horrid
+	// but trying to handle the ordering of everything just,,, ugh
 
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
@@ -1036,6 +1037,7 @@ void EntityManager::doMoves() { profileFunction();
 	playerStart = player->p;
 	bool playerMoved = moveEntity(player);
 
+	// why is this here?? i guess i didnt want to do a full updatemap call??
 	entityMap[playerStart.x][playerStart.y] = futureEntityMap[playerStart.x][playerStart.y];
 	entityMap[player->p.x][player->p.y] = futureEntityMap[player->p.x][player->p.y];
 
@@ -1050,6 +1052,7 @@ void EntityManager::doMoves() { profileFunction();
 
 	// IF WE ARE ONE TILE AWAY FROM EXIT, AND SHADOWS ARE ON BUTTONS, WE DO NOT LEAVE THE LEVE
 	// still tho, calling doFloorSteps will update the shadows, which is needed
+	// pushanims were created before the effect system, and rlly need to be made into one
 
 	player->pushAnimation = player->p == playerStart;
 	if(player->p != playerStart) {
@@ -1115,6 +1118,8 @@ void EntityManager::doMoves() { profileFunction();
 		return;
 	}
 
+	// THESE FUNCS/CODE NEED TO BE MOVED INTO THEIR ENTITIES
+	// getnextmove was supposed to be the solution to this, but
 	Diamond* tempDiamond;
 	Bull* tempBull;
 	Chester* tempChester;
@@ -1262,7 +1267,7 @@ void EntityManager::doMoves() { profileFunction();
 
 	int levcount = 0;
 	LevStatue* hasLevStatue = NULL;
-	// critical levels of goofyness
+
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		switch((*it)->entityType()) {
 			case EntityType::MonStatue:
@@ -1684,7 +1689,6 @@ void EntityManager::createKillEffects() const {
 			effectsManager->entityKill(*it);
 		}
 	}
-
 }
 
 bool EntityManager::enterRoom() {
@@ -2012,7 +2016,6 @@ void EntityManager::sanity() const {
 		"EntityManager list sizes didnt add up! ",
 		entityList.size(), " ", 1, " ", enemyList.size(), " ", obstacleList.size(), " ", shadowList.size());
 
-
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			if(entityMap[x][y].size() == 0) {
@@ -2024,5 +2027,4 @@ void EntityManager::sanity() const {
 			}
 		}
 	}
-
 }

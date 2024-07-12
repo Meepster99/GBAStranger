@@ -107,9 +107,6 @@ public:
 
 		setTile(x, y, t);
 	};
-
-
-
 };
 
 class Effect {

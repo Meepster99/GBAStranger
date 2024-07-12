@@ -1430,13 +1430,13 @@ void EffectsManager::setDebugDisplay(bool black) {
 	unsigned val = black ? 0x11111111 : 0x22222222;
 
 	#define REVERSE_NIBBLES(value) (((value & 0x0000000F) << 28) | \
-                                ((value & 0x000000F0) << 20) | \
-                                ((value & 0x00000F00) << 12) | \
-                                ((value & 0x0000F000) << 4)  | \
-                                ((value & 0x000F0000) >> 4)  | \
-                                ((value & 0x00F00000) >> 12) | \
-                                ((value & 0x0F000000) >> 20) | \
-                                ((value & 0xF0000000) >> 28))
+								((value & 0x000000F0) << 20) | \
+								((value & 0x00000F00) << 12) | \
+								((value & 0x0000F000) << 4)  | \
+								((value & 0x000F0000) >> 4)  | \
+								((value & 0x00F00000) >> 12) | \
+								((value & 0x0F000000) >> 20) | \
+								((value & 0xF0000000) >> 28))
 
 	// xoring by 3 will turn 1s into 2s, and vice vera
 	constexpr unsigned debugGraphic[8] = {
@@ -1723,16 +1723,16 @@ int Dialogue::getNextLine() {
 		buffer[bufferIndex + nextWordCount] = ' ';
 
 		if(width >= 212) {
-	       	buffer[bufferIndex] = '\0';
+		   	buffer[bufferIndex] = '\0';
 			break;
 		}
 
-    	data = nextWordPtr;
+		data = nextWordPtr;
 		bufferIndex += nextWordCount + 1;
 
 		if(isLineEnd(*(nextWordPtr-1))) {
-    	    break;
-    	}
+			break;
+		}
 	}
 
 	return bufferIndex;
@@ -1747,7 +1747,7 @@ int Dialogue::getNextDialogue(char* res) {
 	// if i have something with,,, over 256 chars will it overflow?? or like will the automatic line cutoffs prevent that
 
 	if(*data == '\0') {
-	    return 2;
+		return 2;
 	}
 
 	const char* dataStart = data;
@@ -1771,11 +1771,11 @@ int Dialogue::getNextDialogue(char* res) {
 	}
 
 	if(*data == '\0') {
-	    return 2;
+		return 2;
 	}
 
 	if(*(data-1) == '\n') {
-	    return 1;
+		return 1;
 	}
 
 	return 0;
@@ -3005,38 +3005,18 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 
 void EffectsManager::superRodNumber() { profileFunction();
 
-	// THIS NEEDS TO BE MADE LESS EXPENSIVE! IS IT THE CREATEPALETTE CALLS?
-	// or just the way to many stack allocs,,,, or the use of the string stream?
-	// i really also could use a method of defering the call of the creation of an effect for n frames.
-	// i should REALLY pregenerate a font with outline
-
-	// do the super rods effect anim
-	// the issue? using 4 sprites for the outline like i am rn is,,, ugh
-
-	// ok. i have limits, and they have been reached.
-	// there is no fucking way that drawing 5 sprites to the screen is taking up 20% of my frame cpu.
-	// SOMETHING IS CRITICALLY WRONG IN THIS FUNCTION, TODO
-
-	//auto activeTextPalette = spritePalette->getSpritePalette().create_palette();
-	//auto blackTextPalette = spritePalette->getBlackSpritePalette().create_palette();
-
-	auto activeTextPalette = spritePalette->getSpritePalette();
-    auto blackTextPalette = spritePalette->getBlackSpritePalette();
+	auto activeTextPalette = spritePalette->getWhiteOutlinePalette();
 
 	bn::vector<bn::sprite_ptr, 4> mainNumberSprites;
-	//bn::vector<bn::sprite_ptr, 16> outlineNumberSprites[4];
-	// a basic array didnt seem to want to work with bn::move, valid tho
-	bn::vector<bn::vector<bn::sprite_ptr, 4>, 4> outlineNumberSprites(4, bn::vector<bn::sprite_ptr, 4>());
 
 	Pos playerPos = globalGame->entityManager.player->p;
 	int val = globalGame->entityManager.player->rod.size();
+	char string[4] = {'0', '\0', '\0', '\0'};
 
-	char string[4] = {'0', 0, 0, 0};
-
-    int index = 0;
-
-    constexpr int vals[3] = {99, 9, 0};
-
+	// wtf is this??? ik division is expensive but what?
+	/*
+	int index = 0;
+	constexpr int vals[3] = {99, 9, 0};
 	for(int i=0; i<3; i++) {
 		if(val > vals[i] || index != 0) {
 			int temp = 0;
@@ -3048,57 +3028,44 @@ void EffectsManager::superRodNumber() { profileFunction();
 			index++;
 		}
 	}
-    string[3] = '\0';
+	string[3] = '\0';
+	*/
 
-	int xVal = (16 * playerPos.x) - 240/2 + 12;
-	int yVal = (16 * playerPos.y) - 160/2 + 8;
-
-	textGenerator.set_center_alignment();
-
-	// i dislike seperating these calls, but i dont trust shit
-	for(int j=0; j<4; j++) {
-
-		// stupid way of doing this but i dont want to write a switch case
-		Pos dif = Pos(1, 1);
-		dif.move(static_cast<Direction>(j));
-
-		int tempX = xVal + (dif.x - 1);
-		int tempY = yVal + (dif.y - 1);
-
-		textGenerator.generate((bn::fixed)tempX, (bn::fixed)tempY, bn::string_view(string), outlineNumberSprites[j]);
-
-		for(int i=0; i<outlineNumberSprites[j].size(); i++) {
-			outlineNumberSprites[j][i].set_bg_priority(1);
-			outlineNumberSprites[j][i].set_z_order(-1);
-			outlineNumberSprites[j][i].set_palette(activeTextPalette);
-		}
+	char* start = string;
+	if(val > 9) {
+		start++;
+	}
+	if(val > 99) {
+		start++;
 	}
 
-	textGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
+	do {
+		*start = '0' + (val % 10);
+		val /= 10;
+		start--;
+	} while(start >= string);
+
+
+	int xVal = (16 * playerPos.x) - 240/2 + 12 + 1;
+	int yVal = (16 * playerPos.y) - 160/2 + 8 - 1;
+
+	bn::sprite_text_generator outlineGenerator(dw_fnt_text_12_outline_sprite_font);
+	outlineGenerator.set_center_alignment();
+	outlineGenerator.generate((bn::fixed)xVal, (bn::fixed)yVal, bn::string_view(string), mainNumberSprites);
+
 	for(int i=0; i<mainNumberSprites.size(); i++) {
 		mainNumberSprites[i].set_bg_priority(1);
 		mainNumberSprites[i].set_z_order(-1);
-		mainNumberSprites[i].set_palette(blackTextPalette);
+		mainNumberSprites[i].set_palette(activeTextPalette);
 	}
-
-	textGenerator.set_left_alignment();
 
 	createEffect([](Effect* obj) mutable -> void {
 		obj->sprite.updateRawPosition(-32, -32);
 	},
-	[
-	mainNumberSprites = mainNumberSprites,
-	outlineNumberSprites = outlineNumberSprites
-	](Effect* obj) mutable -> bool {
+	[mainNumberSprites = mainNumberSprites](Effect* obj) mutable -> bool {
 		if(obj->tempCounter < 8) {
 			for(int i=0; i<mainNumberSprites.size(); i++) {
 				mainNumberSprites[i].set_y(mainNumberSprites[i].y() - 1);
-			}
-
-			for(int i=0; i<4; i++) {
-				for(int j=0; j<outlineNumberSprites[i].size(); j++) {
-					outlineNumberSprites[i][j].set_y(outlineNumberSprites[i][j].y() - 1);
-				}
 			}
 		}
 
@@ -4004,7 +3971,7 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 	}
 
 	switch(t) {
-		case EntityType::Player     :
+		case EntityType::Player	    :
 			switch(game->mode) {
 				default:
 				case 0:
@@ -4030,7 +3997,7 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 		case EntityType::Bull       :
 			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cg_falling, 6}}));
 			break;
-		case EntityType::Chester    :
+		case EntityType::Chester	:
 			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_cs_fall, 8}, {&bn::sprite_tiles_items::dw_spr_cs_falling, 6}}));
 			break;
 		case EntityType::WhiteMimic :
@@ -4048,7 +4015,7 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 		case EntityType::Shadow     :
 			effectList.push_back(createFallEffect({{&bn::sprite_tiles_items::dw_spr_fall, 6}})); // this is actually,,, correct
 			break;
-		case EntityType::Boulder    :
+		case EntityType::Boulder	:
 		case EntityType::AddStatue  :
 		case EntityType::EusStatue  :
 		case EntityType::BeeStatue  :

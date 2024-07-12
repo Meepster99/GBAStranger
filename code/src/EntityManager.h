@@ -14,15 +14,24 @@ class EntityManager {
 public:
 
 	SaneSet<Entity*, 4> entityMap[14][9];
-
 	SaneSet<Entity*, 4> futureEntityMap[14][9];
 
 	SaneSet<Entity*, MAXENTITYSPRITES> entityList;
 	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
 	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
 
-	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
+	// some more smaller lists may help,,,, with optimization?
+	// having an individual list for each statue type,,, ugh
+	// i could use a map??
+	// tbh wait,, thats not the worst idea?
+	// i could do that for all entities, i do worry about lookup times though
+	// seperate vars probs the way to go
+	// actually though, why. its not like performance is taking much of a hit from this specifically
+	// i should add new features, or focus on lag from moving tiles
+	//SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
 
+
+	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
 	bn::deque<Pos, 128> shadowQueue;
 
 	SaneSet<Entity*, MAXENTITYSPRITES> deadList;

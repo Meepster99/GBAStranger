@@ -1,6 +1,6 @@
 
 #include "Palette.h"
- 
+
 // why didnt i just go dark to light omfg
 
 //Palette defaultPalette(bn::color(0, 31, 31), bn::color(0, 0, 0), bn::color(31, 31, 31),bn::color(24, 24, 24), bn::color(16, 16, 16));
@@ -11,21 +11,21 @@
 
 #define CLAMP(value, min_val, max_val) MAX(MIN((value), (max_val)), (min_val))
 
-// using fixed here was causing EXCESSIVE (curse)ed (curse) 
+// using fixed here was causing EXCESSIVE (curse)ed (curse)
 // but, since this all occurs in the preprocessor, i think we should be able to use doulbles
 // nope :) and i cant even used fixed
 // ok, i have 0 clue why i cannot use decimals here, but a solution is to like
 // add 4 to the input value.
 // why? idk
 // well, i do k, but why i cannot use decimals is unknown to the gods
-// wait adding 4 didnt work?? you have got to be (curse)ing kidding me 
+// wait adding 4 didnt work?? you have got to be (curse)ing kidding me
 
 /*
 
 0 clue whats going on here
 having TEST  be the thing to add 4, and call bruh works,
 adding 4 in bruh doesnt.
-wtf 
+wtf
 
 #define BRUH(n) CLAMP( (32 * n) / 256, 0, 0xFF)
 
@@ -40,16 +40,16 @@ wtf
 
 #define TEST3(a, b, c, d)  Palette(bn::color(0, 31, 31), TEST2(a), TEST2(d), TEST2(c), TEST2(b));
 
-const Palette val    = TEST3(1310720,12717325,16284503,16777215);	
+const Palette val    = TEST3(1310720,12717325,16284503,16777215);
 
 
 ok.
 n+4 and n + 4 are different. in defines. for some (curse)ing reason .
-omfg 
-how many hours 
-gods 
+omfg
+how many hours
+gods
 
-nope, that wasnt it????? 
+nope, that wasnt it?????
 bc for some reason when i copy the define into here it doesnt work?
 
 tbh i could just do this in functions.
@@ -58,27 +58,27 @@ but i want it to be constexpr?
 is it variable scoping with layered defines??
 bc even with functions with noinline, its still (curse)ting itself
 
-the defines i had leftover in main BETTER have not been causing this 
+the defines i had leftover in main BETTER have not been causing this
 
-nope, they werent 
+nope, they werent
 
-i found it :)) and i want to die 
+i found it :)) and i want to die
 
-bn::color calls bn_assert. doing this before bn::init is called, causes it to (curse) itself. 
+bn::color calls bn_assert. doing this before bn::init is called, causes it to (curse) itself.
 i was clamping at a max of 0xFF instead of 31. this caused it to try to call assert, and crash.
 
 im going to go do a pull request
 like i should of for the unordered map bug
 
-ugh but the more that i think abt it like,,, 
-im not sure 
-i could have it 
+ugh but the more that i think abt it like,,,
+im not sure
+i could have it
 
 naw honestly, as much as i would like to blame someone other than myself
-i wouldnt of made this mistake if i had eaten food today 
+i wouldnt of made this mistake if i had eaten food today
 
-im now realizing, that after all this pain to change a rgb value from 
-(16, 0, 0) to (24, 0, 0), is that 
+im now realizing, that after all this pain to change a rgb value from
+(16, 0, 0) to (24, 0, 0), is that
 16 looks better.
 
 */
@@ -96,25 +96,25 @@ im now realizing, that after all this pain to change a rgb value from
 
 constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 	//return CLAMP( ( 32 * ( n + 4) ) / 256 , 0 , 0xFF );
-	
-	
+
+
 	//int whatthe(curse) = ( 32 * ( n + 0) ) / 256;
 	//int whatthe(curse) = ( 32 * ( n + 4) ) / 256;
-	
+
 	/*
 	int dude = n;
 	dude++;
 	dude++;
 	dude++;
 	dude++;
-	
+
 	int whatthe(curse) = ( 32 * ( dude + 0) );
 	whatthe(curse) = whatthe(curse) >> 8;
 	*/
 	//int whatthe(curse) = PLEASEHELP;
 	//whatthe(curse) = ( 32 * ( whatthe(curse) + 0) );
 	//whatthe(curse) = whatthe(curse) >> 8;
-	
+
 	//return PLEASEHELP >> 3;
 	/*
 	int result;
@@ -128,41 +128,41 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
     );
 	return result;
 	*/
-	
+
 
 	//int whatthe(curse) = 128;
 	//whatthe(curse) = whatthe(curse) + (PLEASEHELP << 5);
 	//whatthe(curse) = whatthe(curse) >> 8;
 
-	// now, after spending 5 god damn hours on this (curse) 
+	// now, after spending 5 god damn hours on this (curse)
 	// ima do something fun and convert the rgb to the CIELAB color space, and then back to 15 bitset
 	// but honestly, gods im tired
 	// its been so long since ive talked to any of my friends
-	
-	
+
+
 	bn::fixed ugh = (32.0 * PLEASEHELP) / 256.0;
-	
+
 	int whatthe = ugh.round_integer();
-	
+
 	if(maxVal > 172) {
 		//whatthe(curse) = ugh.ceil_integer();
 	//else if(maxVal < 86) {
 	} else if(maxVal < 32) {
 		//whatthe(curse) = ugh.floor_integer();
 	}
-	
+
 	//int whatthe(curse) = PLEASEHELP >> 3;
-	
+
 	if(whatthe < 0) {
 		whatthe = 0;
 	}
 	if(whatthe >= 32) {
 		whatthe = 31;
 	}
-	
+
 	return whatthe;
-	
-	
+
+
 };
 
 //static_assert(CONVERT5BIT(20) == 3, "jesus (curse). ");
@@ -176,28 +176,28 @@ constexpr int CONVERT5BIT(int PLEASEHELP, int maxVal) {
 
 constexpr bn::color MAKECOLOR(unsigned n) {
 	//return bn::color(CONVERT5BIT(((n & 0xFF0000) >> 16)), CONVERT5BIT(((n & 0x00FF00) >> 8)), CONVERT5BIT(((n & 0x0000FF) >> 0)));
-	
+
 	int r = (n & 0xFF0000) >> 16;
 	int g = (n & 0x00FF00) >> 8;
 	int b = (n & 0x0000FF) >> 0;
-	
+
 	int maxVal = MAX(MAX(r, g), b);
 
 	r = CONVERT5BIT(r, maxVal);
 	g = CONVERT5BIT(g, maxVal);
 	b = CONVERT5BIT(b, maxVal);
-	
+
 	return bn::color(r, g, b);
 }
-	
+
 //#define PALETTEGEN(a, b, c, d)  Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
 constexpr Palette PALETTEGEN(int a, int b, int c, int d) {
 	return Palette(bn::color(0, 31, 31), MAKECOLOR(a), MAKECOLOR(d), MAKECOLOR(c), MAKECOLOR(b));
 }
 
 
-	
-// I SHOULD JUST HAVE A PALETTEMANAGER CLASS OMFG, OR INTEGRATE IT INTO GAME 
+
+// I SHOULD JUST HAVE A PALETTEMANAGER CLASS OMFG, OR INTEGRATE IT INTO GAME
 //int Palette::fadePalette = -1;
 //bool Palette::toWhite = true;
 
@@ -238,10 +238,9 @@ bn::array<bn::color, 16> colorArray;
 bn::array<bn::color, 16> alternateColorArray;
 bn::array<bn::color, 16> fontColorArray;
 bn::array<bn::color, 16> tempColorArray;
+bn::array<bn::color, 16> whiteOutlineArray;
 
 bn::array<bn::color, 16> blackColorArray;
 bn::array<bn::color, 16> darkGrayColorArray;
 bn::array<bn::color, 16> lightGrayColorArray;
 bn::array<bn::color, 16> whiteColorArray;
-
-

@@ -1,8 +1,7 @@
 //
 
-#include "EffectsManager.h"
-
 #include "Game.h"
+#include "EffectsManager.h"
 
 #include "bn_hw_irq.h"
 
