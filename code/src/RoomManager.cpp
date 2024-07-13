@@ -265,6 +265,8 @@ void RoomManager::initCustomRooms() {
 	globalGame->saveData.hasSword    = !!(burdenStates & 0b0100);
 	globalGame->saveData.hasSuperRod = !!(burdenStates & 0b1000);
 
+	globalGame->saveData.hasRod = true;
+
 	roomCountAlloc = readUnsigned();
 
 	roomOffsets = new unsigned short[roomCountAlloc];
