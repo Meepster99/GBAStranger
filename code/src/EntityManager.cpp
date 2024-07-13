@@ -902,12 +902,10 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	switch(e->entityType()) {
 		case EntityType::Interactable:
 			return false;
+		case EntityType::Eye: // rm_0140, gives a ~.3 perf improvement
+			return false;
 		default:
 			break;
-	}
-
-	if(!dontSet) {
-		posTracker.insert(e->p);
 	}
 
 	bn::optional<Direction> nextMove = e->getNextMove();
@@ -918,6 +916,8 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	}
 
 	Direction move = nextMove.value();
+
+	Pos startPos = e->p;
 
 	Pos testPos(e->p);
 	if(!testPos.move(move)) {
@@ -982,6 +982,10 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 
 	tileManager->floorSteps.push_back(tempFloorStep);
 
+	//if(!dontSet) { // prev was above the !nextmove check, is this ok?
+	posTracker.insert(startPos);
+	//}
+
 	posTracker.insert(testPos);
 
 	e->currentDir = move;
@@ -990,6 +994,11 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 	futureEntityMap[e->p.x][e->p.y].insert(e);
 
 	e->moveSucceded();
+
+	// why is this taking so much?? func resolution?? figure it out
+	// undoing this saves some perf, but do we need it? and also it may (seems to be) messes up a lot of death poses, that was an issue for a hilw
+	//e->doUpdate();
+	// actually, elay player update, do every other as it happens?? maybe???
 	return true;
 }
 
@@ -1100,8 +1109,7 @@ void EntityManager::doMoves() { profileFunction();
 
 	bn::optional<Direction> tempDir;
 
-	// check for initial mon kill after player move, BEFORE enemy move
-	// SHOULD THIS BE BEFORE OR AFTER SHADOWS
+
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ++it) {
 		switch((*it)->entityType()) {
 			case EntityType::MonStatue:
@@ -1261,23 +1269,6 @@ void EntityManager::doMoves() { profileFunction();
 		return;
 	}
 
-	// THIS SHOULD RLLY BE PUT INTO THE BELOW LOOP!
-	// its such a bummer that the behavours for these objects arent stored in the object itself.
-	// someone should really go fix that
-
-	/*
-	if(enemyList.size() == 0 && shadowList.size() == 0) {
-		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
-			if((*it)->entityType() == EntityType::TanStatue) {
-				killEntity(*it);
-				it = obstacleList.begin(); // trash code, killentity only returns the getpos index, this needs to be fixed
-			} else {
-				++it;
-			}
-		}
-	}
-	*/
-
 	if(enemyList.size() == 0 && shadowList.size() == 0) {
 		while(tanStatueList.begin() != tanStatueList.end()) {
 			killEntity(*(tanStatueList.begin()));
@@ -1335,6 +1326,7 @@ void EntityManager::doMoves() { profileFunction();
 
 	sanity();
 
+	// insane i have had this here for so long, obvious performance improvement
 	updateScreen();
 }
 
@@ -1491,6 +1483,8 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 }
 
 void EntityManager::updateMap() { profileFunction();
+
+	// not constatly copying these two buffers between each other would be ideal
 
 	if(posTracker.size() != 0) {
 		for(auto posit = posTracker.cbegin(); posit != posTracker.cend(); ++posit) {

@@ -130,7 +130,6 @@ typedef unsigned char u8;
 #define MAXTEXTSPRITES 128
 #define MAXEFFECTSPRITES 112
 
-
 #define MAXENTITYSPRITES 64
 
 extern unsigned int frame;
@@ -549,13 +548,15 @@ public:
 
 #define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
+typedef int_fast8_t POSTYPE;
+
 class Pos {
 public:
 
-	int x;
-	int y;
+	POSTYPE x;
+	POSTYPE y;
 
-	constexpr Pos(int x_, int y_) : x(x_), y(y_) {
+	constexpr Pos(POSTYPE x_, POSTYPE y_) : x(x_), y(y_) {
 		// this assert almost definitely causes a considerable amount of lag.
 		BN_ASSERT(x >= 0 && y >= 0 && x < 14 && y < 9, "invalid pos created at ", x, " ", y);
 	}
@@ -579,8 +580,8 @@ public:
 
 	POSATTRIBUTES Pos operator+(const Pos& other) {
 
-		int tempX = x + other.x;
-		int tempY = y + other.y;
+		POSTYPE tempX = x + other.x;
+		POSTYPE tempY = y + other.y;
 
 		if(tempX < 0) { tempX = 0; }
 		if(tempY < 0) { tempY = 0; }
@@ -592,8 +593,8 @@ public:
 
 	POSATTRIBUTES Pos operator-(const Pos& other) {
 
-		int tempX = x - other.x;
-		int tempY = y - other.y;
+		POSTYPE tempX = x - other.x;
+		POSTYPE tempY = y - other.y;
 
 		if(tempX < 0) { tempX = 0; }
 		if(tempY < 0) { tempY = 0; }
@@ -671,7 +672,7 @@ public:
 
 };
 
-inline Pos safePos(signed char x, signed char y) {
+inline Pos safePos(POSTYPE x, POSTYPE y) {
 
 	if(x < 0) { x = 0; }
 	if(y < 0) { y = 0; }

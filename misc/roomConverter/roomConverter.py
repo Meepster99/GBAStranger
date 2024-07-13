@@ -2353,7 +2353,7 @@ def convertRoom(data, isHardModePass):
 
 	formatArray = lambda arr : "".join([ "{:d},".format(elem) for elem in np.array(arr).flatten() ])
 
-	formatFullArray = lambda name, arr : "constexpr static inline u8 {:s}[] = {{{:s}}};".format(name, formatArray(arr))
+	formatFullArray = lambda name, arr : "constexpr static inline uint8_t {:s}[] = {{{:s}}};".format(name, formatArray(arr))
 
 	temp = convertCollisionAndDetails(layerData)
 
@@ -2382,7 +2382,7 @@ def convertRoom(data, isHardModePass):
 	output.append(formatFullArray("collision", collision["data"]))
 	output.append(formatFullArray("details", details["data"]))
 
-	output.append("constexpr static inline u8 floor[] = {" + "".join([ "{:d},".format(instance) for instance in floorExport ]) + "};")
+	output.append("constexpr static inline uint8_t floor[] = {" + "".join([ "{:d},".format(instance) for instance in floorExport ]) + "};")
 
 	output.append("constexpr static inline EntityHolder entities[] = {")
 	output.append("".join([ "{{{:s}}},".format(instance) for instance in instanceExport ]))
