@@ -167,6 +167,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 					effectsManager->sword(tilePos, currentDir);
 
 					entityManager->futureEntityMap[tilePos.x][tilePos.y] = entityManager->entityMap[tilePos.x][tilePos.y];
+					//futureEntityMap[tilePos.x][tilePos.y] = entityMap[tilePos.x][tilePos.y];
 
 					return {true, bn::optional<Direction>()};
 				}

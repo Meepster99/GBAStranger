@@ -248,7 +248,7 @@ void CutsceneManager::cifDream() {
 	BN_ASSERT(game->effectsManager.bigSprites.size() != 0, "WHATJDSAFLKDSAJFDSF");
 	if(game->effectsManager.bigSprites[0]->animationIndex != 0 &&
 	game->effectsManager.bigSprites[0]->tiles == &bn::sprite_tiles_items::dw_spr_birch_b) {
-		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better move on]\0", false);
+		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better`move`on]\0", false);
 		// in the glistening of the bark, you seem drained as well
 
 		return;

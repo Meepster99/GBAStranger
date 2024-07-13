@@ -1,9 +1,10 @@
 
 
-#include "SharedTypes.h"
-
-#include "AllRooms.h"
 #include "RoomManager.h"
+#include "AllRooms.h"
+#include "Game.h"
+
+
 
 // for checking the actual dump of the roomdata,
 // C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -D .\build\RoomManager.o > idk.txt
@@ -257,6 +258,13 @@ void RoomManager::initCustomRooms() {
 
 	BN_ASSERT(shouldBe42 == 42, "when loading custom rooms, the first unsigned of the savefile wasnt 42. wtf");
 
+	u8 burdenStates = readByte();
+	//u8 burdenStates = 0;
+	globalGame->saveData.hasMemory   = !!(burdenStates & 0b0001);
+	globalGame->saveData.hasWings    = !!(burdenStates & 0b0010);
+	globalGame->saveData.hasSword    = !!(burdenStates & 0b0100);
+	globalGame->saveData.hasSuperRod = !!(burdenStates & 0b1000);
+
 	roomCountAlloc = readUnsigned();
 
 	roomOffsets = new unsigned short[roomCountAlloc];
@@ -362,41 +370,24 @@ Room RoomManager::loadCustomRoom() {
 	sramIndex = (int)roomOffsets[roomIndex];
 
 	unsigned short collisionOffset = sramIndex + 8;
-	unsigned short entityCount = readShort();
 	unsigned short detailsOffset = readShort();
 	unsigned short floorOffset = readShort();
+	unsigned short entityCount = readShort();
 	unsigned short entitiesOffset = readShort();
 
-	//BN_LOG("entityoffset = ", entitiesOffset);
-
-	/*
-	constexpr Room(
-	const void* collision_, const void* floor_, const void* details_,
-	const void* entities_, const int entityCount_,
-	const void* effects_, const int effectsCount_,
-	const void* secrets_, const int secretsCount_,
-	const void* exitDest_,
-	const void* collisionTiles_, const void* detailsTiles_
-	)
-	*/
-	//sramIndex = entitiesOffset;
-	//unsigned test = readUnsigned();
-	//BN_LOG(test);
-
-	// what the (curse). what the (curse),,, what the,,,(curse)
 	Room res(
-	reinterpret_cast<void*>(0x0E000000 + collisionOffset),
-	reinterpret_cast<void*>(0x0E000000 + floorOffset),
-	reinterpret_cast<void*>(0x0E000000 + detailsOffset),
-	reinterpret_cast<void*>(0x0E000000 + entitiesOffset),
-	entityCount,
-	&defaultEffects,
-	defaultEffectsCount,
-	&defaultSecrets,
-	defaultSecretsCount,
-	defaultExitDest,
-	defaultCollisionTiles,
-	defaultDetailsTiles
+		reinterpret_cast<void*>(0x0E000000 + collisionOffset),
+		reinterpret_cast<void*>(0x0E000000 + floorOffset),
+		reinterpret_cast<void*>(0x0E000000 + detailsOffset),
+		reinterpret_cast<void*>(0x0E000000 + entitiesOffset),
+		entityCount,
+		&defaultEffects,
+		defaultEffectsCount,
+		&defaultSecrets,
+		defaultSecretsCount,
+		defaultExitDest,
+		defaultCollisionTiles,
+		defaultDetailsTiles
 	);
 
 	BN_LOG("room res entitypointyer = ", res.entities);

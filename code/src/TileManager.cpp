@@ -238,8 +238,12 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 					floorMap[x][y] = new Switch(tempPos);
 					switchTracker++;
 					break;
+				case TileType::HalfBomb:
+					floorMap[x][y] = new Bomb(tempPos);
+					static_cast<Bomb*>(floorMap[x][y])->charge = 1;
+					break;
 				default:
-					BN_ERROR("unknown tile tried to get loaded in, wtf");
+					BN_ERROR("unknown tile tried to get loaded in, wtf. id=", uncompressedFloor[x + 14 * y]);
 					break;
 			}
 		}

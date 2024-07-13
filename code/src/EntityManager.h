@@ -10,6 +10,10 @@ class Game;
 class EffectsManager;
 class TileManager;
 
+//extern SaneSet<Entity*, 4> entityMap[14][9];
+//extern SaneSet<Entity*, 4> futureEntityMap[14][9];
+
+
 class EntityManager {
 public:
 

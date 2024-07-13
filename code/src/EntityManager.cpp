@@ -6,6 +6,11 @@
 #include "TileManager.h"
 #include "EffectsManager.h"
 
+
+//SaneSet<Entity*, 4> entityMap[14][9];
+//SaneSet<Entity*, 4> futureEntityMap[14][9];
+
+
 // should, all managers (and game) be namespaces? it seems so
 
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
@@ -998,6 +1003,8 @@ void EntityManager::moveObstacles() {
 
 void EntityManager::doMoves() { profileFunction();
 
+	BN_LOG("entityMap ram location = ", reinterpret_cast<void*>(entityMap));
+
 	// handling ("most of") all entity code in here instead of in each class is horrid
 	// but trying to handle the ordering of everything just,,, ugh
 
@@ -1041,7 +1048,7 @@ void EntityManager::doMoves() { profileFunction();
 	entityMap[playerStart.x][playerStart.y] = futureEntityMap[playerStart.x][playerStart.y];
 	entityMap[player->p.x][player->p.y] = futureEntityMap[player->p.x][player->p.y];
 
-	// a small check is needed here tho for if we walked backward into a shadow
+	// a small check is needed here tho for if we walked backward into a shadow,, or just any entity?
 	if(playerMoved && getMap(player->p).size() >= 2) {
 		SaneSet<Entity*, 4> tempMap = getMap(player->p);
 		tempMap.erase(player);

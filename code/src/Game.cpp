@@ -1133,7 +1133,9 @@ void Game::run() {
 
 	roomManager.isCustomRooms();
 
-	load();
+	if(!roomManager.isCustom) {
+		load();
+	}
 
 	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
 

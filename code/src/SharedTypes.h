@@ -315,6 +315,7 @@ enum class TileType {
 	RodTile,
 	LocustTile,
 	SpriteTile,
+	HalfBomb,
 };
 
 inline bn::ostringstream& operator<<(bn::ostringstream& stream, const TileType& e) {
@@ -784,6 +785,7 @@ public:
 // thing means this was just premature optimization
 
 #define SANESETATTRIBUTES
+//#define SANESETATTRIBUTES __attribute__((section(".iwram")))
 //#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 template <typename T, int maxVecSize>

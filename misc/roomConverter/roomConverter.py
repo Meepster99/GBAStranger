@@ -1,10 +1,10 @@
 
-import json 
+import json
 import os, sys
 import numpy as np
 import re
 import shutil
-import math 
+import math
 import inspect
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessing"))
@@ -12,7 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "EasyPoolProcessin
 from poolQueue import PoolQueue
 from multiprocessing import Queue, Pool, cpu_count, Event
 import queue
-import time 
+import time
 from threading import Thread
 
 
@@ -20,8 +20,8 @@ from colorama import init, Fore, Back, Style
 
 init(convert=True)
 
-RED = Fore.RED 
-GREEN = Fore.GREEN 
+RED = Fore.RED
+GREEN = Fore.GREEN
 YELLOW = Fore.YELLOW
 CYAN = Fore.CYAN
 WHITE = Fore.WHITE
@@ -63,22 +63,22 @@ room = "ugh"
 
 # (curse) it, going to be doing this manually. ( not anymore )
 def readCreationCode(p, creationCode):
-	
+
 	if creationCode is None:
 		return None
-		
+
 	if creationCode == "gml_RoomCC_rm_e_000_1_Create":
 		# this rooms the push 8 tiles in a row room, i do not want to deal with it rn"
 		return None
-		
+
 	if creationCode == "dont":
 		return None
-		
+
 	f = open(os.path.join("../ExportData/Export_Code", creationCode + ".gml"))
 	originalLines = [ line.strip() for line in f.readlines() if len(line.strip()) != 0 ]
-	f.close()	
-	
-	lines = list(originalLines)	
+	f.close()
+
+	lines = list(originalLines)
 
 	i = 0
 	while i < len(lines):
@@ -89,26 +89,26 @@ def readCreationCode(p, creationCode):
 				lines.insert(i+1, "{")
 				lines.insert(i+3, "}")
 		i += 1
-				
-			
+
+
 	# an alternative. it is HELLA JANK, tho
 	execString = ""
 
 	indentLevel = 1
-	
+
 	i = 0
 	while i < len(lines):
 		if ("if" in lines[i] or lines[i] == "else") and lines[i+1] != "{":
 			lines.insert(i+1, "{")
 			lines.insert(i+3, "}")
 		i += 1
-		
+
 	i = 0
 	while i < len(lines):
 		if lines[i] == "{" and lines[i+1] == "}":
 			lines.insert(i+1, "pass")
 		i += 1
-	
+
 	stranger = int(isHardMode)
 	obj_music_controller = 0
 	spr_n_right = 0
@@ -121,7 +121,7 @@ def readCreationCode(p, creationCode):
 	b_form = None
 	dl_form = None
 	dummy_value = None
-	
+
 	def room_goto(roomNameVal):
 		global roomName
 		roomName = roomNameVal
@@ -129,25 +129,25 @@ def readCreationCode(p, creationCode):
 	def instance_destroy():
 		global destroy
 		destroy = True
-		
+
 	def ds_grid_get(a, b, c):
 		return 0
-		
+
 	def ds_list_find_value(a, b):
 		return 0
-	
+
 	def scr_test2_active():
 		return 0
-		
+
 	def instance_create_layer(x, y, idek, data):
-	
-	
-		
-		
+
+
+
+
 		# ive done a lot of coding in my life.
-		# and i can safely say that this is the most atrocious thing ive ever done. 
-		# why didnt i just make objectfunctions global 
-		
+		# and i can safely say that this is the most atrocious thing ive ever done.
+		# why didnt i just make objectfunctions global
+
 		frames = inspect.stack()
 
 		for i, f in enumerate(frames):
@@ -156,9 +156,9 @@ def readCreationCode(p, creationCode):
 		else:
 			print("(curse)")
 			exit(1)
-			
+
 		frame = frames[i]
-			
+
 		try:
 			temp = "getattr(ObjectFunctions, '{:s}')(Pos({:d}, {:d}), None)".format(data, x, y)
 			exec(temp, frame.frame.f_globals, frame.frame.f_locals)
@@ -166,18 +166,18 @@ def readCreationCode(p, creationCode):
 			print(e)
 			print("omfg")
 			exit(1)
-		
-		
+
+
 		global destroy
 		destroy = True
 		return
-	
+
 	def instance_create_depth(x, y, idek, data):
 		return None
-	
+
 	def instance_exists(data):
 		return False
-		
+
 	removeStrings = [
 		"var px = x",
 		"var py = y",
@@ -187,7 +187,7 @@ def readCreationCode(p, creationCode):
 		"randomize()",
 		"irandom_range",
 	]
-	
+
 	parseStrings = [
 		(r'(rm_(?:test2_\d+)?\d+(?:_void)?)', r'"\1"'),
 		(r"global\.stranger", str(stranger)),
@@ -195,7 +195,7 @@ def readCreationCode(p, creationCode):
 		(r"global\.voider", str(stranger)),
 		(r"global\.collect_wings", "0"),
 		(r"\|\|", "or"),
-		(r"&&", "and"), 
+		(r"&&", "and"),
 		(r"!([^=])", r"not \1"),
 		(r"else if", "elif"),
 		(r"global.cc_state", "0"),
@@ -207,17 +207,17 @@ def readCreationCode(p, creationCode):
 		(r"spr_n_up", "0"),
 		(r"global\.jukebox_song", "jukebox_song"),
 		(r"obj_inventory\.ds_ccr", "False"),
-		
+
 		(r"((?:instance_create_layer|instance_create_depth)\((?:.+?,\s*)+)(.+)\)", r'\1"\2")'),
 		(r"(instance_exists\()(.+?)(\))", r'\1"\2"\3'),
 	]
-	
+
 	for i, line in enumerate(lines):
-	
+
 		if line == "{":
 			indentLevel += 1
 			continue
-	
+
 		if line == "}":
 			indentLevel -= 1
 			continue
@@ -227,26 +227,26 @@ def readCreationCode(p, creationCode):
 
 		if line == "else":
 			line += ":"
-		
+
 		for pattern, repl in parseStrings:
 			line = re.sub(pattern, repl, line)
-		
+
 		for s in removeStrings:
 			if s in line:
 				line = "pass"
 				break
-				
+
 		line = re.sub(r"return;", r"break", line)
 
 		execString += ("\t" * indentLevel) + line + "\n"
-	
+
 	# this lets break break out of the while loop, which is basically the same as like, just returning
 	# this has a very stupid oversight! what if there is any other loop?
 	execString = "while True:\n" + execString + "\tbreak\n"
-	
+
 	#print(CYAN + str(p) + " " + creationCode + RESET)
 	#print(GREEN + execString + RESET)
-	
+
 	# capture the current state of the program, so that the exec can modify it
 	bruh = locals()
 	globalBruh = globals()
@@ -257,78 +257,78 @@ def readCreationCode(p, creationCode):
 	try:
 		exec(execString, globalBruh, bruh)
 	except Exception as e:
-		
+
 		print(RED + "readCreationCode (curse)ed up" + RESET)
-		
-	
+
+
 		print(WHITE + creationCode + RESET)
 		print("\n".join(originalLines))
 		print("---\n")
 		print("\n".join(lines))
 		print("---\n")
-		
+
 		maxNumLen = len(str(len(execString.split("\n"))))
-		
+
 		p = r'line (\d+)'
 		errorLines = [ int(n) for n in re.findall(p, str(e)) ]
-	
+
 		for i, line in enumerate(execString.split("\n")):
 			print(f'{RED if i+1 in errorLines else ""}{i+1:{maxNumLen}}\t{line}{RESET}') # single quotes for python3.11, i should update laptop to 3.12
 		print("-----")
-		
+
 		print(RED + "readCreationCode (curse)ed up" + RESET)
 		print(WHITE + creationCode + RESET)
 		print(e)
 		print("\n")
 		exit(1)
-		
+
 	if "layer" in globalBruh:
 		layer = globalBruh["layer"]
-	
+
 	if "destroy" in globalBruh:
 		destroy = globalBruh["destroy"]
-	
+
 	b_form = bruh["b_form"]
 	dl_form = bruh["dl_form"]
 	dummy_value = bruh["dummy_value"]
-	
+
 	if layer:
 		return layer
-	
+
 	if destroy: # low prio, since the code destroys the prev thing after creating another
 		return "destroy"
-	
+
 	if b_form:
 		return "b_form = {:d}".format(b_form)
 
 	if dl_form:
 		return "dl_form = {:d}".format(dl_form)
-		
+
 	if "na_secret" in bruh:
 		res = bruh["na_secret"]
 		tempRoom = None
 		shouldSparkle = None
 		if "roomName" in bruh:
-			tempRoom = bruh["roomName"] 
-			
+			tempRoom = bruh["roomName"]
+
 		if "secret_stars" in bruh: # why does this have to be bruh and not globalbruh? is that why the roomname thing never worked?
 			shouldSparkle = bruh["secret_stars"]
-			
+
 		return [res, tempRoom, shouldSparkle]
-	
+
 	if "contents" in bruh:
 		return "contents = {:d}".format(bruh["contents"])
-	
+
 	if dummy_value:
 		#print(f"{MAGENTA}ummm, dummy_value was {dummy_value} {RESET}")
 		return "dummy_value = {:d}".format(dummy_value)
-		
+
 	return None
-	
+
 def writeFooter(f, successRoomsList):
-	
+
 	data = """
-	
+
 constexpr static inline Room {:s}rooms[{:d}] = {{ {:s} }};
 
 // inneffecient, but my gods do i not care at this point
@@ -336,41 +336,41 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 """
 
 	# reorder the room list, drop unneeded rooms
-	
+
 	roomSelectFile = open("../ExportData/Export_code/gml_GlobalScript_scr_roomselect.gml")
 	lines = [ l.strip() for l in roomSelectFile.readlines() if len(l.strip()) != 0 ]
 	roomSelectFile.close()
 	#successRoomsList
-	
+
 	newRoomsList = []
-	
-	lineIndex = 0 
-	# its 3am, forgive me for this 
+
+	lineIndex = 0
+	# its 3am, forgive me for this
 	for i, line in enumerate(lines):
 		if line == "switch room_number":
-			
+
 			i += 1
-			
+
 			while lines[i] != "}":
-				
+
 				if "case" in lines[i]:
 					while lines[i] != "}":
 						if "room_goto" in lines[i]:
 							newRoomsList.append(lines[i].split("(")[1].split(")")[0])
 							break
 						i += 1
-					
+
 				i+=1
 			lineIndex = i
 			break
-	
+
 	# im just doing this part manually. im tired
 	# the room order,, in the actual undertalemodtool seems to be a good ref for this
-	
+
 	# ex rooms could(and were for 5 seconds) be done automatically, but due to not all rooms(rm_test2_002) being in the roomsel script, its being added manually
-	
+
 	tempRoomsToAdd = """
-	
+
 	rm_test2_000
 	rm_test2_001
 	rm_test2_054
@@ -397,10 +397,10 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_071
 	rm_test2_072
 	rm_test2_073
-	
+
 	# i have no idea if this is correct
 	rm_test2_002
-	
+
 	rm_test2_010
 	rm_test2_003
 	rm_test2_009
@@ -416,10 +416,10 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_012
 	rm_test2_016
 	rm_test2_017
-	
+
 	# see above note for confusion
 	rm_test2_018
-	
+
 	rm_test2_031
 	rm_test2_022
 	rm_test2_019
@@ -435,10 +435,10 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_025
 	rm_test2_027
 	rm_test2_033
-	
+
 	# see above note for confusion
 	rm_test2_034
-	
+
 	rm_test2_035
 	rm_test2_046
 	rm_test2_038
@@ -454,7 +454,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_test2_045
 	rm_test2_037
 	rm_test2_049
-	
+
 	rm_u_0001
 	rm_u_0002
 	rm_u_0003
@@ -484,7 +484,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_u_0027
 	rm_u_0028
 	rm_u_end
-	
+
 	rm_secret_001
 	rm_secret_002
 	rm_secret_003
@@ -494,7 +494,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_secret_007
 	rm_secret_008
 	rm_secret_009
-	
+
 	rm_bee_001
 	rm_bee_002
 	rm_bee_003
@@ -511,7 +511,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_bee_014
 	rm_misc_0002
 	rm_bee_015
-	
+
 	rm_e_intermission
 	rm_e_001
 	rm_e_023
@@ -541,7 +541,7 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_e_021
 	rm_e_027
 	rm_e_000
-	
+
 	rm_mon_001
 	rm_mon_002
 	rm_mon_003
@@ -559,33 +559,33 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 	rm_mon_015
 	rm_test_0006
 	rm_mon_016
-	
+
 	rm_mon_shortcut_001
 	rm_mon_shortcut_002
 	rm_mon_shortcut_003
 	rm_mon_shortcut_004
 	rm_mon_shortcut_005
-	
-	
-	
-	
+
+
+
+
 	rm_rm4
 	"""
-	
+
 	# rm_rm4 MUST be the last one
-	
+
 	[ newRoomsList.append(t.strip()) for t in tempRoomsToAdd.split("\n") if len(t.strip()) != 0 and t.strip()[0] != "#" ]
-	
+
 	newRoomsList[newRoomsList.index("rm_u_0001")] = "rm_voidend"
-			
+
 	successRoomsList = newRoomsList
 
 	successRoomsCount = len(successRoomsList)
 	longestRoomStringLen = 1+len(max(successRoomsList, key=len))
-	
+
 	if isHardMode:
 		longestRoomStringLen += 5
-	
+
 	formatArray = lambda prepend, append, arr : ",".join([ "{:s}{:s}{:s}".format(prepend, elem, append) for elem in arr ])
 
 	if not isHardMode:
@@ -595,25 +595,25 @@ constexpr static inline MessageStrJank {:s}roomNames[] = {{ {:s} }};
 		f.write("""
 // should this be different between normal and hard?? idek
 #define MAXROOMS {:d}
-		
+
 // i (curse)ing despise that this is the only way i can get this to work
 struct MessageStrJank {{
 	const char* str;
 	const char idek = '\\0'; // sanity
 }};
 """.format(successRoomsCount))
-	
+
 	prepend = "LOADROOMMACRO(" if not isHardMode else "LOADROOMMACRO(hard_"
 	roomData = formatArray(prepend, ")", successRoomsList)
-	
+
 	prepend = "MessageStrJank(\"" if not isHardMode else "MessageStrJank(\"hard_"
 	roomNameData = formatArray(prepend, "\\0\")", successRoomsList)
-	
+
 	hardModeString = "hard_" if isHardMode else ""
 	data = data.format(hardModeString, successRoomsCount, roomData, hardModeString, roomNameData)
-	
+
 	f.write(data + "\n")
-	
+
 	f.write("// Staying misfortunate is negligence, and not trying to become happy is cowardice.\n")
 
 	pass
@@ -629,75 +629,75 @@ def compressData(arr):
 	global uncompressedBytes
 	global compressedBytes
 	global maxByteVal
-	
+
 	# basic rle
-	
+
 	# further stuff could be compressed by combining everything into one array(tbh why didnt i do that)
-	
+
 	#maxByteVal = max(maxByteVal, max(arr))
 	for elem in arr:
 		if elem not in byteFrequency:
-			byteFrequency[elem] = 0	
+			byteFrequency[elem] = 0
 		byteFrequency[elem] += 1
-		
-	
+
+
 	res = []
-	
+
 	count = 1
 	val = arr[0]
 	for i in range(1, len(arr) + 1):
-		
+
 		# using this second bit here (curse)s me in terms of the 126 thing, but i still think it will help me in the long run
 		# this reduced my bits by like,, 2% but idc, im leaving it in
-		if arr[min(i, len(arr)-1)] & 0xC0: # 1100 0000 
+		if arr[min(i, len(arr)-1)] & 0xC0: # 1100 0000
 			print("a value passed into the compression func had bit 7 or bit 6 set. this is not allowed!")
 			exit(1)
-		
+
 		if i == len(arr) or arr[i] != val:
-			
+
 			if count == 1 or count == 2 or count == 3:
 				if count not in frequencyFrequency:
 					frequencyFrequency[count] = 0
 				frequencyFrequency[count] += 1
-				
+
 				res.append(val | (count << 6))
 			else:
 				res.append(count)
 				res.append(val)
-				
+
 				if count not in frequencyFrequency:
 					frequencyFrequency[count] = 0
 				frequencyFrequency[count] += 1
-			
+
 			if i == len(arr):
 				break
-		
+
 			count = 1
 			val = arr[i]
 		else:
 			count += 1
-			
+
 			if count == 0x40:
-				
+
 				count-=1
-			
+
 				# this range is about to overflow into the upper two bits, prevent that
 				if count not in frequencyFrequency:
 					frequencyFrequency[count] = 0
 				frequencyFrequency[count] += 1
-				
+
 				res.append(count)
 				res.append(val)
-				
+
 				count = 1
 				val = arr[i]
-				
-		
+
+
 	uncompressedBytes += len(arr)
 	compressedBytes += len(res)
-	
+
 	return res
-	
+
 def uncompressData(comp):
 
 	# because 14*9=126 < 128, this means that bit 8 will always be safe, thank the gods
@@ -705,12 +705,12 @@ def uncompressData(comp):
 	uncomp = []
 	i = 0
 	while i < len(comp):
-		
+
 		if comp[i] & 0xC0:
-			
+
 			count = comp[i] >> 6
 			val = comp[i] & ~0xC0
-		
+
 			uncomp += [val] * count
 			i+=1
 		else:
@@ -718,15 +718,15 @@ def uncompressData(comp):
 			val = comp[i+1]
 			uncomp += [val] * count
 			i += 2
-			
+
 	return uncomp
 
 def convertCollisionAndDetails(layerData):
-	
-	details = {}	
-	
+
+	details = {}
+
 	if "Tiles_2" in layerData:
-		
+
 		details["tileset"] = layerData["Tiles_2"]["layer_data"]["background"]
 		details["data"] = [ elem["id"] for line in layerData["Tiles_2"]["layer_data"]["tile_data"] for elem in line]
 
@@ -739,11 +739,11 @@ def convertCollisionAndDetails(layerData):
 			return None
 	else:
 		details["data"] = [ 0 for i in range(0, 14*9) ]
-	
-	collision = {}	
-	
+
+	collision = {}
+
 	if "Tiles_1" in layerData:
-		
+
 		collision["tileset"] = layerData["Tiles_1"]["layer_data"]["background"]
 		collision["data"] = [ elem["id"] for line in layerData["Tiles_1"]["layer_data"]["tile_data"] for elem in line]
 
@@ -756,16 +756,16 @@ def convertCollisionAndDetails(layerData):
 			return None
 	else:
 		collision["data"] = [ 0 for i in range(0, 14*9) ]
-	
+
 	if len(details["data"]) == 0:
 		details["data"] = [ 0 for i in range(0, 14*9) ]
-	
+
 	if len(collision["data"]) == 0:
 		collision["data"] = [ 0 for i in range(0, 14*9) ]
-	
-	
+
+
 	# basic compression
-		
+
 	start = collision["data"]
 	comp = compressData(start)
 	uncomp = uncompressData(comp)
@@ -773,9 +773,9 @@ def convertCollisionAndDetails(layerData):
 	if not np.array_equal(np.array(start), np.array(uncomp)):
 		print("array decomp somehow failed???")
 		exit()
-		
+
 	collision["data"] = comp
-	
+
 	start = details["data"]
 	comp = compressData(start)
 	uncomp = uncompressData(comp)
@@ -785,62 +785,62 @@ def convertCollisionAndDetails(layerData):
 		exit()
 
 	details["data"] = comp
-		
+
 	return collision, details
 
 def convertObjects(layerData):
-	
+
 	# due to the extremely large amount of difficulty ive had with floor objects being instances, and vice versa, this is here to fix thtat
-	
-	
+
+
 	floorExport = [ ["Pit" for i in range(9)] for j in range(14)]
-	
+
 	specialFloorExport = []
 	floorExitDest = []
-	
+
 	entityExport = []
-	
+
 	effectExport = []
-	
-	# goofy 
+
+	# goofy
 	# oh god its so goofy
 	# does python seriously not allow lambdas to be multiline/assign (curse)?
 	# i despise that this is actually the best/most readable/easiest way to do this
 	class ObjectFunctions:
-		
+
 		def obj_floor(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Floor"
-	
+
 		def obj_glassfloor(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Glass"
-			
+
 		def obj_pit(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Pit"
-			
+
 		def obj_exit(p, creationCode):
 			if creationCode is not None:
 				if creationCode == "b_form = 1":
 					print(RED + "a exit had a bform of 1. still no idea why" + RESET)
 					floorExport[p.x][p.y] = "Exit"
 					return
-			
+
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
-			
-			
-			# gml_Object_obj_exit_Alarm_0 
+
+
+			# gml_Object_obj_exit_Alarm_0
 			# in the future, the data here should also like,, decide where they go for the voided end?
 			# that may require some reimplimentation, but thats for the future
-			
+
 			customExitData = {
 				"rm_secret_001": "rm_0025",
 				"rm_secret_002": "rm_0056",
@@ -849,7 +849,7 @@ def convertObjects(layerData):
 				"rm_secret_005": "rm_rest_area_5",
 				"rm_secret_006": "rm_0168",
 				"rm_secret_007": "rm_0185",
-				"rm_secret_008": "rm_rest_area_8", 
+				"rm_secret_008": "rm_rest_area_8",
 				"rm_0000": "rm_1intro",
 				"rm_rm4": "rm_2intro",
 				"rm_0230": "rm_rest_area_8",
@@ -859,77 +859,77 @@ def convertObjects(layerData):
 				"rm_0259": "rm_rest_area_9",
 				"rm_mon_015": "rm_test_0006",
 				"rm_mon_016": "rm_rest_area_7",
-				
+
 				"rm_mon_shortcut_001": "rm_0023",
 				"rm_mon_shortcut_002": "rm_0054",
 				"rm_mon_shortcut_003": "rm_0112",
 				"rm_mon_shortcut_004": "rm_0172",
 				"rm_mon_shortcut_005": "rm_0202",
-				
+
 				"rm_mon_001": "rm_0201",
-				
+
 				"rm_bee_001": "rm_0149",
 				"rm_misc_0001": "rm_rest_area_6",
-				
+
 				# THESE ARE INCORRECT. were they put in before EX was even in?
 				#"rm_test2_002": "rm_test2_003",
 				#"rm_test2_018": "rm_test2_019",
 				#"rm_test2_034": "rm_test2_035",
-				
+
 				"rm_bee_015": "rm_0165",
 				"rm_return_000": "rm_e_000",
 				"rm_ee_000": "rm_2intro",
 				"rm_ee_006": "rm_2intro",
 				"rm_ee_008": "rm_noway",
 
-				
+
 			}
-			
-			
+
+
 			if layerData["roomName"] in customExitData:
 				#specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, customExitData[layerData["roomName"]]))
 				print(CYAN + "custom exit from {:s} to {:s}".format(layerData["roomName"], customExitData[layerData["roomName"]]) + RESET)
 				floorExitDest.append(customExitData[layerData["roomName"]])
-			
+
 			floorExport[p.x][p.y] = "Exit"
-			
+
 		def obj_floorswitch(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Switch"
-			
+
 		def obj_bombfloor(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Bomb"
-			
+
 		def obj_deathfloor(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Death"
-			
+
 		def obj_copyfloor(p, creationCode):
 			if creationCode is not None:
 				getattr(ObjectFunctions, creationCode)(p, None)
 				return
 			floorExport[p.x][p.y] = "Copy"
-			
-	
-	
 
-		def obj_spawnpoint(p, creationCode):	
-		
+
+
+
+		def obj_spawnpoint(p, creationCode):
+
 			res = ""
-		
-			# this code makes me want to cry 
-			
-			# i was going to pass "dont" in as a creation code, but that (curse)ed to many things up. so now, im going to see if 
-			# this is being called from exec via the stack frames. omfg 
-			
-		
+
+			# this code makes me want to cry
+
+			# i was going to pass "dont" in as a creation code, but that (curse)ed to many things up. so now, im going to see if
+			# this is being called from exec via the stack frames. omfg
+
+
 			res = readCreationCode(p, "gml_Object_obj_spawnpoint_Create_0")
 			if res == "destroy":
 				#print(CYAN + "room: {:s} creating player at alternate pos, i hope lmao".format(room) + RESET)
@@ -937,22 +937,22 @@ def convertObjects(layerData):
 			elif res is not None:
 				print("a player had a creation code, this is not defined!")
 				exit(1)
-						
+
 			entityExport.insert(0, "EntityType::Player,{:d},{:d}".format(p.x, p.y))
-			
-		def obj_player(p, creationCode): 
+
+		def obj_player(p, creationCode):
 			# this one like,, gods idek whats going on anymore
 			entityExport.insert(0, "EntityType::Player,{:d},{:d}".format(p.x, p.y))
-			
+
 		def obj_chest_small(p, creationCode):
-		
+
 			chestCreationCodes = {
 				None: "EntityType::Chest",
 				"contents = 0": "EntityType::EmptyChest", # actually should be a chest that gives nothing by default
 				"contents = 1": "EntityType::Chest",
 				"contents = 5": "EntityType::EmptyChest",
-				
-				# unknown. i think that 5 is empty, these are special stuff 
+
+				# unknown. i think that 5 is empty, these are special stuff
 				"contents = 4": "EntityType::EmptyChest",
 				"contents = 3": "EntityType::EmptyChest",
 				"contents = 2": "EntityType::EmptyChest",
@@ -960,29 +960,29 @@ def convertObjects(layerData):
 				"contents = 7": "EntityType::EmptyChest",
 				"contents = 8": "EntityType::EmptyChest",
 				"contents = 9": "EntityType::EmptyChest",
-				
-				# ex? 
+
+				# ex?
 				"contents = 10": "EntityType::EmptyChest",
 			}
-			
+
 			if creationCode not in chestCreationCodes:
 				print("couldnt find what to do with a chest with creationcode: ", creationCode)
 				exit(1)
-		
+
 			entityExport.append("{:s},{:d},{:d}".format(chestCreationCodes[creationCode], p.x, p.y))
 
 		def obj_boulder(p, creationCode):
-		
+
 			if creationCode is None:
 				entityExport.append("EntityType::Boulder,{:d},{:d}".format(p.x, p.y))
-			else:				
-				
+			else:
+
 				# this being here is an assumption of that only boulders will be statues. i hope that holds.
-				
+
 				statueMap = {
 					# HEY THIS NEEDS TO BE UPDATED
 					"b_form = 9": lambda p : "EntityType::JukeBox,{:d},{:d}".format(p.x, p.y),
-					
+
 					"b_form = 8": lambda p : "EntityType::AddStatue,{:d},{:d}".format(p.x, p.y),
 					"b_form = 7": lambda p : "EntityType::MonStatue,{:d},{:d}".format(p.x, p.y),
 					"b_form = 6": lambda p : "EntityType::EusStatue,{:d},{:d}".format(p.x, p.y),
@@ -992,61 +992,61 @@ def convertObjects(layerData):
 					"b_form = 2": lambda p : "EntityType::BeeStatue,{:d},{:d}".format(p.x, p.y),
 					"b_form = 1": lambda p : "EntityType::LevStatue,{:d},{:d}".format(p.x, p.y),
 				}
-				
+
 				entityExport.append(statueMap[creationCode](p))
-				
+
 		def obj_enemy_cg(p, creationCode):
 			# i should be checking creationcode here, but i,,,, dont want to!
 			entityExport.append("EntityType::Bull,{:d},{:d}".format(p.x, p.y))
-		
+
 		def obj_enemy_cl(p, creationCode):
 			entityExport.append("EntityType::Leech,{:d},{:d}".format(p.x, p.y))
-		
+
 		def obj_enemy_cc(p, creationCode):
 			entityExport.append("EntityType::Maggot,{:d},{:d}".format(p.x, p.y))
-		
+
 		def obj_enemy_ch(p, creationCode):
 			entityExport.append("EntityType::Eye,{:d},{:d}".format(p.x, p.y))
-		
+
 		def obj_enemy_cs(p, creationCode):
 			entityExport.append("EntityType::Chester,{:d},{:d}".format(p.x, p.y))
-		
+
 		def obj_enemy_cl(p, creationCode):
 			entityExport.append("EntityType::Leech,{:d},{:d}".format(p.x, p.y))
-		
+
 		def obj_enemy_cm(p, creationCode):
 			 entityExport.append("EntityType::Mimic,{:d},{:d}".format(p.x, p.y))
-			 
+
 		def obj_enemy_co(p, creationCode):
 			entityExport.append("EntityType::Diamond,{:d},{:d}".format(p.x, p.y))
 
 		def obj_collision(p, creationCode):
 			# for now, donothing, but i could maybe,,, modify this to put a black tile in collision/details that has collision?
 			pass
-			
+
 		def obj_dustemiter_unknown(p, creationCode):
 			pass
-			
+
 		def obj_enter_the_secret(p, creationCode):
 			ObjectFunctions.obj_spawnpoint(p, creationCode)
-		
+
 		def obj_na_secret_exit(p, creationCode):
-		
+
 			# general room switch: gml_GlobalScript_scr_roomselect
-		
+
 			# contains the,, mapping of secrets to like yea: gml_Object_obj_na_secret_exit_Alarm_5
-	
+
 			if creationCode is None:
 				specialFloorExport.append("{:d},{:d},NULL".format(p.x, p.y))
 				return
-			
+
 			#i could get the room to goto dynamically, but im tired ok
-			# i REALLY should do that 
-			
+			# i REALLY should do that
+
 			#print(f"{MAGENTA}{creationCode}{RESET}")
-			
+
 			creationCode, _unusedRoomName, shouldSparkle = creationCode
-			
+
 			secretData = {
 				4: "rm_mon_shortcut_001",
 				1: "next",
@@ -1058,61 +1058,61 @@ def convertObjects(layerData):
 				10: "rm_bee_001",
 				2: "rm_mon_001",
 				3: "rm_cif_end",
-			
+
 				11: "rm_test2_002",
 				12: "rm_test2_018",
 				13: "rm_test2_034",
 				14: "next",
 				15: "rm_trailer_001", # are trailer rooms playable??
 			}
-			
+
 			if creationCode not in secretData:
 				print("creationCode not in secret data! how! ", str(creationCode))
-				
+
 				exit(1)
-			
+
 			res = secretData[creationCode]
-			
+
 			if res == "next":
 				specialFloorExport.append("{:d},{:d},NULL".format(p.x, p.y))
 			else:
 				specialFloorExport.append("{:d},{:d},\"{:s}\"".format(p.x, p.y, res))
-			
+
 			if shouldSparkle:
-				x, y = p.rawX, p.rawY 
+				x, y = p.rawX, p.rawY
 				effectExport.append("&bn::sprite_tiles_items::dw_spr_spark_particle,{:d},{:d},1,1".format(x, y))
-			
+
 			pass
-			
+
 		def obj_npc_friend(p, creationCode):
 			pass
-			
+
 		def obj_mural(p, creationCode):
 			pass
-				
+
 		def obj_enemy_nm(p, creationCode):
 			pass
-			
+
 		def obj_secret_exit(p, creationCode):
 			pass
-			
+
 		def obj_solarsystem(p, creationCode):
 			pass
-		
+
 		def obj_rest(p, creationCode):
-			x, y = p.rawX, p.rawY 
-			# ideally, these offsets would be gotten from the images themself, but like,,, im tired 
-	
+			x, y = p.rawX, p.rawY
+			# ideally, these offsets would be gotten from the images themself, but like,,, im tired
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_birch,{:d},{:d},3,4".format(x, y))
-			
+
 			pass
-		
+
 		def obj_dustemit(p, creationCode):
 			pass
-			
+
 		def obj_fakewall(p, creationCode):
 			pass
-			
+
 		def obj_enemy_invisiblemon(p, creationCode):
 			pass
 
@@ -1126,8 +1126,8 @@ def convertObjects(layerData):
 			pass
 
 		def obj_demonlords_statue(p, creationCode):
-			x, y = p.rawX, p.rawY 
-			
+			x, y = p.rawX, p.rawY
+
 			if creationCode is None:
 				effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_baal,{:d},{:d},6,4".format(x, y))
 			elif creationCode == "dl_form = 1":
@@ -1153,46 +1153,46 @@ def convertObjects(layerData):
 
 		def obj_npc_nun(p, creationCode):
 			pass
-		
+
 		def _tailCoordinateFunction(x, y, w, h):
-		
+
 			x += int(w / 2)
 			y += int(h / 2)
-		
+
 			w = int(math.ceil(w/16))
 			h = int(math.ceil(h/16))
-			
+
 			# bigsprite's coordinates like, have a seperate system, and since tails can be both normal and bigsprites, this handles the conversion issues
-		
+
 			if w <= 4 and h <= 4:
 				# small sprite
-				
+
 				x -= 0
 				y += 16
 
 			return [x, y, w, h]
-		
+
 			pass
 		def obj_npc_tail(p, creationCode):
-			x, y = p.rawX, p.rawY 
+			x, y = p.rawX, p.rawY
 			x += 4
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_upperbody,{:d},{:d},3,5,false,2,true".format(x, y))
-			
+
 			y += 2 * 16
 			y -= 3
 			y += 8;
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_boobytrap,{:d},{:d},3,3,false,1".format(x, y))
-		
+
 			pass
-			
+
 		def obj_npc_tail_tail(p, creationCode):
-			x, y = p.rawX, p.rawY 
+			x, y = p.rawX, p.rawY
 			x += 4
-			
+
 			y += 4
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_lowerbody,{:d},{:d},6,3,false".format(x, y))
-			
+
 			"""
 			x += 16
 			y -= 2 * 16
@@ -1200,206 +1200,206 @@ def convertObjects(layerData):
 			x -= 1
 			y -= 1
 			"""
-			
-			x, y = p.rawX, p.rawY 
+
+			x, y = p.rawX, p.rawY
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, 52, 40)
-			x, y = p.rawX, p.rawY 
-			
+			x, y = p.rawX, p.rawY
+
 			y -= 28 - 1
 			x += 12 - 1
-			
+
 
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_tail,{:d},{:d},{:d},{:d},false,1,true".format(x, y, w, h))
-			
+
 			pass
-		
+
 		def obj_voidtail_004(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-			
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 128, 32
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_004,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_005(p, creationCode):
-		
+
 			x, y = p.rawX, p.rawY + 4
-	
+
 			w, h = 176, 56
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_x56,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
-		
+
+
 			pass
 
 		def obj_voidtail_013(p, creationCode):
-		
+
 			x, y = p.rawX - 8, p.rawY - 8
-			
+
 			w, h = 56, 48
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_013,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
-		
+
 		def obj_voidtail_001(p, creationCode):
-			
-			x, y = p.rawX, p.rawY 
-			
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 80, 128
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_001,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_014(p, creationCode):
-	
-			x, y = p.rawX, p.rawY 
-	
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 112, 128
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_014,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_008(p, creationCode):
-		
+
 			x, y = p.rawX, p.rawY - 12
-			
+
 			w, h = 64, 52
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_008,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
 			pass
 
 		def obj_voidtail_003(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-			
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 80, 16
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_003,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-	
+
 			pass
 
 		def obj_voidtail_009(p, creationCode):
-		
+
 			# tails are going to cause collision issues, and i rlly should do something abt that, but i wont
-			x, y = p.rawX, p.rawY 
-			
+			x, y = p.rawX, p.rawY
+
 			w, h = 96, 160
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_009,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_007(p, creationCode):
-		
+
 			x, y = p.rawX, p.rawY + 6
-	
+
 			w, h = 64, 148
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_007,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_012(p, creationCode):
-		
-			
+
+
 			x, y = p.rawX - 8, p.rawY - 16
-	
+
 			w, h = 56, 32
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_012,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_011(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
+
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 112, 128
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_011,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
 
-		
+
 			pass
 
 		def obj_voidtail_006(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
+
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 128, 56
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_006,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
 
 		def obj_voidtail_010(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-	
+
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 112, 160
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_010,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
+
 			pass
-		
+
 		def obj_voidtail_002(p, creationCode):
-		
-			
-			x, y = p.rawX, p.rawY 
-			
+
+
+			x, y = p.rawX, p.rawY
+
 			w, h = 64, 48
-			
+
 			x, y, w, h = ObjectFunctions._tailCoordinateFunction(x, y, w, h)
-			
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_tail_void_002,{:d},{:d},{:d},{:d},false".format(x, y, w, h))
-		
-		
+
+
 			pass
-			
+
 		def obj_chest(p, creationCode):
-			x, y = p.rawX - 8, p.rawY 
-			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
-			pass
-			
-		def obj_sealchest(p, creationCode):
-			x, y = p.rawX - 8, p.rawY 
+			x, y = p.rawX - 8, p.rawY
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
 			pass
 
-			
+		def obj_sealchest(p, creationCode):
+			x, y = p.rawX - 8, p.rawY
+			effectExport.append("&bn::sprite_tiles_items::dw_spr_chest,{:d},{:d},2,1".format(x, y))
+			pass
+
+
 		def obj_npc_failure_002(p, creationCode):
 			pass
 
@@ -1428,12 +1428,12 @@ def convertObjects(layerData):
 			pass
 
 		def obj_npc_gor(p, creationCode):
-			x, y = p.rawX, p.rawY 
+			x, y = p.rawX, p.rawY
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_gor,{:d},{:d},3,4,false".format(x, y))
-			
-			
+
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_gor_hair,{:d},{:d},7,4,false".format(x, y))
-			
+
 			pass
 
 		def obj_npc_failure_006(p, creationCode):
@@ -1528,10 +1528,10 @@ def convertObjects(layerData):
 
 		def obj_npc_dr_ab___on(p, creationCode):
 			pass
-		
+
 		def obj_baal_d(p, creationCode):
 			pass
-			
+
 		def obj_npc_failure_003(p, creationCode):
 			pass
 
@@ -1572,11 +1572,11 @@ def convertObjects(layerData):
 			pass
 
 		def obj_statue_abaddon(p, creationCode):
-			x, y = p.rawX, p.rawY 
-			# ideally, these offsets would be gotten from the images themself, but like,,, im tired 
+			x, y = p.rawX, p.rawY
+			# ideally, these offsets would be gotten from the images themself, but like,,, im tired
 
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_statue_abaddon,{:d},{:d},6,4".format(x, y))
-			
+
 			pass
 
 		def obj_gateofdis_bg(p, creationCode):
@@ -1610,11 +1610,11 @@ def convertObjects(layerData):
 			pass
 
 		def obj_stinklines(p, creationCode):
-		
-			x, y = p.rawX, p.rawY 
-		
+
+			x, y = p.rawX, p.rawY
+
 			effectExport.append("&bn::sprite_tiles_items::dw_spr_stinklines,{:d},{:d},1,1".format(x, y))
-			
+
 			pass
 
 		def obj_spawnpoint__dream(p, creationCode):
@@ -1808,7 +1808,7 @@ def convertObjects(layerData):
 
 		def obj_enemy_cifhandr(p, creationCode):
 			pass
-		
+
 		def obj_pr_cupboard(p, creationCode):
 			pass
 
@@ -1877,7 +1877,7 @@ def convertObjects(layerData):
 
 		def obj_floor_un(p, creationCode):
 			pass
-	
+
 		def obj_console(p, creationCode):
 			pass
 
@@ -2184,35 +2184,35 @@ def convertObjects(layerData):
 		def obj_npc_mimic(p, creationCode):
 			# new 1.0.6 content?
 			pass
-			
+
 		def obj_riddle_008(p, creationCode):
 			# new as of ex
 			pass
-			
+
 		def _hpn_func(p, creationCode):
-		
+
 			print(f"{CYAN}numbertile called with \"{creationCode}\" {RESET}")
 			floorExport[p.x][p.y] = "Floor"
-			
+
 			# due to me not wanting to mess with floor compression
 			# im hijacking secrets to do this properly
-			
+
 			numVal = int(creationCode.rsplit(" ", 1)[1])
 			temp = f"{p.x},{p.y},\"{numVal:02d}\""
 			specialFloorExport.append(temp)
-			
+
 			pass
 
 		def obj_floor_hpn2(p, creationCode):
-			# DEF NEW AS OF EX, 
+			# DEF NEW AS OF EX,
 			# rm_test2_054
-			# going to cry 
+			# going to cry
 			# this will mess with floor code. im going to cry
 			# temp fix:
 			#ObjectFunctions.obj_floor(p, creationCode)
 			ObjectFunctions._hpn_func(p, creationCode)
 			pass
-		
+
 		def obj_floor_hpn3(p, creationCode):
 			#ObjectFunctions.obj_floor(p, creationCode)
 			ObjectFunctions._hpn_func(p, creationCode)
@@ -2226,75 +2226,75 @@ def convertObjects(layerData):
 			ObjectFunctions._hpn_func(p, creationCode)
 
 
-	
+
 	allData = []
-	
+
 	for label in ["Instances", "Floor_INS", "Floor", "Pit", "Player"]:
 		if label in layerData:
 			allData += layerData[label]["layer_data"]["instances"]
-	
-			
-	
+
+
+
 	for inst in allData:
-	
+
 		#x, y = (inst["x"] - 8) // 16, (inst["y"] - 8) // 16
-		
+
 		p = Pos(inst["x"], inst["y"])
 
 		objectDef = inst["object_definition"]
 		creationCodeFilename = inst["creation_code"]
-		
-		
-		
+
+
+
 		#if p.x < 0 or p.x >= 14 or p.y < 0 or p.y >= 9:
 		#	continue
-		
-	
-		
-	
+
+
+
+
 		if hasattr(ObjectFunctions, objectDef):
-		
+
 			creationCode = readCreationCode(p, creationCodeFilename)
-			# avoid needing this check every time 
+			# avoid needing this check every time
 			if creationCode == "destroy":
 				continue
-		
+
 			getattr(ObjectFunctions, objectDef)(p, creationCode)
 		else:
-		
+
 			print(YELLOW + "we dont have a definition for {:s} in convert entities".format(objectDef) + RESET)
-		
+
 			if objectDef not in failures:
 				failures[objectDef] = []
-		
+
 			failures[objectDef].append(layerData["roomName"])
-			
+
 			return None
-	
+
 	# remove any entities at a below 0
 	# we allow effects
 	for e in list([ e for e in entityExport ]):
 		x, y = [ int(x) for x in e.split(",")[1:] ]
-		
+
 		if x < 0 or x >= 14 or y < 0 or y >= 9:
 			entityExport.remove(e)
-			
+
 	# MAKE SURE THE PLAYER HAS A SPAWNPOINT HERE
 	if len(entityExport) == 0:
 		#print(RED + "there were no entities, not even a player??" + RESET)
 		return None
-		
-		
+
+
 	# this is dumb, and also (i think) slows compile time considerably.
 	# changing this to not waste space
 	# nvm, imjust going to hope O3 works
 	effectExport.insert(0, "&bn::sprite_tiles_items::dw_spr_statue_abaddon,-1,-1,-1,-1")
-	
+
 	# convert the floor array to values
 	floorExport = np.transpose(floorExport).flatten()
-	
+
 	# MAKE SURE THIS IS THE SAME AS THE ENUM IN SHAREDTYPES
-	
+
 	tileTypes = {
 		"Pit": 0,
 		"Floor": 1,
@@ -2307,10 +2307,11 @@ def convertObjects(layerData):
 		"WordTile": 8,
 		"RodTile": 9,
 		"LocustTile": 10,
+		"HalfBomb": 11
 	}
-	
+
 	floorExport = [ tileTypes[tile] for tile in floorExport ]
-	
+
 	start = floorExport
 	comp = compressData(start)
 	uncomp = uncompressData(comp)
@@ -2318,9 +2319,9 @@ def convertObjects(layerData):
 	if not np.array_equal(np.array(start), np.array(uncomp)):
 		print("array decomp somehow failed???")
 		exit()
-		
+
 	floorExport = comp
-	
+
 	entityPoses = set()
 	for e in entityExport:
 		temp = tuple([ int(x) for x in e.split(",")[1:]])
@@ -2329,102 +2330,102 @@ def convertObjects(layerData):
 			print(entityExport)
 			exit(1)
 		entityPoses.add(temp)
-	
+
 	specialFloorExport.insert(0, "-1,-1,NULL")
-	
+
 	return [floorExport, entityExport, effectExport, specialFloorExport, floorExitDest]
-	
+
 def convertRoom(data, isHardModePass):
 
 	global isHardMode
 	isHardMode = isHardModePass
 
 	layerData = {}
-	
+
 	for l in data["layers"]:
 		layerData[l["layer_name"]] = l
-	
+
 	layerData["roomName"] = data["name"]
-	
+
 	global room
 	room = data["name"]
-	
-	
+
+
 	formatArray = lambda arr : "".join([ "{:d},".format(elem) for elem in np.array(arr).flatten() ])
-	
+
 	formatFullArray = lambda name, arr : "constexpr static inline u8 {:s}[] = {{{:s}}};".format(name, formatArray(arr))
-	
+
 	temp = convertCollisionAndDetails(layerData)
-	
+
 	if temp is None:
 		#print(RED + "collision/details convert failed!" + RESET)
 		return None
-		
+
 	collision, details = temp
-		
+
 	objectsExport = convertObjects(layerData)
 	if objectsExport is None:
 		return None
-		
+
 	floorExport, instanceExport, effectExport, specialFloorExport, floorExitDest = objectsExport
-	
+
 
 	output = []
-	
+
 	tempNamespaceName = data["name"] if not isHardMode else "hard_" + data["name"]
-	
+
 	output.append("namespace {:s} {{".format(tempNamespaceName))
-	
+
 	if len(details["data"]) == 0:
 		details["data"] = [ [0 for i in range(9)] for j in range(14)]
-	
+
 	output.append(formatFullArray("collision", collision["data"]))
 	output.append(formatFullArray("details", details["data"]))
 
 	output.append("constexpr static inline u8 floor[] = {" + "".join([ "{:d},".format(instance) for instance in floorExport ]) + "};")
-	
-	output.append("constexpr static inline EntityHolder entities[] = {")	
+
+	output.append("constexpr static inline EntityHolder entities[] = {")
 	output.append("".join([ "{{{:s}}},".format(instance) for instance in instanceExport ]))
 	output.append("};")
-	
+
 	output.append("constexpr static inline int entityCount = {:d};".format(len(instanceExport)))
-	
+
 	output.append("constexpr static inline EffectHolder effects[] = {")
 	output.append("".join([ "{{{:s}}},".format(effect) for effect in effectExport ]))
-	output.append("};")	
-	
+	output.append("};")
+
 	output.append("constexpr static inline int effectsCount = {:d};".format(len(effectExport)))
-	
+
 	output.append("constexpr static inline SecretHolder secrets[] = {")
 	output.append("".join([ "{{{:s}}},".format(secret) for secret in specialFloorExport ]))
-	output.append("};")	
-	
+	output.append("};")
+
 	output.append("constexpr static inline int secretsCount = {:d};".format(len(specialFloorExport)))
-	
+
 	if len(floorExitDest) == 0:
 		output.append("constexpr static inline const char* exitDest = NULL;")
 	else:
 		output.append("constexpr static inline const char* exitDest = \"{:s}\\0\";".format(floorExitDest[0]))
-		
-	
+
+
 	if "tileset" not in collision or collision["tileset"] is None:
 		collision["tileset"] = "tile_bg_1"
-	
+
 	if "tileset" not in details or details["tileset"] is None:
 		details["tileset"] = "tile_edges"
-	
-	
+
+
 	output.append("constexpr static inline const bn::regular_bg_tiles_item* collisionTiles = &bn::regular_bg_tiles_items::dw_{:s};".format(collision["tileset"]))
 	output.append("constexpr static inline const bn::regular_bg_tiles_item* detailsTiles = &bn::regular_bg_tiles_items::dw_{:s};".format(details["tileset"]))
-	
+
 	output.append("};")
-	
+
 	return output
 
 def convertRoomWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
 
 	while not shouldStop.is_set():
-			
+
 		try:
 			data = jobQueue.get(timeout = 0.5)
 		except queue.Empty:
@@ -2432,31 +2433,31 @@ def convertRoomWorker(jobQueue: Queue, returnQueue: Queue, shouldStop: Event):
 			continue
 
 		data, isHardModePass = data
-			
+
 		res = convertRoom(data, isHardModePass)
-		
+
 		returnQueue.put([data["name"], res])
 
 def convertAllRoomsWorker(f, isHardModePass):
 
 	inputPath = "../ExportData/Room_Export/"
-	
+
 	jsonFiles = [file for file in os.listdir(inputPath) if file.lower().endswith('.json')]
-	
+
 	# dont need this, but i think it might give me an extra bit for compression'
 	# misc is needed for the,,, bee face room?
 	# test is needed for rm_test_0006
-	# i dont want to cause issues so, ima just manually readd it 
+	# i dont want to cause issues so, ima just manually readd it
 	removeStrings = ["test", "trailer", "dream", "rm_cc_results", "rm_cif_end", "memories"]
 	includeStrings = ["test2"]
-	
+
 	for removeStr in removeStrings:
 		# i could, and should one line this
 		jsonFiles = [ file for file in jsonFiles if removeStr not in file or "test2" in file]
-	
+
 	jsonFiles.append("rm_test_0006.json")
 	jsonFiles.append("rm_rm4.json")
-	
+
 	#jsonFiles = ["rm_0005.json"]
 	#jsonFiles = ["rm_0027.json"]
 	#jsonFiles = ["rm_0008.json"]
@@ -2466,86 +2467,86 @@ def convertAllRoomsWorker(f, isHardModePass):
 	#jsonFiles = ["rm_0009.json"]
 	#jsonFiles = ["rm_0008.json", "rm_0009.json"]
 	#jsonFiles = ["rm_0009.json"]
-	
-	successRooms = 0 
+
+	successRooms = 0
 	totalRooms = len(jsonFiles)
-	
+
 	successRoomsList = []
-	
+
 	allData = []
-	
+
 	for file in jsonFiles:
 		with open(os.path.join(inputPath, file)) as jsonFilePointer:
 			data = json.load(jsonFilePointer)
 			allData.append(data)
-	
+
 	global isHardMode
 	isHardMode = isHardModePass
-	
+
 	#pool = PoolQueue(convertRoomWorker, cpuPercent = 0.75)
 	#pool = PoolQueue(convertRoomWorker, cpuPercent = 0.05)
-	
+
 	#pool.start()
-	
+
 	resData = {}
-	
+
 	for data in allData:
 		#pool.send([data, isHardModePass])
 		print(f"doing room {'hard_' if isHardModePass else ''}" + data["name"])
 		temp = convertRoom(data, isHardModePass)
 		resData[data["name"]] = temp
-		
+
 	#resData = pool.join()
-	
+
 	for roomName, roomData in resData.items():
-		
+
 		if roomData is not None:
 			successRooms += 1
 			successRoomsList.append(roomName)
 			[ f.write(line + "\n") for line in roomData ]
 		else:
 			print(RED + roomName + " failure" + RESET)
-		
-	
+
+
 	writeFooter(f, [ elem.rsplit(".json", 1)[0] for elem in successRoomsList ])
-	
+
 	print("")
-	
+
 	print("we converted {:6.2f}% rooms({:d}/{:d}), i hope thats acceptable.".format(100*successRooms/totalRooms, successRooms, totalRooms))
-	
+
 	print("")
-	
+
 	print("primary failure sources:")
 
 	for _, v in failures.items():
 		if type(v) != list:
 			print("wtf")
 			exit(1)
-	
+
 	tempSorted = sorted([ [k, len(v), v] for k, v in failures.items() ], key = lambda elem : len(elem[2]), reverse=True)
-	
+
 	highlightStrings = ["mon", "_e_"]
-	
+
 	for t in tempSorted:
 		temp = str(t)
-		
+
 		col = WHITE
-		
+
 		for s in highlightStrings:
 			if s in temp:
 				col = RED
 				break
-				
+
 		print(col + temp + RESET)
 	print("")
-	
+
 	#print("compressed data had a ratio of {:6.2f}%".format(100 * compressedBytes / uncompressedBytes))
 
 	# program hands without this being here?
 	print(GREEN + "convertAllRoomsWorker done\n" + RESET)
-	
+
 	pass
-	
+
 def convertAllRooms():
 
 	"""
@@ -2555,22 +2556,22 @@ def convertAllRooms():
 	"""
 
 	f = open("AllRooms.h", "w")
-	
+
 	f.write("//Did you know every time you sigh, a little bit of happiness escapes?\n")
 
-	
+
 	# this is (curse)ing dumb, i should be recording the CHANGES between the normal and hard mode, this turns all the effort i put into compression to (curse)
 	isHardModePass = False
-	
+
 	print("starting normal mode conversion")
 	convertAllRoomsWorker(f, isHardModePass)
-	
+
 	print("starting hard mode conversion")
 	isHardModePass = True
 	convertAllRoomsWorker(f, isHardModePass)
-	
+
 	f.close()
-	
+
 	pass
 
 def main():
@@ -2582,13 +2583,12 @@ def main():
 
 	convertAllRooms()
 	print("done, copying roomdata")
-	
+
 	shutil.copy("AllRooms.h", "../../code/src")
-	
+
 	print("room conversion success")
 
 	return None
-	
+
 if __name__ == "__main__":
 	main()
-
