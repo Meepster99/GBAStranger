@@ -259,7 +259,6 @@ void RoomManager::initCustomRooms() {
 	BN_ASSERT(shouldBe42 == 42, "when loading custom rooms, the first unsigned of the savefile wasnt 42. wtf");
 
 	u8 burdenStates = readByte();
-	//u8 burdenStates = 0;
 	globalGame->saveData.hasMemory   = !!(burdenStates & 0b0001);
 	globalGame->saveData.hasWings    = !!(burdenStates & 0b0010);
 	globalGame->saveData.hasSword    = !!(burdenStates & 0b0100);

@@ -32,7 +32,7 @@ public:
 	// seperate vars probs the way to go
 	// actually though, why. its not like performance is taking much of a hit from this specifically
 	// i should add new features, or focus on lag from moving tiles
-	//SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
+	SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
 
 
 	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;

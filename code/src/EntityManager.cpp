@@ -66,6 +66,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	entityList.clear();
 	enemyList.clear();
 	obstacleList.clear();
+	tanStatueList.clear();
 	shadowList.clear();
 	deadList.clear();
 
@@ -228,6 +229,10 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		} else if(temp->isObstacle()) {
 			BN_ASSERT(obstacleList.size() + 1 != obstacleList.maxSize(), "obstacleList maxed out, why?");
 			obstacleList.insert(temp);
+
+			if(temp->entityType() == EntityType::TanStatue) {
+				tanStatueList.insert(temp);
+			}
 		}
 	}
 
@@ -883,6 +888,7 @@ EntityManager::~EntityManager() {
 	entityList.clear();
 	enemyList.clear();
 	obstacleList.clear();
+	tanStatueList.clear();
 	shadowList.clear();
 	deadList.clear();
 
@@ -1002,8 +1008,6 @@ void EntityManager::moveObstacles() {
 }
 
 void EntityManager::doMoves() { profileFunction();
-
-	BN_LOG("entityMap ram location = ", reinterpret_cast<void*>(entityMap));
 
 	// handling ("most of") all entity code in here instead of in each class is horrid
 	// but trying to handle the ordering of everything just,,, ugh
@@ -1261,6 +1265,7 @@ void EntityManager::doMoves() { profileFunction();
 	// its such a bummer that the behavours for these objects arent stored in the object itself.
 	// someone should really go fix that
 
+	/*
 	if(enemyList.size() == 0 && shadowList.size() == 0) {
 		for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 			if((*it)->entityType() == EntityType::TanStatue) {
@@ -1269,6 +1274,13 @@ void EntityManager::doMoves() { profileFunction();
 			} else {
 				++it;
 			}
+		}
+	}
+	*/
+
+	if(enemyList.size() == 0 && shadowList.size() == 0) {
+		while(tanStatueList.begin() != tanStatueList.end()) {
+			killEntity(*(tanStatueList.begin()));
 		}
 	}
 
@@ -1343,11 +1355,20 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	Pos tempPos = e->p;
 
 	futureEntityMap[tempPos.x][tempPos.y].erase(e);
-
 	bn::vector<Entity*, 4>::iterator res = entityMap[tempPos.x][tempPos.y].erase(e);
+
 	entityList.erase(e);
-	obstacleList.erase(e);
-	enemyList.erase(e);
+
+	// should save some cycles?
+	if(e->isObstacle()) {
+		obstacleList.erase(e);
+		if(e->entityType() == EntityType::TanStatue) {
+			tanStatueList.erase(e);
+		}
+	}
+	if(e->isEnemy()) {
+		enemyList.erase(e);
+	}
 
 	deadList.insert(e);
 
@@ -1368,7 +1389,7 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	return res;
 }
 
-void EntityManager::removeEntity(Entity* e) {
+void EntityManager::removeEntity(Entity* e) { // used for cutscenes, primarily the mimic talk in rm_0172
 	Pos tempPos = e->p;
 
 	futureEntityMap[tempPos.x][tempPos.y].erase(e);
@@ -1377,6 +1398,8 @@ void EntityManager::removeEntity(Entity* e) {
 	entityList.erase(e);
 	obstacleList.erase(e);
 	enemyList.erase(e);
+
+	tanStatueList.erase(e);
 
 	deadList.insert(e);
 }

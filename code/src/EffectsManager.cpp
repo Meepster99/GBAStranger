@@ -5407,20 +5407,7 @@ void EffectsManager::rotateTanStatues() {
 		return;
 	}
 
-	bool foundTanStatue = false;
-
-	for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
-		if(*it == NULL) {
-			continue;
-		}
-
-		if( (*it)->entityType() != EntityType::TanStatue ) {
-			foundTanStatue = true;
-			break;
-		}
-	}
-
-	if(!foundTanStatue) {
+	if(globalGame->entityManager.tanStatueList.size() == 0) {
 		return;
 	}
 
@@ -5440,16 +5427,7 @@ void EffectsManager::rotateTanStatues() {
 		const int val = (globalGame->effectsManager.rotateTanStatuesFrames) % 3;
 
 		if(globalGame->effectsManager.rotateTanStatuesFrames == 0) {
-
-			for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
-				if(*it == NULL) {
-					continue;
-				}
-
-				if( (*it)->entityType() != EntityType::TanStatue ) {
-					continue;
-				}
-
+			for(auto it = globalGame->entityManager.tanStatueList.begin(); it != globalGame->entityManager.tanStatueList.end(); ++it) {
 				(*it)->sprite.spritePointer.set_tiles(
 					bn::sprite_tiles_items::dw_spr_killer,
 					0
@@ -5460,21 +5438,12 @@ void EffectsManager::rotateTanStatues() {
 			return true;
 		}
 
-		for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
-			if(*it == NULL) {
-				continue;
-			}
-
-			if( (*it)->entityType() != EntityType::TanStatue ) {
-				continue;
-			}
-
+		for(auto it = globalGame->entityManager.tanStatueList.begin(); it != globalGame->entityManager.tanStatueList.end(); ++it) {
 			(*it)->sprite.spritePointer.set_tiles(
 				bn::sprite_tiles_items::dw_spr_killer,
 				val
 			);
 		}
-
 
 		return false;
 	};
