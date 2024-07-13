@@ -1519,8 +1519,9 @@ void Game::changeMusic() {
 
 		item.play();
 
-		bn::music::set_pitch(adjustVal);
-		bn::music::set_tempo(adjustVal);
+		// tbh,,,, no.
+		//bn::music::set_pitch(adjustVal);
+		//bn::music::set_tempo(adjustVal);
 
 	};
 

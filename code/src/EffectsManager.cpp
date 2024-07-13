@@ -2198,7 +2198,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 
 	auto activeTextPalette = spritePalette->getSpritePalette();
 	auto alternateTextPalette = spritePalette->getAlternateSpritePalette();
-	auto blackTextPalette = spritePalette->getBlackSpritePalette();
+	//auto blackTextPalette = spritePalette->getBlackSpritePalette();
 
 	if(game->roomManager.isWhiteRooms()) {
 		activeTextPalette = spritePalette->getLightGraySpritePalette();
@@ -2218,37 +2218,17 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 
 	#define RESTSPRITESIZE 8
 	bn::vector<bn::sprite_ptr, RESTSPRITESIZE> restSprites;
-	bn::vector<bn::vector<bn::sprite_ptr, RESTSPRITESIZE>, 4> restSpritesOutline;
+	//bn::vector<bn::vector<bn::sprite_ptr, RESTSPRITESIZE>, 4> restSpritesOutline;
 
 	bn::vector<bn::sprite_ptr, 4> yesSprites;
 	bn::vector<bn::sprite_ptr, 4> noSprites;
 
-	textGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view(questionString), restSprites);
+
+	bn::sprite_text_generator outlineGenerator(dw_fnt_text_12_outline_sprite_font);
+	outlineGenerator.generate((bn::fixed)restX, (bn::fixed)restY, bn::string_view(questionString), restSprites);
 	for(int i=0; i<restSprites.size(); i++) {
 		restSprites[i].set_bg_priority(0);
 		restSprites[i].set_palette(activeTextPalette);
-	}
-
-	for(int j=0; j<4; j++) {
-
-		restSpritesOutline.push_back(bn::vector<bn::sprite_ptr, 4>());
-
-		bn::fixed x = restX;
-		bn::fixed y = restY;
-
-		// stupid way of doing this but i dont want to write a switch case
-		Pos dif = Pos(1, 1);
-		dif.move(static_cast<Direction>(j));
-
-		x += (dif.x - 1);
-		y += (dif.y - 1);
-
-		textGenerator.generate(x, y, bn::string_view(questionString), restSpritesOutline[j]);
-		for(int i=0; i<restSpritesOutline[j].size(); i++) {
-			restSpritesOutline[j][i].set_bg_priority(0);
-			restSpritesOutline[j][i].set_z_order(1);
-			restSpritesOutline[j][i].set_palette(blackTextPalette);
-		}
 	}
 
 	int res = 0;
@@ -2312,11 +2292,6 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		}
 	}
 
-
-	for(int i=0; i<4; i++) {
-		restSpritesOutline[i].clear();
-	}
-	restSpritesOutline.clear();
 	restSprites.clear();
 	yesSprites.clear();
 	noSprites.clear();
@@ -3012,24 +2987,6 @@ void EffectsManager::superRodNumber() { profileFunction();
 	Pos playerPos = globalGame->entityManager.player->p;
 	int val = globalGame->entityManager.player->rod.size();
 	char string[4] = {'0', '\0', '\0', '\0'};
-
-	// wtf is this??? ik division is expensive but what?
-	/*
-	int index = 0;
-	constexpr int vals[3] = {99, 9, 0};
-	for(int i=0; i<3; i++) {
-		if(val > vals[i] || index != 0) {
-			int temp = 0;
-			while(val > vals[i]) {
-				val -= (vals[i] + 1);
-				temp++;
-			}
-			string[index] = '0' + temp;
-			index++;
-		}
-	}
-	string[3] = '\0';
-	*/
 
 	char* start = string;
 	if(val > 9) {

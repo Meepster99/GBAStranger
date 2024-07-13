@@ -799,7 +799,6 @@ def convertFonts(outputPath):
 
 			writeFont(tempImage, charData, outputPath, "fnt_text_12_outline.png", fontDataFile)
 
-
 	fontDataFile.close()
 
 	copyIfChanged("fontData.h", "../../code/src/")
@@ -824,8 +823,6 @@ def getSpriteDimensions(spriteName, padded):
 	spritePath = paddedInputPath if padded else inputPath
 
 	png_files = []
-
-
 
 	search_prefix = spriteName
 
@@ -871,9 +868,6 @@ def convertSprite(spriteName, spriteImages, dimensions, isBackground, isNormalBa
 	outputPath = "./formattedOutput/allSprites/"
 
 	if not isNormalBackground:
-
-
-
 		# hmm
 		# i could maybe,,, leave this to the butano thingy to take care of?
 		# im assuming/hoping that if i use regular_bg
@@ -1690,6 +1684,8 @@ def main():
 	if not os.path.isdir("../../code/graphics/"):
 		createFolder("../../code/graphics/")
 
+	#convertFonts("./formattedOutput/fonts/")
+
 	if len(sys.argv) != 1:
 		#generateCustomFloorBackground("./formattedOutput/customFloor/")
 
@@ -1732,7 +1728,6 @@ def main():
 
 
 	createFolder("./formattedOutput/")
-	#createFolder("./formattedOutput/sprites/")
 	createFolder("./formattedOutput/fonts/")
 	createFolder("./formattedOutput/tiles/")
 	createFolder("./formattedOutput/customFloor/")
