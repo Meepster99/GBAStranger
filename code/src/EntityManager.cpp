@@ -66,13 +66,18 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	entityList.clear();
 	enemyList.clear();
 	obstacleList.clear();
+	addStatueList.clear();
 	tanStatueList.clear();
+	monStatueList.clear();
+	levStatueList.clear();
 	shadowList.clear();
 	deadList.clear();
 
 	player = NULL;
 
 	SaneSet<Pos, MAXENTITYSPRITES> posSet;
+
+	Entity* tempEntity = NULL;
 
 	for(int i=0; i<entitiesCount; i++) {
 		// i shouldnt have to do this, but despite getting a literal 1:1 memory recreation, it still chose to (curse) itself
@@ -172,7 +177,9 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				}
 				break;
 			case EntityType::AddStatue:
-				entityList.insert(getAddStatue(tempPos));
+				tempEntity = getAddStatue(tempPos);
+				entityList.insert(tempEntity);
+				addStatueList.insert(tempEntity);
 				break;
 			case EntityType::EusStatue:
 				entityList.insert(new EusStatue(tempPos));
@@ -181,16 +188,22 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new BeeStatue(tempPos));
 				break;
 			case EntityType::MonStatue:
-				entityList.insert(new MonStatue(tempPos));
+				tempEntity = new MonStatue(tempPos);
+				entityList.insert(tempEntity);
+				monStatueList.insert(tempEntity);
 				break;
 			case EntityType::TanStatue:
-				entityList.insert(new TanStatue(tempPos));
+				tempEntity = new TanStatue(tempPos);
+				entityList.insert(tempEntity);
+				tanStatueList.insert(tempEntity);
 				break;
 			case EntityType::GorStatue:
 				entityList.insert(new GorStatue(tempPos));
 				break;
 			case EntityType::LevStatue:
-				entityList.insert(new LevStatue(tempPos));
+				tempEntity = new LevStatue(tempPos);
+				entityList.insert(tempEntity);
+				levStatueList.insert(tempEntity);
 				break;
 			case EntityType::CifStatue:
 				entityList.insert(new CifStatue(tempPos));
@@ -207,14 +220,12 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 	BN_ASSERT(entityList.size() == entitiesCount, "why does the entitylist size not equal entity count?? size=",entityList.size(), " count=",entitiesCount);
 	BN_ASSERT(player != NULL, "finished loading in all sprites, but a player wasnt found");
 
+	// enemylist and obstacle list should honestly be done up above?
+
 	// create starting map.
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
 
 		Entity* temp = *it;
-
-		(*it)->entityManager = this;
-		(*it)->effectsManager = effectsManager;
-		(*it)->game = game;
 
 		SaneSet<Entity*, 4>& mapRef = getMap(temp->p);
 		mapRef.insert(temp);
@@ -226,37 +237,34 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		if(temp->isEnemy()) {
 			BN_ASSERT(enemyList.size() + 1 != enemyList.maxSize(), "enemyList maxed out, why?");
 			enemyList.insert(temp);
+
+			Pos testPos(temp->p);
+			Direction testDir;
+			Direction resetDir;
+
+			switch(temp->entityType()) {
+				default:
+					continue;
+					break;
+				case EntityType::Leech:
+					testDir = Direction::Right;
+					resetDir = Direction::Left;
+					break;
+				case EntityType::Maggot:
+					testDir = Direction::Down;
+					resetDir = Direction::Up;
+					break;
+			}
+
+			// only leeches and maggots execute this part, all others would have continued the loop
+
+			if(!testPos.move(testDir) || hasCollision(testPos) || !hasFloor(testPos) || hasEntity(testPos)) {
+				temp->currentDir = resetDir;
+			}
+
 		} else if(temp->isObstacle()) {
 			BN_ASSERT(obstacleList.size() + 1 != obstacleList.maxSize(), "obstacleList maxed out, why?");
 			obstacleList.insert(temp);
-
-			if(temp->entityType() == EntityType::TanStatue) {
-				tanStatueList.insert(temp);
-			}
-		}
-	}
-
-	for(auto it = enemyList.begin(); it != enemyList.end(); ++it) {
-		if((*it)->entityType() != EntityType::Leech && (*it)->entityType() != EntityType::Maggot) {
-			continue;
-		}
-
-		Pos testPos((*it)->p);
-		Direction testDir;
-		Direction resetDir;
-
-		if((*it)->entityType() == EntityType::Leech) {
-			testDir = Direction::Right;
-			resetDir = Direction::Left;
-		} else {
-			testDir = Direction::Down;
-			resetDir = Direction::Up;
-		}
-
-		if(!testPos.move(testDir)) {
-			(*it)->currentDir = resetDir;
-		} else if(hasCollision(testPos) || !hasFloor(testPos) || hasEntity(testPos)) {
-			(*it)->currentDir = resetDir;
 		}
 	}
 
@@ -1354,8 +1362,18 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	// should save some cycles?
 	if(e->isObstacle()) {
 		obstacleList.erase(e);
-		if(e->entityType() == EntityType::TanStatue) {
-			tanStatueList.erase(e);
+		switch(e->entityType()) {
+			case EntityType::TanStatue:
+				tanStatueList.erase(e);
+				break;
+			case EntityType::LevStatue:
+				levStatueList.erase(e);
+				break;
+			case EntityType::MonStatue:
+				monStatueList.erase(e);
+				break;
+			default:
+				break;
 		}
 	}
 	if(e->isEnemy()) {
@@ -1392,6 +1410,8 @@ void EntityManager::removeEntity(Entity* e) { // used for cutscenes, primarily t
 	enemyList.erase(e);
 
 	tanStatueList.erase(e);
+	monStatueList.erase(e);
+	levStatueList.erase(e);
 
 	deadList.insert(e);
 }
@@ -1645,6 +1665,7 @@ void EntityManager::updateScreen() {
 	// update all onscreen sprites
 	// NOT EFFICIENT.
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
+		BN_LOG("entitytype ", (int)(*it)->entityType());
 		(*it)->doUpdate();
 	}
 }
@@ -1709,8 +1730,15 @@ void EntityManager::createKillEffects() const {
 		if(*it == NULL) {
 			continue;
 		}
-		if((*it)->entityType() != EntityType::Player && (*it)->entityType() != EntityType::LevStatue && (*it)->entityType() != EntityType::MonStatue && (*it)->entityType() != EntityType::Shadow) {
-			effectsManager->entityKill(*it);
+		switch((*it)->entityType()) {
+			case EntityType::Player:
+			case EntityType::LevStatue:
+			case EntityType::MonStatue:
+			case EntityType::Shadow:
+				break;
+			default:
+				effectsManager->entityKill(*it);
+				break;
 		}
 	}
 }

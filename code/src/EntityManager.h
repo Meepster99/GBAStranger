@@ -32,8 +32,11 @@ public:
 	// seperate vars probs the way to go
 	// actually though, why. its not like performance is taking much of a hit from this specifically
 	// i should add new features, or focus on lag from moving tiles
+	// at this point, would a 2d vector addressed by entitytype just be better here?
+	SaneSet<Entity*, MAXENTITYSPRITES> addStatueList;
 	SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
-
+	SaneSet<Entity*, MAXENTITYSPRITES> levStatueList;
+	SaneSet<Entity*, MAXENTITYSPRITES> monStatueList;
 
 	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
 	bn::deque<Pos, 128> shadowQueue;

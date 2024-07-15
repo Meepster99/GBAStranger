@@ -18,7 +18,7 @@ void Floor::setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 	collisionPointer->rawMap.setTile(x, y, tileIndex + collisionTileCount, flipX, flipY);
 }
 
-__attribute__((noinline, section(".iwram"))) void doFloorDraw() {
+void doFloorDraw() {
 
 	auto& floorMap = globalGame->tileManager.floorMap;
 	//auto& floorLayer = globalGame->tileManager.floorLayer;

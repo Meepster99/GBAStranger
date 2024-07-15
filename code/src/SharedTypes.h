@@ -546,9 +546,11 @@ public:
 
 };
 
-#define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+#define POSATTRIBUTES
+//#define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
 
 typedef int_fast8_t POSTYPE;
+//typedef int16_t POSTYPE;
 
 class Pos {
 public:
@@ -571,7 +573,7 @@ public:
         return *this;
     }
 
-	POSATTRIBUTES bool operator<(const Pos& other) const {
+	POSATTRIBUTES constexpr bool operator<(const Pos& other) const {
 		//return (x + 14 * y) < (other.x + 14 * y);
 		// x and y both,, are restricted to 4 bits max per num,,,, i canoptimize this
 		// this is only rlly being used for SaneSet anyway

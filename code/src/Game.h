@@ -145,11 +145,6 @@ public:
 		tileManager.effectsManager = &effectsManager;
 		tileManager.cutsceneManager = &cutsceneManager;
 
-		Entity::entityManager = &entityManager;
-		Entity::effectsManager = &effectsManager;
-		Entity::tileManager = &tileManager;
-		Entity::cutsceneManager = &cutsceneManager;
-
 		entityManager.effectsManager = &effectsManager;
 		entityManager.tileManager = &tileManager;
 		effectsManager.tileManager = &tileManager;
@@ -161,7 +156,6 @@ public:
 		FloorTile::floorLayer = &tileManager.floorLayer;
 
 		FloorTile::game = this;
-		Entity::game = this;
 		BigSprite::game = this;
 
 		BigSprite::entityManager = &entityManager;

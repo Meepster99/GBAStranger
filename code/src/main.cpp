@@ -387,7 +387,6 @@ int main() {
 
 	BN_ASSERT(totalIWram.safe_division(32 * 1024) < 1, "iwram overflow!!!");
 	BN_ASSERT(totalEWram.safe_division(256 * 1024) < 1, "ewram overflow!!!");
-
 	// ---
 
 	bn::bg_tiles::set_allow_offset(true);
