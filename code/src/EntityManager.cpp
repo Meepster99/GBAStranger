@@ -298,7 +298,7 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 
 				menuOpened = false;
 
-				BN_LOG("move");
+				BN_LOG("add pause statue move");
 
 				Pos pastPos = e->p;
 
@@ -315,6 +315,13 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 				e->doUpdate();
 
 				tileManager->doFloorSteps();
+
+				// such a weird one off case. calling resetroom in here also feels wrong
+				if(tileManager->exitTile != NULL && tileManager->exitTile->tilePos == player->p && Switch::pressedCount == Switch::totalCount) {
+					addKill(NULL);
+
+					globalGame->resetRoom();
+				}
 			}
 		};
 
