@@ -567,7 +567,7 @@ bool Obstacle::kicked() {
 }
 
 Chest::Chest(Pos p_, bool isEmpty) : Obstacle(p_) {
-	spriteTilesArray.clear();
+
 	spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_chest_regular);
 
 	// this is horrid, but sometimes chests spawn without any floor under them.
