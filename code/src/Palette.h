@@ -504,20 +504,15 @@ extern Palette ZERORANGERPALETTE;
 
 extern Palette DEPTHS;
 
-//extern Palette MORNING;
-//extern Palette NOON;
-//extern Palette EVENING;
 extern Palette NIGHT;
 
 extern Palette MILK;
 
+extern Palette BOTHERSOME;
+extern Palette POCKET;
+extern Palette PORTMASTER;
+
 extern Palette CUSTOM;
 
-extern Palette* paletteList[14];
-extern const char* paletteNameList[14];
-
-
-//extern Palette redText;
-//extern Palette greenText;
-//extern Palette blueText;
-//extern Palette whiteText;
+extern Palette* paletteList[17];
+extern const char* paletteNameList[17];

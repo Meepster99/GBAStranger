@@ -319,7 +319,6 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 				// such a weird one off case. calling resetroom in here also feels wrong
 				if(tileManager->exitTile != NULL && tileManager->exitTile->tilePos == player->p && Switch::pressedCount == Switch::totalCount) {
 					addKill(NULL);
-
 					globalGame->resetRoom();
 				}
 			}
@@ -1672,7 +1671,6 @@ void EntityManager::updateScreen() {
 	// update all onscreen sprites
 	// NOT EFFICIENT.
 	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
-		BN_LOG("entitytype ", (int)(*it)->entityType());
 		(*it)->doUpdate();
 	}
 }

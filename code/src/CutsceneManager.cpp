@@ -162,10 +162,42 @@ void CutsceneManager::introCutscene() {
 		game->doButanoUpdate();
 	}
 
-	game->effectsManager.doDialogue("[You aquired a strange rod]\n"
-	"[Simply holding it makes you feel uneasy]\n"
-	"[You begin to imagine your whole life existing on a 2001 handheld]\n"
-	"[Something is completely messed up, but in a PG way]\0", true);
+	/*
+
+	[The strange rod has changed its form]\n
+	[And somehow...]\n
+	[You feel your uneasiness fading away]\n
+
+	*/
+
+	if(isSuperRodChest) {
+		switch(game->mode) {
+			default:
+			case 0:
+				game->effectsManager.doDialogue("[The strange rod has changed its form]\n"
+					"[And somehow...]\n"
+					"[You feel your uneasiness fading away]\0", true);
+				break;
+			case 1:
+				game->effectsManager.doDialogue("[The strange rod has changed its form]\n"
+				"[And somehow...]\n"
+				"[You feel your uneasiness fading away]\0", true);
+				break;
+			case 2: // comment on unused graphics
+				game->effectsManager.doDialogue("[The strange rod has changed its form]\n"
+				"[However...]\n"
+				"[Your uneasiness remains.]\n"
+				"[Shouldn't someone else have this?]\0", true);
+				break;
+		}
+	} else {
+		game->effectsManager.doDialogue("[You aquired a strange rod]\n"
+		"[Simply holding it makes you feel uneasy]\n"
+		"[You begin to imagine your whole life existing on a 2001 handheld]\n"
+		"[Something is completely messed up, but in a PG way]\0", true);
+	}
+
+
 	game->playSound(&bn::sound_items::void_stranger_ost_56);
 
 	// its insane that i never overloaded the set_tiles func
