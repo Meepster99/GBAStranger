@@ -93,6 +93,7 @@ fullClean:
 	rm -fr audio graphics
 
 	rm -fr ./src/AllRooms.h
+	rm -fr ./src/fontData.h
 	rm -fr ./src/dataWinIncludes.h
 
 	rm -fr ../misc/massFormatter/formattedOutput
