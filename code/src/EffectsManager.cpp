@@ -186,7 +186,7 @@ void BigSprite::firstDraw() {
 			tempSprite.spritePointer.set_bg_priority(priority);
 
 
-			BN_LOG("WHAT, ", x + (y * width) + (animationIndex * width * height));
+			//BN_LOG("WHAT, ", x + (y * width) + (animationIndex * width * height));
 
 			tempSprite.spritePointer.set_tiles(
 				*tiles,
@@ -4005,6 +4005,7 @@ void EffectsManager::entityFall(Entity* entity) {
 
 void EffectsManager::playerBrandRoomBackground() {
 
+    // does this capture duplicate the hblank thing?
 	auto createFunc = [](Effect* obj) mutable -> void {
 
 		int randIndex = randomGenerator.get_int(0, 4);
@@ -4034,14 +4035,18 @@ void EffectsManager::playerBrandRoomBackground() {
 		obj->tempCounter = randomGenerator.get_int(0, 2) == 0 ? obj->tempCounter : -obj->tempCounter;
 		obj->tempCounter2 = randomGenerator.get_int(0, 2) ==0 ? obj->tempCounter2 : -obj->tempCounter2;
 
-
 		obj->x = randomGenerator.get_int(-32, 32);
 		obj->y = randomGenerator.get_int(-32, 32);
 
 		obj->sprite.spritePointer.set_position(obj->x, obj->y);
 	};
 
-	auto tickFunc = [](Effect* obj) mutable -> bool {
+	auto tickFunc = [this](Effect* obj) mutable -> bool {
+
+		// using optional to take advantage of destruction is something i wish i understood earlier
+		//colors_hbe.reload_colors_ref();
+
+		// -----
 
 		obj->x += obj->tempCounter;
 		obj->y += obj->tempCounter2;
@@ -4078,9 +4083,6 @@ void EffectsManager::playerBrandRoomBackground() {
 		}
 
 		createEffect(createFunc, tickFunc);
-		//Effect* e = new Effect(createFunc, tickFunc);
-		//effectList.insert(effectList.begin(), e);
-
 
 		effectCount++;
 
@@ -4088,6 +4090,51 @@ void EffectsManager::playerBrandRoomBackground() {
 	};
 
 	createEffect(generatorCreateFunc, generatorTickFunc);
+
+	if(bn::hbes::used_count() > 2) {
+		return;
+	}
+
+	//bn::bg_palettes_transparent_color_hbe_ptr colors_hbe = bn::bg_palettes_transparent_color_hbe_ptr::create(colors);
+	//bn::backdrop_color_hbe_ptr colors_hbe = bn::backdrop_color_hbe_ptr::create(hbeColorsList);
+
+	bn::color bg = globalGame->pal->getColorArray()[1];
+	bn::color dark = globalGame->pal->getColorArray()[4];
+	bn::color light = globalGame->pal->getColorArray()[3];
+
+    // change the background colors
+	createEffect([](Effect* obj) mutable -> void { obj->sprite.spritePointer.set_position(-32, -32); },
+	[ colors_hbe = bn::backdrop_color_hbe_ptr::create(hbeColorsList),
+	this, count = 160, dark, light, bg](Effect* obj) mutable -> bool {
+		(void)obj;
+
+		count-=2;
+		if(!count) {
+			return true;
+		}
+
+		for(int index = 0; index<bn::display::height(); index++) {
+
+			if(index < (160 - count) || index > count) {
+				hbeColorsList[index] = bg;
+				continue;
+			}
+
+			bn::fixed h = ((bn::fixed)index) / bn::display::height();
+
+			bn::fixed r = light.red() + ((dark.red() - light.red()) * h);
+			bn::fixed g = light.green() + ((dark.green() - light.green()) * h);
+			bn::fixed b = light.blue() + ((dark.blue() - light.blue()) * h);
+
+			bn::color color((int)r, (int)g, (int)b);
+
+			hbeColorsList[index] = color;
+		}
+
+		colors_hbe.reload_colors_ref();
+
+		return false;
+	});
 }
 
 Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {

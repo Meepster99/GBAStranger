@@ -8,7 +8,6 @@
 #include "EntityManager.h"
 #include "EffectsManager.h"
 #include "CutsceneManager.h"
-//#include "LinkManager.h"
 
 extern Game* globalGame;
 extern bn::fixed sinTable[360];

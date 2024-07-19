@@ -9,6 +9,11 @@
 // but in order to pass lambda funcs with captures as func pointers, its needed.
 #include <functional>
 
+#include "bn_display.h"
+#include "bn_bg_palettes_transparent_color_hbe_ptr.h"
+#include "bn_backdrop_color_hbe_ptr.h"
+#include "bn_hbes.h"
+
 class Game;
 class EntityManager;
 class TileManager;
@@ -426,6 +431,7 @@ public:
 	void entityKill(Entity* entity);
 	void entityFall(Entity* entity);
 	void entityFall(EntityType t, Pos p);
+	alignas(int) bn::color hbeColorsList[bn::display::height()];
 	void playerBrandRoomBackground();
 	Effect* generateSweatEffect(Entity* sweatEntity = NULL);
 	Effect* generateDialogueEndpointer();
