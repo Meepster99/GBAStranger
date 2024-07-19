@@ -1,7 +1,7 @@
 
 #include "Entity.h"
 
-#include "entityManager.h"
+#include "EntityManager.h"
 
 #include "Game.h"
 
@@ -22,20 +22,20 @@ void Player::pushRod(Pos tilePos) {
 
 	// pick tile up
 
-	FloorTile* tile = globalGame->tileManager.floorMap[tilePos.x][tilePos.y];
+	FloorTile* tile = TileManager::floorMap[tilePos.x][tilePos.y];
 
-	rod.push_back(globalGame->tileManager.floorMap[tilePos.x][tilePos.y]);
+	rod.push_back(TileManager::floorMap[tilePos.x][tilePos.y]);
 
-	globalGame->tileManager.floorMap[tilePos.x][tilePos.y] = NULL;
+	TileManager::floorMap[tilePos.x][tilePos.y] = NULL;
 
-	globalGame->entityManager.rodUse();
-	globalGame->tileManager.updateTile(tilePos);
-	globalGame->tileManager.updateRod();
+	EntityManager::rodUse();
+	TileManager::updateTile(tilePos);
+	TileManager::updateRod();
 
 	bn::sound_items::snd_voidrod_store.play();
-	globalGame->effectsManager.voidRod(tilePos, currentDir);
+	EffectsManager::voidRod(tilePos, currentDir);
 
-	globalGame->cutsceneManager.disCrash(tile, true);
+	CutsceneManager::disCrash(tile, true);
 }
 
 void Player::popRod(Pos tilePos) {
@@ -46,16 +46,16 @@ void Player::popRod(Pos tilePos) {
 	rod.pop_back();
 
 	tempTile->tilePos = tilePos;
-	globalGame->tileManager.floorMap[tilePos.x][tilePos.y] = tempTile;
+	TileManager::floorMap[tilePos.x][tilePos.y] = tempTile;
 
-	globalGame->entityManager.rodUse();
-	globalGame->tileManager.updateTile(tilePos);
-	globalGame->tileManager.updateRod();
+	EntityManager::rodUse();
+	TileManager::updateTile(tilePos);
+	TileManager::updateRod();
 
 	bn::sound_items::snd_voidrod_place.play();
-	globalGame->effectsManager.voidRod(tilePos, currentDir);
+	EffectsManager::voidRod(tilePos, currentDir);
 
-	globalGame->cutsceneManager.disCrash(tempTile, false);
+	CutsceneManager::disCrash(tempTile, false);
 }
 
 bool Player::inRod(FloorTile* tile) {
@@ -100,28 +100,28 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		bool moveRes = tilePos.move(currentDir);
 
 		if(!moveRes) {
-			//globalGame->effectsManager.createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			globalGame->effectsManager.questionMark();
+			//EffectsManager::createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			EffectsManager::questionMark();
 			return {false, bn::optional<Direction>()};
 		}
 
-		if(globalGame->entityManager.hasCollision(tilePos)) {
-			//globalGame->effectsManager.createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			globalGame->effectsManager.questionMark();
+		if(EntityManager::hasCollision(tilePos)) {
+			//EffectsManager::createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			EffectsManager::questionMark();
 			return {false, bn::optional<Direction>()};
 		}
 
-		if(globalGame->entityManager.hasObstacle(tilePos)) {
+		if(EntityManager::hasObstacle(tilePos)) {
 			// do dialogue here
 			// what abt npcs tho, (curse)
 			// shadows not technically being enemies rlly (curse)s me
 
-			Obstacle* temp = static_cast<Obstacle*>(*(globalGame->entityManager.getMap(tilePos).begin()));
+			Obstacle* temp = static_cast<Obstacle*>(*(EntityManager::getMap(tilePos).begin()));
 
 			if(temp->entityType() == EntityType::Interactable || temp->entityType() == EntityType::Chest || hasMemory) {
 				temp->interact();
 			} else {
-				globalGame->effectsManager.questionMark();
+				EffectsManager::questionMark();
 			}
 
 			return {false, bn::optional<Direction>()};
@@ -129,50 +129,50 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 
 		// if there is a entity in this tile, this is an invalid move(unless sword!).
 
-		if(globalGame->entityManager.hasEntity(tilePos)) {
-			if( (hasSword && !inRod(globalGame->tileManager.swordTile)) ||
-				hashString("rm_0172\0") == globalGame->roomManager.currentRoomHash()
+		if(EntityManager::hasEntity(tilePos)) {
+			if( (hasSword && !inRod(TileManager::swordTile)) ||
+				hashString("rm_0172\0") == RoomManager::currentRoomHash()
 				) {
-				BN_ASSERT(globalGame->entityManager.getMap(tilePos).size() == 1, "when killing an entity, there were multiple entitys in the tilepos??");
+				BN_ASSERT(EntityManager::getMap(tilePos).size() == 1, "when killing an entity, there were multiple entitys in the tilepos??");
 
-				Entity* tempEntity = *(globalGame->entityManager.getMap(tilePos).begin());
+				Entity* tempEntity = *(EntityManager::getMap(tilePos).begin());
 				if(tempEntity->entityType() != EntityType::Shadow) {
 
-					if(hashString("rm_0172\0") == globalGame->roomManager.currentRoomHash()) {
+					if(hashString("rm_0172\0") == RoomManager::currentRoomHash()) {
 						// i rlly rlly hope that doing,,, this call so deep inside of the move code doesnt
 						// mess anything up during vblank
-						globalGame->cutsceneManager.mimicTalk();
+						CutsceneManager::mimicTalk();
 
-						globalGame->entityManager.removeEntity(tempEntity);
-						globalGame->effectsManager.sword(tilePos, currentDir);
+						EntityManager::removeEntity(tempEntity);
+						EffectsManager::sword(tilePos, currentDir);
 
 						return {true, bn::optional<Direction>()};
 					}
 
 					tempEntity->deathReason = EntityType::Player;
 
-					globalGame->entityManager.killEntity(tempEntity);
+					EntityManager::killEntity(tempEntity);
 
 					// ADD STEPOFF HERE?
-					globalGame->tileManager.stepOffs.insert(tilePos);
+					TileManager::stepOffs.insert(tilePos);
 
-					globalGame->effectsManager.sword(tilePos, currentDir);
+					EffectsManager::sword(tilePos, currentDir);
 
-					globalGame->entityManager.futureEntityMap[tilePos.x][tilePos.y] = globalGame->entityManager.entityMap[tilePos.x][tilePos.y];
+					EntityManager::futureEntityMap[tilePos.x][tilePos.y] = EntityManager::entityMap[tilePos.x][tilePos.y];
 					//futureEntityMap[tilePos.x][tilePos.y] = entityMap[tilePos.x][tilePos.y];
 
 					return {true, bn::optional<Direction>()};
 				}
 			}
 
-			//globalGame->effectsManager.createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
-			globalGame->effectsManager.questionMark();
+			//EffectsManager::createEffect(p-Pos(0, 1), EffectTypeCast(questionMark));
+			EffectsManager::questionMark();
 			return {false, bn::optional<Direction>()};
 		}
 
 		// do the tile swap.
 
-		FloorTile* tile = globalGame->tileManager.floorMap[tilePos.x][tilePos.y];
+		FloorTile* tile = TileManager::floorMap[tilePos.x][tilePos.y];
 
 		if(hasRod || hasSuperRod) {
 			if(tile == NULL && rod.size() != 0) {
@@ -182,14 +182,14 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				// pick tile up
 				pushRod(tilePos);
 			} else if(tile == NULL && rod.size() == 0) {
-				globalGame->effectsManager.questionMark();
+				EffectsManager::questionMark();
 				return {false, bn::optional<Direction>()};
 			} else if (tile != NULL && rod.size() != 0) {
-				globalGame->effectsManager.questionMark();
+				EffectsManager::questionMark();
 				return {false, bn::optional<Direction>()};
 			}
 		} else {
-			globalGame->effectsManager.questionMark();
+			EffectsManager::questionMark();
 		}
 
 		nextMove = bn::optional<Direction>();
@@ -225,18 +225,18 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 	// we can do this without needing to vblank, since it is meant to hold up execution
 
 	Pos tempPos = p;
-	if(!tempPos.move(currentDir) || globalGame->entityManager.hasCollision(tempPos)) {
-		globalGame->playSound(&bn::sound_items::snd_push_small);
+	if(!tempPos.move(currentDir) || EntityManager::hasCollision(tempPos)) {
+		Game::playSound(&bn::sound_items::snd_push_small);
 		return {true, bn::optional<Direction>(currentDir)};
 	}
 
-	if( ((wingsUse == hasWings) || hasWingsTile) && !globalGame->entityManager.hasFloor(tempPos) && !globalGame->entityManager.hasCollision(tempPos) && !globalGame->entityManager.hasEntity(tempPos)) {
+	if( ((wingsUse == hasWings) || hasWingsTile) && !EntityManager::hasFloor(tempPos) && !EntityManager::hasCollision(tempPos) && !EntityManager::hasEntity(tempPos)) {
 
 	   BN_LOG("doing sweat!");
 
 		// spr_sweat
 
-		globalGame->entityManager.shouldTickPlayer = false;
+		EntityManager::shouldTickPlayer = false;
 
 		// i should rlly probs not be using this coord system
 		bn::fixed xVal = sprite.screenx;
@@ -272,7 +272,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		bn::fixed factor = 1.0;
 		int tickAmount = (8.0 / factor).ceil_integer();
 
-		Effect* sweatEffect = globalGame->effectsManager.generateSweatEffect();
+		Effect* sweatEffect = EffectsManager::generateSweatEffect();
 
 		sprite.spritePointer.set_x(xVal);
 		sprite.spritePointer.set_y(yVal);
@@ -291,7 +291,7 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 				if(frame % 6 == 0) {
 					doTick();
 				}
-				globalGame->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 			if(playerStop) {
 				break;
@@ -309,8 +309,8 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 			}
 		}
 
-		globalGame->effectsManager.removeEffect(sweatEffect);
-		globalGame->entityManager.shouldTickPlayer = true;
+		EffectsManager::removeEffect(sweatEffect);
+		EntityManager::shouldTickPlayer = true;
 
 		if(playerStop) {
 			currentDir = currentDirBackup;
@@ -324,9 +324,9 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 
 	// check if we are bumping into an obstacle, and if so, set the playerPush var
 	tempPos = p;
-	if(tempPos.move(currentDir) && globalGame->entityManager.hasObstacle(tempPos)) {
-		BN_ASSERT(globalGame->entityManager.getMap(tempPos).size() == 1, "when deciding what the player pushed, something was wrong");
-		globalGame->entityManager.playerPush = *(globalGame->entityManager.getMap(tempPos).begin());
+	if(tempPos.move(currentDir) && EntityManager::hasObstacle(tempPos)) {
+		BN_ASSERT(EntityManager::getMap(tempPos).size() == 1, "when deciding what the player pushed, something was wrong");
+		EntityManager::playerPush = *(EntityManager::getMap(tempPos).begin());
 	}
 
 	return {true, bn::optional<Direction>(currentDir)};
@@ -342,7 +342,7 @@ void Player::updateTileIndex() {
 
 	// there should of been a way to do this by,,, setting the bool in hasmoved, but that didnt seem to work.
 	// now the bool is updated by movefailed and movesucceded
-	// nope, im just going to use the playermoved bool from the globalGame->entityManager, (curse) it
+	// nope, im just going to use the playermoved bool from the Game::entityManager, (curse) it
 	// nope, player->p == playerStart
 	// gods this is so dumb
 
@@ -354,7 +354,7 @@ void Player::updateTileIndex() {
 Player::Player(Pos p_) : Entity(p_) {
 	spriteTilesArray.clear();
 
-	switch(globalGame->mode) {
+	switch(Game::mode) {
 		default:
 		case 0:
 			spriteTilesArray.push_back(bn::sprite_tiles_items::dw_spr_player_up);
@@ -395,18 +395,18 @@ Player::Player(Pos p_) : Entity(p_) {
 
 	// having duplicates causes so many problems, why did i not just read from the savedata var
 	// i do not like that we set these vars here!
-	locustCount = globalGame->saveData.locustCount;
-	isVoided = globalGame->saveData.isVoided;
-	if(globalGame->mode == 2) { // cif is always voided!
+	locustCount = Game::saveData.locustCount;
+	isVoided = Game::saveData.isVoided;
+	if(Game::mode == 2) { // cif is always voided!
 		isVoided = true;
 	}
 
-	hasMemory = globalGame->saveData.hasMemory;
-	hasWings  = globalGame->saveData.hasWings;
-	hasSword  = globalGame->saveData.hasSword;
+	hasMemory = Game::saveData.hasMemory;
+	hasWings  = Game::saveData.hasWings;
+	hasSword  = Game::saveData.hasSword;
 
-	hasRod = globalGame->saveData.hasRod;
-	hasSuperRod = globalGame->saveData.hasSuperRod;
+	hasRod = Game::saveData.hasRod;
+	hasSuperRod = Game::saveData.hasSuperRod;
 }
 
 // Enemy
@@ -422,7 +422,7 @@ bn::optional<Direction> Bull::getNextMove() {
 
 	// this MIGHT BE DUMB
 	Pos tempPos = p;
-	if(temp.has_value() && tempPos.move(temp.value()) && globalGame->entityManager.hasNonPlayerEntity(tempPos)) {
+	if(temp.has_value() && tempPos.move(temp.value()) && EntityManager::hasNonPlayerEntity(tempPos)) {
 		idle = true;
 		return bn::optional<Direction>();
 	}
@@ -436,14 +436,14 @@ void Bull::moveFailed() {
 
 bn::optional<Direction> Chester::getNextMove() {
 	// wow. it really is that simple.
-	//return globalGame->entityManager.canSeePlayer(p);
+	//return EntityManager::canSeePlayer(p);
 
 	bn::optional<Direction> temp = nextMove;
 	nextMove.reset();
 
 	// this MIGHT BE DUMB
 	Pos tempPos = p;
-	if(temp.has_value() && tempPos.move(temp.value()) && globalGame->entityManager.hasNonPlayerEntity(tempPos)) {
+	if(temp.has_value() && tempPos.move(temp.value()) && EntityManager::hasNonPlayerEntity(tempPos)) {
 		idle = true;
 		return bn::optional<Direction>();
 	}
@@ -552,7 +552,7 @@ bool Obstacle::kicked() {
 	// this might be(definitely is) bad for add statues, but for rn, im just hacking this together
 
 	Pos tempPos = p;
-	if(tempPos.move(Direction::Up) && tempPos != globalGame->entityManager.player->p) {
+	if(tempPos.move(Direction::Up) && tempPos != EntityManager::player->p) {
 		return true;
 	}
 
@@ -573,8 +573,8 @@ Chest::Chest(Pos p_, bool isEmpty) : Obstacle(p_) {
 	// this is horrid, but sometimes chests spawn without any floor under them.
 	// this fixes that.
 
-	if(!globalGame->tileManager.hasFloor(p_)) {
-		globalGame->tileManager.floorMap[p_.x][p_.y] = new FloorTile(p_);
+	if(!TileManager::hasFloor(p_)) {
+		TileManager::floorMap[p_.x][p_.y] = new FloorTile(p_);
 	}
 
 	if(isEmpty) {
@@ -593,10 +593,10 @@ void Chest::interact() {
 
 	// ALL OF THESE FUNCS SHOULD OF BEEN LAMBDAS OMFG
 
-	if(globalGame->roomManager.roomIndex > 3) {
+	if(RoomManager::roomIndex > 3) {
 		// this if statement is here on purpose for a very stupid easter egg, see the random boulder msgs
 		// its 2 just in case, for future room ordering changes
-		Pos playerPos = globalGame->entityManager.player->p;
+		Pos playerPos = EntityManager::player->p;
 		playerPos.move(Direction::Up);
 		if(playerPos != p) {
 			return;
@@ -610,23 +610,23 @@ void Chest::interact() {
 
 		doUpdate();
 
-		bool isFirstLocust = globalGame->entityManager.player->locustCount == 0;
+		bool isFirstLocust = EntityManager::player->locustCount == 0;
 
 		bn::sound_items::snd_open.play();
 
 		if(gotBonus) {
-			globalGame->entityManager.player->locustCount+=3;
+			EntityManager::player->locustCount+=3;
 		} else {
-			globalGame->entityManager.player->locustCount++;
+			EntityManager::player->locustCount++;
 		}
 
-		globalGame->tileManager.updateLocust();
+		TileManager::updateLocust();
 		// this isnt counted as a successful move, but we should still update locusts
-		globalGame->tileManager.floorLayer.reloadCells();
+		TileManager::floorLayer.reloadCells();
 
-		globalGame->entityManager.player->currentDir = Direction::Down;
-		globalGame->entityManager.player->doUpdate(); // ensure the direction change is updated
-		globalGame->effectsManager.locustGet(isFirstLocust);
+		EntityManager::player->currentDir = Direction::Down;
+		EntityManager::player->doUpdate(); // ensure the direction change is updated
+		EffectsManager::locustGet(isFirstLocust);
 	}
 }
 
@@ -634,7 +634,7 @@ void Chest::specialBumpFunction() {
 	if(!gotBonus && animationIndex == 0 && specialBumpCount == 3 && playerIdleFrame == playerIdleStart && (frame - playerIdleStart) >= 60 * 3) {
 		specialBumpCount = 0;
 		gotBonus = true;
-		globalGame->effectsManager.chestBonus(this);
+		EffectsManager::chestBonus(this);
 	}
 };
 
@@ -664,7 +664,7 @@ constexpr const char* randomBoulderMessages[] = {
 	"ever think about how you are the human equivalent of a sponge?\ndoing nothing but sucking everything and everyone else up, giving nothing back.\nunless someone comes along and squeezes it out of you.\nparasite.\0",
 	"I feel like i need to start stacking therapy sessions.\rLike,,,, doing multiple therapy at once.\0",
 	"By the way, if you want to hear voided, goto B254 as cif. Thats where it plays.\nAnother fun fact is, the data for that song actually takes up 21% of the whole rom file, since i wanted it to sound good.\0",
-	"I often wonder about why I made this. Im on new meds now, and my work on this has really slowed down. Part of me thinks that its because I am basically done. But another part of me worries that the meds are making me, complacent? tired? more worthless than I already am. At the end of the day, what have I created here. What have I done. Ive done nothing but regurgitate an objectively worse caricature of the actual game. I feel like this whole project is just plagiarism. And it hurts. Because I love this game so fucking much.\0",
+	"I often wonder about why I made this. Im on new meds now, and my work on this has really slowed down. Part of me thinks that its because I am basically done. But another part of me worries that the meds are making me, complacent? tired? more worthless than I already am. At the end of the day, what have I created here. What have I done. Ive done nothing but regurgitate an objectively worse caricature of the actual Game:: I feel like this whole project is just plagiarism. And it hurts. Because I love this game so fucking much.\0",
 	"Knowing and not knowing don't matter. After all, even if you don't know about something, you can guess just about everything if you look at it.\0",
 	"I don't know everything, I just know what I know\0",
 	"I know everything. There's nothing i don't know\0",
@@ -723,20 +723,20 @@ void generateFunny(char* res) {
 void Boulder::interact() {
 
 	if(specialDialogue != NULL) {
-		globalGame->effectsManager.doDialogue(specialDialogue);
+		EffectsManager::doDialogue(specialDialogue);
 		return;
 	}
 
 	static int lastIndex = -1;
 
 	int index = randomGenerator.get_int(0, sizeof(randomBoulderMessages) / sizeof(randomBoulderMessages[0]));
-	if(globalGame->roomManager.roomIndex == 3 && lastIndex == -1) {
+	if(RoomManager::roomIndex == 3 && lastIndex == -1) {
 		index = 8;
 		lastIndex = index;
 
 		const char* temp = randomBoulderMessages[index];
 
-		globalGame->effectsManager.doDialogue(temp);
+		EffectsManager::doDialogue(temp);
 		return;
 	}
 
@@ -766,29 +766,29 @@ void Boulder::interact() {
 	if(index == 0) {
 		char buffer[512];
 		generateFunny(buffer);
-		globalGame->effectsManager.doDialogue(buffer);
+		EffectsManager::doDialogue(buffer);
 	} else {
-		globalGame->effectsManager.doDialogue(temp);
+		EffectsManager::doDialogue(temp);
 	}
 }
 
 void Obstacle::moveSucceded() {
-	globalGame->playSound(&bn::sound_items::snd_push);
-	globalGame->removeSound(&bn::sound_items::snd_push_small);
-	globalGame->effectsManager.smokeCloud(p, currentDir);
+	Game::playSound(&bn::sound_items::snd_push);
+	Game::removeSound(&bn::sound_items::snd_push_small);
+	EffectsManager::smokeCloud(p, currentDir);
 }
 
 void Obstacle::moveFailed() {
-	//game->playSound(&bn::sound_items::snd_push_small);
+	//Game::playSound(&bn::sound_items::snd_push_small);
 }
 
 void EusStatue::isDead() {
 
-	BN_ASSERT(globalGame->tileManager.floorMap[p.x][p.y] == NULL, "with a eus statue, you tried pushing it onto an area that i hadnt nulled yet(a glass that just broke, or something). im to lazy rn to fix this, but if you see it msg me");
+	BN_ASSERT(TileManager::floorMap[p.x][p.y] == NULL, "with a eus statue, you tried pushing it onto an area that i hadnt nulled yet(a glass that just broke, or something). im to lazy rn to fix this, but if you see it msg me");
 
-	globalGame->tileManager.floorMap[p.x][p.y] = new FloorTile(p);
+	TileManager::floorMap[p.x][p.y] = new FloorTile(p);
 
-	globalGame->tileManager.updateTile(p);
+	TileManager::updateTile(p);
 }
 
 bn::optional<Direction> GorStatue::getNextMove() {
@@ -807,27 +807,27 @@ void GorStatue::moveSucceded() {
 
 bn::optional<Direction> MonStatue::getNextMove() {
 
-	bn::optional<Direction> res = globalGame->entityManager.canSeePlayer(p);
+	bn::optional<Direction> res = EntityManager::canSeePlayer(p);
 
 	if(res.has_value()) {
 		animationIndex = 1;
 		doUpdate();
-		globalGame->entityManager.addKill(this);
-		globalGame->effectsManager.monLightning(p, res.value());
+		EntityManager::addKill(this);
+		EffectsManager::monLightning(p, res.value());
 	}
 
 	return Obstacle::getNextMove();
 }
 
 void TanStatue::isDead() {
-	if(globalGame->tileManager.hasFloor(p)) { // i still have 0 clue if like,,, idek
-		globalGame->tileManager.stepOff(p);
+	if(TileManager::hasFloor(p)) { // i still have 0 clue if like,,, idek
+		TileManager::stepOff(p);
 	}
 }
 
 LevStatue::~LevStatue() {
 	if(activeEffect != NULL) {
-		globalGame->effectsManager.removeEffect(activeEffect);
+		EffectsManager::removeEffect(activeEffect);
 		activeEffect = NULL;
 	}
 }
@@ -836,16 +836,16 @@ void LevStatue::isDead() {
 	totalLev--;
 	if(isActive) {
 		rodUses--;
-		globalGame->entityManager.rodUse();
+		EntityManager::rodUse();
 	}
 
 	if(activeEffect != NULL) {
-		globalGame->effectsManager.removeEffect(activeEffect);
+		EffectsManager::removeEffect(activeEffect);
 		activeEffect = NULL;
 	}
 
 	if(rodUses != 0 && rodUses >= totalLev) {
-		globalGame->entityManager.levKill = true;
+		EntityManager::levKill = true;
 	}
 }
 
@@ -853,7 +853,7 @@ void LevStatue::activate() {
 
 	BN_ASSERT(activeEffect == NULL, "a lev statues active effect wasnt null why trying to activate it??");
 
-	activeEffect = globalGame->effectsManager.levStatueActive(this);
+	activeEffect = EffectsManager::levStatueActive(this);
 
 	isActive = true;
 	rodUses++;
@@ -863,38 +863,38 @@ void LevStatue::activate() {
 // -----
 
 void AddStatue::interact() {
-	globalGame->effectsManager.doDialogue("...\0\0");
+	EffectsManager::doDialogue("...\0\0");
 }
 
 void EusStatue::interact() {
-	globalGame->effectsManager.doDialogue("My love...\0\0");
+	EffectsManager::doDialogue("My love...\0\0");
 }
 
 void BeeStatue::interact() {
-	globalGame->effectsManager.doDialogue("Got any locusts?\0\0");
+	EffectsManager::doDialogue("Got any locusts?\0\0");
 }
 
 void TanStatue::interact() {
-	globalGame->effectsManager.doDialogue("MAKE THEM GO AWAY\0\0");
+	EffectsManager::doDialogue("MAKE THEM GO AWAY\0\0");
 }
 
 void GorStatue::interact() {
-	globalGame->effectsManager.doDialogue("How bothersome.\0\0");
+	EffectsManager::doDialogue("How bothersome.\0\0");
 }
 
 void LevStatue::interact() {
     if(bruhRand() & 0xFF) {
-        globalGame->effectsManager.doDialogue("One wrong move and I'll destroy you...\0\0");
+        EffectsManager::doDialogue("One wrong move and I'll destroy you...\0\0");
     } else {
         bn::sound_items::egg.play();
-        globalGame->effectsManager.doDialogue("One wrong move and I'll absolutely FUCK you up...\0\0");
+        EffectsManager::doDialogue("One wrong move and I'll absolutely FUCK you up...\0\0");
     }
 }
 
 void CifStatue::interact() {
-	globalGame->effectsManager.doDialogue("...\0\0");
+	EffectsManager::doDialogue("...\0\0");
 }
 
 void JukeBox::interact() {
-	globalGame->effectsManager.doDialogue(" G R O O V Y !!\0\0");
+	EffectsManager::doDialogue(" G R O O V Y !!\0\0");
 }

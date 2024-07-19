@@ -6,12 +6,6 @@
 #include "Game.h"
 //#include "TileManager.h"
 
-
-EffectsManager* FloorTile::effectsManager = NULL;
-TileManager* FloorTile::tileManager = NULL;
-//BackgroundMap* FloorTile::rawMap = NULL;
-EntityManager* FloorTile::entityManager = NULL;
-Game* FloorTile::game = NULL;
 Floor* FloorTile::floorLayer = NULL;
 
 int Switch::pressedCount = 0;
@@ -33,7 +27,7 @@ void FloorTile::draw() {
 }
 
 void FloorTile::drawPit(int x, int y) {
-	if(game->collisionMap[x][y] == 12) {
+	if(Game::collisionMap[x][y] == 12) {
 		drawDropOff(x, y);
 	} else {
 		floorLayer->setTile(x * 2 + 1, y * 2 + 1, 4 * 0);
@@ -52,21 +46,21 @@ void FloorTile::drawDropOff(int x, int y) {
 
 void Glass::stepOn() {
 	isSteppedOn = true;
-	game->playSound(&bn::sound_items::snd_stepglassfloor);
+	Game::playSound(&bn::sound_items::snd_stepglassfloor);
 }
 
 void Glass::stepOff() {
 	isSteppedOn = false;
 	if(isAlive) {
-		effectsManager->glassBreak(tilePos);
+		EffectsManager::glassBreak(tilePos);
 	}
 	isAlive = false;
-	tileManager->updateTile(tilePos);
+	TileManager::updateTile(tilePos);
 }
 
 void Glass::isSteppedOnAnimation() {
 	if((bruhRand() & 0xFF) == 0) {
-		effectsManager->glassShineSpark(tilePos);
+		EffectsManager::glassShineSpark(tilePos);
 	}
 }
 
@@ -76,11 +70,11 @@ void Bomb::stepOn() {
 	if(charge == 2) {
 		isAlive = false;
 
-		game->entityManager.posTracker.insert(tilePos);
+		EntityManager::posTracker.insert(tilePos);
 
-		game->effectsManager.bombTileAnimate(tilePos);
+		EffectsManager::bombTileAnimate(tilePos);
 
-		game->playSound(&bn::sound_items::snd_vanish);
+		Game::playSound(&bn::sound_items::snd_vanish);
 
 		// this may be bad
 		// break adjacent bomb tiles,,,, i think?
@@ -91,8 +85,8 @@ void Bomb::stepOn() {
 				continue;
 			}
 
-			if(tileManager->hasFloor(testPos) == TileType::Bomb) {
-				Bomb* tempBomb = static_cast<Bomb*>(tileManager->floorMap[testPos.x][testPos.y]);
+			if(TileManager::hasFloor(testPos) == TileType::Bomb) {
+				Bomb* tempBomb = static_cast<Bomb*>(TileManager::floorMap[testPos.x][testPos.y]);
 				if(tempBomb->charge == 1) {
 					tempBomb->stepOn();
 				}
@@ -100,7 +94,7 @@ void Bomb::stepOn() {
 		}
 	}
 
-	tileManager->updateTile(tilePos);
+	TileManager::updateTile(tilePos);
 }
 
 void Death::stepOn() {
@@ -122,21 +116,21 @@ void Death::stepOn() {
 
 	isSteppedOn = true;
 
-	effectsManager->deathTile(tilePos);
+	EffectsManager::deathTile(tilePos);
 
 	// this needs to call updatemap as well. gods(maybe?)
-	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+	SaneSet<Entity*, 4>& tempMap = EntityManager::getMap(tilePos);
 
 	//BN_LOG("DEATHTILE CALLED, TEMPMAP LENGTH IS ", tempMap.size(), " at ", tilePos);
 
 	for(auto it = tempMap.begin(); it != tempMap.end(); ) {
 		if((*it)->entityType() == EntityType::Player) {
 			// how can i make it play a death anim?
-			entityManager->addKill(*it);
+			EntityManager::addKill(*it);
 			++it;
 		} else {
 			//BN_LOG("killing a ", (*it)->entityType());
-			it = entityManager->killEntity(*it);
+			it = EntityManager::killEntity(*it);
 		}
 	}
 }
@@ -144,34 +138,34 @@ void Death::stepOn() {
 void Switch::stepOn() {
 	pressedCount++;
 	isSteppedOn = true;
-	tileManager->updateExit();
-	game->playSound(&bn::sound_items::snd_activate);
+	TileManager::updateExit();
+	Game::playSound(&bn::sound_items::snd_activate);
 }
 
 void Switch::stepOff() {
 	pressedCount--;
 	isSteppedOn = false;
-	tileManager->updateExit();
-	game->playSound(&bn::sound_items::snd_reveal);
+	TileManager::updateExit();
+	Game::playSound(&bn::sound_items::snd_reveal);
 }
 
 void Switch::isSteppedOnAnimation() {
 	if((bruhRand() & 0x1FF) == 0) {
-		effectsManager->switchGlow(tilePos);
+		EffectsManager::switchGlow(tilePos);
 	}
 }
 
 int RodTile::getTileValue() const {
 
-	int offset = entityManager->player->hasSuperRod ? 11 : 0;
+	int offset = EntityManager::player->hasSuperRod ? 11 : 0;
 
-	if(!entityManager->player->hasRod && !entityManager->player->hasSuperRod) {
+	if(!EntityManager::player->hasRod && !EntityManager::player->hasSuperRod) {
 		return startIndex;
 	}
 
 	FloorTile* rodTile = NULL;
-	if(entityManager->player->rod.size() != 0) {
-		rodTile = entityManager->player->rod.back();
+	if(EntityManager::player->rod.size() != 0) {
+		rodTile = EntityManager::player->rod.back();
 	}
 
 	if(rodTile == NULL) {
@@ -211,7 +205,7 @@ int RodTile::getTileValue() const {
 }
 
 int LocustTile::getTileValue() const {
-	//return startIndex + (entityManager->player->locustCount != 0);
+	//return startIndex + (EntityManager::player->locustCount != 0);
 	return startIndex + 1;
 }
 
@@ -286,16 +280,16 @@ void WordTile::draw() {
 	temp = getWordTileIndex(second);
 	int secondTile = 228 + (((temp >> 1) << 2) | (temp & 1));
 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 1, firstTile);
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 1, y * 2 + 2, firstTile + 2);
+	TileManager::floorLayer.setTile(x * 2 + 1, y * 2 + 1, firstTile);
+	TileManager::floorLayer.setTile(x * 2 + 1, y * 2 + 2, firstTile + 2);
 
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 1, secondTile);
-	globalGame->tileManager.floorLayer.setTile(x * 2 + 2, y * 2 + 2, secondTile + 2);
+	TileManager::floorLayer.setTile(x * 2 + 2, y * 2 + 1, secondTile);
+	TileManager::floorLayer.setTile(x * 2 + 2, y * 2 + 2, secondTile + 2);
 }
 
 void Exit::isSteppedOnAnimation() {
-	if((isFirstCall || (frame - playerIdleFrame == 60 * 8)) && tilePos != entityManager->player->p) { // THIS EQUALS SIGN SHOULD ENSURE ONLY ONE THING SPAWNS AT ONCE,, I HOPE?
-		effectsManager->exitGlow(tilePos);
+	if((isFirstCall || (frame - playerIdleFrame == 60 * 8)) && tilePos != EntityManager::player->p) { // THIS EQUALS SIGN SHOULD ENSURE ONLY ONE THING SPAWNS AT ONCE,, I HOPE?
+		EffectsManager::exitGlow(tilePos);
 	}
 	isFirstCall = false;
 }
@@ -304,8 +298,8 @@ void Copy::isSteppedOnAnimation() {
 	// this pos check is so much less expensive than doing a getPos. i think theres some other places too
 	// ALSO, i still dont have the proper shadow creation thing.
 	// i should start letting things like that hold up main
-	if(tilePos == entityManager->player->p && (bruhRand() & 0x1FF) == 0) {
-		effectsManager->copyGlow(tilePos);
+	if(tilePos == EntityManager::player->p && (bruhRand() & 0x1FF) == 0) {
+		EffectsManager::copyGlow(tilePos);
 	}
 }
 
@@ -314,11 +308,11 @@ void Copy::stepOn() {
 
 	// im hoping this call will be more efficient than what i was doing in dofloorsteps, which was a full loop over all steps
 
-	SaneSet<Entity*, 4>& tempMap = entityManager->getMap(tilePos);
+	SaneSet<Entity*, 4>& tempMap = EntityManager::getMap(tilePos);
 
 	for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
 		if((*it)->entityType() == EntityType::Player) {
-			entityManager->shadowQueue.push_back(tilePos);
+			EntityManager::shadowQueue.push_back(tilePos);
 		}
 	}
 }

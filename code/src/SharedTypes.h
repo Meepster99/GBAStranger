@@ -179,7 +179,7 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void unco
 
 void _fullReset();
 
-#define getInput(key) ((globalGame->saveData.delay == -1) ? bn::keypad::pressed(key) : (bn::keypad::pressed(key) || bn::keypad::held(key)))
+#define getInput(key) ((Game::saveData.delay == -1) ? bn::keypad::pressed(key) : (bn::keypad::pressed(key) || bn::keypad::held(key)))
 
 void logRamStatus();
 

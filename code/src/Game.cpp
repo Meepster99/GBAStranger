@@ -3,8 +3,6 @@
 
 Palette* BackgroundMap::backgroundPalette = &defaultPalette;
 
-Game* globalGame = NULL;
-
 unsigned int frame = 0;
 int playerIdleFrame = 0; // frame at which the player started idleing
 bool isVblank = false;
@@ -12,6 +10,48 @@ unsigned boobaCount = 0;
 unsigned playerMoveCount = 0;
 
 bool debugToggle = false;
+
+
+namespace Game {
+	Collision collision;
+	Details details(&collision);
+	u8 collisionMap[14][9];
+	u8 detailsMap[14][9];
+	GameSave saveData;
+	bn::timer miscTimer;
+	GameState state = GameState::Loading;
+	bool needRedraw = false;
+	int mode = 0;
+	const char* strangerNames[3] = {"Gray\0", "Lillie\0", "Cif\0"};
+	int paletteIndex = 0;
+	Palette* pal = NULL;
+	int fadePaletteIndex = -1;
+	SaneSet<const bn::sound_item*, MAXSOUNDS> queuedSounds;
+	SaneSet<const bn::sound_item*, MAXSOUNDS*2> removedSounds;
+};
+
+void Game::changeMode(int val) {
+	mode += val;
+	mode = ((mode % 3) + 3) % 3;
+	RoomManager::setMode(mode);
+}
+
+const char* Game::getMode() {
+	return strangerNames[mode];
+}
+
+void Game::Game() {
+
+	TileManager::TileManager(&collision);
+
+	FloorTile::floorLayer = &TileManager::floorLayer;
+
+	bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4);
+
+	collision.rawMap.bgPointer.set_tiles(backgroundTiles);
+}
+
+// -----
 
 /*
 
@@ -32,7 +72,7 @@ bn::random randomGenerator = bn::random();
 void delay(int delayFrameCount) {
 	// this function should of been made WAYYYY earlier
 	for(int i=0; i<delayFrameCount; i++) {
-		globalGame->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 }
 
@@ -66,7 +106,7 @@ void uncompressData(u8 res[126], u8* input) {
 
 void Game::createExitEffects() {
 
-	// this func was originally in entityManager->exit, but was moved.
+	// this func was originally in EntityManager::exit, but was moved.
 	// tbh, it kinda shouldnt have been
 	// bc in the future, getting timings of what death animations to stay on screen
 	// before starting the transition will be, lets say spiritually taxing
@@ -74,13 +114,13 @@ void Game::createExitEffects() {
 
 	// this function is horrid.
 
-	Pos playerPos = entityManager.player->p;
+	Pos playerPos = EntityManager::player->p;
 
-	entityManager.createKillEffects();
+	EntityManager::createKillEffects();
 
 	// determines if something(like a mon or lev statue) has killed the player
 	// may cause issues if the player dies to multiple things at once??
-	//bool customKill = entityManager.obstacleKill();
+	//bool customKill = EntityManager::obstacleKill();
 
 	// if a custom kill handler(like for mon or tan statues)
 	// but tbh, instead of calling those effects inside the domoves func, they really should be called here.
@@ -88,72 +128,72 @@ void Game::createExitEffects() {
 
 	// tbh this if statement is legacy now that im having death effects get drawn
 	// at sprite's screen poses, instead of their game coords, but im leaving it here bc im scaredas
-	if(playerPos != entityManager.playerStart && entityManager.enemyKill()) {
+	if(playerPos != EntityManager::playerStart && EntityManager::enemyKill()) {
 
 		// this case means a enemy killed the player and the player moved, so we use the player start pos
 
 		// this line should NOT be commented out
 		// how do i discern a falldeath from running into an enemy vs, shadow walkoff?
 		Pos tempPos = playerPos;
-		if(entityManager.killAtPos(tempPos)) {
-			playerPos = entityManager.playerStart;
+		if(EntityManager::killAtPos(tempPos)) {
+			playerPos = EntityManager::playerStart;
 		}
 	}
 
 
 	// i could use the enemykill/fallkill things, but tbh like
 	// in certain cases, where an enemey kills you above a floor like, yea
-	if(entityManager.playerWon()) {
+	if(EntityManager::playerWon()) {
 
-	} else if(entityManager.monKill()) {
+	} else if(EntityManager::monKill()) {
 
 		BN_LOG("killing player via mon! special goofy case!");
-		entityManager.addKill(entityManager.player);
-		//entityManager.
+		EntityManager::addKill(EntityManager::player);
+		//EntityManager::
 
 		// some weird shit happens,,,, with mon statue kills
 		// the player fall anim is replaced with, the defaullt fall???
 
-	} else if(entityManager.hasFloor(playerPos)) {
+	} else if(EntityManager::hasFloor(playerPos)) {
 		BN_LOG("killing player via enemy");
 		// unsure if this is a good idea, but it will make other calls to fallKill work
-		entityManager.addKill(entityManager.player);
-		effectsManager.entityKill(entityManager.player);
+		EntityManager::addKill(EntityManager::player);
+		EffectsManager::entityKill(EntityManager::player);
 	} else {
 		BN_LOG("killing player via fall");
 
-		entityManager.addKill(entityManager.player);
-		effectsManager.entityFall(entityManager.player);
+		EntityManager::addKill(EntityManager::player);
+		EffectsManager::entityFall(EntityManager::player);
 	}
 
-	entityManager.player->p = playerPos;
+	EntityManager::player->p = playerPos;
 }
 
 void Game::findNextRoom() {
 
-	if(entityManager.playerWon()) {
+	if(EntityManager::playerWon()) {
 
-		entityManager.player->wingsUse = 0;
+		EntityManager::player->wingsUse = 0;
 
-		entityManager.updateScreen(); // is this ok?
+		EntityManager::updateScreen(); // is this ok?
 
-		int tileManagerRoomIndex = tileManager.getRoomIndex();
-		int startRoomIndex = roomManager.roomIndex;
+		int tileManagerRoomIndex = TileManager::getRoomIndex();
+		int startRoomIndex = RoomManager::roomIndex;
 
-		// crash game.
+		// crash Game::
 		if(tileManagerRoomIndex == -1 && startRoomIndex <= 256) {
 			BN_LOG("crashing game due to bad floor count");
-			cutsceneManager.displayDisText("FATAL ERROR : BR NULL\0");
+			CutsceneManager::displayDisText("FATAL ERROR : BR NULL\0");
 			delay(5);
-			cutsceneManager.crashGame();
+			CutsceneManager::crashGame();
 		}
 
 		// check for cif statue
 		bool cifReset = false;
-		Pos testPos = entityManager.player->p;
+		Pos testPos = EntityManager::player->p;
 		if(testPos.move(Direction::Up)) {
 
-			SaneSet<Entity*, 4> tempMap = entityManager.getMap(testPos);
+			SaneSet<Entity*, 4> tempMap = EntityManager::getMap(testPos);
 
 			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
 				if((*it)->entityType() == EntityType::CifStatue) {
@@ -165,20 +205,20 @@ void Game::findNextRoom() {
 
 		if(cifReset) {
 			// todo, in the future, put a special anim here
-			BN_ASSERT(entityManager.player != NULL, "player was null during cif reset");
+			BN_ASSERT(EntityManager::player != NULL, "player was null during cif reset");
 
-			entityManager.player->locustCount = 0;
-			//globalGame->tileManager.locustCounterTile->first = '0';
-			//globalGame->tileManager.locustCounterTile->second = '0';
-			entityManager.player->isVoided = false;
+			EntityManager::player->locustCount = 0;
+			//TileManager::locustCounterTile->first = '0';
+			//TileManager::locustCounterTile->second = '0';
+			EntityManager::player->isVoided = false;
 
-			//game->save(); // extranious call for sanityl
-			roomManager.cifReset();
+			//Game::save(); // extranious call for sanityl
+			RoomManager::cifReset();
 		} else {
-			if(tileManager.exitDestination == NULL) {
-				roomManager.nextRoom();
+			if(TileManager::exitDestination == NULL) {
+				RoomManager::nextRoom();
 			} else {
-				roomManager.gotoRoom(tileManager.exitDestination);
+				RoomManager::gotoRoom(TileManager::exitDestination);
 			}
 		}
 
@@ -194,9 +234,9 @@ void Game::findNextRoom() {
 		if(tileManagerRoomIndex != -1 && tileManagerRoomIndex != startRoomIndex) {
 			if(tileManagerRoomIndex >= 256 && startRoomIndex <= 256) {
 				// goto the white rooms
-				roomManager.gotoRoom("rm_u_0001\0");
+				RoomManager::gotoRoom("rm_u_0001\0");
 			} else {
-				roomManager.gotoRoom(tileManagerRoomIndex);
+				RoomManager::gotoRoom(tileManagerRoomIndex);
 			}
 			return;
 		}
@@ -204,23 +244,23 @@ void Game::findNextRoom() {
 		bn::sound_items::snd_stairs.play();
 		return;
 	} else {
-		if(roomManager.isWhiteRooms()) {
-			roomManager.roomIndex = 256; // this is bad
+		if(RoomManager::isWhiteRooms()) {
+			RoomManager::roomIndex = 256; // this is bad
 			save();
-			cutsceneManager.crashGame();
+			CutsceneManager::crashGame();
 		}
 	}
 
 	// do a check for if we are doing a bee statue shortcut (or in the future, a shortcut shortcut)((or in the future future, brands???))
 	// because of the goofy ahh way this is written, this is going to get called every time until the falling anim finishes?, i dont like that tbh, but i cannot do anything
 	// i can at least like,,, do a check to not duplicate inc room via just setting locusts to 0
-	if(entityManager.fallKill() && entityManager.player->locustCount != 0) {
+	if(EntityManager::fallKill() && EntityManager::player->locustCount != 0) {
 
 		bool beeReset = false;
-		Pos testPos = entityManager.player->p;
+		Pos testPos = EntityManager::player->p;
 
 		if(testPos.move(Direction::Up)) {
-			SaneSet<Entity*, 4> tempMap = entityManager.getMap(testPos);
+			SaneSet<Entity*, 4> tempMap = EntityManager::getMap(testPos);
 			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
 				if((*it)->entityType() == EntityType::BeeStatue) {
 						beeReset = true;
@@ -230,10 +270,10 @@ void Game::findNextRoom() {
 
 			if(beeReset) {
 				BN_LOG("bee reset occured");
-				roomManager.changeFloor(entityManager.player->locustCount);
-				entityManager.player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this (curse)
-				//tileManager.locustCounterTile->first = '0';
-				//tileManager.locustCounterTile->second = '0';
+				RoomManager::changeFloor(EntityManager::player->locustCount);
+				EntityManager::player->locustCount = 0; // setting this to 0 should prevent,,, oofs when doing this (curse)
+				//TileManager::locustCounterTile->first = '0';
+				//TileManager::locustCounterTile->second = '0';
 
 				// but does this update the save file?
 			}
@@ -241,16 +281,16 @@ void Game::findNextRoom() {
 	}
 
 	// isnt,,, every kill now a fall kill??? or some shit???
-	if(entityManager.fallKill() && !entityManager.hasFloor(entityManager.player->p)) {
+	if(EntityManager::fallKill() && !EntityManager::hasFloor(EntityManager::player->p)) {
 		bool foundGlass = false;
 		const char* res = NULL;
-		switch(roomManager.roomIndex) {
+		switch(RoomManager::roomIndex) {
 			case 131: // glass break room
 				// check for the goofy ahh no glass shortcut
 
 				for(int x=0; x<14; x++) {
 					for(int y=0; y<9; y++) {
-						if(tileManager.hasFloor(x, y) == TileType::Glass) {
+						if(TileManager::hasFloor(x, y) == TileType::Glass) {
 							foundGlass = true;
 							break;
 						}
@@ -258,7 +298,7 @@ void Game::findNextRoom() {
 				}
 
 				if(!foundGlass) {
-					roomManager.gotoRoom("rm_mon_shortcut_004");
+					RoomManager::gotoRoom("rm_mon_shortcut_004");
 				}
 				break;
 			case 23:
@@ -271,10 +311,10 @@ void Game::findNextRoom() {
 			case 223:
 			case 227:
 
-				res = tileManager.checkBrand();
+				res = TileManager::checkBrand();
 
 				if(res != NULL) {
-					roomManager.gotoRoom(res);
+					RoomManager::gotoRoom(res);
 				}
 
 				break;
@@ -283,10 +323,10 @@ void Game::findNextRoom() {
 		}
 	}
 
-	if(tileManager.secretDestinations.size() != 0) {
-		for(int i=0; i<tileManager.secretDestinations.size(); i++) {
-			if(tileManager.secretDestinations[i].second == entityManager.player->p && !tileManager.hasFloor(entityManager.player->p)) {
-				roomManager.gotoRoom(tileManager.secretDestinations[i].first);
+	if(TileManager::secretDestinations.size() != 0) {
+		for(int i=0; i<TileManager::secretDestinations.size(); i++) {
+			if(TileManager::secretDestinations[i].second == EntityManager::player->p && !TileManager::hasFloor(EntityManager::player->p)) {
+				RoomManager::gotoRoom(TileManager::secretDestinations[i].first);
 				break;
 			}
 		}
@@ -301,11 +341,11 @@ void Game::resetRoom(bool debug) {
 	// wait actually,,, i am not sure if i want it here. i only have one other patch case left so yea
 
 	// summon all room exiting effects
-	if(!debug && !entityManager.playerWon()) {
+	if(!debug && !EntityManager::playerWon()) {
 		createExitEffects();
 	}
 
-	int prevRoomIndex = roomManager.roomIndex;
+	int prevRoomIndex = RoomManager::roomIndex;
 
 	// decide what room to goto next
 	if(!debug) {
@@ -315,22 +355,22 @@ void Game::resetRoom(bool debug) {
 
 	if(!debug) {
 
-		if(!roomManager.isWhiteRooms()) {
-			entityManager.player->locustCount = MAX(0, tileManager.getLocustCount());
+		if(!RoomManager::isWhiteRooms()) {
+			EntityManager::player->locustCount = MAX(0, TileManager::getLocustCount());
 		}
 
-		//if(!entityManager.player->isVoided && !entityManager.playerWon()) {
-		if(!entityManager.player->isVoided && prevRoomIndex == roomManager.roomIndex) {
-			if(entityManager.player->locustCount > 0) {
-				entityManager.player->locustCount--;
+		//if(!EntityManager::player->isVoided && !EntityManager::playerWon()) {
+		if(!EntityManager::player->isVoided && prevRoomIndex == RoomManager::roomIndex) {
+			if(EntityManager::player->locustCount > 0) {
+				EntityManager::player->locustCount--;
 			} else {
-				entityManager.player->isVoided = true;
+				EntityManager::player->isVoided = true;
 			}
 		}
 	}
 
 
-	BN_LOG("reseting to room ", roomManager.currentRoomName());
+	BN_LOG("reseting to room ", RoomManager::currentRoomName());
 
 	if(!debug) {
 		state = GameState::Exiting;
@@ -348,15 +388,15 @@ void Game::resetRoom(bool debug) {
 
 	state = GameState::Loading;
 
-	cutsceneManager.resetRoom();
+	CutsceneManager::resetRoom();
 	queuedSounds.clear();
 	removedSounds.clear();
 
 	save();
 
 	// this hopefully wont slow down debug moving much
-	cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
-	cutsceneManager.backgroundLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	CutsceneManager::backgroundLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 
 	changeMusic();
 
@@ -397,7 +437,7 @@ void Game::loadTiles() {
 	(void)tickCount; // supress warning if logging is disabled
 	loadTilesTimer.restart();
 
-	Room idek = roomManager.loadRoom();
+	Room idek = RoomManager::loadRoom();
 
 	const bn::regular_bg_tiles_item* collisionTiles = (const bn::regular_bg_tiles_item*)idek.collisionTiles;
 	const bn::regular_bg_tiles_item* detailsTiles = (const bn::regular_bg_tiles_item*)idek.detailsTiles;
@@ -426,7 +466,7 @@ void Game::loadTiles() {
 
 	memcpy(tileRef.data() + collisionTileCount, detailsTiles->tiles_ref().data(), 8 * sizeof(uint32_t) * detailsTileCount);
 
-	if(roomManager.isWhiteRooms()) {
+	if(RoomManager::isWhiteRooms()) {
 
 		unsigned dataBuffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -457,7 +497,7 @@ void Game::loadTiles() {
 	}
 
 	details.collisionTileCount = collisionTileCount;
-	tileManager.floorLayer.collisionTileCount = collisionTileCount + detailsTileCount;
+	TileManager::floorLayer.collisionTileCount = collisionTileCount + detailsTileCount;
 
 	tickCount = loadTilesTimer.elapsed_ticks();
 	BN_LOG("loadtiles took ", tickCount.safe_division(FRAMETICKS), " frames");
@@ -467,7 +507,7 @@ void Game::loadLevel(bool debug) {
 
 	loadTiles();
 
-	BN_LOG("entered loadlevel with debug=", debug, " roomname=", roomManager.currentRoomName(), " roomindex = ", roomManager.roomIndex);
+	BN_LOG("entered loadlevel with debug=", debug, " roomname=", RoomManager::currentRoomName(), " roomindex = ", RoomManager::roomIndex);
 
 	//load();
 
@@ -476,7 +516,7 @@ void Game::loadLevel(bool debug) {
 	(void)tickCount; // supress warning if logging is disabled
 	loadLevelTimer.restart();
 
-	Room idek = roomManager.loadRoom();
+	Room idek = RoomManager::loadRoom();
 
 
 	u8 uncompressedCollision[126];
@@ -489,8 +529,8 @@ void Game::loadLevel(bool debug) {
 	static bool needRestore = false;
 
 	if(needRestore) {
-		//cutsceneManager.restoreAllButEffectsAndFloor();
-		//tileManager.floorLayer.rawMap.bgPointer.set_priority(2);
+		//CutsceneManager::restoreAllButEffectsAndFloor();
+		//TileManager::floorLayer.rawMap.bgPointer.set_priority(2);
 		needRestore = false;
 	}
 
@@ -543,7 +583,7 @@ void Game::loadLevel(bool debug) {
 	//static bn::timer tempTimer;
 	//tempTimer.restart();
 
-	tileManager.loadTiles(floorPointer, secretsPointer, secretsCount, exitDest);
+	TileManager::loadTiles(floorPointer, secretsPointer, secretsCount, exitDest);
 
 	//tickCount = tempTimer.elapsed_ticks();
 	//BN_LOG("tileManager loadtiles took ", tickCount.safe_division(FRAMETICKS), " frames");
@@ -554,7 +594,7 @@ void Game::loadLevel(bool debug) {
 	int entitiesCount = idek.entityCount;
 
 
-	entityManager.loadEntities(entitiesPointer, entitiesCount);
+	EntityManager::loadEntities(entitiesPointer, entitiesCount);
 
 	//BN_LOG("loadentities was completed,,, sorta?");
 
@@ -563,40 +603,40 @@ void Game::loadLevel(bool debug) {
 	EffectHolder* effectsPointer = (EffectHolder*)idek.effects;
 	int effectsCount = idek.effectsCount;
 
-	effectsManager.loadEffects(effectsPointer, effectsCount);
+	EffectsManager::loadEffects(effectsPointer, effectsCount);
 
 	// should probs put the below into the cutscene file
 
 	// this code actually rlly should of been in effects, omfg
-	if(strcmp(roomManager.currentRoomName(), "rm_rm4\0") == 0 || strcmp(roomManager.currentRoomName(), "hard_rm_rm4\0") == 0) {
+	if(strcmp(RoomManager::currentRoomName(), "rm_rm4\0") == 0 || strcmp(RoomManager::currentRoomName(), "hard_rm_rm4\0") == 0) {
 		needRestore = true;
-		//cutsceneManager.backupAllButEffectsAndFloor();
+		//CutsceneManager::backupAllButEffectsAndFloor();
 
-		cutsceneManager.createPlayerBrandRoom();
+		CutsceneManager::createPlayerBrandRoom();
 
 		// this should of been programmed in as a bigsprite, but now that i know that i shouldnt use those, its going as a bg
 		// the floor rlly should be combined onto the same layer as collision
 
-	} else if(roomManager.currentRoomHash() == hashString("rm_u_end\0")) {
+	} else if(RoomManager::currentRoomHash() == hashString("rm_u_end\0")) {
 		//needRestore = true;
-		//cutsceneManager.backupAllButEffectsAndFloor();
+		//CutsceneManager::backupAllButEffectsAndFloor();
 
 
-		cutsceneManager.createResetRoom();
+		CutsceneManager::createResetRoom();
 	} else {
-		if((strstrCustom(roomManager.currentRoomName(), "_u_00\0") == NULL) &&
-			(strstrCustom(roomManager.currentRoomName(), "_u_en\0") == NULL)) {
+		if((strstrCustom(RoomManager::currentRoomName(), "_u_00\0") == NULL) &&
+			(strstrCustom(RoomManager::currentRoomName(), "_u_en\0") == NULL)) {
 			bn::bg_palettes::set_transparent_color(pal->getColorArray()[1]);
-			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
-			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+			//CutsceneManager::backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_black_bg);
+			//CutsceneManager::backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 		} else {
-			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
-			//cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+			//CutsceneManager::backgroundLayer.rawMap.bgPointer.set_item(bn::regular_bg_items::dw_default_white_bg);
+			//CutsceneManager::backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 			bn::bg_palettes::set_transparent_color(pal->getColorArray()[2]);
 		}
 	}
 
-	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
+	EffectsManager::setBorderColor(!RoomManager::isWhiteRooms());
 
 
 	tickCount = loadLevelTimer.elapsed_ticks();
@@ -615,12 +655,12 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 	// why the fuck. does putting this in arm and iwram cause everything in restrequest to fucking melt and die??
 	*reinterpret_cast<unsigned short*>(REG_IME) = 0; // disable interrupts
 
-	auto& collisionMap = globalGame->collisionMap;
-	auto& detailsMap = globalGame->detailsMap;
-	auto& floorMap = globalGame->tileManager.floorMap;
+	auto& collisionMap = Game::collisionMap;
+	auto& detailsMap = Game::detailsMap;
+	auto& floorMap = TileManager::floorMap;
 
-	auto& collision = globalGame->collision;
-	auto& details = globalGame->details;
+	auto& collision = Game::collision;
+	auto& details = Game::details;
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<8; y++) {
@@ -672,8 +712,8 @@ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_
 	// i am quite suspicious of the difference between only having section(".iwram") and having that and target("arm")
 	// i swear that the arm being there is needed to have it actually be in arm
 
-	auto& cells = globalGame->collision.rawMap.cells;
-	auto& mapItem = globalGame->collision.rawMap.mapItem;
+	auto& cells = Game::collision.rawMap.cells;
+	auto& mapItem = Game::collision.rawMap.mapItem;
 
 	for(int x=1; x<28+1; x++) {
 		for(int y=1; y<18+1; y++) {
@@ -714,7 +754,7 @@ void Game::fullDraw() {
 	BN_LOG("clearGameMap draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 
 	tempTimer.restart();
-	tileManager.fullDraw();
+	TileManager::fullDraw();
 	tickCount = tempTimer.elapsed_ticks();
 	BN_LOG("tile draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 
@@ -728,7 +768,7 @@ void Game::fullDraw() {
 	//doButanoUpdate();
 
 	tempTimer.restart();
-	entityManager.fullUpdate();
+	EntityManager::fullUpdate();
 	tickCount = tempTimer.elapsed_ticks();
 	BN_LOG("entityManager draw took ", tickCount.safe_division(FRAMETICKS), " frames");
 
@@ -742,7 +782,7 @@ void Game::fullTileDraw() {
 
 	//collision.draw(collisionMap);
 	//details.draw(detailsMap, collisionMap);
-	//tileManager.fullDraw();
+	//TileManager::fullDraw();
 }
 
 void Game::changePalette(int offset) {
@@ -765,7 +805,7 @@ void Game::changePalette(int offset) {
 
 	/*
 	if(paletteIndex == paletteListSize - 1) {
-		cutsceneManager.inputCustomPalette();
+		CutsceneManager::inputCustomPalette();
 	}
 	*/
 
@@ -773,17 +813,17 @@ void Game::changePalette(int offset) {
 
 	bn::bg_palettes::set_transparent_color(pal->getColorArray()[1]);
 
-	entityManager.updatePalette(paletteList[paletteIndex]);
-	effectsManager.updatePalette(paletteList[paletteIndex]);
+	EntityManager::updatePalette(paletteList[paletteIndex]);
+	EffectsManager::updatePalette(paletteList[paletteIndex]);
 
 
 	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	//tileManager.floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	effectsManager.effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	//TileManager::floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	EffectsManager::effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 
-	cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	cutsceneManager.backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	CutsceneManager::backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 
@@ -847,7 +887,7 @@ void Game::changePalette(int offset) {
 
 	*/
 
-	if(entityManager.player != NULL) {
+	if(EntityManager::player != NULL) {
 		// FUCKING DUMBASSsave();
 		//save();
 	}
@@ -940,22 +980,14 @@ void Game::fadePalette(const int index) {
 	}
 }
 
-Game::~Game() {
-	globalGame = NULL;
-	bn::core::set_vblank_callback(doNothing);
-	frame = 0;
-}
-
 void Game::doButanoUpdate() {
-
-	BN_ASSERT(globalGame != NULL, "in vblank, globalgame was null");
 
 	//static bn::timer vblankTimer;
 	//static bn::fixed tickCount;
 	//(void)tickCount; // supress warning if logging is disabled
 	//vblankTimer.restart();
 
-	globalGame->doVBlank();
+	Game::doVBlank();
 
 	//tickCount = vblankTimer.elapsed_ticks();
 	//BN_LOG("vblank ops took ", tickCount.safe_division(FRAMETICKS), " frames");
@@ -1065,51 +1097,51 @@ void Game::doVBlank() { profileFunction();
 
 	switch(state) {
 		case GameState::Normal:
-			//BN_LOG("entityManager.doVBlank();");
+			//BN_LOG("EntityManager::doVBlank();");
 			//timer.restart();
-			entityManager.doVBlank();
+			EntityManager::doVBlank();
 			//BN_LOG("entityManager vblank took ", ((bn::fixed)timer.elapsed_ticks()).safe_division(VBLANKTICKS), " vblanks");
 
-			//BN_LOG("effectsManager.doVBlank();");
+			//BN_LOG("EffectsManager::doVBlank();");
 			//timer.restart();
-			effectsManager.doVBlank();
+			EffectsManager::doVBlank();
 			//BN_LOG("effectsManager vblank took ", ((bn::fixed)timer.elapsed_ticks()).safe_division(VBLANKTICKS), " vblanks");
 
-			//BN_LOG("tileManager.doVBlank();");
+			//BN_LOG("TileManager::doVBlank();");
 			//timer.restart();
-			tileManager.doVBlank();
+			TileManager::doVBlank();
 			//BN_LOG("tileManager vblank took ", ((bn::fixed)timer.elapsed_ticks()).safe_division(VBLANKTICKS), " vblanks");
 			//BN_LOG("done");
 			break;
 		case GameState::Exiting:
-			if(!a) { a = entityManager.exitRoom(); }
-			if(!b) { b = effectsManager.exitRoom(); }
-			if(!c) { c = tileManager.exitRoom(); }
+			if(!a) { a = EntityManager::exitRoom(); }
+			if(!b) { b = EffectsManager::exitRoom(); }
+			if(!c) { c = TileManager::exitRoom(); }
 			if(a && b && c) {
 				state = GameState::Entering;
 				a = b = c = false; // vine boom sound effect
 			}
 			break;
 		case GameState::Entering:
-			if(!a) { a = entityManager.enterRoom(); }
-			if(!b) { b = effectsManager.enterRoom(); }
-			if(!c) { c = tileManager.enterRoom(); }
+			if(!a) { a = EntityManager::enterRoom(); }
+			if(!b) { b = EffectsManager::enterRoom(); }
+			if(!c) { c = TileManager::enterRoom(); }
 			if(a && b && c) {
 				state = GameState::Normal;
 				a = b = c = false; // vine boom sound effect
 			}
 			// tick effects even while intro is occuring
 			// this should of been here months ago.
-			effectsManager.doVBlank();
+			EffectsManager::doVBlank();
 			break;
 		case GameState::Loading:
 		case GameState::Paused:
 			break;
 		case GameState::Dialogue:
-			effectsManager.doVBlank();
+			EffectsManager::doVBlank();
 			break;
 		case GameState::Cutscene:
-			cutsceneManager.doVBlank();
+			CutsceneManager::doVBlank();
 			break;
 		case GameState::Sleep:
 			break;
@@ -1129,15 +1161,13 @@ void Game::run() {
 
 	BN_LOG("look at u bein all fancy lookin in the logs");
 
-	globalGame = this;
+	RoomManager::isCustomRooms();
 
-	roomManager.isCustomRooms();
-
-	if(!roomManager.isCustom) {
+	if(!RoomManager::isCustom) {
 		load();
 	}
 
-	effectsManager.setBorderColor(!roomManager.isWhiteRooms());
+	EffectsManager::setBorderColor(!RoomManager::isWhiteRooms());
 
 	changePalette(0); // the paletteindex is already set by the load func, this just properly updates it
 
@@ -1150,18 +1180,18 @@ void Game::run() {
 
 	bool brandBlank = true;
 	for(int i=0; i<6; i++) {
-		if(tileManager.playerBrand[i] != 0) {
+		if(TileManager::playerBrand[i] != 0) {
 			brandBlank = false;
 			break;
 		}
 	}
 
-	if(brandBlank && !roomManager.isCustom) {
+	if(brandBlank && !RoomManager::isCustom) {
 
-		bool shouldDoBrandInput = cutsceneManager.titleScreen();
+		bool shouldDoBrandInput = CutsceneManager::titleScreen();
 
 		if(shouldDoBrandInput) {
-			cutsceneManager.brandInput();
+			CutsceneManager::brandInput();
 		} else {
 
 			int brandState[6][6];
@@ -1189,7 +1219,7 @@ void Game::run() {
 			}
 
 			for(int i=0; i<6; i++) {
-				tileManager.playerBrand[i] = tempBrand[i];
+				TileManager::playerBrand[i] = tempBrand[i];
 			}
 
 			// savedata setup
@@ -1204,7 +1234,7 @@ void Game::run() {
 
 			saveData.mode = 2;
 			mode = 2;
-			roomManager.setMode(2);
+			RoomManager::setMode(2);
 
 			paletteIndex = 1;
 			saveData.paletteIndex = 1;
@@ -1212,7 +1242,7 @@ void Game::run() {
 		}
 	} else {
 		if(!debugToggle) {
-			cutsceneManager.titleScreen();
+			CutsceneManager::titleScreen();
 		}
 	}
 
@@ -1241,11 +1271,11 @@ void Game::run() {
 
 				if(bn::keypad::l_held()) {
 					for(int i=0; i<debugIncrement; i++) {
-						roomManager.prevRoom();
+						RoomManager::prevRoom();
 					}
 				} else {
 					for(int i=0; i<debugIncrement; i++) {
-						roomManager.nextRoom();
+						RoomManager::nextRoom();
 					}
 				}
 
@@ -1276,8 +1306,8 @@ void Game::run() {
 				//bn::core::reset();
 				BN_LOG("full game reset called");
 
-				globalGame->saveData.hash = 0;
-				bn::sram::write(globalGame->saveData);
+				Game::saveData.hash = 0;
+				bn::sram::write(Game::saveData);
 
 				delay(1);
 
@@ -1291,15 +1321,15 @@ void Game::run() {
 				//THIS IS (curse), make it break out of this loop, and then put the actual Game* in a while func, and have it call its destructor and then reconstruct
 				//bn::core::reset();
 				BN_LOG("save reset called");
-				entityManager.player->locustCount = 0;
-				entityManager.player->isVoided = false;
+				EntityManager::player->locustCount = 0;
+				EntityManager::player->isVoided = false;
 				save();
 				break;
 			}
 		}
 
 		if(bn::keypad::start_pressed()) {
-			effectsManager.doMenu();
+			EffectsManager::doMenu();
 
 			inputTimer.restart();
 			doButanoUpdate();
@@ -1308,7 +1338,7 @@ void Game::run() {
 
 		if(bn::keypad::select_pressed()) {
 			debugToggle = !debugToggle;
-			effectsManager.setDebugDisplay(!roomManager.isWhiteRooms());
+			EffectsManager::setDebugDisplay(!RoomManager::isWhiteRooms());
 
 			inputTimer.restart();
 			//save(); // calling debug here has a chance to maybe fuck shit up,, but
@@ -1367,12 +1397,12 @@ void Game::run() {
 
 			moveTimer.restart();
 
-			entityManager.doMoves();
+			EntityManager::doMoves();
 
 			// doing this after,,, so repeated mistake presses are less likely
 			inputTimer.restart();
 
-			if(entityManager.hasKills()) {
+			if(EntityManager::hasKills()) {
 				resetRoom();
 				continue;
 			}
@@ -1387,8 +1417,8 @@ void Game::run() {
 			// wait for certain animations to be done until the next move can occur
 			while(true) {
 				bool noWait = true;
-				for(int i = 0; i < effectsManager.effectList.size(); i++) {
-					if(effectsManager.effectList[i]->waitFlag) {
+				for(int i = 0; i < EffectsManager::effectList.size(); i++) {
+					if(EffectsManager::effectList[i]->waitFlag) {
 						noWait = false;
 						break;
 					}
@@ -1496,17 +1526,17 @@ void Game::changeMusic() {
 
 		*/
 
-		static int prevMode = globalGame->mode;
+		static int prevMode = Game::mode;
 
-		if(bn::music::playing() && bn::music::playing_item() == item && prevMode == globalGame->mode) {
+		if(bn::music::playing() && bn::music::playing_item() == item && prevMode == Game::mode) {
 			return;
 		}
 
-		prevMode = globalGame->mode;
+		prevMode = Game::mode;
 
 		bn::fixed adjustVal = 1.0;
 
-		if((globalGame->mode == 2 || globalGame->entityManager.player->isVoided) &&
+		if((Game::mode == 2 || EntityManager::player->isVoided) &&
 			(item == bn::music_items::msc_dungeon_wings ||
 			item == bn::music_items::msc_beecircle ||
 			item == bn::music_items::msc_dungeongroove ||
@@ -1527,7 +1557,7 @@ void Game::changeMusic() {
 
 	};
 
-	int roomIndex = roomManager.roomIndex;
+	int roomIndex = RoomManager::roomIndex;
 
 	if(roomIndex == 254 && mode == 2) {
 		doPlay(bn::music_items::msc_voidsong);
@@ -1583,13 +1613,13 @@ void Game::changeMusic() {
 		doPlay(bn::music_items::msc_levcircle);
 	} else if(roomIndex <= 224) {
 		doPlay(bn::music_items::msc_cifcircle);
-	} else if(strstrCustom(roomManager.currentRoomName(), "_bee_\0") != NULL ||
-			strstrCustom(roomManager.currentRoomName(), "_misc_\0") != NULL) {
+	} else if(strstrCustom(RoomManager::currentRoomName(), "_bee_\0") != NULL ||
+			strstrCustom(RoomManager::currentRoomName(), "_misc_\0") != NULL) {
 		doPlay(bn::music_items::msc_beesong);
-	} else if(strstrCustom(roomManager.currentRoomName(), "_e_\0") != NULL) {
+	} else if(strstrCustom(RoomManager::currentRoomName(), "_e_\0") != NULL) {
 		doPlay(bn::music_items::msc_endless);
-	} else if(strstrCustom(roomManager.currentRoomName(), "_mon_0\0") != NULL ||
-			strstrCustom(roomManager.currentRoomName(), "_test_\0") != NULL) {
+	} else if(strstrCustom(RoomManager::currentRoomName(), "_mon_0\0") != NULL ||
+			strstrCustom(RoomManager::currentRoomName(), "_test_\0") != NULL) {
 		doPlay(bn::music_items::msc_monstrail);
 	} else {
 		bn::music::stop();
@@ -1679,28 +1709,28 @@ uint64_t GameSave::getSaveHash() {
 void Game::save() {
 	BN_LOG("saving save");
 
-	if(roomManager.isCustom) {
+	if(RoomManager::isCustom) {
 		return;
 	}
 
-	BN_ASSERT(entityManager.player != NULL, "when saving save, the player was null!");
+	BN_ASSERT(EntityManager::player != NULL, "when saving save, the player was null!");
 
-	saveData.locustCount = entityManager.player->locustCount;
-	saveData.isVoided = entityManager.player->isVoided;
+	saveData.locustCount = EntityManager::player->locustCount;
+	saveData.isVoided = EntityManager::player->isVoided;
 
-	saveData.hasMemory = entityManager.player->hasMemory;
-	saveData.hasWings = entityManager.player->hasWings;
-	saveData.hasSword = entityManager.player->hasSword;
+	saveData.hasMemory = EntityManager::player->hasMemory;
+	saveData.hasWings = EntityManager::player->hasWings;
+	saveData.hasSword = EntityManager::player->hasSword;
 
-	saveData.roomIndex = roomManager.roomIndex;
+	saveData.roomIndex = RoomManager::roomIndex;
 	saveData.paletteIndex = paletteIndex;
 	saveData.mode = mode;
 
-	BN_ASSERT(entityManager.player->hasRod == 0 || entityManager.player->hasRod == 1, "why was player hasrod ", entityManager.player->hasRod);
-	BN_ASSERT(entityManager.player->hasSuperRod == 0 || entityManager.player->hasSuperRod == 1, "why was player hasSuperRod ", entityManager.player->hasSuperRod);
+	BN_ASSERT(EntityManager::player->hasRod == 0 || EntityManager::player->hasRod == 1, "why was player hasrod ", EntityManager::player->hasRod);
+	BN_ASSERT(EntityManager::player->hasSuperRod == 0 || EntityManager::player->hasSuperRod == 1, "why was player hasSuperRod ", EntityManager::player->hasSuperRod);
 
-	saveData.hasRod = entityManager.player->hasRod;
-	saveData.hasSuperRod = entityManager.player->hasSuperRod;
+	saveData.hasRod = EntityManager::player->hasRod;
+	saveData.hasSuperRod = EntityManager::player->hasSuperRod;
 
 	if(saveData.hasRod) {
 		saveData.hasRod = 1;
@@ -1715,7 +1745,7 @@ void Game::save() {
 	}
 
 	for(int i=0; i<6; i++) {
-		saveData.playerBrand[i] = tileManager.playerBrand[i];
+		saveData.playerBrand[i] = TileManager::playerBrand[i];
 	}
 
 	saveData.randomSeed = bruhRand();
@@ -1731,7 +1761,7 @@ void Game::load() {
 
 	bn::sram::read(saveData);
 
-	if(roomManager.isCustom) {
+	if(RoomManager::isCustom) {
 		return;
 	}
 
@@ -1740,10 +1770,10 @@ void Game::load() {
 		saveData = GameSave();
 	}
 
-	roomManager.roomIndex = saveData.roomIndex;
+	RoomManager::roomIndex = saveData.roomIndex;
 	paletteIndex = saveData.paletteIndex;
 	mode = saveData.mode;
-	roomManager.setMode(mode);
+	RoomManager::setMode(mode);
 
 	if(saveData.col1Save == -1) {
 		BN_LOG("SAVE DATA COLOR DATA WAS CORRUPTED??? HOW???");
@@ -1761,7 +1791,7 @@ void Game::load() {
 	debugToggle = saveData.debug;
 
 	for(int i=0; i<6; i++) {
-		tileManager.playerBrand[i] = saveData.playerBrand[i];
+		TileManager::playerBrand[i] = saveData.playerBrand[i];
 	}
 }
 
@@ -1775,7 +1805,7 @@ void Game::saveRNG() {
 		return;
 	}
 
-	if(roomManager.isCustom) {
+	if(RoomManager::isCustom) {
 		return;
 	}
 

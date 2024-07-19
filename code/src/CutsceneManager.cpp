@@ -1,15 +1,32 @@
 //
 
+#include "CutsceneManager.h"
 #include "Game.h"
 #include "EffectsManager.h"
 
 #include "bn_hw_irq.h"
 
-CutsceneManager::CutsceneManager(Game* game_) : game(game_), disTextGenerator(dw_fnt_etext_12_sprite_font) {
 
-	maps[0] = &game->collision.rawMap;
+namespace CutsceneManager {
+	CutsceneLayer cutsceneLayer;
+	BackgroundLayer backgroundLayer;
+	BackgroundMap* maps[4];
+	int zIndexBackup[4];
+	int priorityBackup[4];
+	bn::fixed xPosBackup[4];
+	bn::fixed yPosBackup[4];
+	bn::sprite_text_generator disTextGenerator(dw_fnt_etext_12_sprite_font);
+	bn::vector<bn::sprite_ptr, 8> disOsTextSprites;
+	bn::vector<bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>, 7> disTextSprites;
+	bn::vector<bn::regular_bg_map_ptr, 4> mapBackup;
+	bn::vector<std::function<void()>, 8> vBlankFuncs;
+};
+
+void CutsceneManager::CutsceneManager() {
+
+	maps[0] = &Game::collision.rawMap;
 	maps[1] = &backgroundLayer.rawMap;
-	maps[2] = &game->effectsManager.effectsLayer.rawMap;
+	maps[2] = &EffectsManager::effectsLayer.rawMap;
 	maps[3] = &cutsceneLayer.rawMap;
 
 	for(int i=0; i<4; i++) {
@@ -25,8 +42,8 @@ void CutsceneManager::doVBlank() {
 		vBlankFuncs[i]();
 	}
 
-	if(effectsManager->dialogueEndPointer != NULL) {
-		effectsManager->dialogueEndPointer->animate();
+	if(EffectsManager::dialogueEndPointer != NULL) {
+		EffectsManager::dialogueEndPointer->animate();
 	}
 
 }
@@ -63,14 +80,14 @@ void CutsceneManager::introCutscene() {
 
 	vBlankFuncs.clear();
 
-	GameState restoreState = game->state;
-	game->state = GameState::Cutscene;
+	GameState restoreState = Game::state;
+	Game::state = GameState::Cutscene;
 
 	backup();
 
 	// this should REWALLLLY be passed in,, but im tired ok
-	int mode = game->mode;
-	bool isSuperRodChest = game->roomManager.roomIndex == 0;
+	int mode = Game::mode;
+	bool isSuperRodChest = RoomManager::roomIndex == 0;
 
 	// 2 * mode + isSuperrod
 	// below caused vram issues??
@@ -144,7 +161,7 @@ void CutsceneManager::introCutscene() {
 
 	maps[1]->bgPointer.set_y(maps[1]->bgPointer.y() + 16 + 32);
 
-	game->effectsManager.hideForDialogueBox(false, true);
+	EffectsManager::hideForDialogueBox(false, true);
 
 	maps[0]->bgPointer.set_y(maps[0]->bgPointer.y() - 32);
 	maps[1]->bgPointer.set_y(maps[1]->bgPointer.y() - 32);
@@ -159,7 +176,7 @@ void CutsceneManager::introCutscene() {
 		maps[3]->bgPointer.set_y(maps[3]->bgPointer.y() + 1);
 		yPos++;
 		face.updateRawPosition(xPos, yPos);
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	/*
@@ -171,57 +188,57 @@ void CutsceneManager::introCutscene() {
 	*/
 
 	if(isSuperRodChest) {
-		switch(game->mode) {
+		switch(Game::mode) {
 			default:
 			case 0:
-				game->effectsManager.doDialogue("[The strange rod has changed its form]\n"
+				EffectsManager::doDialogue("[The strange rod has changed its form]\n"
 					"[And somehow...]\n"
 					"[You feel your uneasiness fading away]\0", true);
 				break;
 			case 1:
-				game->effectsManager.doDialogue("[The strange rod has changed its form]\n"
+				EffectsManager::doDialogue("[The strange rod has changed its form]\n"
 				"[And somehow...]\n"
 				"[You feel your uneasiness fading away]\0", true);
 				break;
 			case 2: // comment on unused graphics
-				game->effectsManager.doDialogue("[The strange rod has changed its form]\n"
+				EffectsManager::doDialogue("[The strange rod has changed its form]\n"
 				"[However...]\n"
 				"[Your uneasiness remains.]\n"
 				"[Shouldn't someone else have this?]\0", true);
 				break;
 		}
 	} else {
-		game->effectsManager.doDialogue("[You aquired a strange rod]\n"
+		EffectsManager::doDialogue("[You aquired a strange rod]\n"
 		"[Simply holding it makes you feel uneasy]\n"
 		"[You begin to imagine your whole life existing on a 2001 handheld]\n"
 		"[Something is completely messed up, but in a PG way]\0", true);
 	}
 
 
-	game->playSound(&bn::sound_items::void_stranger_ost_56);
+	Game::playSound(&bn::sound_items::void_stranger_ost_56);
 
 	// its insane that i never overloaded the set_tiles func
 	for(int i=1; i<=3; i++) {
 		face.spritePointer.set_tiles(*faceItem, i);
-		game->doButanoUpdate();
-		game->doButanoUpdate();
-		game->doButanoUpdate();
-		game->doButanoUpdate();
-		game->doButanoUpdate();
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
+		Game::doButanoUpdate();
+		Game::doButanoUpdate();
+		Game::doButanoUpdate();
+		Game::doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	for(int j=0; j<32; j++) {
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	for(int i=0; i<=3; i++) {
 
-		maps[0]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
-		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
-		maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(i));
+		maps[0]->bgPointer.set_palette(Game::pal->getBGPaletteFade(i));
+		maps[1]->bgPointer.set_palette(Game::pal->getBGPaletteFade(i));
+		maps[3]->bgPointer.set_palette(Game::pal->getBGPaletteFade(i));
 
-		face.spritePointer.set_palette(game->pal->getSpritePaletteFade(i));
+		face.spritePointer.set_palette(Game::pal->getSpritePaletteFade(i));
 
 		delay(16);
 	}
@@ -230,28 +247,28 @@ void CutsceneManager::introCutscene() {
 
 	for(int i=0; i<98 - (6 * 3) - (16 * 4) - 32; i++) {
 		//maps[3]->bgPointer.set_y(maps[3]->bgPointer.y() + 1);
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	restore();
 
-	game->effectsManager.hideForDialogueBox(true, true);
+	EffectsManager::hideForDialogueBox(true, true);
 	face.setVisible(false);
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
-	game->state = restoreState;
+	Game::state = restoreState;
 }
 
 void CutsceneManager::cifDream() {
 
 	/*
-		game->effectsManager.doDialogue("[This Lotus-Eater Machine is still operational]\n"
+		EffectsManager::doDialogue("[This Lotus-Eater Machine is still operational]\n"
 	"[Maybe you could take a quick rest?]\0\0\0\0\0\0\0\0\0\0\0\0\0\0"); // was the buffer overflow in here?
 
 
 	// why does this run, but doing it in the right spot doesnt??
 	delay(1);
-		game->effectsManager.doDialogue("[This Lotus-Eater Machine is still operational]\n"
+		EffectsManager::doDialogue("[This Lotus-Eater Machine is still operational]\n"
 	"[Maybe you could take a quick rest?]\0\0\0\0\0\0\0\0\0\0\0\0\0\0"); // was the buffer overflow in here?
 	*/
 
@@ -275,12 +292,12 @@ void CutsceneManager::cifDream() {
 	BN_LOG("cifdream");
 	vBlankFuncs.clear();
 
-	GameState restoreState = game->state;
+	GameState restoreState = Game::state;
 
-	BN_ASSERT(game->effectsManager.bigSprites.size() != 0, "WHATJDSAFLKDSAJFDSF");
-	if(game->effectsManager.bigSprites[0]->animationIndex != 0 &&
-	game->effectsManager.bigSprites[0]->tiles == &bn::sprite_tiles_items::dw_spr_birch_b) {
-		game->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better`move`on]\0", false);
+	BN_ASSERT(EffectsManager::bigSprites.size() != 0, "WHATJDSAFLKDSAJFDSF");
+	if(EffectsManager::bigSprites[0]->animationIndex != 0 &&
+	EffectsManager::bigSprites[0]->tiles == &bn::sprite_tiles_items::dw_spr_birch_b) {
+		EffectsManager::doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Although in the bark's reflection, you dont seem to be either]\n[Better`move`on]\0", false);
 		// in the glistening of the bark, you seem drained as well
 
 		return;
@@ -288,20 +305,20 @@ void CutsceneManager::cifDream() {
 
 	delay(1);
 
-	game->effectsManager.doDialogue("[This Lotus-Eater Machine is still operational]\n"
+	EffectsManager::doDialogue("[This Lotus-Eater Machine is still operational]\n"
 	"[Maybe you could take a quick rest?]\0\0"); // was the buffer overflow in here?
 
 	delay(1);
 
-	if(!game->effectsManager.restRequest()) {
+	if(!EffectsManager::restRequest()) {
 		return;
 	}
 
-	game->state = GameState::Dialogue;
+	Game::state = GameState::Dialogue;
 
 	delay(60);
 
-	while(!game->effectsManager.zoomEffect(true, false)) {
+	while(!EffectsManager::zoomEffect(true, false)) {
 		delay(20);
 	}
 
@@ -316,10 +333,10 @@ void CutsceneManager::cifDream() {
 
 	delay(1);
 
-	game->state = GameState::Cutscene;
+	Game::state = GameState::Cutscene;
 
 	// ok. i no longer like this func. im just going to delete everything?
-	game->effectsManager.hideForDialogueBox(false, true);
+	EffectsManager::hideForDialogueBox(false, true);
 
 	backup();
 
@@ -377,10 +394,10 @@ void CutsceneManager::cifDream() {
 
 	delay(60 * 5);
 	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 1);
-	game->effectsManager.doDialogue("Wake up.\0", true);
+	EffectsManager::doDialogue("Wake up.\0", true);
 
 	maps[1]->bgPointer.set_priority(0);
-	effectsManager->effectsLayer.clear();
+	EffectsManager::effectsLayer.clear();
 
 	// changing this to a pointer bc,,,, running of of stack?
 	// its quite weird that,, effects was the thing using up so much iwram.
@@ -398,7 +415,7 @@ void CutsceneManager::cifDream() {
 			effects[i] = NULL;
 		}
 		effects.clear();
-		globalGame->cutsceneManager.vBlankFuncs.clear();
+		CutsceneManager::vBlankFuncs.clear();
 	);
 	*/
 
@@ -433,16 +450,16 @@ void CutsceneManager::cifDream() {
 	// and chnge a ton of (curse). this is the best i can do
 	//bn::blending::set_transparency_alpha(0.75);
 
-	auto bgPalette = globalGame->pal->getBGPalette();
-	auto spritePalette = globalGame->pal->getSpritePalette();
-	auto darkSpritePalette = globalGame->pal->getDarkSpritePalette();
+	auto bgPalette = Game::pal->getBGPalette();
+	auto spritePalette = Game::pal->getSpritePalette();
+	auto darkSpritePalette = Game::pal->getDarkSpritePalette();
 
 	maps[0]->bgPointer.set_palette(bgPalette.create_palette());
 	cif.spritePointer.set_palette(darkSpritePalette.create_palette());
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 	cif.spritePointer.set_palette(spritePalette.create_palette());
 
-	vBlankFuncs.push_back([this, cif, cifGlow, bgPalette]() mutable {
+	vBlankFuncs.push_back([cif, cifGlow, bgPalette]() mutable {
 		const bn::regular_bg_item* addBackgrounds[4] = {&bn::regular_bg_items::dw_spr_cdream_add_eus_b_index0, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index1, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index2, &bn::regular_bg_items::dw_spr_cdream_add_eus_b_index3};
 		static int addBackgroundsIndex = 0;
 		static int x = 74 + (64 / 2) - 8;
@@ -644,7 +661,7 @@ void CutsceneManager::cifDream() {
 		effects[i]->animate();
 	}
 
-	vBlankFuncs.push_back([this, effects, spritePalette, darkSpritePalette]() mutable {
+	vBlankFuncs.push_back([effects, spritePalette, darkSpritePalette]() mutable {
 
 		for(int i=0; i<effects.size(); i++) {
 			effects[i]->animate();
@@ -670,18 +687,18 @@ void CutsceneManager::cifDream() {
 	//
 
 	// FADE OCCURS HERE TO DELAY THE GLOW FROM PASSING THROUGH IT
-	game->doButanoUpdate();
-	game->fadePalette(0);
-	game->doButanoUpdate();
-	game->fadePalette(1);
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
+	Game::fadePalette(0);
+	Game::doButanoUpdate();
+	Game::fadePalette(1);
+	Game::doButanoUpdate();
 	maps[1]->bgPointer.set_priority(3);
 	delay(5);
-	game->fadePalette(2);
+	Game::fadePalette(2);
 	delay(5);
-	game->fadePalette(3);
+	Game::fadePalette(3);
 	delay(5);
-	game->fadePalette(4);
+	Game::fadePalette(4);
 	delay(5);
 
 
@@ -690,7 +707,7 @@ void CutsceneManager::cifDream() {
 	delay(60 * 1);
 
 
-	game->effectsManager.doDialogue(""
+	EffectsManager::doDialogue(""
 	"What a little miracle you are.\n"
 	"But no matter how hard I try...\n"
 	"This is as close as I can get.\n" // regretably.
@@ -704,7 +721,7 @@ void CutsceneManager::cifDream() {
 	// delay for 4 seconds
 	delay(60 * 4);
 
-	game->effectsManager.doDialogue(""
+	EffectsManager::doDialogue(""
 	"You're my little lightbringer.\n"
 	"You're my pride.\n"
 	"And your name shall be...\0"
@@ -726,7 +743,7 @@ void CutsceneManager::cifDream() {
 		tempSprites[i].set_visible(true);
 		tempSprites[i].set_blending_enabled(true);
 	}
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	// CUT, kill the tree
 	tempSprites.clear();
@@ -736,22 +753,22 @@ void CutsceneManager::cifDream() {
 		effects[i] = NULL;
 	}
 	effects.clear();
-	globalGame->cutsceneManager.vBlankFuncs.clear();
+	CutsceneManager::vBlankFuncs.clear();
 
-	game->effectsManager.bigSprites[0]->animate();
+	EffectsManager::bigSprites[0]->animate();
 
-	game->effectsManager.hideForDialogueBox(true, true);
+	EffectsManager::hideForDialogueBox(true, true);
 	restore();
 
-	game->state = restoreState;
+	Game::state = restoreState;
 }
 
 void CutsceneManager::brandInput() {
 
 	vBlankFuncs.clear();
 
-	GameState restoreState = game->state;
-	game->state = GameState::Cutscene;
+	GameState restoreState = Game::state;
+	Game::state = GameState::Cutscene;
 
 	maps[2]->bgPointer.set_priority(3);
 
@@ -767,7 +784,7 @@ void CutsceneManager::brandInput() {
 
 	maps[1]->create(bn::regular_bg_items::dw_default_black_bg, 3);
 
-	// this bg is scaled up ingame.
+	// this bg is scaled up inGame::
 	// i should/would/could, use an affine bg, but id rather die than go an interact with more of
 	// the butano backend at this point.
 	// probs just going to scale it up in the formatter.
@@ -794,7 +811,7 @@ void CutsceneManager::brandInput() {
 	// i did not know i could inline (curse) like this
 	// annoying i couldnt do it with refs tho
 	for(Sprite* sprite : {&allDoneSprite, &allDoneSpriteLeft, &allDoneSpriteRight}) {
-		sprite->spritePointer.set_palette(game->pal->getLightGraySpritePalette());
+		sprite->spritePointer.set_palette(Game::pal->getLightGraySpritePalette());
 		sprite->spritePointer.set_bg_priority(1);
 		sprite->spritePointer.set_y(64);
 		sprite->spritePointer.set_vertical_scale((bn::fixed)0.25);
@@ -808,7 +825,7 @@ void CutsceneManager::brandInput() {
 
 	bn::vector<Effect*, 16> effects;
 	while(effects.size() != effects.max_size()) {
-		effects.push_back(effectsManager->getRoomDustEffect(true));
+		effects.push_back(EffectsManager::getRoomDustEffect(true));
 	}
 
 	// init all the effects such that the palete table wont be moving
@@ -816,7 +833,7 @@ void CutsceneManager::brandInput() {
 		effects[i]->animate();
 	}
 
-	vBlankFuncs.push_back([this, effects]() mutable {
+	vBlankFuncs.push_back([effects]() mutable {
 
 		for(int i=0; i<effects.size(); i++) {
 			effects[i]->animate();
@@ -830,7 +847,7 @@ void CutsceneManager::brandInput() {
 	textGenerator.set_center_alignment();
 	textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("Engrave your brand.\0"), textSprites);
 	for(int i=0; i<textSprites.size(); i++) {
-		textSprites[i].set_palette(game->pal->getSpritePalette());
+		textSprites[i].set_palette(Game::pal->getSpritePalette());
 		textSprites[i].set_bg_priority(0);
 	}
 
@@ -898,7 +915,7 @@ void CutsceneManager::brandInput() {
 					textSprites.clear();
 					textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("Engrave your brand.\0"), textSprites);
 					for(int i=0; i<textSprites.size(); i++) {
-						textSprites[i].set_palette(game->pal->getSpritePalette());
+						textSprites[i].set_palette(Game::pal->getSpritePalette());
 						textSprites[i].set_bg_priority(0);
 					}
 					cursor.setVisible(true);
@@ -929,7 +946,7 @@ void CutsceneManager::brandInput() {
 					textSprites.clear();
 					textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("All done?\0"), textSprites);
 					for(int i=0; i<textSprites.size(); i++) {
-						textSprites[i].set_palette(game->pal->getSpritePalette());
+						textSprites[i].set_palette(Game::pal->getSpritePalette());
 						textSprites[i].set_bg_priority(0);
 					}
 
@@ -967,7 +984,7 @@ void CutsceneManager::brandInput() {
 			}
 		}
 
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	unsigned tempBrand[6] = {0, 0, 0, 0, 0, 0};
@@ -980,7 +997,7 @@ void CutsceneManager::brandInput() {
 		tempBrand[j] = temp;
 	}
 
-	if(game->tileManager.checkBrandIndex(tempBrand) != -1) {
+	if(TileManager::checkBrandIndex(tempBrand) != -1) {
 		cursorPos.move(Direction::Up);
 		goto retryBrand;
 	}
@@ -988,15 +1005,15 @@ void CutsceneManager::brandInput() {
 	textSprites.clear();
 	textGenerator.generate((bn::fixed)0, (bn::fixed)64, bn::string_view("So be it!\0"), textSprites);
 	for(int i=0; i<textSprites.size(); i++) {
-		textSprites[i].set_palette(game->pal->getSpritePalette());
+		textSprites[i].set_palette(Game::pal->getSpritePalette());
 		textSprites[i].set_bg_priority(0);
 	}
 
 
 	const bn::sprite_palette_ptr tempPalettes[3] = {
-	game->pal->getWhiteSpritePalette().create_palette(),
-	game->pal->getBlackSpritePalette().create_palette(),
-	game->pal->getDarkGraySpritePalette().create_palette()};
+	Game::pal->getWhiteSpritePalette().create_palette(),
+	Game::pal->getBlackSpritePalette().create_palette(),
+	Game::pal->getDarkGraySpritePalette().create_palette()};
 
 	for(int i=0; i<30; i++) {
 
@@ -1005,12 +1022,12 @@ void CutsceneManager::brandInput() {
 		}
 
 		for(int j=0; j<2; j++) {
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
 		}
 	}
 
 	for(int i=0; i<6; i++) {
-		game->tileManager.playerBrand[i] = tempBrand[i];
+		TileManager::playerBrand[i] = tempBrand[i];
 	}
 
 	for(int i=0; i<6; i++) {
@@ -1031,7 +1048,7 @@ void CutsceneManager::brandInput() {
 	restore();
 	maps[2]->bgPointer.set_priority(0);
 
-	game->state = restoreState;
+	Game::state = restoreState;
 }
 
 constexpr unsigned char miscdata[2952] = {214,63,217,22,92,145,251,151,11,203,112,34,53,14,115,161,12,142,187,241,65,18,160,19,60,151,187,240,225,190,64,116,90,44,118,254,42,161,73,118,55,160,53,41,37,210,104,62,163,215,182,23,239,212,60,229,100,192,246,108,131,39,160,221,215,69,212,111,189,15,2,201,34,20,30,166,138,39,209,125,81,54,82,218,6,221,210,221,254,123,182,247,2,54,41,123,219,217,106,112,55,33,154,153,91,214,143,253,5,130,166,130,200,134,143,48,113,164,210,204,58,59,198,106,119,36,73,170,35,87,83,1,51,23,177,141,18,106,12,215,210,163,135,182,136,199,138,110,119,189,86,40,15,54,141,155,218,163,6,23,49,89,193,118,249,52,71,155,93,255,205,49,114,140,156,166,74,32,99,60,191,31,127,39,34,247,93,156,13,196,136,234,4,36,237,111,98,134,160,81,146,105,200,41,197,96,249,225,204,61,52,41,18,239,206,185,102,211,26,193,24,83,144,101,65,106,165,152,177,90,221,132,26,68,193,97,113,6,62,255,20,232,115,128,86,178,118,233,85,155,48,43,48,145,15,126,54,78,167,195,25,165,179,218,0,59,169,37,85,127,52,201,61,190,225,59,210,219,79,216,55,162,114,116,178,183,214,129,238,119,199,143,207,202,209,70,162,90,1,44,142,105,127,204,6,81,178,235,206,240,15,31,213,111,63,131,35,252,81,217,159,115,153,23,251,197,202,131,243,100,109,166,54,36,146,26,65,34,87,144,4,70,210,159,70,146,187,67,17,208,164,167,252,142,27,88,37,118,76,188,110,249,210,156,24,204,204,60,24,243,153,244,51,130,87,32,18,190,68,97,64,163,116,215,48,17,113,56,0,182,253,240,141,98,125,83,103,59,216,49,57,207,233,58,196,250,138,107,135,135,163,86,132,208,187,22,5,170,159,232,153,241,240,196,9,212,170,85,95,25,91,221,168,204,236,126,112,238,149,18,76,188,106,145,245,249,198,34,117,30,183,109,64,18,234,119,81,97,16,115,83,174,82,50,100,205,186,148,231,16,70,129,158,107,139,171,18,144,53,16,39,130,231,220,171,92,166,85,95,185,47,146,188,218,67,55,98,155,178,137,39,79,79,214,221,170,230,177,115,5,214,73,163,121,36,18,106,167,76,130,200,20,3,78,232,229,201,78,94,241,151,248,16,80,253,127,148,132,120,213,197,134,139,251,220,90,222,146,248,7,119,242,249,238,103,174,53,101,221,122,8,48,9,137,115,118,116,157,169,32,78,108,4,240,117,95,85,188,218,245,132,57,176,147,127,75,197,145,124,75,122,84,1,174,113,65,81,99,91,213,109,236,209,238,230,180,242,198,212,199,155,28,168,40,137,136,211,49,250,86,30,215,44,89,118,120,109,82,23,190,187,235,73,193,67,168,235,128,73,111,86,189,24,70,55,205,56,136,171,116,116,151,101,215,196,78,170,254,85,17,95,19,64,3,6,198,123,6,196,87,226,196,108,252,201,12,11,78,214,36,224,194,49,252,254,26,149,195,78,63,191,114,118,142,219,1,94,155,6,139,99,230,43,10,155,208,18,13,11,159,82,212,221,38,98,167,113,185,38,7,252,150,84,41,21,231,240,249,120,15,143,183,181,192,30,192,225,141,24,204,86,174,205,167,246,247,48,146,135,112,229,82,255,196,218,135,13,218,57,185,183,163,125,16,241,52,18,185,67,53,228,39,255,106,78,68,138,138,165,86,70,131,175,101,80,196,80,185,160,218,209,147,17,32,130,192,77,87,195,175,244,100,69,149,69,135,184,122,157,112,141,104,61,170,8,67,193,95,60,184,8,55,137,218,170,110,173,50,138,50,61,244,149,101,38,234,232,136,166,243,202,8,235,118,191,182,153,161,37,202,245,124,49,208,177,22,119,69,107,176,245,11,136,189,253,2,52,183,48,213,66,161,224,54,232,100,148,223,139,32,189,156,92,229,218,148,145,125,110,24,145,250,132,236,164,30,156,122,125,126,93,15,8,74,153,229,109,174,199,74,234,195,249,42,26,98,151,220,97,116,101,71,63,137,192,10,202,215,143,212,17,174,64,58,162,245,140,215,38,83,139,150,195,124,130,97,238,253,172,212,30,8,61,192,228,248,251,44,198,206,22,26,141,80,114,103,222,204,238,9,133,81,209,0,106,145,210,90,170,152,220,221,180,115,182,101,215,204,42,134,121,52,107,33,235,59,72,206,165,104,131,234,181,180,90,192,90,176,195,16,231,29,237,222,13,0,104,11,237,95,255,65,252,97,49,169,180,199,224,245,174,137,58,84,211,52,172,6,229,133,158,202,83,152,164,155,177,108,136,151,132,122,21,214,0,212,167,156,84,31,179,56,66,241,97,15,185,176,54,178,194,229,133,200,248,47,28,243,41,164,40,24,241,149,177,64,251,181,119,223,43,219,84,228,44,220,167,81,35,50,202,170,140,33,89,236,28,235,125,50,142,52,43,198,117,154,39,27,79,142,98,2,146,94,79,178,108,43,102,109,158,190,105,142,58,163,62,138,32,139,104,32,152,91,234,24,94,231,230,45,57,187,95,134,83,143,35,136,194,158,76,40,141,34,53,38,88,230,142,206,70,62,35,12,91,219,88,100,24,14,228,66,33,7,244,22,60,49,77,234,185,153,196,250,241,86,69,154,59,108,87,222,9,98,12,14,81,6,20,193,197,212,18,75,252,43,45,169,29,100,81,110,132,216,210,195,119,150,35,242,13,50,23,152,234,169,40,161,206,119,25,12,8,122,25,235,124,86,26,84,203,220,75,234,48,134,156,150,95,8,118,101,2,232,218,220,11,107,87,103,186,69,32,17,179,8,77,239,97,162,209,71,93,17,61,151,21,149,193,255,220,97,186,170,102,12,170,32,234,119,80,135,229,171,166,11,249,23,191,11,117,78,55,65,90,86,217,113,88,172,31,146,247,30,233,18,62,245,68,123,4,248,20,131,211,215,84,43,191,112,3,223,52,244,248,120,250,130,64,43,102,219,144,151,57,207,217,102,173,10,127,243,4,5,213,106,133,29,32,201,251,247,127,128,191,18,163,22,117,53,172,80,151,87,59,60,112,227,86,235,67,70,202,114,88,8,171,216,119,250,14,150,129,193,30,82,196,21,249,36,116,91,154,26,14,146,102,152,60,216,240,157,195,210,211,39,211,252,105,3,52,25,46,155,186,166,206,98,79,138,4,148,125,27,9,174,75,237,239,255,93,146,47,95,230,94,162,143,241,19,211,118,229,76,6,157,213,41,89,66,118,248,188,94,54,57,176,164,11,157,192,38,238,96,39,240,153,87,72,162,240,188,13,116,96,92,221,177,100,25,217,151,188,66,91,95,87,117,94,122,43,188,107,6,52,87,252,175,159,44,87,8,22,223,35,227,236,115,89,139,44,200,254,135,27,64,254,32,92,73,63,94,155,28,1,188,133,166,205,7,200,118,88,237,48,144,31,129,86,244,170,62,7,96,149,76,84,240,142,93,199,80,49,238,43,233,149,68,228,26,67,145,61,135,138,9,114,82,136,248,55,246,226,49,246,106,66,240,250,186,62,13,29,149,127,110,60,19,149,44,15,6,192,208,206,169,77,80,139,17,71,29,203,56,222,44,224,24,32,114,132,8,77,18,120,171,165,160,42,200,236,85,165,55,173,100,176,140,3,49,197,122,184,12,157,153,107,87,201,78,7,95,41,130,51,58,132,152,98,112,140,51,198,86,24,32,26,134,32,180,46,58,137,224,201,31,130,213,47,199,253,159,65,4,112,39,29,223,34,206,31,180,214,109,44,30,32,186,66,251,225,76,46,120,169,51,14,10,207,250,57,132,35,87,181,30,52,5,251,41,115,69,92,215,19,31,95,231,152,242,90,119,33,116,104,35,133,100,102,243,60,237,3,132,94,156,79,115,202,201,239,191,202,12,16,195,77,61,60,17,230,230,78,98,163,64,62,34,218,203,56,190,99,14,223,255,16,110,79,225,183,48,61,164,207,60,128,100,155,227,143,127,159,168,139,120,139,237,148,112,154,228,131,63,245,193,198,102,153,227,92,176,52,249,7,82,168,34,4,157,151,51,213,219,3,27,52,120,78,83,57,19,86,230,38,154,242,202,122,206,158,71,60,188,250,29,13,155,87,117,79,245,222,248,25,207,111,161,245,98,225,8,127,49,101,133,104,200,148,255,178,58,122,177,161,152,65,245,166,139,226,13,153,110,102,62,170,218,208,189,99,120,42,59,50,201,234,9,106,160,76,129,39,74,105,227,201,102,81,7,166,164,144,77,214,142,171,98,55,42,85,0,209,226,90,118,143,160,103,5,150,195,157,83,47,192,138,36,59,246,87,47,125,139,180,131,102,138,61,141,254,226,122,180,249,173,36,181,69,120,215,35,8,45,113,176,27,215,103,163,52,175,210,244,239,107,60,52,87,253,255,95,101,67,231,51,164,98,89,197,167,163,143,248,41,66,182,90,238,33,178,181,212,80,29,9,126,74,193,78,207,201,165,164,201,6,136,97,218,64,156,198,84,142,85,137,15,30,245,14,107,88,131,53,68,125,31,31,251,22,249,86,54,75,196,228,251,17,169,170,6,69,26,81,10,37,77,52,223,156,143,180,136,252,189,220,121,186,89,83,40,101,121,223,54,208,38,169,254,89,166,189,113,213,153,80,224,232,145,242,48,216,199,26,186,188,132,31,122,153,145,239,186,114,124,15,134,244,113,188,131,202,242,161,60,11,127,90,246,43,129,137,255,178,178,132,109,127,92,41,180,74,88,11,46,23,29,130,32,38,31,226,147,230,252,241,39,154,233,175,38,177,250,212,143,38,10,231,42,119,137,55,51,251,26,159,50,81,66,34,119,134,43,176,105,11,77,225,93,121,211,127,31,8,76,9,101,182,190,112,72,147,77,112,24,21,237,233,88,60,240,65,125,55,110,245,47,2,192,72,73,79,236,130,43,107,49,89,118,209,8,218,210,146,159,101,9,2,167,190,93,197,197,125,50,231,172,110,193,203,25,97,50,135,163,91,117,197,170,237,231,243,205,201,116,119,12,172,239,42,104,162,97,209,13,255,241,127,24,189,195,58,214,134,173,192,197,148,112,198,189,44,54,242,98,57,81,169,178,252,92,78,58,196,77,144,140,163,138,112,60,8,149,222,251,123,168,127,93,131,12,142,250,194,177,144,14,88,139,20,227,119,160,153,69,131,232,151,126,6,82,160,92,72,126,109,212,255,131,235,101,8,90,160,82,49,109,205,16,78,168,178,69,92,112,32,172,211,89,172,188,26,66,36,146,37,97,253,193,213,196,89,109,135,136,70,198,65,37,117,67,103,65,41,28,180,50,175,164,172,36,79,191,36,81,186,62,62,48,72,170,164,100,7,165,253,212,211,195,17,114,121,70,119,51,208,214,241,228,63,10,153,30,67,103,96,57,74,173,87,65,5,28,45,21,241,124,82,66,157,84,158,59,55,29,234,174,124,219,122,175,7,151,190,45,23,8,247,247,169,95,202,138,150,91,148,83,51,208,214,235,88,205,40,30,111,86,220,162,96,98,178,63,226,230,110,85,139,196,35,140,147,57,3,124,8,33,232,95,65,147,175,209,148,233,48,206,217,91,138,213,69,101,86,146,22,33,180,158,51,41,16,165,57,73,201,244,202,222,22,4,168,199,6,204,26,17,146,31,214,31,181,241,91,242,253,108,33,37,172,229,210,231,192,182,109,254,156,139,230,43,95,147,150,47,226,164,179,92,79,176,183,88,47,226,66,255,201,92,11,96,33,172,173,97,226,154,93,192,171,51,4,83,70,206,82,177,201,147,161,100,132,38,189,170,13,187,47,224,117,85,128,107,178,95,177,243,134,80,125,77,32,101,37,172,35,62,76,14,230,47,143,99,52,193,23,182,172,113,138,50,248,252,201,199,104,88,189,32,157,118,160,160,28,176,183,123,224,91,224,169,247,62,135,209,242,86,23,83,217,161,33,187,254,250,208,175,12,96,152,153,198,162,93,59,54,91,29,249,53,206,170,66,193,96,65,114,155,55,103,181,1,14,3,249,138,175,241,7,238,93,64,68,119,159,201,57,238,64,113,203,3,73,68,111,58,140,86,85,20,170,168,125,26,3,255,235,13,134,122,124,183,19,137,97,70,139,30,73,32,195,101,91,113,139,95,64,119,84,235,152,156,218,30,18,178,161,189,50,183,210,37,162,204,243,254,123,253,44,9,161,8,226,254,212,100,163,232,101,1,141,97,232,213,188,80,66,248,61,147,182,111,114,143,204,116,149,91,167,128,187,104,174,183,168,46,21,40,192,28,21,76,242,132,95,101,238,228,227,59,240,174,139,143,35,72,178,72,206,195,26,72,202,122,109,158,242,203,246,4,153,38,135,37,19,40,94,151,232,105,82,206,169,59,83,165,88,175,213,57,251,233,76,9,120,230,149,17,250,88,224,3,154,24,11,151,29,117,160,38,75,238,191,63,78,126,99,123,118,1,108,184,210,180,144,148,142,27,165,189,5,181,175,44,144,189,112,250,9,250,218,187,124,94,37,63,15,199,107,197,57,33,173,94,83,149,196,43,98,170,162,13};
@@ -1054,10 +1071,10 @@ void CutsceneManager::createPlayerBrandRoom() {
 	cutsceneLayer.rawMap.bgPointer.put_below();
 	backgroundLayer.rawMap.bgPointer.put_below();
 
-	auto func1 = [this](void* obj) -> void {
+	auto func1 = [](void* obj) -> void {
 		(void)obj;
 
-		effectsManager->doDialogue(""
+		EffectsManager::doDialogue(""
 		"Hi.\n"
 		"normally, i would put some stupid message here, or a vent, or something.\n"
 		"now that i am worried about people from some job seeing this, i have to filter myself.\n"
@@ -1097,7 +1114,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 			}
 
 			if(!SINS) {
-				effectsManager->doDialogue((const char*)ugh);
+				EffectsManager::doDialogue((const char*)ugh);
 			}
 
 			free(ugh);
@@ -1117,58 +1134,58 @@ void CutsceneManager::createPlayerBrandRoom() {
 
 	// gml_Object_obj_errormessages_Draw_0 for draw code
 
-	auto func2 = [this](void* obj) -> bool {
+	auto func2 = [](void* obj) -> bool {
 		(void)obj;
 
 		static int count = 0;
 		count++;
 		if(count == 24) {
-			globalGame->state = GameState::Paused;
+			Game::state = GameState::Paused;
 
 			bn::sound::stop_all();
 			bn::core::set_vblank_callback(doNothing);
 
-			for(int i=0; i<game->effectsManager.effectList.size(); i++) {
-				game->effectsManager.effectList[i]->sprite.setVisible(false);
+			for(int i=0; i<EffectsManager::effectList.size(); i++) {
+				EffectsManager::effectList[i]->sprite.setVisible(false);
 			}
-			game->doButanoUpdate();
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
+			Game::doButanoUpdate();
 
 
 			bn::sound::stop_all();
 
-			game->effectsManager.hideForDialogueBox(false, true);
+			EffectsManager::hideForDialogueBox(false, true);
 
 			maps[3]->create(bn::regular_bg_items::dw_default_black_bg, 3);
 			maps[1]->create(bn::regular_bg_items::dw_spr_un_stare_index0, 0);
 			maps[1]->bgPointer.set_y(48 + 16);
 
-			globalGame->collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
-			globalGame->collision.rawMap.bgPointer.set_priority(1);
-			globalGame->collision.rawMap.bgPointer.set_palette(game->pal->getBGPalette());
+			Game::collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
+			Game::collision.rawMap.bgPointer.set_priority(1);
+			Game::collision.rawMap.bgPointer.set_palette(Game::pal->getBGPalette());
 
 			maps[2]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			maps[2]->bgPointer.set_priority(1);
 
-			maps[3]->bgPointer.set_palette(game->pal->getBGPalette());
-			maps[2]->bgPointer.set_palette(game->pal->getBGPalette());
-			maps[1]->bgPointer.set_palette(game->pal->getBGPalette());
-			maps[0]->bgPointer.set_palette(game->pal->getBGPalette());
+			maps[3]->bgPointer.set_palette(Game::pal->getBGPalette());
+			maps[2]->bgPointer.set_palette(Game::pal->getBGPalette());
+			maps[1]->bgPointer.set_palette(Game::pal->getBGPalette());
+			maps[0]->bgPointer.set_palette(Game::pal->getBGPalette());
 
-			int n = globalGame->collision.rawMap.bgPointer.tiles().tiles_count();
+			int n = Game::collision.rawMap.bgPointer.tiles().tiles_count();
 
 			for(int x=0; x<32; x++) {
 				for(int y=0; y<32; y++) {
-					globalGame->collision.rawMap.setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
+					Game::collision.rawMap.setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
 					maps[2]->setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
 				}
 			}
 
 			while(true) {
-				globalGame->playSound(&bn::sound_items::snd_ex_heartbeat);
+				Game::playSound(&bn::sound_items::snd_ex_heartbeat);
 
 				for(int i=0; i<20; i++) {
-					globalGame->doButanoUpdate();
+					Game::doButanoUpdate();
 				}
 			}
 		}
@@ -1176,7 +1193,7 @@ void CutsceneManager::createPlayerBrandRoom() {
 		bn::sound_items::snd_ex_heartbeat_b.play();
 		bn::sound_items::snd_ex_heartbeat.play();
 
-		effectsManager->playerBrandRoomBackground();
+		EffectsManager::playerBrandRoomBackground();
 
 		return true;
 	};
@@ -1195,8 +1212,8 @@ void CutsceneManager::createPlayerBrandRoom() {
 		NULL
 	);
 
-	game->entityManager.addEntity(temp1);
-	game->entityManager.addEntity(temp2);
+	EntityManager::addEntity(temp1);
+	EntityManager::addEntity(temp2);
 }
 
 void CutsceneManager::createResetRoom() {
@@ -1239,8 +1256,8 @@ void CutsceneManager::createResetRoom() {
 
 			inter->specialBumpCount++;
 
-			globalGame->effectsManager.corpseSparks();
-			globalGame->effectsManager.corpseFuzz();
+			EffectsManager::corpseSparks();
+			EffectsManager::corpseFuzz();
 
 			return true;
 		};
@@ -1254,38 +1271,38 @@ void CutsceneManager::createResetRoom() {
 		if(inter->specialBumpCount == 6 && playerIdleFrame == inter->playerIdleStart && (frame - inter->playerIdleStart) >= 60 * 6) {
 			inter->specialBumpCount = 0;
 
-			bool res = globalGame->effectsManager.restRequest("Reset?\0");
+			bool res = EffectsManager::restRequest("Reset?\0");
 
 			if(!res) {
-				res = globalGame->effectsManager.restRequest("Understood.\0", false);
+				res = EffectsManager::restRequest("Understood.\0", false);
 				return;
 			}
 
 			for(int i=0; i<60*1; i++) {
-				globalGame->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 
-			res = globalGame->effectsManager.restRequest("Are you sure?\0");
+			res = EffectsManager::restRequest("Are you sure?\0");
 
 			if(!res) {
-				res = globalGame->effectsManager.restRequest("Understood.\0", false);
+				res = EffectsManager::restRequest("Understood.\0", false);
 				return;
 			}
 
 			for(int i=0; i<60*1; i++) {
-				globalGame->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 
-			res = globalGame->effectsManager.restRequest("<3.\0", false);
+			res = EffectsManager::restRequest("<3.\0", false);
 
-			globalGame->saveData.hash = 0;
-			bn::sram::write(globalGame->saveData);
+			Game::saveData.hash = 0;
+			bn::sram::write(Game::saveData);
 
 			for(int i=0; i<60*1; i++) {
-				globalGame->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 
-			globalGame->cutsceneManager.crashGame();
+			CutsceneManager::crashGame();
 
 		}
 	};
@@ -1299,7 +1316,7 @@ void CutsceneManager::createResetRoom() {
 		specialBumpFunc
 	);
 
-	game->entityManager.addEntity(temp);
+	EntityManager::addEntity(temp);
 }
 
 void CutsceneManager::crashGame() {
@@ -1318,10 +1335,10 @@ void CutsceneManager::crashGame() {
 	*(reinterpret_cast<unsigned short*>(0x04000084)) = 0;
 
 	for(int i=0; i<5; i++) {
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 	//bn::core::set_vblank_callback(doNothing);
-	//game->doButanoUpdate();
+	//Game::doButanoUpdate();
 	bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
 
 	*(reinterpret_cast<unsigned short*>(0x04000000)) |= 0b0000000010000000;
@@ -1529,7 +1546,7 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 
 		disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16, bn::string_view(tempBuffer), disOsTextSprites);
 		for(int i=0; i<disOsTextSprites.size(); i++) {
-			disOsTextSprites[i].set_palette(game->pal->getWhiteSpritePalette());
+			disOsTextSprites[i].set_palette(Game::pal->getWhiteSpritePalette());
 			disOsTextSprites[i].set_bg_priority(3);
 		}
 	}
@@ -1543,7 +1560,7 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 		for(int i=0; i<disTextSprites[j].size(); i++) {
 			disTextSprites[j][i].set_y(-80+16+((j+2)*16));
 			if(j == 0) {
-				disTextSprites[j][i].set_palette(game->pal->getDarkGraySpritePalette());
+				disTextSprites[j][i].set_palette(Game::pal->getDarkGraySpritePalette());
 			}
 		}
 	}
@@ -1554,11 +1571,11 @@ void CutsceneManager::displayDisText(const char* errorLine) {
 
 	disTextGenerator.generate((bn::fixed)-120+8+8, (bn::fixed)-80+16+(1*16), bn::string_view(errorLine), disTextSprites[0]);
 	for(int i=0; i<disTextSprites[0].size(); i++) {
-		disTextSprites[0][i].set_palette(game->pal->getLightGraySpritePalette());
+		disTextSprites[0][i].set_palette(Game::pal->getLightGraySpritePalette());
 		disTextSprites[0][i].set_bg_priority(3);
 	}
 
-	effectsManager->corrupt(10);
+	EffectsManager::corrupt(10);
 }
 
 void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
@@ -1641,7 +1658,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 
 	const char* errorLine = NULL;
 	Pos tilePos = testTile->tilePos;
-	bool isVoided = game->entityManager.player->isVoided;
+	bool isVoided = EntityManager::player->isVoided;
 	bool doCarcusEnding = false;
 	bool doCrashGame = false;
 
@@ -1654,11 +1671,11 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 			errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
 			break;
 		case TileType::SpriteTile: [[unlikely]]
-			if((void*)testTile == (void*)tileManager->memoryTile) {
+			if((void*)testTile == (void*)TileManager::memoryTile) {
 				errorLine = isPickup ? ">ERR: MEM1 REMOVED" : ">MEM1 RESTORED";
-			} else if((void*)testTile == (void*)tileManager->wingsTile) {
+			} else if((void*)testTile == (void*)TileManager::wingsTile) {
 				errorLine = isPickup ? ">ERR: MEM2 REMOVED" : ">MEM2 RESTORED";
-			} else if((void*)testTile == (void*)tileManager->swordTile) {
+			} else if((void*)testTile == (void*)TileManager::swordTile) {
 				errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
 			}
 			break;
@@ -1670,7 +1687,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 						doCrashGame = true;
 					} else {
 						errorLine = ">FATAL ERROR: HP NULL";
-						game->entityManager.addKill(game->entityManager.player); // this makes them fall, not slump over, but its ok for now
+						EntityManager::addKill(EntityManager::player); // this makes them fall, not slump over, but its ok for now
 					}
 					break;
 				case Pos(2, 8).getSwitchValue(): // ID/07
@@ -1683,7 +1700,7 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 					break;
 				case Pos(12, 8).getSwitchValue(): // B0/B?
 					errorLine = ">FATAL ERROR : BR NULL";
-					if(tileManager->floorTile1->second == '?') {
+					if(TileManager::floorTile1->second == '?') {
 						doCrashGame = true;
 					} else {
 						doCarcusEnding = true;
@@ -1694,13 +1711,13 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 					if(static_cast<WordTile*>(testTile)->first == '?') {
 						errorLine = ">FATAL ERROR: BR NULL";
 						doCrashGame = true;
-					} else if(!isPickup && tileManager->getRoomIndex() != game->roomManager.roomIndex) {
+					} else if(!isPickup && TileManager::getRoomIndex() != RoomManager::roomIndex) {
 						BN_LOG("swaprooms via tile swap!");
-						game->entityManager.addKill(NULL);
+						EntityManager::addKill(NULL);
 					}
 					break;
 				default: // check if locust value is restored
-					if((tileManager->locustTile->tilePos + Pos(1, 0)) == tilePos) {
+					if((TileManager::locustTile->tilePos + Pos(1, 0)) == tilePos) {
 						errorLine = isPickup ? ">ERR: INVALID/MISSING LI VALUE" : ">LI VALUE RESTORED";
 					}
 					break;
@@ -1738,13 +1755,13 @@ void CutsceneManager::inputCustomPalette() {
 
 	vBlankFuncs.clear();
 
-	if(effectsManager->menuOptions.size() == 0) {
+	if(EffectsManager::menuOptions.size() == 0) {
 		return;
 	}
 
 	BN_LOG("entering custompalette input");
 
-	effectsManager->setMenuVis(false);
+	EffectsManager::setMenuVis(false);
 
 	bn::sprite_text_generator textGenerator(common::variable_8x8_sprite_font);
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> colorDetails[4];
@@ -1782,7 +1799,7 @@ void CutsceneManager::inputCustomPalette() {
 			bn::string<64> string;
 			bn::ostringstream string_stream(string);
 
-			bn::color& colorRef = globalGame->pal->getColorArray()[paletteLookup[i]];
+			bn::color& colorRef = Game::pal->getColorArray()[paletteLookup[i]];
 
 			constexpr char channelNames[3] = {'R', 'G', 'B'};
 			int values[3] = {colorRef.red(), colorRef.green(), colorRef.blue()};
@@ -1827,16 +1844,16 @@ void CutsceneManager::inputCustomPalette() {
 
 	writeStatus();
 
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	bool doUpdate = false;
 
 	while(true) {
 
-		colorOptions[0].spritePointer.set_palette(game->pal->getBlackSpritePalette());
-		colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
-		colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
-		colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
+		colorOptions[0].spritePointer.set_palette(Game::pal->getBlackSpritePalette());
+		colorOptions[1].spritePointer.set_palette(Game::pal->getDarkGraySpritePalette());
+		colorOptions[2].spritePointer.set_palette(Game::pal->getLightGraySpritePalette());
+		colorOptions[3].spritePointer.set_palette(Game::pal->getWhiteSpritePalette());
 
 		if(bn::keypad::b_pressed()) {
 			break;
@@ -1853,7 +1870,7 @@ void CutsceneManager::inputCustomPalette() {
 		}
 
 		if(bn::keypad::right_pressed()) {
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
 			rgbSelector++;
 			doUpdate = true;
 		}
@@ -1885,7 +1902,7 @@ void CutsceneManager::inputCustomPalette() {
 
 				int changeVal = bn::keypad::up_held() ? 1 : -1;
 
-				bn::color& colorRef = game->pal->getColorArray()[paletteLookup[currentSelector]];
+				bn::color& colorRef = Game::pal->getColorArray()[paletteLookup[currentSelector]];
 
 				if(rgbSelector == 0) {
 					colorRef.set_red(CLAMP(colorRef.red() + changeVal, 0, 31));
@@ -1895,18 +1912,18 @@ void CutsceneManager::inputCustomPalette() {
 					colorRef.set_blue(CLAMP(colorRef.blue() + changeVal, 0, 31));
 				}
 
-				globalGame->pal->a = globalGame->pal->getColorArray()[0];
-				globalGame->pal->b = globalGame->pal->getColorArray()[1];
-				globalGame->pal->c = globalGame->pal->getColorArray()[2];
-				globalGame->pal->d = globalGame->pal->getColorArray()[3];
-				globalGame->pal->e = globalGame->pal->getColorArray()[4];
+				Game::pal->a = Game::pal->getColorArray()[0];
+				Game::pal->b = Game::pal->getColorArray()[1];
+				Game::pal->c = Game::pal->getColorArray()[2];
+				Game::pal->d = Game::pal->getColorArray()[3];
+				Game::pal->e = Game::pal->getColorArray()[4];
 
-				game->pal->update();
+				Game::pal->update();
 
-				colorOptions[0].spritePointer.set_palette(game->pal->getBlackSpritePalette());
-				colorOptions[1].spritePointer.set_palette(game->pal->getDarkGraySpritePalette());
-				colorOptions[2].spritePointer.set_palette(game->pal->getLightGraySpritePalette());
-				colorOptions[3].spritePointer.set_palette(game->pal->getWhiteSpritePalette());
+				colorOptions[0].spritePointer.set_palette(Game::pal->getBlackSpritePalette());
+				colorOptions[1].spritePointer.set_palette(Game::pal->getDarkGraySpritePalette());
+				colorOptions[2].spritePointer.set_palette(Game::pal->getLightGraySpritePalette());
+				colorOptions[3].spritePointer.set_palette(Game::pal->getWhiteSpritePalette());
 
 				doUpdate = true;
 			}
@@ -1917,7 +1934,7 @@ void CutsceneManager::inputCustomPalette() {
 				delay(5);
 			}
 
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
 		}
 
 		if(doUpdate) {
@@ -1925,7 +1942,7 @@ void CutsceneManager::inputCustomPalette() {
 			writeStatus();
 		}
 
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	// WRITE THE ACTUAL PALETTE
@@ -1933,25 +1950,25 @@ void CutsceneManager::inputCustomPalette() {
 	for(int i=0; i<4; i++) {
 		colorDetails[i].clear();
 	}
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
-	globalGame->changePalette(0);
-	game->doButanoUpdate();
-	effectsManager->setMenuVis(true);
+	Game::changePalette(0);
+	Game::doButanoUpdate();
+	EffectsManager::setMenuVis(true);
 }
 
 void CutsceneManager::showCredits() {
 
 	vBlankFuncs.clear();
 
-	if(effectsManager->menuOptions.size() == 0) {
+	if(EffectsManager::menuOptions.size() == 0) {
 		return;
 	}
 
 	// TODO, THIS SHOULD FREE THE MENU SPRITES, OR MAYBE I
 	// SHOULD MAKE SOME OF THE STATIONARY TEXT INTO THE BG?
 
-	effectsManager->setMenuVis(false);
+	EffectsManager::setMenuVis(false);
 
 	bn::sprite_text_generator verTextGenerator(common::variable_8x8_sprite_font);
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
@@ -1976,7 +1993,7 @@ void CutsceneManager::showCredits() {
 	verTextGenerator.generate((bn::fixed)-104, (bn::fixed)72, bn::string_view(vermsgString3), verTextSprites);
 
 	for(int i=0; i<verTextSprites.size(); i++) {
-		verTextSprites[i].set_palette(globalGame->pal->getFontSpritePalette());
+		verTextSprites[i].set_palette(Game::pal->getFontSpritePalette());
 		verTextSprites[i].set_bg_priority(0);
 		verTextSprites[i].set_visible(true);
 	}
@@ -1994,24 +2011,24 @@ void CutsceneManager::showCredits() {
 		if(bn::keypad::b_pressed()) {
 			break;
 		}
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 
-	game->doButanoUpdate();
-	effectsManager->setMenuVis(true);
+	Game::doButanoUpdate();
+	EffectsManager::setMenuVis(true);
 }
 
 bool CutsceneManager::titleScreen() {
 
 	backup();
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	vBlankFuncs.clear();
 
-	GameState restoreState = game->state;
-	game->state = GameState::Cutscene;
+	GameState restoreState = Game::state;
+	Game::state = GameState::Cutscene;
 
 	// dance_milkyway  index 0 and 1 are just palette swaps.
 
@@ -2019,8 +2036,8 @@ bool CutsceneManager::titleScreen() {
 	maps[1]->create(bn::regular_bg_items::dw_spr_dance_milkyway_001_index0, 0);
 	maps[3]->create(bn::regular_bg_items::dw_spr_dance_milkyway_002_index1, 1);
 
-	maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(0, false));
-	maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(0, false));
+	maps[1]->bgPointer.set_palette(Game::pal->getBGPaletteFade(0, false));
+	maps[3]->bgPointer.set_palette(Game::pal->getBGPaletteFade(0, false));
 	delay(60);
 
 	Sprite idrk(bn::sprite_items::dw_idrk);
@@ -2029,15 +2046,15 @@ bool CutsceneManager::titleScreen() {
 	idrk.spritePointer.set_position(0 + (120-20), 0 - (80 - 16));
 
 	for(int i=0; i<=4; i++) {
-		idrk.spritePointer.set_palette(game->pal->getSpritePaletteFade(i, false));
-		maps[1]->bgPointer.set_palette(game->pal->getBGPaletteFade(i, false));
-		maps[3]->bgPointer.set_palette(game->pal->getBGPaletteFade(i, false));
+		idrk.spritePointer.set_palette(Game::pal->getSpritePaletteFade(i, false));
+		maps[1]->bgPointer.set_palette(Game::pal->getBGPaletteFade(i, false));
+		maps[3]->bgPointer.set_palette(Game::pal->getBGPaletteFade(i, false));
 		delay(5);
 	}
 
 	vBlankFuncs.push_back(
 		// THIS MAKES LAMBDAS ACTUALLY GOOD, WHY DIDNT I LEARN THIS EARLIER??!!
-		[this, flicker = 0, wait = 0]() mutable -> void {
+		[flicker = 0, wait = 0]() mutable -> void {
 
 			if(flicker) {
 				flicker--;
@@ -2072,8 +2089,8 @@ bool CutsceneManager::titleScreen() {
 
 	bn::vector<bn::vector<bn::sprite_ptr, 4>, 5> textSprites(5, bn::vector<bn::sprite_ptr, 4>());
 
-	auto activeTextPalette = game->pal->getWhiteSpritePalette().create_palette();
-	auto blackTextPalette = game->pal->getBlackSpritePalette().create_palette();
+	auto activeTextPalette = Game::pal->getWhiteSpritePalette().create_palette();
+	auto blackTextPalette = Game::pal->getBlackSpritePalette().create_palette();
 
 	int restX = 0;
 	int restY = 0;
@@ -2108,8 +2125,7 @@ bool CutsceneManager::titleScreen() {
 
 	vBlankFuncs.push_back(
 		// THIS MAKES LAMBDAS ACTUALLY GOOD, WHY DIDNT I LEARN THIS EARLIER??!!
-		[this,
-		x = 0,
+		[x = 0,
 		y = -100,
 		angle = 0,
 		//textSprites = bn::move(textSprites)
@@ -2181,9 +2197,9 @@ bool CutsceneManager::titleScreen() {
 	bn::vector<bn::sprite_ptr, 64> splashTextSprites;
 	textGenerator.set_center_alignment();
 
-	unsigned idekIndex = game->saveData.randomSeed % idekSize;
+	unsigned idekIndex = Game::saveData.randomSeed % idekSize;
 
-	if(game->saveData.randomSeed == 0xFFFF) {
+	if(Game::saveData.randomSeed == 0xFFFF) {
 		idekIndex = 0;
 	}
 
@@ -2204,11 +2220,11 @@ bool CutsceneManager::titleScreen() {
 
 	auto updatePalettes = [&]() mutable -> void {
 
-		activeTextPalette = game->pal->getWhiteSpritePalette().create_palette();
-		blackTextPalette = game->pal->getBlackSpritePalette().create_palette();
+		activeTextPalette = Game::pal->getWhiteSpritePalette().create_palette();
+		blackTextPalette = Game::pal->getBlackSpritePalette().create_palette();
 
 		for(int i=0; i<splashTextSprites.size(); i++) {
-			splashTextSprites[i].set_palette(globalGame->pal->getFontSpritePalette());
+			splashTextSprites[i].set_palette(Game::pal->getFontSpritePalette());
 		}
 
 		for(int j=0; j<5; j++) {
@@ -2221,7 +2237,7 @@ bool CutsceneManager::titleScreen() {
 			}
 		}
 
-		idrk.spritePointer.set_palette(game->pal->getSpritePalette());
+		idrk.spritePointer.set_palette(Game::pal->getSpritePalette());
 	};
 
 	updatePalettes();
@@ -2231,7 +2247,7 @@ bool CutsceneManager::titleScreen() {
 		for(int j=0; j<splashTextSprites.size(); j++) {
 			splashTextSprites[j].set_y(splashTextSprites[j].y() - 1);
 		}
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	bool res = true;
@@ -2244,10 +2260,10 @@ bool CutsceneManager::titleScreen() {
 
 
 		if(bn::keypad::left_pressed()) {
-			game->changePalette(1);
+			Game::changePalette(1);
 			updatePalettes();
 		} else if(bn::keypad::right_pressed()) {
-			game->changePalette(-1);
+			Game::changePalette(-1);
 			updatePalettes();
 		}
 
@@ -2260,17 +2276,17 @@ bool CutsceneManager::titleScreen() {
 		}
 
 		// just for the like,, testing that all the splash txt is short enough, and properly ticking the saved rng to do so
-		game->saveRNG();
+		Game::saveRNG();
 
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	vBlankFuncs.clear();
 	bn::green_swap::set_enabled(false);
 
 	restore();
-	game->state = restoreState;
-	game->doButanoUpdate();
+	Game::state = restoreState;
+	Game::doButanoUpdate();
 
 	return res;
 }
@@ -2290,7 +2306,7 @@ void CutsceneManager::mimicTalk() {
 	idrk.spritePointer.set_bg_priority(0);
 	idrk.updatePosition(Pos(11, 4));
 
-	effectsManager->doDialogue("hello there!\nThank you for playing <3.\r"
+	EffectsManager::doDialogue("hello there!\nThank you for playing <3.\r"
 	"It means the world to me.\n"
 	"I really hope the following doesnt sound wrong, I am nervous talking to new people.\n"
 	"I never meet anyone around here, so I dont have much practice.\n"
@@ -2423,8 +2439,7 @@ void CutsceneManager::voidedLyrics() {
 		obj->sprite.updateRawPosition(-32, -32);
 	};
 
-	auto tickFunc = [this,
-	startFrame = frame,
+	auto tickFunc = [startFrame = frame,
 	index = 0
 	](Effect* obj) mutable -> bool {
 
@@ -2451,7 +2466,7 @@ void CutsceneManager::voidedLyrics() {
 
 		if(frame - startFrame > voidedLyricsData[index].time) {
 
-			globalGame->cutsceneManager.displayDisText(voidedLyricsData[index].lyric);
+			CutsceneManager::displayDisText(voidedLyricsData[index].lyric);
 
 			index++;
 			if(index == lyricsCount) {
@@ -2465,7 +2480,7 @@ void CutsceneManager::voidedLyrics() {
 		return false;
 	};
 
-	effectsManager->createEffect(createFunc, tickFunc);
+	EffectsManager::createEffect(createFunc, tickFunc);
 }
 
 // -----
@@ -2497,7 +2512,7 @@ void CutsceneManager::restore(int i) {
 
 	if(i == 0) {
 		maps[0]->bgPointer.set_tiles(bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4));
-		globalGame->loadTiles();
+		Game::loadTiles();
 	}
 }
 
@@ -2516,6 +2531,6 @@ void CutsceneManager::restore() {
 void CutsceneManager::delay(int delayFrameCount) {
 	// this function should of been made WAYYYY earlier
 	for(int i=0; i<delayFrameCount; i++) {
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 }

@@ -4,18 +4,22 @@
 
 struct MessageStrJank;
 
-class RoomManager {
-public:
+namespace RoomManager {
 
-	RoomManager();
 
-	bool isCustom = false;
+	// dont have to use a vector here. i worry bc like, running out of space. i can use an unsigned short tho bc, 32kb = 2^15
+	// gods but regardless, it just burns 2k of stack mem, when i dont (curse)ing need it. im allocating
 
-	int roomIndex = 0;
-	int modeTracker = 0;
+	extern unsigned roomCountAlloc;
+	extern unsigned short* roomOffsets;
+	extern char** roomNamesAlloc;
+	extern bool isCustom;
+	extern int roomIndex;
+	extern int modeTracker;
+	extern const Room* roomArray;
+	extern const MessageStrJank* roomNameArray;
 
-	const Room* roomArray = NULL;
-	const MessageStrJank* roomNameArray = NULL;
+	void RoomManager();
 
 	Room loadRoom();
 
@@ -36,15 +40,5 @@ public:
 	Room loadCustomRoom();
 
 	bool isWhiteRooms();
-
-	~RoomManager();
-
-private:
-	// dont have to use a vector here. i worry bc like, running out of space. i can use an unsigned short tho bc, 32kb = 2^15
-	// gods but regardless, it just burns 2k of stack mem, when i dont (curse)ing need it. im allocating
-
-	unsigned roomCountAlloc = 0;
-	unsigned short* roomOffsets = NULL;
-	char** roomNamesAlloc = NULL;
 
 };

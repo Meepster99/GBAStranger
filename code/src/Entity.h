@@ -5,11 +5,11 @@
 
 #include <functional>
 
-class Game;
-class EntityManager;
-class EffectsManager;
-class TileManager;
-class CutsceneManager;
+//class Game;
+//class EntityManager;
+//class EffectsManager;
+//class TileManager;
+//class CutsceneManager;
 class Effect;
 
 class Sprite {

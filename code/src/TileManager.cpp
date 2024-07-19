@@ -6,6 +6,34 @@
 
 #include "Game.h"
 
+namespace TileManager {
+	FloorTile* floorMap[14][16];
+	Exit* exitTile = NULL;
+	RodTile* rodTile = NULL;
+	LocustTile* locustTile = NULL;
+	WordTile* voidTile1 = NULL;
+	WordTile* floorTile1 = NULL;
+	SpriteTile* memoryTile = NULL;
+	SpriteTile* wingsTile = NULL;
+	SpriteTile* swordTile = NULL;
+	Floor floorLayer;
+	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
+	SaneSet<Pos, MAXENTITYSPRITES> stepOns;
+	SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
+	const char* exitDestination = NULL;
+	bn::vector<bn::pair<const char*, Pos>, 8> secretDestinations;
+	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
+};
+
+void TileManager::TileManager(Collision* col) {
+	floorLayer = Floor(col);
+	for(int x=0; x<14; x++) {
+		for(int y=0; y<9; y++) {
+			floorMap[x][y] = NULL;
+		}
+	}
+}
+
 // -----
 
 void Floor::setBigTile(int x, int y, int tile, bool flipX, bool flipY) {
@@ -20,8 +48,8 @@ void Floor::setTile(int x, int y, int tileIndex, bool flipX, bool flipY) {
 
 void doFloorDraw() {
 
-	auto& floorMap = globalGame->tileManager.floorMap;
-	//auto& floorLayer = globalGame->tileManager.floorLayer;
+	auto& floorMap = TileManager::floorMap;
+	//auto& floorLayer = TileManager::floorLayer;
 
 	// is the floor map stored in iwram or ewram?
 	// does, not doing this sequentially cause fuck ups with doing multiplication?
@@ -46,11 +74,11 @@ void doFloorDraw() {
 
 };
 
-__attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
+void doWhiteRoomsFloorDraw() {
 
 	// a reference requires lookup,, right? would using just a normal thing be better?
-	const int playerX = globalGame->entityManager.player->p.x;
-	const int playerY = globalGame->entityManager.player->p.y;
+	const int playerX = EntityManager::player->p.x;
+	const int playerY = EntityManager::player->p.y;
 
 	const int startX = MAX(playerX - 2, 0);
 	const int startY = MAX(playerY - 2, 0);
@@ -58,7 +86,7 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 	const int endX = MIN(playerX + 2, 13);
 	const int endY = MIN(playerY + 2, 8);
 
-	auto& floorMap = globalGame->tileManager.floorMap;
+	auto& floorMap = TileManager::floorMap;
 
 	for(int x=startX; x<=endX; x++) {
 		for(int y=startY; y<=endY; y++) {
@@ -77,8 +105,8 @@ __attribute__((noinline, section(".ewram"))) void doWhiteRoomsFloorDraw() {
 		}
 	}
 
-	if(globalGame->tileManager.exitTile != NULL) {
-		Pos exitPos = globalGame->tileManager.exitTile->tilePos;
+	if(TileManager::exitTile != NULL) {
+		Pos exitPos = TileManager::exitTile->tilePos;
 		if(exitPos.move(Direction::Down)) {
 			FloorTile::drawDropOff(exitPos.x, exitPos.y);
 		}
@@ -99,10 +127,10 @@ void Floor::draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][16]) {
 	(void)floorMap;
 
 
-	//const auto& detailsMap = globalGame->detailsMap;
-	//auto& tileManager = globalGame->tileManager;
+	//const auto& detailsMap = Game::detailsMap;
+	//auto& tileManager = Game::tileManager;
 
-	const bool isWhiteRooms = globalGame->roomManager.isWhiteRooms();
+	const bool isWhiteRooms = RoomManager::isWhiteRooms();
 
 	//BN_LOG("whiterooms status ", isWhiteRooms);
 
@@ -123,42 +151,42 @@ void Floor::reloadCells() {
 // not a "you did something wrong" error, a "please submit a bug report, something is wrong" error
 
 auto memoryGetFunc = []() -> int {
-	Player* player = globalGame->entityManager.player;
+	Player* player = EntityManager::player;
 
 	BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 
 	if(player->hasMemory) {
-		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 0;
+		return 51 + ( Game::mode == 2 ? 3 : 0) + 0;
 	}
 
 	return 57;
 };
 
 auto wingsGetFunc = []() -> int {
-	Player* player = globalGame->entityManager.player;
+	Player* player = EntityManager::player;
 
 	BN_ASSERT(player != NULL, "in a spriteTileFunc, player was null");
 
 	if(player->hasWings) {
-		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 1;
+		return 51 + ( Game::mode == 2 ? 3 : 0) + 1;
 	}
 
 	return 57;
 };
 
 auto swordGetFunc = []() -> int {
-	Player* player = globalGame->entityManager.player;
+	Player* player = EntityManager::player;
 
-	BN_ASSERT(globalGame->entityManager.player != NULL, "in a spriteTileFunc, player was null");
+	BN_ASSERT(EntityManager::player != NULL, "in a spriteTileFunc, player was null");
 
 	if(player->hasSword) {
 		Pos tempPos = player->p;
 
-		if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
-			return 68 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
+		if(tempPos.move(player->currentDir) && EntityManager::hasEnemy(tempPos)) {
+			return 68 + (Game::mode == 2 ? 4 : 0) + ((frame % 16) / 4);
 		}
 
-		return 51 + ( globalGame->mode == 2 ? 3 : 0) + 2;
+		return 51 + ( Game::mode == 2 ? 3 : 0) + 2;
 	}
 
 	return 57;
@@ -179,8 +207,8 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	stepOffs.clear();
 	floorSteps.clear();
 
-	if(entityManager->player != NULL) {
-		Player* player = entityManager->player;
+	if(EntityManager::player != NULL) {
+		Player* player = EntityManager::player;
 
 		for(int i=0; i<player->rod.size(); i++) {
 			delete player->rod[i];
@@ -252,13 +280,13 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	Switch::pressedCount = 0; // is this,,, ok? TODO, SEE IF THIS CAUSES ISSUES
 	BN_ASSERT(Switch::pressedCount == 0, "after loading in new tiles, the number of pressed tiles wasnt 0? Switch::pressedCount = ", Switch::pressedCount);
 	BN_ASSERT(Switch::totalCount == switchTracker, "after loading in new tiles, the number of switches and number inside the class wasnt equal???");
-	BN_LOG("whiteroomstatus is ", game->roomManager.isWhiteRooms());
+	BN_LOG("whiteroomstatus is ", RoomManager::isWhiteRooms());
 
-	if(!game->roomManager.isWhiteRooms()) {
+	if(!RoomManager::isWhiteRooms()) {
 		// blank tile
 		floorMap[0][8] = new WordTile(Pos(0, 8));
 
-		if(globalGame->saveData.isVoided) { // void tiles
+		if(Game::saveData.isVoided) { // void tiles
 			floorMap[1][8] = voidTile1 = new WordTile(Pos(1, 8), 'V', 'O');
 			floorMap[2][8] = new WordTile(Pos(2, 8), 'I', 'D');
 		} else { // hp tiles
@@ -290,7 +318,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		floorMap[11][8] = new WordTile(Pos(11, 8));
 
 		// this should be changed. roommanager should just have a array with a 3 length char array for what floor number should be displayed(or ???)
-		int roomIndex = game->roomManager.roomIndex;
+		int roomIndex = RoomManager::roomIndex;
 
 		BN_ASSERT(roomIndex <= 999, "why in tarnation is the roommanager's roomindex greater than 999???");
 
@@ -333,7 +361,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 		secrets++;
 	}
 
-	if(game->roomManager.currentRoomHash() == hashString("rm_e_021\0")) {
+	if(RoomManager::currentRoomHash() == hashString("rm_e_021\0")) {
 		// this is the room which,, takes you back unless you have the right config
 		// it will take you back to rm_e_020\0
 
@@ -343,7 +371,7 @@ void TileManager::loadTiles(u8* floorPointer, SecretHolder* secrets, int secrets
 	// why in tarnation is this vblank needed for floor 136??
 	// i dont like having this here and slowing down debug swapping, but ugh
 	// if i want to do tas verification, i need to not have framedrops
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	tickCount = testTimer.elapsed_ticks();
 	BN_LOG("tilemanager loadtiles ", tickCount.safe_division(FRAMETICKS), " frames");
@@ -377,7 +405,7 @@ const char* TileManager::checkBrand() { profileFunction();
 
 	static int prevMatchIndex = -1;
 
-	switch(game->roomManager.roomIndex) {
+	switch(RoomManager::roomIndex) {
 		case 23:
 		case 53:
 		case 67:
@@ -394,9 +422,9 @@ const char* TileManager::checkBrand() { profileFunction();
 			break;
 	}
 
-	if(!entityManager->player->inRod(exitTile)) {
+	if(!EntityManager::player->inRod(exitTile)) {
 		// if the player doesnt have the exit tile, return
-		cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+		CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 		prevMatchIndex = -1;
 		return NULL;
 	}
@@ -427,52 +455,23 @@ const char* TileManager::checkBrand() { profileFunction();
 	if(matchIndex != -1) {
 		if(matchIndex != prevMatchIndex) {
 			if(matchIndex < 8) {
-				cutsceneManager->cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
+				CutsceneManager::cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
 			} else {
-				cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+				CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 			}
 
-			cutsceneManager->cutsceneLayer.rawMap.bgPointer.set_palette(game->pal->getBlackBGPalette());
+			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBlackBGPalette());
 
-			effectsManager->fadeBrand();
+			EffectsManager::fadeBrand();
 			prevMatchIndex = matchIndex;
 		}
 
 		return destinations[matchIndex];
 	}
-	cutsceneManager->cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 
 	prevMatchIndex = matchIndex;
 	return NULL;
-}
-
-TileManager::~TileManager() {
-
-	if(entityManager->player != NULL) {
-		Player* player = entityManager->player;
-
-		for(int i=0; i<player->rod.size(); i++) {
-			delete player->rod[i];
-			player->rod[i] = NULL;
-		}
-		player->rod.clear();
-	}
-
-	exitTile = NULL;
-	rodTile = NULL;
-	locustTile = NULL;
-	memoryTile = NULL;
-	wingsTile  = NULL;
-	swordTile  = NULL;
-
-	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			if(floorMap[x][y] != NULL) {
-				delete floorMap[x][y];
-			}
-			floorMap[x][y] = NULL;
-		}
-	}
 }
 
 // -----
@@ -516,8 +515,8 @@ void TileManager::doFloorSteps() { profileFunction();
 	stepOffs.clear();
 	floorSteps.clear();
 
-	if(hasFloor(entityManager->player->p) == TileType::Exit && Switch::pressedCount == Switch::totalCount) {
-		entityManager->addKill(NULL);
+	if(hasFloor(EntityManager::player->p) == TileType::Exit && Switch::pressedCount == Switch::totalCount) {
+		EntityManager::addKill(NULL);
 	}
 
 	// calling this here may be excessive!
@@ -566,7 +565,7 @@ void TileManager::updateExit() {
 	if(exitTile == NULL) {
 		return;
 	}
-	if(entityManager->player->inRod(exitTile)) {
+	if(EntityManager::player->inRod(exitTile)) {
 		return;
 	}
 	updateTile(exitTile->tilePos);
@@ -577,7 +576,7 @@ void TileManager::updateRod() {
 	if(rodTile == NULL) {
 		return;
 	}
-	if(entityManager->player->inRod(rodTile)) {
+	if(EntityManager::player->inRod(rodTile)) {
 		return;
 	}
 
@@ -586,7 +585,7 @@ void TileManager::updateRod() {
 
 void TileManager::updateLocust() {
 
-	if(locustTile != NULL && !entityManager->player->inRod(locustTile)) {
+	if(locustTile != NULL && !EntityManager::player->inRod(locustTile)) {
 		updateTile(locustTile->tilePos);
 	}
 
@@ -599,8 +598,8 @@ void TileManager::updateLocust() {
 			// i seriously NEVER made a gettile func??? fom pos?
 			WordTile* locustCounterTile = static_cast<WordTile*>(floorMap[tempTilePos.x][tempTilePos.y]);
 
-			locustCounterTile->first = '0' + ((entityManager->player->locustCount / 10) % 10);
-			locustCounterTile->second = '0' + (entityManager->player->locustCount % 10);
+			locustCounterTile->first = '0' + ((EntityManager::player->locustCount / 10) % 10);
+			locustCounterTile->second = '0' + (EntityManager::player->locustCount % 10);
 
 			updateTile(tempTilePos);
 		}
@@ -609,14 +608,14 @@ void TileManager::updateLocust() {
 
 void TileManager::updateVoidTiles() {
 
-	if(entityManager->player == NULL) {
+	if(EntityManager::player == NULL) {
 		// just run. i REALLY should have just read from the gamesave instead of player all the time
 		return;
 	}
 
-	bool isVoided = entityManager->player->isVoided;
+	bool isVoided = EntityManager::player->isVoided;
 
-	if(voidTile1 != NULL && !entityManager->player->inRod(voidTile1)) {
+	if(voidTile1 != NULL && !EntityManager::player->inRod(voidTile1)) {
 
 		voidTile1->first = isVoided ? 'V' : 'H';
 		voidTile1->second = isVoided ? 'O' : 'P';
@@ -638,15 +637,15 @@ void TileManager::updateVoidTiles() {
 
 void TileManager::updateBurdenTiles() {
 
-	if(memoryTile != NULL && !entityManager->player->inRod(memoryTile)) {
+	if(memoryTile != NULL && !EntityManager::player->inRod(memoryTile)) {
 		updateTile(memoryTile->tilePos);
 	}
 
-	if(wingsTile != NULL && !entityManager->player->inRod(wingsTile)) {
+	if(wingsTile != NULL && !EntityManager::player->inRod(wingsTile)) {
 		updateTile(wingsTile->tilePos);
 	}
 
-	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
+	if(swordTile != NULL && !EntityManager::player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);
 	}
 
@@ -654,7 +653,7 @@ void TileManager::updateBurdenTiles() {
 
 int TileManager::getLocustCount() {
 
-	if(locustTile == NULL || entityManager->player->inRod(locustTile)) {
+	if(locustTile == NULL || EntityManager::player->inRod(locustTile)) {
 		return -1;
 	}
 
@@ -699,7 +698,7 @@ int TileManager::getRoomIndex() {
 
 bool TileManager::hasCollision(const Pos& p) {
 	// should this even be here?
-	return entityManager->hasCollision(p);
+	return EntityManager::hasCollision(p);
 }
 
 void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
@@ -717,7 +716,7 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 
 	// assuming this dir, is,,, bad.
 	// i should get it from the dir, but im fucking tired
-	Direction dir = globalGame->entityManager.player->currentDir;
+	Direction dir = EntityManager::player->currentDir;
 	Direction ortho;
 
 	switch(dir) {
@@ -751,7 +750,7 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 	erasePos.move(ortho);
 	//erasePos.move(ortho);
 
-	auto doDraw = [this, &dir](const Pos& p) -> void {
+	auto doDraw = [ &dir](const Pos& p) -> void {
 
 		int x = p.x;
 		int y = p.y;
@@ -785,7 +784,7 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 		}
 	};
 
-	auto doClear = [this, &ortho, &dir](const Pos& p) -> void {
+	auto doClear = [&ortho, &dir](const Pos& p) -> void {
 
 		int x = p.x;
 		int y = p.y;
@@ -846,8 +845,8 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 	updateExit();
 
 	// goofy ahh shit code
-	if(globalGame->tileManager.exitTile != NULL) {
-		Pos exitPos = globalGame->tileManager.exitTile->tilePos;
+	if(TileManager::exitTile != NULL) {
+		Pos exitPos = TileManager::exitTile->tilePos;
 		if(exitPos.move(Direction::Down)) {
 
 			// check if the dropoff is within 2 units of the player
@@ -867,7 +866,7 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 void TileManager::fullDraw() {
 
 	//BN_LOG("tileManager layer draw");
-	floorLayer.draw(game->collisionMap, floorMap);
+	floorLayer.draw(Game::collisionMap, floorMap);
 
 	//BN_LOG("tileManager exit update");
 	updateExit();
@@ -910,7 +909,7 @@ void TileManager::doVBlank() { profileFunction();
 			switch(floorMap[x][y]->tileType()) {
 				case TileType::Death: [[unlikely]]
 					if(doDeathTileAnim) {
-						effectsManager->deathTileAnimate(Pos(x, y));
+						EffectsManager::deathTileAnimate(Pos(x, y));
 					}
 					break;
 				default: [[likely]]
@@ -923,7 +922,7 @@ void TileManager::doVBlank() { profileFunction();
 		exitTile->isFirstCall = false;
 	}
 
-	if(swordTile != NULL && !entityManager->player->inRod(swordTile)) {
+	if(swordTile != NULL && !EntityManager::player->inRod(swordTile)) {
 		updateTile(swordTile->tilePos);
 	}
 
@@ -940,6 +939,10 @@ bn::optional<TileType> TileManager::hasFloor(const int x, const int y) {
 	}
 
 	return bn::optional<TileType>(temp->tileType());
+}
+
+bn::optional<TileType> TileManager::hasFloor(const Pos& p) {
+	return hasFloor(p.x, p.y);
 }
 
 void TileManager::stepOff(Pos p) {

@@ -3,10 +3,10 @@
 #include "SharedTypes.h"
 #include "Tile.h"
 
-class Game;
-class EffectsManager;
-class EntityManager;
-class CutsceneManager;
+//class Game;
+//class EffectsManager;
+//class EntityManager;
+//class CutsceneManager;
 class Collision;
 
 class Floor {
@@ -17,6 +17,7 @@ public:
 	int collisionTileCount = 0;
 
 	// this class is now legacy, but im going to reimpliment funcs in here and pass them off to collision
+	Floor() {}
 	Floor(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
 
 	USEIWRAM void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false);
@@ -30,8 +31,7 @@ public:
 
 };
 
-class TileManager {
-public:
+namespace TileManager {
 
 	// hmm
 	// it would be quite nice if this width was,,, 16 instead of 14 so that i wouldnt need to
@@ -41,28 +41,22 @@ public:
 	// the arm7tdmi, the m stands for fast multiplier, but how fast is it? is it faster/at the same speed as just a bitshift?
 
 	// its insane that i never made a func to access this??? i dont believe it would add on any overhead, just make my bs easier since i dont have to type [pos.x][pos.y]
-	FloorTile* floorMap[14][16];
-	//FloorTile* floorMap[16][9];
-
-	// these tiles are getting,, like gods this is just excessive
-	Exit* exitTile = NULL;
-	RodTile* rodTile = NULL;
-	LocustTile* locustTile = NULL;
-
-	WordTile* voidTile1 = NULL;
-	WordTile* floorTile1 = NULL;
-
-	SpriteTile* memoryTile = NULL;
-	SpriteTile* wingsTile = NULL;
-	SpriteTile* swordTile = NULL;
-
-	Game* game = NULL;
-	Floor floorLayer;
-
-	EntityManager* entityManager;
-	EffectsManager* effectsManager;
-	CutsceneManager* cutsceneManager;
-
+	BN_DATA_EWRAM extern FloorTile* floorMap[14][16];
+	BN_DATA_EWRAM extern Exit* exitTile;
+	BN_DATA_EWRAM extern RodTile* rodTile;
+	BN_DATA_EWRAM extern LocustTile* locustTile;
+	BN_DATA_EWRAM extern WordTile* voidTile1;
+	BN_DATA_EWRAM extern WordTile* floorTile1;
+	BN_DATA_EWRAM extern SpriteTile* memoryTile;
+	BN_DATA_EWRAM extern SpriteTile* wingsTile;
+	BN_DATA_EWRAM extern SpriteTile* swordTile;
+	BN_DATA_EWRAM extern Floor floorLayer;
+	BN_DATA_EWRAM extern bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
+	BN_DATA_EWRAM extern SaneSet<Pos, MAXENTITYSPRITES> stepOns;
+	BN_DATA_EWRAM extern SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
+	BN_DATA_EWRAM extern const char* exitDestination;
+	BN_DATA_EWRAM extern bn::vector<bn::pair<const char*, Pos>, 8> secretDestinations;
+	BN_DATA_EWRAM extern unsigned playerBrand[6];
 
 	constexpr static unsigned addBrand[6] = {0b100001, 0b000110, 0b011111, 0b111110, 0b011000, 0b100001};
 	constexpr static unsigned eusBrand[6] = {0b110011, 0b001100, 0b110001, 0b111011, 0b110111, 0b110011};
@@ -75,35 +69,11 @@ public:
 
 	constexpr static unsigned disBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
 
-	// unsure if storeing this here is the best option tbh
-	unsigned playerBrand[6] = {0b000000, 0b000000, 0b000000, 0b000000, 0b000000, 0b000000};
-
-	const unsigned* allBrands[10] = {addBrand, eusBrand, beeBrand, monBrand, tanBrand, gorBrand, levBrand, cifBrand, disBrand, playerBrand};
-
-	const char* destinations[10] = {"rm_secret_001", "rm_secret_002", "rm_secret_003", "rm_secret_004", "rm_secret_005", "rm_secret_006", "rm_secret_007", "rm_secret_008", "rm_e_intermission", "rm_rm4"};
+	constexpr const unsigned* allBrands[10] = {addBrand, eusBrand, beeBrand, monBrand, tanBrand, gorBrand, levBrand, cifBrand, disBrand, playerBrand};
+	constexpr const char* destinations[10] = {"rm_secret_001", "rm_secret_002", "rm_secret_003", "rm_secret_004", "rm_secret_005", "rm_secret_006", "rm_secret_007", "rm_secret_008", "rm_e_intermission", "rm_rm4"};
 
 
-	// goofy, but will work
-	// should i instead pass the entity* into here so that death tiles can properly kill?
-	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
-
-	SaneSet<Pos, MAXENTITYSPRITES> stepOns;
-	SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
-
-	TileManager(Game* game_, Collision* col) : game(game_),
-	floorLayer(col)
-	{
-		for(int x=0; x<14; x++) {
-			for(int y=0; y<9; y++) {
-				floorMap[x][y] = NULL;
-			}
-		}
-	}
-
-	~TileManager();
-
-	const char* exitDestination = NULL;
-	bn::vector<bn::pair<const char*, Pos>, 8> secretDestinations;
+	void TileManager(Collision* col);
 
 	// this cant be arm, it causes some lambdas to fuck up. why? is iwram automatically set to be arm instructions, and then the lambdas,, ugh
 	// since this cant be arm, im putting it in ewram instead of iwram bc ewram is 16 bit for the thumb instrs
@@ -121,11 +91,11 @@ public:
 	int getLocustCount();
 	int getRoomIndex();
 
-	__attribute__((section(".ewram"))) void updateWhiteRooms(const Pos& startPos, const Pos& currentPos);
+	void updateWhiteRooms(const Pos& startPos, const Pos& currentPos);
 	void fullDraw();
 
 	bn::optional<TileType> hasFloor(const int x, const int y);
-	bn::optional<TileType> hasFloor(const Pos& p) { return hasFloor(p.x, p.y); } // i really enjoy this use of optional here.
+	bn::optional<TileType> hasFloor(const Pos& p);
 
 	void stepOff(Pos p);
 	void stepOn(Pos p);

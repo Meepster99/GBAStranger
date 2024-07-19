@@ -4,13 +4,22 @@
 #include "AllRooms.h"
 #include "Game.h"
 
-
+namespace RoomManager {
+	unsigned roomCountAlloc = 0;
+	unsigned short* roomOffsets = NULL;
+	char** roomNamesAlloc = NULL;
+	bool isCustom = false;
+	int roomIndex = 0;
+	int modeTracker = 0;
+	const Room* roomArray = NULL;
+	const MessageStrJank* roomNameArray = NULL;
+};
 
 // for checking the actual dump of the roomdata,
 // C:\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe -S -D .\build\RoomManager.o > idk.txt
 // more work needs to be done on the room exporter, and compressing it
 
-RoomManager::RoomManager() {
+void RoomManager::RoomManager() {
 	setMode(0);
 }
 
@@ -184,23 +193,6 @@ bool RoomManager::isWhiteRooms() {
 
 // -----
 
-RoomManager::~RoomManager() {
-
-	if(roomOffsets != NULL) {
-		// i despise how the delete has two options, for/not arrays.
-		delete[] roomOffsets;
-		roomOffsets = NULL;
-	}
-
-	if(roomNamesAlloc != NULL) {
-		for(unsigned i = 0; i < roomCountAlloc; ++i) {
-			delete[] roomNamesAlloc[i];
-			roomNamesAlloc[i] = NULL;
-		}
-		delete[] roomNamesAlloc;
-	}
-}
-
 void RoomManager::isCustomRooms() {
 
 	u8* sram = reinterpret_cast<u8*>(0x0E000000);
@@ -259,12 +251,12 @@ void RoomManager::initCustomRooms() {
 	BN_ASSERT(shouldBe42 == 42, "when loading custom rooms, the first unsigned of the savefile wasnt 42. wtf");
 
 	u8 burdenStates = readByte();
-	globalGame->saveData.hasMemory   = !!(burdenStates & 0b0001);
-	globalGame->saveData.hasWings    = !!(burdenStates & 0b0010);
-	globalGame->saveData.hasSword    = !!(burdenStates & 0b0100);
-	globalGame->saveData.hasSuperRod = !!(burdenStates & 0b1000);
+	Game::saveData.hasMemory   = !!(burdenStates & 0b0001);
+	Game::saveData.hasWings    = !!(burdenStates & 0b0010);
+	Game::saveData.hasSword    = !!(burdenStates & 0b0100);
+	Game::saveData.hasSuperRod = !!(burdenStates & 0b1000);
 
-	globalGame->saveData.hasRod = true;
+	Game::saveData.hasRod = true;
 
 	roomCountAlloc = readUnsigned();
 

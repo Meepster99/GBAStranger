@@ -55,6 +55,7 @@ DEFAULTLIBS :=  -static-libstdc++
 USERBUILD   :=
 EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; python  ../misc/soundConverter/soundConverter.py regenIncludes; python  ../misc/musicConverter/musicConverter.py regenIncludes
 
+STACKTRACE := true
 
 ifdef DISABLEASSERTS
 	USERFLAGS += -DDISABLEASSERTS=true

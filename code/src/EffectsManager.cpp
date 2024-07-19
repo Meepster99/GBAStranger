@@ -4,13 +4,56 @@
 
 #include "Game.h"
 
-Palette* EffectsManager::spritePalette = &defaultPalette;
-Game* BigSprite::game = NULL;
-EffectsManager* MenuOption::effectsManager = NULL;
 int MenuOption::yIndex = -1;
-EntityManager* BigSprite::entityManager = NULL;
-TileManager* BigSprite::tileManager = NULL;
-EffectsManager* BigSprite::effectsManager = NULL;
+
+namespace EffectsManager {
+	Palette* spritePalette;
+	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
+	SaneSet<Effect*, MAXEFFECTSPRITES> removeEffectsList;
+	Effect* dialogueEndPointer = NULL;
+	bn::sprite_text_generator textGenerator(dw_fnt_text_12_sprite_font);
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine1;
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine2;
+	bn::sprite_text_generator verTextGenerator(common::variable_8x8_sprite_font);
+	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
+	bn::vector<BigSprite*, 128> bigSprites;
+	bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(128, bn::bpp_mode::BPP_4);
+	EffectsLayer effectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles);
+	bn::vector<MenuOption*, 16> menuOptions;
+	bool playerWonLastExit = true;
+	int rodNumber = 0;
+	bn::vector<Effect*, 16> roomDustTracker;
+	int questionMarkCount = 0;
+	int exitGlowCount = 0;
+	int rotateTanStatuesCount = 0;
+	int rotateTanStatuesFrames = 0;
+};
+
+void EffectsManager::createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_) {
+	Effect* e = new Effect(create_, animate_, 1);
+	effectList.push_back(e);
+}
+
+void EffectsManager::createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency) {
+	Effect* e = new Effect(create_, animate_, animationFrequency);
+	effectList.push_back(e);
+}
+
+void EffectsManager::createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, bool waitFlag) {
+	Effect* e = new Effect(create_, animate_, 1);
+	e->waitFlag = waitFlag;
+	effectList.push_back(e);
+}
+
+void EffectsManager::removeEffect(Effect* effect) {
+	// should effectlist be a saneset?
+	// actually, ill just add this to a list, and remove it from like,,, the vblankfunc
+	removeEffectsList.insert(effect);
+}
+
+void EffectsManager::doDialogue(const char* data, const bn::sound_item* sound) {
+	doDialogue(data, false, sound);
+}
 
 // -----
 
@@ -227,72 +270,72 @@ void BigSprite::loadBoobTrap() {
 
 	BN_LOG("booba detected");
 
-	if(globalGame->mode != 0) { // load alt tail
+	if(Game::mode != 0) { // load alt tail
 		xPos = -16;
 		yPos = -16;
 	}
 
 	auto func1 = [](void* obj) -> void {
-
-		BigSprite* bigSprite = static_cast<BigSprite*>(obj);
+		(void)obj;
+		//BigSprite* bigSprite = static_cast<BigSprite*>(obj);
 
 		static unsigned boobaBackup = 0;
 
 		if(boobaCount > 32) {
-			if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
+			if(EntityManager::hasObstacle(Pos(12, 5))) {
 
 				bn::music::stop();
 
-				bigSprite->effectsManager->doDialogue(
+				EffectsManager::doDialogue(
 					"fool.\n"
 					"get out of my sight.\0"
 				);
 
-				Pos startPos = globalGame->entityManager.player->p;
+				Pos startPos = EntityManager::player->p;
 				Pos downPos = startPos;
 				downPos.move(Direction::Down);
 
 				bn::sound_items::snd_reveal.play();
-				globalGame->effectsManager.deathTile(downPos);
+				EffectsManager::deathTile(downPos);
 
-				delete globalGame->tileManager.floorMap[downPos.x][downPos.y];
-				globalGame->tileManager.floorMap[downPos.x][downPos.y] = NULL;
-				globalGame->tileManager.updateTile(downPos);
+				delete TileManager::floorMap[downPos.x][downPos.y];
+				TileManager::floorMap[downPos.x][downPos.y] = NULL;
+				TileManager::updateTile(downPos);
 				delay(30);
 
 
-				globalGame->entityManager.player->p.move(Direction::Down);
+				EntityManager::player->p.move(Direction::Down);
 
-				globalGame->entityManager.updateScreen();
+				EntityManager::updateScreen();
 
 				bn::sound_items::snd_push.play();
 
-				effectsManager->smokeCloud(downPos, Direction::Down);
+				EffectsManager::smokeCloud(downPos, Direction::Down);
 
 				delay(15);
 
-				globalGame->cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_black_bg);
+				CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_black_bg);
 
 				// only here for debugging
 				boobaCount = MAX(32, boobaCount);
 
 				for(unsigned i=0; i<boobaCount; i++) {
 					bn::sound_items::snd_reveal.play();
-					globalGame->effectsManager.deathTile(globalGame->entityManager.player->p);
+					EffectsManager::deathTile(EntityManager::player->p);
 					delay(5);
 				}
-				globalGame->cutsceneManager.cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+				CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
 				delay(5);
 
-				bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
+				EntityManager::addKill(*(EntityManager::getMap(Pos(12, 5)).begin()));
 
-				globalGame->roomManager.nextRoom();
+				RoomManager::nextRoom();
 
 				return;
 			}
 
 
-			bigSprite->effectsManager->doDialogue(
+			EffectsManager::doDialogue(
 			"...\n"
 			"[They refuse to speak with you.]\n"
 			"[You feel ashamed.]\0"
@@ -304,7 +347,7 @@ void BigSprite::loadBoobTrap() {
 		if(boobaCount != boobaBackup) {
 			boobaBackup = boobaCount;
 
-			bigSprite->effectsManager->doDialogue(
+			EffectsManager::doDialogue(
 			"please dont touch me\rin that manner.\ryou'll regret it.\0"
 			);
 
@@ -312,8 +355,8 @@ void BigSprite::loadBoobTrap() {
 		}
 
 		// wtf. irlly need to switch over to namespaces
-		if(bigSprite->effectsManager->entityManager->hasObstacle(Pos(12, 5))) {
-			bigSprite->effectsManager->doDialogue(
+		if(EntityManager::hasObstacle(Pos(12, 5))) {
+			EffectsManager::doDialogue(
 			"i,,, why did you even do that?\rprobably wanted to see if i had programed it in\n"
 			"well, i did\rlet me move that out of the way\n"
 			"it might hurt a little bit though\0"
@@ -321,8 +364,8 @@ void BigSprite::loadBoobTrap() {
 
 			// it would be quite funny to somehow have her boobs kill you
 
-			bigSprite->effectsManager->entityKill(globalGame->entityManager.player);
-			bigSprite->effectsManager->entityManager->addKill(*(bigSprite->effectsManager->entityManager->getMap(Pos(12, 5)).begin()));
+			EffectsManager::entityKill(EntityManager::player);
+			EntityManager::addKill(*(EntityManager::getMap(Pos(12, 5)).begin()));
 			return;
 		}
 
@@ -346,7 +389,7 @@ void BigSprite::loadBoobTrap() {
 		// i rlly need to rewrite the dialogue system to automatically cut words.
 		if(msgIndex < sizeof(msgs)) {
 
-			bigSprite->effectsManager->doDialogue(msgs[msgIndex]);
+			EffectsManager::doDialogue(msgs[msgIndex]);
 
 			if(msgIndex != sizeof(msgs)/sizeof(msgs[0]) - 1) {
 				msgIndex++;
@@ -366,19 +409,19 @@ void BigSprite::loadBoobTrap() {
 			// for some reason, if this branch is predictable(not random) it causes a sprite tiles crash.
 
 			// why doesnt the : display here?
-			globalGame->cutsceneManager.displayDisText(">FATAL ERROR : TOO MUCH BOOBA\0");
+			CutsceneManager::displayDisText(">FATAL ERROR : TOO MUCH BOOBA\0");
 
 			delay(1);
 			bn::sound_items::metal_pipe_falling_sound_effect.play();
 			int lmao = 0;
 			while(lmao < 60 * 5) {
 				lmao++;
-				game->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 
 
 			bn::sound_items::snd_reveal.play();
-			globalGame->effectsManager.deathTile(globalGame->entityManager.player->p);
+			EffectsManager::deathTile(EntityManager::player->p);
 			delay(10);
 
 			BN_ERROR("excessive, overflow, booba\nto much booba\ntouch grass. or maybe take some estrogen and\nget your own.\nBooba Error Code: ", boobaCount);
@@ -387,8 +430,8 @@ void BigSprite::loadBoobTrap() {
 		static int timesCalled = 0;
 
 		if(timesCalled == 0) {
-			game->playSound(&bn::sound_items::snd_bounce);
-			game->removeSound(&bn::sound_items::snd_push_small);
+			Game::playSound(&bn::sound_items::snd_bounce);
+			Game::removeSound(&bn::sound_items::snd_push_small);
 		}
 
 		static_cast<BigSprite*>(obj)->animate();
@@ -398,11 +441,11 @@ void BigSprite::loadBoobTrap() {
 			boobaCount++;
 
 			if(boobaCount == 8) {
-				globalGame->cutsceneManager.displayDisText(">ERR: BOOBA\0");
+				CutsceneManager::displayDisText(">ERR: BOOBA\0");
 			} else if(boobaCount == 16) {
-				globalGame->cutsceneManager.displayDisText(">ERR: BOOBA COUNTER OVERFLOW\0");
+				CutsceneManager::displayDisText(">ERR: BOOBA COUNTER OVERFLOW\0");
 			} else if(boobaCount == 32) {
-				globalGame->cutsceneManager.displayDisText(">ERR: WHY ARE YOU LIKE THIS\0");
+				CutsceneManager::displayDisText(">ERR: WHY ARE YOU LIKE THIS\0");
 			}
 
 			return true;
@@ -425,8 +468,8 @@ void BigSprite::loadBoobTrap() {
 		(void*)this
 	);
 
-	entityManager->addEntity(temp1);
-	entityManager->addEntity(temp2);
+	EntityManager::addEntity(temp1);
+	EntityManager::addEntity(temp2);
 
 	for(int i=3 ; i<=8; i++) {
 
@@ -437,7 +480,7 @@ void BigSprite::loadBoobTrap() {
 
 				static int tailSpeedFrames = 0;
 				if(tailSpeedFrames == 0) {
-					globalGame->playSound(&bn::sound_items::snd_bounceimpact);
+					Game::playSound(&bn::sound_items::snd_bounceimpact);
 				}
 
 				// tails tail should speed up here. i have no easy method of getting a handler for it.
@@ -447,7 +490,7 @@ void BigSprite::loadBoobTrap() {
 				// could i do something like i = int(1) in the captures???
 				tailSpeedFrames++;
 
-				bn::vector<BigSprite*, 128>& allBigSprites = globalGame->effectsManager.bigSprites;
+				bn::vector<BigSprite*, 128>& allBigSprites = EffectsManager::bigSprites;
 
 				static BigSprite* tailBigSprite = NULL;
 
@@ -479,19 +522,19 @@ void BigSprite::loadBoobTrap() {
 			NULL,
 			NULL
 		);
-		entityManager->addEntity(temp);
+		EntityManager::addEntity(temp);
 	}
 
-	BN_ASSERT(tileManager->floorMap[9][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
-	BN_ASSERT(tileManager->floorMap[10][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
+	BN_ASSERT(TileManager::floorMap[9][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
+	BN_ASSERT(TileManager::floorMap[10][4] == NULL, "bigsprite tried adding a tile when there was one already there??");
 
-	tileManager->floorMap[9][4] = new FloorTile(Pos(9,4));
-	tileManager->floorMap[10][4] = new FloorTile(Pos(10,4));
+	TileManager::floorMap[9][4] = new FloorTile(Pos(9,4));
+	TileManager::floorMap[10][4] = new FloorTile(Pos(10,4));
 }
 
 void BigSprite::loadTailHead() {
 
-	if(globalGame->mode != 0) { // load alt tail
+	if(Game::mode != 0) { // load alt tail
 		tiles = &bn::sprite_tiles_items::dw_spr_tail_upperbody_2;
 	}
 
@@ -503,8 +546,8 @@ void BigSprite::loadTailHead() {
 	customAnimate = []() -> int {
 
 		// this was a switch statement until i became a conspiracy theorist.
-		BN_ASSERT(globalGame->entityManager.player != NULL, "WHAT THE (curse)");
-		int playerX = globalGame->entityManager.player->p.x;
+		BN_ASSERT(EntityManager::player != NULL, "WHAT THE (curse)");
+		int playerX = EntityManager::player->p.x;
 		if(playerX <= 6) {
 			return 2;
 		} else if(playerX <= 8) {
@@ -531,23 +574,22 @@ void BigSprite::loadChest() {
 	// and now that im going back to previously written code, and using it for completely unintended purposes, i am reminded that i am a trash programmer
 	// i hijacked the KICK function to do this random bs????
 
-	bool isSuperRodChest = game->roomManager.roomIndex == 0;
+	bool isSuperRodChest = RoomManager::roomIndex == 0;
 
-	BN_ASSERT(entityManager != NULL, "what");
-	BN_ASSERT(entityManager->player != NULL, "why was player null during loadchest");
+	BN_ASSERT(EntityManager::player != NULL, "why was player null during loadchest");
 
-	BN_LOG("hasrod, hassuperrod ", entityManager->player->hasRod, "   ", entityManager->player->hasSuperRod);
-	BN_LOG("hasrod, hassuperrod ", (int)entityManager->player->hasRod, "   ", (int)entityManager->player->hasSuperRod);
+	BN_LOG("hasrod, hassuperrod ", EntityManager::player->hasRod, "   ", EntityManager::player->hasSuperRod);
+	BN_LOG("hasrod, hassuperrod ", (int)EntityManager::player->hasRod, "   ", (int)EntityManager::player->hasSuperRod);
 
 	// stupidest bug of all time. what the fuck
-	//if(entityManager->player->hasSuperRod) { entityManager->player->hasSuperRod = 1; }
-	//if(entityManager->player->hasRod) { entityManager->player->hasRod = 1; }
+	//if(EntityManager::player->hasSuperRod) { EntityManager::player->hasSuperRod = 1; }
+	//if(EntityManager::player->hasRod) { EntityManager::player->hasRod = 1; }
 
 	if(isSuperRodChest) {
-		BN_LOG("attempting to set tile to ", (int)entityManager->player->hasSuperRod);
-		//sprites[0].spritePointer.set_tiles(*tiles, entityManager->player->hasSuperRod);
+		BN_LOG("attempting to set tile to ", (int)EntityManager::player->hasSuperRod);
+		//sprites[0].spritePointer.set_tiles(*tiles, EntityManager::player->hasSuperRod);
 
-		if(entityManager->player->hasSuperRod) {
+		if(EntityManager::player->hasSuperRod) {
 			sprites[0].spritePointer.set_tiles(*tiles, 1);
 		} else {
 			sprites[0].spritePointer.set_tiles(*tiles, 0);
@@ -557,11 +599,11 @@ void BigSprite::loadChest() {
 		// why the fuck is true | true 255, but true || true, true?? true | true should be true because true IS FUCKIN 1 NOT 255 WHO THE FUCK
 		// HOW MANY OTHER TIMES DO I,,, WHAT?? what the fuck
 		// WHAT THE FUCK
-		BN_LOG("attempting to set tile to ", (int)entityManager->player->hasRod || entityManager->player->hasSuperRod);
-		//sprites[0].spritePointer.set_tiles(*tiles, (entityManager->player->hasRod || entityManager->player->hasSuperRod));
+		BN_LOG("attempting to set tile to ", (int)EntityManager::player->hasRod || EntityManager::player->hasSuperRod);
+		//sprites[0].spritePointer.set_tiles(*tiles, (EntityManager::player->hasRod || EntityManager::player->hasSuperRod));
 
 		// WHAT
-		if((entityManager->player->hasRod || entityManager->player->hasSuperRod)) {
+		if((EntityManager::player->hasRod || EntityManager::player->hasSuperRod)) {
 			sprites[0].spritePointer.set_tiles(*tiles, 1);
 		} else {
 			sprites[0].spritePointer.set_tiles(*tiles, 0);
@@ -570,9 +612,9 @@ void BigSprite::loadChest() {
 
 	auto func1 = [isSuperRodChest](void* obj) -> void {
 
-		if(entityManager->player->hasSuperRod) {
+		if(EntityManager::player->hasSuperRod) {
 			return;
-		} else if(!isSuperRodChest && globalGame->entityManager.player->hasRod) {
+		} else if(!isSuperRodChest && EntityManager::player->hasRod) {
 			return;
 		}
 
@@ -580,19 +622,19 @@ void BigSprite::loadChest() {
 
 		Pos testChestPos( (bigSprite->xPos) / 16, (bigSprite->yPos) / 16 );
 
-		if(entityManager->player->p.y != testChestPos.y + 1) {
+		if(EntityManager::player->p.y != testChestPos.y + 1) {
 			return;
 		}
 
-		globalGame->cutsceneManager.introCutscene();
+		CutsceneManager::introCutscene();
 
 		bigSprite->sprites[0].spritePointer.set_tiles(*(bigSprite->tiles), 1);
 
-		globalGame->entityManager.player->hasRod = !isSuperRodChest;
-		globalGame->entityManager.player->hasSuperRod = isSuperRodChest;
+		EntityManager::player->hasRod = !isSuperRodChest;
+		EntityManager::player->hasSuperRod = isSuperRodChest;
 
-		globalGame->tileManager.updateRod();
-		globalGame->tileManager.floorLayer.reloadCells();
+		TileManager::updateRod();
+		TileManager::floorLayer.reloadCells();
 
 		return;
 	};
@@ -618,13 +660,13 @@ void BigSprite::loadChest() {
 		(void*)this
 	);
 
-	entityManager->addEntity(temp1);
-	entityManager->addEntity(temp2);
+	EntityManager::addEntity(temp1);
+	EntityManager::addEntity(temp2);
 }
 
 void BigSprite::loadTree() {
 
-	switch(game->mode) {
+	switch(Game::mode) {
 		default:
 		case 0:
 			tiles = &bn::sprite_tiles_items::dw_spr_birch;
@@ -634,7 +676,7 @@ void BigSprite::loadTree() {
 			break;
 		case 2:
 			tiles = &bn::sprite_tiles_items::dw_spr_birch_b;
-			if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
+			if(strcmp(RoomManager::currentRoomName(), "rm_rest_area_9\0") == 0) {
 				animationIndex = 0;
 			} else {
 				animationIndex = 1;
@@ -676,11 +718,11 @@ void BigSprite::loadTree() {
 
 					bn::sound_items::egg.play();
 
-					unsigned eggBackup = globalGame->saveData.eggCount;
-					globalGame->saveData.eggCount++;
+					unsigned eggBackup = Game::saveData.eggCount;
+					Game::saveData.eggCount++;
 
 					if(eggBackup == 0) {
-						globalGame->effectsManager.doDialogue("\0* You got the egg\0");
+						EffectsManager::doDialogue("\0* You got the egg\0");
 					} else {
 						//char buffer[64];
 						//memset(buffer, '\0', 64);
@@ -693,19 +735,19 @@ void BigSprite::loadTree() {
 						// nvm c_str instead of data worked
 						// nope???? wtf???
 						string_stream << "* You got another egg. You now have: ";
-						string_stream << globalGame->saveData.eggCount;
+						string_stream << Game::saveData.eggCount;
 						string_stream << " eggs\0";
 
 						char buffer[64];
 						memset(buffer, '\0', 64);
 						strncpy(buffer + 1, string.c_str(), string.size());
 
-						globalGame->effectsManager.doDialogue(buffer);
+						EffectsManager::doDialogue(buffer);
 					}
 				};
 
 				if(alreadyTalked) {
-					globalGame->effectsManager.doDialogue("* The fool is happily working away.\nBetter leave them to it\0");
+					EffectsManager::doDialogue("* The fool is happily working away.\nBetter leave them to it\0");
 					return;
 				}
 
@@ -732,14 +774,14 @@ void BigSprite::loadTree() {
 
 				bool restRes = false;
 
-				if(globalGame->saveData.eggCount == 0) {
-					globalGame->effectsManager.doDialogue(eggMsg1);
-					restRes = globalGame->effectsManager.restRequest("What do you think?\0");
-				} else if(globalGame->saveData.eggCount < 5) {
-					globalGame->effectsManager.doDialogue(eggMsg2);
-					restRes = globalGame->effectsManager.restRequest("What do you think?\0");
+				if(Game::saveData.eggCount == 0) {
+					EffectsManager::doDialogue(eggMsg1);
+					restRes = EffectsManager::restRequest("What do you think?\0");
+				} else if(Game::saveData.eggCount < 5) {
+					EffectsManager::doDialogue(eggMsg2);
+					restRes = EffectsManager::restRequest("What do you think?\0");
 				} else {
-					globalGame->effectsManager.doDialogue(eggMsg3);
+					EffectsManager::doDialogue(eggMsg3);
 					restRes = true;
 				}
 
@@ -756,75 +798,75 @@ void BigSprite::loadTree() {
 					idrk.setVisible(false);
 					idrk.updatePosition(Pos(11, 4));
 
-					if(globalGame->saveData.eggCount == 0) {
+					if(Game::saveData.eggCount == 0) {
 
-						globalGame->effectsManager.doDialogue("`* The fool slowly turns around and stares at you\0");
+						EffectsManager::doDialogue("`* The fool slowly turns around and stares at you\0");
 
 						idrk.setVisible(true);
-						globalGame->effectsManager.doDialogue("\0* Thank you for saying hello.\0", &bn::sound_items::snd_cifer);
+						EffectsManager::doDialogue("\0* Thank you for saying hello.\0", &bn::sound_items::snd_cifer);
 						idrk.setVisible(false);
 
-						globalGame->effectsManager.doDialogue("\0* After awkwardly fumbling through their pockets, they force a gift into your hands\0");
+						EffectsManager::doDialogue("\0* After awkwardly fumbling through their pockets, they force a gift into your hands\0");
 
 						giveEgg();
 
 						idrk.setVisible(true);
-						globalGame->effectsManager.doDialogue("\0* It reminds me of you. Please take good care of it.\0", &bn::sound_items::snd_cifer);
+						EffectsManager::doDialogue("\0* It reminds me of you. Please take good care of it.\0", &bn::sound_items::snd_cifer);
 						idrk.setVisible(false);
-						globalGame->effectsManager.doDialogue("\0* The fool returns to their computer, just as they were before.\0");
+						EffectsManager::doDialogue("\0* The fool returns to their computer, just as they were before.\0");
 
-						globalGame->effectsManager.doDialogue("* What even was that?\0");
+						EffectsManager::doDialogue("* What even was that?\0");
 
-					} else if(globalGame->saveData.eggCount < 5) {
+					} else if(Game::saveData.eggCount < 5) {
 
-						globalGame->effectsManager.doDialogue("\0* The fool slowly turns around and stares at you\0");
+						EffectsManager::doDialogue("\0* The fool slowly turns around and stares at you\0");
 
 						idrk.setVisible(true);
-						globalGame->effectsManager.doDialogue("* Hello again. Did you enjoy the egg?\0", &bn::sound_items::snd_cifer);
+						EffectsManager::doDialogue("* Hello again. Did you enjoy the egg?\0", &bn::sound_items::snd_cifer);
 						idrk.setVisible(false);
 
-						restRes = globalGame->effectsManager.restRequest("Egg?\0");
+						restRes = EffectsManager::restRequest("Egg?\0");
 
 						if(restRes) {
 							giveEgg();
 							idrk.setVisible(true);
-							globalGame->effectsManager.doDialogue("\0* Great! I thought you would.\n* Please come back for more later if you'd like.\0", &bn::sound_items::snd_cifer);
+							EffectsManager::doDialogue("\0* Great! I thought you would.\n* Please come back for more later if you'd like.\0", &bn::sound_items::snd_cifer);
 							idrk.setVisible(false);
-							globalGame->effectsManager.doDialogue("* Thank you for spending time with me. It means the world.\0", &bn::sound_items::snd_cifer);
+							EffectsManager::doDialogue("* Thank you for spending time with me. It means the world.\0", &bn::sound_items::snd_cifer);
 						} else {
 							idrk.setVisible(true);
-							globalGame->effectsManager.doDialogue("\0* Thats,`,`,`ok.\n* They arent for everyone.\n* I understand that.\0", &bn::sound_items::snd_cifer);
+							EffectsManager::doDialogue("\0* Thats,`,`,`ok.\n* They arent for everyone.\n* I understand that.\0", &bn::sound_items::snd_cifer);
 							idrk.setVisible(false);
-							globalGame->effectsManager.doDialogue("* They seem dejected, and return to their work\0");
+							EffectsManager::doDialogue("* They seem dejected, and return to their work\0");
 						}
 					} else {
 						alreadyTalked = false;
 
 
-						globalGame->effectsManager.doDialogue("\0* Your friend eagerly gets up from their bed and turns to you\0");
+						EffectsManager::doDialogue("\0* Your friend eagerly gets up from their bed and turns to you\0");
 
 						idrk.setVisible(true);
-						globalGame->effectsManager.doDialogue("\0* Thank you for taking such good care of my eggs. I finally am able to rest.\n* As payment, would you like some breakfast?\0", &bn::sound_items::snd_cifer);
+						EffectsManager::doDialogue("\0* Thank you for taking such good care of my eggs. I finally am able to rest.\n* As payment, would you like some breakfast?\0", &bn::sound_items::snd_cifer);
 						idrk.setVisible(false);
 
-						globalGame->effectsManager.doDialogue("\0* They offer you some scrambled eggs.\n"
+						EffectsManager::doDialogue("\0* They offer you some scrambled eggs.\n"
 						"* You eat them without a second thought.\n"
 						"* The taste reminds you of home.\0");
 
 						idrk.setVisible(true);
-						globalGame->effectsManager.doDialogue("\0"
+						EffectsManager::doDialogue("\0"
 						"* Again, thank you for spending time with me, and helping me with my eggs.\n"
 						"* It means the world, to me.\n"
 						"* Thank you. <3\0"
 						, &bn::sound_items::snd_cifer);
 						idrk.setVisible(false);
 
-						globalGame->effectsManager.doDialogue("\0"
+						EffectsManager::doDialogue("\0"
 						"* Your friend lies back down, clean and well-rested\n"
 						"* You feel proud.\0");
 
 						idrk.setVisible(true);
-						globalGame->effectsManager.doDialogue("\0"
+						EffectsManager::doDialogue("\0"
 						"* Please come back any time if you want more eggs!\n"
 						"* Or,`to spend time with me.`I would appreciate it.\0"
 						, &bn::sound_items::snd_cifer);
@@ -836,10 +878,10 @@ void BigSprite::loadTree() {
 					// this is going to be the most complex convo in the whole game lmao
 					// have them take a bath and take a break after 5 eggs
 					// gods, i should take a break
-					// globalGame->saveData.eggCount++;
+					// Game::saveData.eggCount++;
 
 				} else {
-					globalGame->effectsManager.doDialogue("* You were better off leaving it alone.\0");
+					EffectsManager::doDialogue("* You were better off leaving it alone.\0");
 				}
 			};
 
@@ -867,21 +909,21 @@ void BigSprite::loadTree() {
 				"[And it seems they have finally taken a bath.]\n"
 				"[Maybe go say hello?]\0";
 
-				if(globalGame->saveData.eggCount == 0) {
-					globalGame->effectsManager.doDialogue(inProgressMsg);
-				} else if(globalGame->saveData.eggCount < 5) {
-					globalGame->effectsManager.doDialogue(inProgressMsg2);
+				if(Game::saveData.eggCount == 0) {
+					EffectsManager::doDialogue(inProgressMsg);
+				} else if(Game::saveData.eggCount < 5) {
+					EffectsManager::doDialogue(inProgressMsg2);
 				} else {
-					globalGame->effectsManager.doDialogue(inProgressMsg3);
+					EffectsManager::doDialogue(inProgressMsg3);
 				}
 			};
 
-			Pos playerPos = globalGame->entityManager.player->p;
+			Pos playerPos = EntityManager::player->p;
 
 			if(playerPos == Pos(6, 3)) {
 				eggFunc();
 			} else {
-				switch(game->mode) {
+				switch(Game::mode) {
 					default:
 					case 0:
 						inProgressFunc();
@@ -890,10 +932,10 @@ void BigSprite::loadTree() {
 						inProgressFunc();
 						break;
 					case 2:
-						if(strcmp(game->roomManager.currentRoomName(), "rm_rest_area_9\0") == 0) {
-							globalGame->cutsceneManager.cifDream();
+						if(strcmp(RoomManager::currentRoomName(), "rm_rest_area_9\0") == 0) {
+							CutsceneManager::cifDream();
 						} else {
-							globalGame->effectsManager.doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
+							EffectsManager::doDialogue("[This Lotus-Eater Machine doesn't seem to be operational]\n[Better move on]\0");
 						}
 						break;
 				}
@@ -931,15 +973,15 @@ void BigSprite::loadTree() {
 
 			firstRun = false;
 
-			game->playSound(&bn::sound_items::snd_push);
-			game->removeSound(&bn::sound_items::snd_push_small);
+			Game::playSound(&bn::sound_items::snd_push);
+			Game::removeSound(&bn::sound_items::snd_push_small);
 
 			restoreAnimationIndex = bigSprite->animationIndex;
 			restoreTiles = bigSprite->tiles;
 			bigSprite->animationIndex = 0;
 
 			if(restoreAnimationIndex == 0) {
-				globalGame->effectsManager.treeLeaves();
+				EffectsManager::treeLeaves();
 				if(restoreTiles == &bn::sprite_tiles_items::dw_spr_birch) {
 					bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_birch_shake;
 				} else {
@@ -1005,7 +1047,7 @@ void BigSprite::loadTree() {
 		this
 	);
 
-	entityManager->addEntity(temp1);
+	EntityManager::addEntity(temp1);
 }
 
 void BigSprite::loadGorHead() {
@@ -1057,57 +1099,57 @@ void BigSprite::loadGorHead() {
 		//bigSprite->sprites[0].spritePointer.tiles()
 
 		if(bigSprite->tiles == &bn::sprite_tiles_items::dw_spr_gor_sleep) {
-			globalGame->effectsManager.doDialogue("[A giant head lies before you, blocking your path]\0");
+			EffectsManager::doDialogue("[A giant head lies before you, blocking your path]\0");
 			return;
 		}
 
 
 		// give locust if they dont have any
-		if(globalGame->entityManager.player->locustCount == 0) {
-			globalGame->effectsManager.doDialogue(""
+		if(EntityManager::player->locustCount == 0) {
+			EffectsManager::doDialogue(""
 			"damnnnnnnnnnnn\n"
 			"you are flat broke\n"
 			"i got some spare change lying around, here\n"
 			"now, go yeet yourself at the floor of that statue to the right, and have fun\n"
 			"\0", &bn::sound_items::snd_gor);
 
-			globalGame->entityManager.player->locustCount = 1;
-			globalGame->tileManager.updateLocust();
-			globalGame->tileManager.floorLayer.reloadCells();
+			EntityManager::player->locustCount = 1;
+			TileManager::updateLocust();
+			TileManager::floorLayer.reloadCells();
 
 			return;
 		}
 
 		if(talkCount == 0) {
 
-			globalGame->effectsManager.doDialogue("\0Many college students have gone to college\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0And gotten hooked on drugs, marijuana, and alcohol\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Listen, stop trying to be somebody else\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Be yourself and know that that's good enough\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Don't try to be someone else\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Don't try to be like someone else\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Don't try to act like someone else, be yourself\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Be secure with yourself\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Rely and trust upon your own decisions\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0On your own beliefs\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0You understand the things that I've taught you\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Not to drink alcohol, not to use drugs\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Don't use that cocaine or marijuana\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Because that stuff is highly addictive\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0When people become weed-heads\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0They become sluggish, lazy, stupid and unconcerned\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Sluggish, lazy, stupid and unconcerned\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0That's all marijuana does to you, okay?\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0This is mom\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Unless you're taking it under doctor's, um, control\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Then it's regulated\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Do not smoke marijuana, do not consume alcohol\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0Do not get in the car with someone who is inebriated\0", &bn::sound_items::snd_gor);
-			globalGame->effectsManager.doDialogue("\0This is mom, call me, bye\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Many college students have gone to college\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0And gotten hooked on drugs, marijuana, and alcohol\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Listen, stop trying to be somebody else\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Don't try to be someone else\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Be yourself and know that that's good enough\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Don't try to be someone else\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Don't try to be like someone else\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Don't try to act like someone else, be yourself\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Be secure with yourself\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Rely and trust upon your own decisions\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0On your own beliefs\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0You understand the things that I've taught you\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Not to drink alcohol, not to use drugs\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Don't use that cocaine or marijuana\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Because that stuff is highly addictive\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0When people become weed-heads\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0They become sluggish, lazy, stupid and unconcerned\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Sluggish, lazy, stupid and unconcerned\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0That's all marijuana does to you, okay?\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0This is mom\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Unless you're taking it under doctor's, um, control\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Then it's regulated\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Do not smoke marijuana, do not consume alcohol\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0Do not get in the car with someone who is inebriated\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("\0This is mom, call me, bye\0", &bn::sound_items::snd_gor);
 
 		} else {
-			globalGame->effectsManager.doDialogue("Thank you for listening to me recite the lyrics to Frank Ocean's Song: Be Yourself.\0", &bn::sound_items::snd_gor);
+			EffectsManager::doDialogue("Thank you for listening to me recite the lyrics to Frank Ocean's Song: Be Yourself.\0", &bn::sound_items::snd_gor);
 		}
 
 		talkCount++;
@@ -1129,8 +1171,8 @@ void BigSprite::loadGorHead() {
 			frameCount = 0;
 			bigSprite->sprites[0].spritePointer.set_tiles(bn::sprite_tiles_items::dw_spr_gor);
 			bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_gor;
-			globalGame->effectsManager.bigSprites[1]->animationIndex = 1;
-			globalGame->effectsManager.bigSprites[1]->animate();
+			EffectsManager::bigSprites[1]->animationIndex = 1;
+			EffectsManager::bigSprites[1]->animate();
 			return true;
 		}
 
@@ -1138,8 +1180,8 @@ void BigSprite::loadGorHead() {
 		bigSprite->tiles = &bn::sprite_tiles_items::dw_spr_gor_hit;
 
 		// this is jank and stupid
-		globalGame->effectsManager.bigSprites[1]->animationIndex = 0;
-		globalGame->effectsManager.bigSprites[1]->animate();
+		EffectsManager::bigSprites[1]->animationIndex = 0;
+		EffectsManager::bigSprites[1]->animate();
 
 		return false;
 	};
@@ -1164,7 +1206,7 @@ void BigSprite::loadGorHead() {
 			(void*)this,
 			(void*)this
 		);
-		entityManager->addEntity(temp);
+		EntityManager::addEntity(temp);
 	}
 
 	for(unsigned i=0; i<3; i++) {
@@ -1174,7 +1216,7 @@ void BigSprite::loadGorHead() {
 			(void*)this,
 			(void*)this
 		);
-		entityManager->addEntity(temp);
+		EntityManager::addEntity(temp);
 	}
 
 
@@ -1195,12 +1237,7 @@ void BigSprite::loadStink() {
 
 // -----
 
-EffectsManager::EffectsManager(Game* game_) :
-	game(game_),
-	textGenerator(dw_fnt_text_12_sprite_font),
-	verTextGenerator(common::variable_8x8_sprite_font),
-	effectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles)
-	{
+void EffectsManager::EffectsManager()	{
 
 	// may not be the best idea?
 	textGenerator.set_one_sprite_per_character(true);
@@ -1250,32 +1287,6 @@ EffectsManager::EffectsManager(Game* game_) :
 	effectsLayer.reloadCells();
 }
 
-EffectsManager::~EffectsManager() {
-	for(int i=0; i<effectList.size(); i++) {
-		if(effectList[i] != NULL) {
-			delete effectList[i];
-		}
-		effectList[i] = NULL;
-	}
-
-	effectList.clear();
-	removeEffectsList.clear();
-
-	for(int i=0; i<bigSprites.size(); i++) {
-		if(bigSprites[i] != NULL) {
-			delete bigSprites[i];
-		}
-		bigSprites[i] = NULL;
-	}
-
-	bigSprites.clear();
-
-	if(dialogueEndPointer != NULL) {
-		delete dialogueEndPointer;
-		dialogueEndPointer = NULL;
-	}
-}
-
 void EffectsManager::updatePalette(Palette* pal) {
 
 	for(int i=0; i<effectList.size(); i++) {
@@ -1317,9 +1328,9 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 		firstRun = false;
 		layer = inward ? 30 : 0;
 
-		Pos testPos = entityManager->player->p;
+		Pos testPos = EntityManager::player->p;
 		if(testPos.move(Direction::Up)) {
-			SaneSet<Entity*, 4> tempMap = entityManager->getMap(testPos);
+			SaneSet<Entity*, 4> tempMap = EntityManager::getMap(testPos);
 			for(auto it = tempMap.begin(); it != tempMap.end(); ++it) {
 				if((*it)->entityType() == EntityType::CifStatue) {
 					cifReset = true;
@@ -1331,7 +1342,7 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	}
 	(void)autoSpeed;
 
-	Pos p = entityManager->player->p;
+	Pos p = EntityManager::player->p;
 
 	int xPos = (p.x * 2) + 1;
 	int yPos = (p.y * 2) + 1;
@@ -1340,7 +1351,7 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 	int stopIndex = inward ? -1 : 30;
 	int tileIndex = 4 * inward;
 
-	if(inward && game->roomManager.isWhiteRooms()) {
+	if(inward && RoomManager::isWhiteRooms()) {
 		tileIndex = 126;
 	}
 
@@ -1512,11 +1523,11 @@ bool EffectsManager::exitRoom() {
 		return false;
 	}
 
-	bool res = entityManager->playerWon() ? zoomEffect(true) : topDownEffect(true);
+	bool res = EntityManager::playerWon() ? zoomEffect(true) : topDownEffect(true);
 
 	if(res) {
 		firstRun = true;
-		playerWonLastExit = entityManager->playerWon(); // wtf am i on
+		playerWonLastExit = EntityManager::playerWon(); // wtf am i on
 		return true;
 	}
 
@@ -1637,14 +1648,14 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		} else if(effects->tiles == &bn::sprite_tiles_items::dw_spr_spark_particle) {
 			secretSparks(Pos(effects->x/16, effects->y/16));
 		} else {
-			BN_LOG("attempting to create bigsprite: ", game->roomManager.currentRoomName(), " id index: ", i);
+			BN_LOG("attempting to create bigsprite: ", RoomManager::currentRoomName(), " id index: ", i);
 			bigSprites.push_back(new BigSprite(effects->tiles, effects->x, effects->y, effects->width, effects->height, effects->collide, effects->priority, effects->autoAnimate) );
 			BN_LOG("success");
 		}
 		effects++;
 	}
 
-	unsigned roomNameHash = game->roomManager.currentRoomHash();
+	unsigned roomNameHash = RoomManager::currentRoomHash();
 
 	// i rlly need a better method than this
 	// and also, roonamess being named differently during hard mode just (curse)s me
@@ -1662,25 +1673,25 @@ void EffectsManager::loadEffects(EffectHolder* effects, int effectsCount) {
 		case hashString("rm_rest_area_8\0"):
 		case hashString("rm_rest_area_9\0"):
 			roomDust();
-			game->doButanoUpdate(); // avert the frame drops that loading roomdust causes
+			Game::doButanoUpdate(); // avert the frame drops that loading roomdust causes
 			break;
 		default:
-			if(game->roomManager.isWhiteRooms()) {
+			if(RoomManager::isWhiteRooms()) {
 				roomDust();
-				game->doButanoUpdate(); // avert the frame drops that loading roomdust causes
+				Game::doButanoUpdate(); // avert the frame drops that loading roomdust causes
 			}
 			break;
 	}
 
 	// init the hopefully cool voided lyrics
-	if(game->mode == 2 && roomNameHash == hashString("rm_rest_area_9\0")) {
-		globalGame->cutsceneManager.voidedLyrics();
+	if(Game::mode == 2 && roomNameHash == hashString("rm_rest_area_9\0")) {
+		CutsceneManager::voidedLyrics();
 	}
 }
 
 // -----
 
-Dialogue::Dialogue(EffectsManager* effectsManager_, const char* data_) : effectsManager(effectsManager_), originalData(data_) {
+Dialogue::Dialogue(const char* data_) : originalData(data_) {
 	// gods should i just make a dialogue class
 	// honestly, i didnt need it, and this code is (curse)ing trash.
 	// nvm, hopefully not anymore, im going to make it less trash
@@ -1718,7 +1729,7 @@ int Dialogue::getNextLine() {
 
 		buffer[bufferIndex + nextWordCount] = '\0';
 
-		int width = effectsManager->textGenerator.width(bn::string_view(buffer));
+		int width = EffectsManager::textGenerator.width(bn::string_view(buffer));
 
 		buffer[bufferIndex + nextWordCount] = ' ';
 
@@ -1785,7 +1796,7 @@ int Dialogue::getNextDialogue(char* res) {
 
 void EffectsManager::hideForDialogueBox(bool vis, bool isCutscene) {
 
-	entityManager->hideForDialogueBox(vis, isCutscene);
+	EntityManager::hideForDialogueBox(vis, isCutscene);
 
 	int compareVal = isCutscene ? 0 : 6;
 	compareVal = (compareVal * 16) - 8;
@@ -1874,7 +1885,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	BN_ASSERT(*safteyTestData == '\0', "oh gods. dialogue data wasnt double nulltermed.  PLEASE MESSAGE ME THIS. str=", data);
 
 	if(sound == NULL) {
-		switch(game->mode) {
+		switch(Game::mode) {
 			default:
 			case 0:
 				sound = &bn::sound_items::snd_voice2;
@@ -1902,14 +1913,14 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 
 	// TODO, spr_textbox_endpointer, rotate every 5/6 frames(ithink?)
 
-	GameState restoreState = game->state;
+	GameState restoreState = Game::state;
 	if(!isCutscene) {
-		game->state = GameState::Dialogue;
+		Game::state = GameState::Dialogue;
 	}
 
-	//tileManager->floorLayer.rawMap.reloadCells();
-	//game->collision.reloadCells();
-	//game->details.reloadCells();
+	//TileManager::floorLayer.rawMap.reloadCells();
+	//Game::collision.reloadCells();
+	//Game::details.reloadCells();
 
 	effectsLayer.setBigTile(0, 6, 19);
 	effectsLayer.setBigTile(13, 6, 20);
@@ -1967,7 +1978,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		data++;
 	}
 
-	Dialogue dialogue(this, data);
+	Dialogue dialogue(data);
 	textSpritesLine1.clear();
 	textSpritesLine2.clear();
 
@@ -2031,16 +2042,16 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 			textSprites[i].set_bg_priority(0);
 			textSprites[i].set_visible(false);
 			//textSprites[i].set_palette(spritePalette->getSpritePalette());
-			textSprites[i].set_palette(globalGame->pal->getSpritePalette());
+			textSprites[i].set_palette(Game::pal->getSpritePalette());
 		}
-		globalGame->doButanoUpdate();
+		Game::doButanoUpdate();
 
 		// in the future, this needs to be gotten dynamically
 		//const bn::sound_item* sound = &bn::sound_items::snd_voice2;
 
 		// i may be bsing, but i think a sound plays at the start and and and when a space occurs
 		// this is actually completley wrong! but im tired ok, and also kinda like it so im leaving it in
-		//globalGame->playSound(sound);
+		//Game::playSound(sound);
 		soundItem->play();
 
 		int bufferIndex = 0;
@@ -2051,11 +2062,11 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 			}
 
 			if(bufferPtr[bufferIndex] == ' ' || bufferPtr[bufferIndex] == '`') {
-				globalGame->playSound(soundItem);
+				Game::playSound(soundItem);
 				if(bufferPtr[bufferIndex] == '`') {
 					// delay scroll, this will eat up skipscrolls, but im tired.
 					for(int j=0; j<60; j++) {
-						globalGame->doButanoUpdate();
+						Game::doButanoUpdate();
 					}
 				}
 				bufferIndex++;
@@ -2068,11 +2079,11 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 					skipScrollBool = true;
 					break;
 				}
-				globalGame->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 		}
 
-		globalGame->playSound(soundItem);
+		Game::playSound(soundItem);
 
 		textSprites.clear();
 		textGeneratorObj.set_one_sprite_per_character(false);
@@ -2082,10 +2093,10 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 			textSprites[i].set_visible(true);
 			textSprites[i].set_bg_priority(0);
 			//textSprites[i].set_palette(spritePalette->getSpritePalette());
-			textSprites[i].set_palette(globalGame->pal->getSpritePalette());
+			textSprites[i].set_palette(Game::pal->getSpritePalette());
 		}
 
-		globalGame->doButanoUpdate();
+		Game::doButanoUpdate();
 
 		return skipScrollBool;
 	};
@@ -2128,7 +2139,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 
 				textOffset=1;
 
-				game->doButanoUpdate();
+				Game::doButanoUpdate();
 			}
 
 			if(textOffset == 0) {
@@ -2144,7 +2155,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 		}
 
 
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 
@@ -2160,7 +2171,7 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 
 
 	// this is trash, and will cause frame drops
-	game->fullTileDraw();
+	Game::fullTileDraw();
 
 	if(!isCutscene) {
 		hideForDialogueBox(true, isCutscene);
@@ -2171,10 +2182,10 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 
 	if(!dontUpdateAtEnd) {
 		// so confused. was this needed at all??
-		//game->doButanoUpdate();
+		//Game::doButanoUpdate();
 	}
 
-	game->state = restoreState;
+	Game::state = restoreState;
 }
 
 bool EffectsManager::restRequest(const char* questionString, bool getOption) {
@@ -2191,8 +2202,8 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		questionString = defaultMessage;
 	}
 
-	GameState restoreState = game->state;
-	game->state = GameState::Dialogue;
+	GameState restoreState = Game::state;
+	Game::state = GameState::Dialogue;
 
 	textGenerator.set_one_sprite_per_character(false);
 
@@ -2200,13 +2211,13 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	auto alternateTextPalette = spritePalette->getAlternateSpritePalette();
 	//auto blackTextPalette = spritePalette->getBlackSpritePalette();
 
-	if(game->roomManager.isWhiteRooms()) {
+	if(RoomManager::isWhiteRooms()) {
 		activeTextPalette = spritePalette->getLightGraySpritePalette();
 		alternateTextPalette = spritePalette->getDarkGraySpritePalette();
 	}
 
 	for(int i=0; i<60; i++) {
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 	int restX = -16;
@@ -2236,7 +2247,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 	if(getOption) {
 
 		for(int i=0; i<60; i++) {
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
 		}
 
 		textGenerator.generate((bn::fixed)-70, (bn::fixed)-10, bn::string_view("[Yes]\0"), yesSprites);
@@ -2280,7 +2291,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 			}
 
 
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
 
 		}
 	} else {
@@ -2288,14 +2299,14 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 			if(bn::keypad::a_pressed()) {
 				break;
 			}
-			game->doButanoUpdate();
+			Game::doButanoUpdate();
 		}
 	}
 
 	restSprites.clear();
 	yesSprites.clear();
 	noSprites.clear();
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	bool answer = res - 1;
 
@@ -2305,7 +2316,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		if(doCutsceneDialogue) {
 			doDialogue("[You decide to move on]\0", false);
 		}
-		game->state = restoreState;
+		Game::state = restoreState;
 		return false;
 	}
 
@@ -2314,7 +2325,7 @@ bool EffectsManager::restRequest(const char* questionString, bool getOption) {
 		doDialogue("[Slowly,`surely,`dreams embrace you]\0\0\0", false);
 	}
 
-	game->state = restoreState;
+	Game::state = restoreState;
 	return true;
 }
 
@@ -2349,9 +2360,9 @@ void MenuOption::fullDraw(bool isActive) { // use white color for active, use da
 	// why is this so pathetically slow?
 	textGenerator.generate((bn::fixed)-104 + xDraw, (bn::fixed)yDraw, bn::string_view(buffer), textSprites);
 
-	auto spritePalettePalette = effectsManager->spritePalette->getAlternateSpritePalette();
+	auto spritePalettePalette = EffectsManager::spritePalette->getAlternateSpritePalette();
 	if(isActive) {
-		spritePalettePalette = effectsManager->spritePalette->getSpritePalette();
+		spritePalettePalette = EffectsManager::spritePalette->getSpritePalette();
 	}
 
 	for(int i=0; i<textSprites.size(); i++) {
@@ -2365,9 +2376,9 @@ void MenuOption::draw(bool isActive) {
 	isActiveState = isActive;
 	for(int i=0; i<textSprites.size(); i++) {
 		if(isActive) {
-			textSprites[i].set_palette(effectsManager->spritePalette->getSpritePalette());
+			textSprites[i].set_palette(EffectsManager::spritePalette->getSpritePalette());
 		} else {
-			textSprites[i].set_palette(effectsManager->spritePalette->getAlternateSpritePalette());
+			textSprites[i].set_palette(EffectsManager::spritePalette->getAlternateSpritePalette());
 		}
 	}
 }
@@ -2433,12 +2444,12 @@ void EffectsManager::setMenuVis(bool vis) {
 
 void EffectsManager::doMenu() {
 
-	game->entityManager.menuOpened = true;
+	EntityManager::menuOpened = true;
 
 	setBorderColor();
 
-	GameState restoreState = game->state;
-	game->state = GameState::Paused;
+	GameState restoreState = Game::state;
+	Game::state = GameState::Paused;
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
@@ -2447,7 +2458,7 @@ void EffectsManager::doMenu() {
 	}
 
 	for(int i=0; i<6; i++) {
-		unsigned temp = tileManager->playerBrand[i];
+		unsigned temp = TileManager::playerBrand[i];
 		for(int j=0; j<6; j++) {
 			setBrandColor(5-j, i, temp & 1);
 			temp >>=1;
@@ -2460,40 +2471,40 @@ void EffectsManager::doMenu() {
 	effectsLayer.rawMap.setTile(28, 2, 125);
 
 	effectsLayer.reloadCells();
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	MenuOption::yIndex = -68;
 
 	// oh god im getting goofy again
 	menuOptions.push_back(
 		new MenuOption("Stranger: ",
-		[]() -> const char* { return globalGame->getMode(); },
-		[](int val) { globalGame->changeMode(val); }
+		[]() -> const char* { return Game::getMode(); },
+		[](int val) { Game::changeMode(val); }
 		)
 	);
 
 	menuOptions.push_back(
 		new MenuOption("Room: ",
-		[]() -> const char* { return globalGame->roomManager.currentRoomName(); },
-		[](int val) { return globalGame->roomManager.changeFloor(val); }
+		[]() -> const char* { return RoomManager::currentRoomName(); },
+		[](int val) { return RoomManager::changeFloor(val); }
 		)
 	);
 
 	menuOptions.push_back(
 		new MenuOption("Palette: ",
-		[]() -> const char* { return paletteNameList[globalGame->paletteIndex]; },
-		[](int val) { return globalGame->changePalette(val); }
+		[]() -> const char* { return paletteNameList[Game::paletteIndex]; },
+		[](int val) { return Game::changePalette(val); }
 		)
 	);
 
 	menuOptions[menuOptions.size() - 1]->bPress = []() -> void {
-		globalGame->cutsceneManager.inputCustomPalette();
+		CutsceneManager::inputCustomPalette();
 	};
 
 	menuOptions.push_back(
 		new MenuOption("Memory: ",
 		[]() -> const char* {
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 			return player->hasMemory ? "yay" : "nay";
 		},
@@ -2502,14 +2513,14 @@ void EffectsManager::doMenu() {
 
 			BN_LOG("mem toggle with val of, ", val);
 
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 
 			BN_LOG(player->hasMemory, " ", (int)player->hasMemory);
 			player->hasMemory = !(player->hasMemory);
 			BN_LOG(player->hasMemory, " ", (int)player->hasMemory);
 
-			globalGame->tileManager.updateBurdenTiles();
+			TileManager::updateBurdenTiles();
 		},
 		80 * 0
 		)
@@ -2518,16 +2529,16 @@ void EffectsManager::doMenu() {
 	menuOptions.push_back(
 		new MenuOption("Wings: ",
 		[]() -> const char* {
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 			return player->hasWings ? "yay" : "nay";
 		},
 		[](int val) {
 			(void)val;
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 			player->hasWings = !player->hasWings;
-			globalGame->tileManager.updateBurdenTiles();
+			TileManager::updateBurdenTiles();
 		},
 		80 * 1
 		)
@@ -2537,16 +2548,16 @@ void EffectsManager::doMenu() {
 	menuOptions.push_back(
 		new MenuOption("Sword: ",
 		[]() -> const char* {
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 			return player->hasSword ? "yay" : "nay";
 		},
 		[](int val) {
 			(void)val;
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 			player->hasSword = !player->hasSword;
-			globalGame->tileManager.updateBurdenTiles();
+			TileManager::updateBurdenTiles();
 		},
 		80 * 2 - 12
 		)
@@ -2555,14 +2566,14 @@ void EffectsManager::doMenu() {
 	menuOptions.push_back(
 		new MenuOption("Rod: ",
 		[]() -> const char* {
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 
 			return player->hasRod || player->hasSuperRod ? ( player->hasSuperRod ? "super" : "normal") : "none";
 		},
 		[](int val) {
 			(void)val;
-			Player* player = globalGame->entityManager.player;
+			Player* player = EntityManager::player;
 			BN_ASSERT(player != NULL, "in a menufunc, player was null");
 
 
@@ -2592,7 +2603,7 @@ void EffectsManager::doMenu() {
 			}
 
 			//player->hasSuperRod	= !player->hasSuperRod;
-			globalGame->tileManager.updateRod();
+			TileManager::updateRod();
 		},
 		-2
 		)
@@ -2605,34 +2616,34 @@ void EffectsManager::doMenu() {
 		new MenuOption("Delay frames: ",
 		[string]() mutable -> const char* {
 
-			if(globalGame->saveData.delay == -1) {
+			if(Game::saveData.delay == -1) {
 				return "Press\0";
 			}
 
-			if(globalGame->saveData.delay == 0) {
+			if(Game::saveData.delay == 0) {
 				return "Kachow\0";
 			}
 
-			string = bn::to_string<16>(globalGame->saveData.delay / FRAMETICKS);
+			string = bn::to_string<16>(Game::saveData.delay / FRAMETICKS);
 
 			return string.data();
 		},
 		[](int val) {
 
 
-			if(val > 0 && globalGame->saveData.delay == -1) {
-				globalGame->saveData.delay = 0;
+			if(val > 0 && Game::saveData.delay == -1) {
+				Game::saveData.delay = 0;
 				return;
 			}
 
-			if(val < 0 && globalGame->saveData.delay == 0) {
-				globalGame->saveData.delay = -1;
+			if(val < 0 && Game::saveData.delay == 0) {
+				Game::saveData.delay = -1;
 				return;
 			}
 
-			globalGame->saveData.delay += val > 0 ? 2 * FRAMETICKS : -2 * FRAMETICKS;
-			globalGame->saveData.delay = MAX(globalGame->saveData.delay, -1);
-			globalGame->saveData.delay = MIN(globalGame->saveData.delay, 5 * 60 * FRAMETICKS);
+			Game::saveData.delay += val > 0 ? 2 * FRAMETICKS : -2 * FRAMETICKS;
+			Game::saveData.delay = MAX(Game::saveData.delay, -1);
+			Game::saveData.delay = MIN(Game::saveData.delay, 5 * 60 * FRAMETICKS);
 
 		},
 		80 * 1
@@ -2649,7 +2660,7 @@ void EffectsManager::doMenu() {
 	);
 
 	menuOptions[menuOptions.size() - 1]->bPress = []() -> void {
-		globalGame->cutsceneManager.showCredits();
+		CutsceneManager::showCredits();
 	};
 
 
@@ -2660,12 +2671,12 @@ void EffectsManager::doMenu() {
 		)
 	);
 
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
 	for(int i=0; i<menuOptions.size(); i++) {
 		menuOptions[i]->fullDraw(i == 0);
 		// this many butanoupdates SHOULD NOT BE NECCESSARY!
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 
@@ -2675,8 +2686,8 @@ void EffectsManager::doMenu() {
 	bool isActive = false;
 	bool flashing = false;
 
-	int startRoomIndex = game->roomManager.roomIndex;
-	int startRoomMode = game->mode;
+	int startRoomIndex = RoomManager::roomIndex;
+	int startRoomMode = Game::mode;
 
 	while(true) {
 
@@ -2726,35 +2737,35 @@ void EffectsManager::doMenu() {
 		}
 
 
-		game->doButanoUpdate();
+		Game::doButanoUpdate();
 	}
 
 
 	verTextSprites.clear();
 	// this causes frame drops, and isnt ideal, but will work for now
-	if(startRoomIndex != game->roomManager.roomIndex ||
-		startRoomMode != game->mode) {
-		game->resetRoom(true);
+	if(startRoomIndex != RoomManager::roomIndex ||
+		startRoomMode != Game::mode) {
+		Game::resetRoom(true);
 	}
 	for(int i=0; i<menuOptions.size(); i++) {
 		delete menuOptions[i];
 	}
 	menuOptions.clear();
 	menuOptions.clear();
-	//tileManager->fullDraw(); // literally only here since for some reason, butden tiles didnt update until a move?
-	game->doButanoUpdate();
+	//TileManager::fullDraw(); // literally only here since for some reason, butden tiles didnt update until a move?
+	Game::doButanoUpdate();
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			effectsLayer.setBigTile(x, y, 0);
 		}
 	}
-	setBorderColor(!game->roomManager.isWhiteRooms());
+	setBorderColor(!RoomManager::isWhiteRooms());
 
 	effectsLayer.reloadCells();
-	game->doButanoUpdate();
+	Game::doButanoUpdate();
 
-	game->state = restoreState;
+	Game::state = restoreState;
 }
 
 // -----
@@ -2927,7 +2938,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
 
-		if(globalGame->entityManager.player->hasSuperRod) {
+		if(EntityManager::player->hasSuperRod) {
 			obj->sprite = Sprite(bn::sprite_tiles_items::dw_spr_void_rod_endless, bn::sprite_shape_size(32, 32));
 			obj->tiles = &bn::sprite_tiles_items::dw_spr_void_rod_endless;
 
@@ -2963,7 +2974,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	[](Effect* obj) -> bool {
 		obj->tempCounter++;
 		if(obj->tempCounter == 12) {
-			globalGame->effectsManager.rodNumber--;
+			EffectsManager::rodNumber--;
 			return true;
 		}
 		return false;
@@ -2971,7 +2982,7 @@ void EffectsManager::voidRod(Pos p, Direction dir) {
 	true // waitflag
 	);
 
-	if(globalGame->entityManager.player->hasSuperRod) {
+	if(EntityManager::player->hasSuperRod) {
 		superRodNumber();
 	}
 
@@ -2984,8 +2995,8 @@ void EffectsManager::superRodNumber() { profileFunction();
 
 	bn::vector<bn::sprite_ptr, 4> mainNumberSprites;
 
-	Pos playerPos = globalGame->entityManager.player->p;
-	int val = globalGame->entityManager.player->rod.size();
+	Pos playerPos = EntityManager::player->p;
+	int val = EntityManager::player->rod.size();
 	char string[4] = {'0', '\0', '\0', '\0'};
 
 	char* start = string;
@@ -3046,7 +3057,7 @@ void EffectsManager::wings() {
 
 	bn::sound_items::snd_wingspawn.play();
 
-	Player* player = entityManager->player;
+	Player* player = EntityManager::player;
 
 	auto getCreateFunc = [player](int wingNum) -> auto {
 		auto createFunc = [player, wingNum](Effect* obj) mutable -> void {
@@ -3054,7 +3065,7 @@ void EffectsManager::wings() {
 			obj->tempCounter = wingNum; // discern wings from each other
 			obj->tempCounter2 = 1; // first run bypass
 
-			obj->tiles = globalGame->mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_cif : &bn::sprite_tiles_items::dw_spr_void_wings;
+			obj->tiles = Game::mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_cif : &bn::sprite_tiles_items::dw_spr_void_wings;
 
 
 			obj->sprite.spritePointer.set_x(120+32);
@@ -3070,7 +3081,7 @@ void EffectsManager::wings() {
 	auto wingTickFunc = [player](Effect* obj) -> bool {
 
 
-		if(globalGame->entityManager.player->wingsUse == 0) {
+		if(EntityManager::player->wingsUse == 0) {
 			// play the wing destroy anim here!
 
 			bn::fixed xPos = obj->sprite.spritePointer.x();
@@ -3087,7 +3098,7 @@ void EffectsManager::wings() {
 
 			auto dissipateCreateFunc = [xPos, yPos, horizontalFlip](Effect* obj2) -> void {
 
-				obj2->tiles = globalGame->mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_dissipate_cif : &bn::sprite_tiles_items::dw_spr_void_wings_dissipate;
+				obj2->tiles = Game::mode == 2 ? &bn::sprite_tiles_items::dw_spr_void_wings_dissipate_cif : &bn::sprite_tiles_items::dw_spr_void_wings_dissipate;
 
 				obj2->sprite.spritePointer.set_x(xPos);
 				obj2->sprite.spritePointer.set_y(yPos);
@@ -3113,7 +3124,7 @@ void EffectsManager::wings() {
 				return false;
 			};
 
-			globalGame->effectsManager.createEffect(dissipateCreateFunc, dissipateTickFunc);
+			EffectsManager::createEffect(dissipateCreateFunc, dissipateTickFunc);
 
 			return true;
 		}
@@ -3235,7 +3246,7 @@ void EffectsManager::sword(Pos p, Direction dir) {
 		obj->graphicsIndex = dirConverter[static_cast<int>(dir)];
 
 		obj->sprite.spritePointer.set_tiles(
-			globalGame->mode == 2 ? bn::sprite_tiles_items::dw_spr_void_sword_cif : bn::sprite_tiles_items::dw_spr_void_sword,
+			Game::mode == 2 ? bn::sprite_tiles_items::dw_spr_void_sword_cif : bn::sprite_tiles_items::dw_spr_void_sword,
 			obj->graphicsIndex
 		);
 
@@ -3261,9 +3272,9 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	// spr_mon_shock_small for when it kills you
 
 	// i dont believe this is the right sound
-	game->playSound(&bn::sound_items::snd_lockdamage);
+	Game::playSound(&bn::sound_items::snd_lockdamage);
 
-	Entity* ent = *(entityManager->getMap(p).begin());
+	Entity* ent = *(EntityManager::getMap(p).begin());
 
 	BN_ASSERT(ent->entityType() == EntityType::MonStatue, "wtf, oh gods wtf");
 
@@ -3274,7 +3285,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 	//bn::vector<Effect*, 32> allEffects;
 
 	// wow; wtf
-	while(p != globalGame->entityManager.player->p) {
+	while(p != EntityManager::player->p) {
 		auto createFunc = [p, dir](Effect* obj) mutable -> void {
 
 			obj->sprite.spritePointer.set_tiles(
@@ -3370,7 +3381,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 		&bn::sprite_tiles_items::dw_spr_cif_gblink_u, &bn::sprite_tiles_items::dw_spr_cif_gblink_d, &bn::sprite_tiles_items::dw_spr_cif_gblink_l, &bn::sprite_tiles_items::dw_spr_cif_gblink_r
 	};
 
-	const bn::sprite_tiles_item* useTile = tiles[4*game->mode + static_cast<int>(entityManager->player->currentDir)];
+	const bn::sprite_tiles_item* useTile = tiles[4*Game::mode + static_cast<int>(EntityManager::player->currentDir)];
 
 	auto blinkCreateFunc = [p, useTile](Effect* obj) mutable -> void {
 
@@ -3379,7 +3390,7 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 			obj->graphicsIndex
 		);
 
-		globalGame->entityManager.player->sprite.setVisible(false);
+		EntityManager::player->sprite.setVisible(false);
 
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
@@ -3426,11 +3437,11 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 
 	//allEffects.push_back(e);
 
-	game->cutsceneManager.delay(60);
+	CutsceneManager::delay(60);
 
-	game->playSound(&bn::sound_items::snd_golden);
+	Game::playSound(&bn::sound_items::snd_golden);
 
-	if(entityManager->hasFloor(entityManager->player->p)) {
+	if(EntityManager::hasFloor(EntityManager::player->p)) {
 
 		auto createFuncGolden = [p, useTile](Effect* obj) mutable -> void {
 
@@ -3498,12 +3509,12 @@ void EffectsManager::monLightning(Pos p, Direction dir) {
 			e = new Effect(createFunc, tickFunc, 2);
 			effectList.push_back(e);
 
-			game->cutsceneManager.delay(4);
+			CutsceneManager::delay(4);
 
 		}
 	} else {
-		entityManager->player->wingsUse = 0;
-		entityFall(EntityType::Boulder, entityManager->player->p);
+		EntityManager::player->wingsUse = 0;
+		entityFall(EntityType::Boulder, EntityManager::player->p);
 	}
 }
 
@@ -3708,13 +3719,13 @@ void EffectsManager::entityKill(Entity* entity) {
 	entity->sprite.setVisible(false);
 
 	if(t == EntityType::Player) {
-		game->playSound(&bn::sound_items::snd_player_damage);
+		Game::playSound(&bn::sound_items::snd_player_damage);
 
-		entityManager->player->wingsUse = 0;
+		EntityManager::player->wingsUse = 0;
 
 		const bn::sprite_tiles_item* tiles;
 
-		switch(game->mode) {
+		switch(Game::mode) {
 			default:
 			case 0:
 				tiles = &bn::sprite_tiles_items::dw_spr_player_hit;
@@ -3836,14 +3847,14 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 		},
 		[fallData, p](Effect* e) -> bool {
 
-			if(globalGame->tileManager.hasFloor(p)) {
+			if(TileManager::hasFloor(p)) {
 
 				// at this point, you have to start wondering if im only doing this for the bit
 
-				globalGame->playSound(&bn::sound_items::snd_reveal);
+				Game::playSound(&bn::sound_items::snd_reveal);
 
 				auto createPlonk = [p](bool left) -> void {
-					globalGame->effectsManager.createEffect(
+					EffectsManager::createEffect(
 						[p, left](Effect* e2) -> void {
 
 							e2->tiles = &bn::sprite_tiles_items::dw_spr_plonk;
@@ -3921,15 +3932,15 @@ void EffectsManager::entityFall(EntityType t, Pos p) {
 	};
 
 	if(t == EntityType::Player) {
-		entityManager->player->wingsUse = 0;
-		game->playSound(&bn::sound_items::snd_player_fall);
+		EntityManager::player->wingsUse = 0;
+		Game::playSound(&bn::sound_items::snd_player_fall);
 	} else {
-		game->playSound(&bn::sound_items::snd_fall);
+		Game::playSound(&bn::sound_items::snd_fall);
 	}
 
 	switch(t) {
 		case EntityType::Player	    :
-			switch(game->mode) {
+			switch(Game::mode) {
 				default:
 				case 0:
 						effectList.push_back(createFallEffect({ {&bn::sprite_tiles_items::dw_spr_player_fall, 6} }));
@@ -4020,9 +4031,9 @@ void EffectsManager::playerBrandRoomBackground() {
 		}
 
 		const bn::sprite_palette_ptr tempPalettes[3] = {
-		globalGame->pal->getWhiteSpritePalette().create_palette(),
-		globalGame->pal->getDarkGraySpritePalette().create_palette(),
-		globalGame->pal->getLightGraySpritePalette().create_palette()};
+		Game::pal->getWhiteSpritePalette().create_palette(),
+		Game::pal->getDarkGraySpritePalette().create_palette(),
+		Game::pal->getLightGraySpritePalette().create_palette()};
 
 		obj->sprite.spritePointer.set_palette(tempPalettes[randomGenerator.get_int(0, 3)]);
 
@@ -4067,7 +4078,7 @@ void EffectsManager::playerBrandRoomBackground() {
 		obj->sprite.spritePointer.set_position(obj->x, obj->y);
 	};
 
-	auto generatorTickFunc = [this, createFunc, tickFunc](Effect* obj) mutable -> bool {
+	auto generatorTickFunc = [createFunc, tickFunc](Effect* obj) mutable -> bool {
 		(void)obj;
 
 		static int effectCount = 0;
@@ -4099,7 +4110,7 @@ Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
 	// but it at least will make my accesses shorter
 	// i really should of overloaded all sprite_ptr funcs into spritepointer, but its wayyyy far gone now
 	if(sweatEntity == NULL) {
-		sweatEntity = entityManager->player;
+		sweatEntity = EntityManager::player;
 	}
 
 	auto createFunc = [sweatEntity](Effect* obj) mutable -> void {
@@ -4210,7 +4221,7 @@ void EffectsManager::questionMark() {
 		return;
 	}
 
-	Pos playerPos = entityManager->player->p;
+	Pos playerPos = EntityManager::player->p;
 
 	auto createFunc = [playerPos](Effect* obj) mutable -> void {
 
@@ -4232,7 +4243,7 @@ void EffectsManager::questionMark() {
 		obj->animateFunc(obj);
 	};
 
-	auto tickFunc = [this](Effect* obj) mutable -> bool {
+	auto tickFunc = [](Effect* obj) mutable -> bool {
 
 		if(frame % 2 != 0 && obj->tempCounter == 0) {
 			return false;
@@ -4350,7 +4361,7 @@ void EffectsManager::chestBonus(Chest* chest) {
 		}
 
 		if(obj->tempCounter % 8 == 0) {
-			globalGame->effectsManager.explosion(chest->p);
+			EffectsManager::explosion(chest->p);
 		}
 
 		obj->tempCounter++;
@@ -4463,9 +4474,9 @@ void EffectsManager::levKill() {
 
 	*/
 
-	game->cutsceneManager.backup(1);
+	CutsceneManager::backup(1);
 
-	entityManager->shouldTickPlayer = false;
+	EntityManager::shouldTickPlayer = false;
 
 	unsigned startFrame = frame;
 
@@ -4473,7 +4484,7 @@ void EffectsManager::levKill() {
 
 	while(frame - startFrame < 60) {
 
-		game->doButanoUpdate(); // is it ok to do this up here, instead of bottom of loop?
+		Game::doButanoUpdate(); // is it ok to do this up here, instead of bottom of loop?
 
 		if(frame % 2 != 0) {
 			continue;
@@ -4482,7 +4493,7 @@ void EffectsManager::levKill() {
 		// how will this perform if kicking a lev statue off?
 		// should this technically be a cutscene? i could either add an assert as the start to ensure that haskills.size == 0, or i could just have this func be blocking .
 		// same with how i should of done mon statue!
-		for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+		for(auto it = EntityManager::obstacleList.begin(); it != EntityManager::obstacleList.end(); ++it) {
 			if(*it == NULL) {
 				continue;
 			}
@@ -4500,7 +4511,7 @@ void EffectsManager::levKill() {
 
 	startFrame = frame;
 
-	entityManager->player->sprite.spritePointer.set_bg_priority(0);
+	EntityManager::player->sprite.spritePointer.set_bg_priority(0);
 
 	effectsLayer.black();
 	effectsLayer.reloadCells();
@@ -4508,7 +4519,7 @@ void EffectsManager::levKill() {
 	// how will this perform if kicking a lev statue off?
 		// should this technically be a cutscene? i could either add an assert as the start to ensure that haskills.size == 0, or i could just have this func be blocking .
 		// same with how i should of done mon statue!
-	for(auto it = globalGame->entityManager.obstacleList.begin(); it != globalGame->entityManager.obstacleList.end(); ++it) {
+	for(auto it = EntityManager::obstacleList.begin(); it != EntityManager::obstacleList.end(); ++it) {
 		if(*it == NULL) {
 			continue;
 		}
@@ -4529,33 +4540,33 @@ void EffectsManager::levKill() {
 
 	const bn::regular_bg_item* judgementBackgrounds[5] = {&bn::regular_bg_items::dw_spr_judgment_dark_index0, &bn::regular_bg_items::dw_spr_judgment_dark_index1, &bn::regular_bg_items::dw_spr_judgment_dark_index2, &bn::regular_bg_items::dw_spr_judgment_dark_index3, &bn::regular_bg_items::dw_spr_judgment_dark_index4};
 
-	game->cutsceneManager.delay(15);
+	CutsceneManager::delay(15);
 
-	Pos playerPos = entityManager->player->p;
+	Pos playerPos = EntityManager::player->p;
 
 	bn::sound_items::snd_judgment.play();
 
 	for(int i=0; i<5; i++) {
-		game->cutsceneManager.backgroundLayer.rawMap.create(*judgementBackgrounds[i]);
+		CutsceneManager::backgroundLayer.rawMap.create(*judgementBackgrounds[i]);
 
-		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
-		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
-		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
+		CutsceneManager::backgroundLayer.rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
+		CutsceneManager::backgroundLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
+		CutsceneManager::backgroundLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
 
 		// why do i not make this func global omfg
-		game->cutsceneManager.delay(4);
+		CutsceneManager::delay(4);
 	}
 
 	// i PRAY this works
-	//game->cutsceneManager.restoreLayer(3);
-	game->cutsceneManager.restore(1);
+	//CutsceneManager::restoreLayer(3);
+	CutsceneManager::restore(1);
 
-	game->cutsceneManager.delay(15);
+	CutsceneManager::delay(15);
 
 	effectsLayer.clear();
 	effectsLayer.reloadCells();
 
-	entityManager->player->sprite.spritePointer.set_bg_priority(1);
+	EntityManager::player->sprite.spritePointer.set_bg_priority(1);
 }
 
 void EffectsManager::fadeBrand() {
@@ -4574,23 +4585,23 @@ void EffectsManager::fadeBrand() {
 		constexpr int offset = 8;
 
 		if(obj->tempCounter == offset + factor * 1) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(1, false));
+			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(1, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 2) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(2, false));
+			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(2, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 3) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(3, false));
+			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(3, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 4) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(4, false));
+			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(4, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 5) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPalette());
+			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPalette());
 			return true;
 		}
 
@@ -4724,7 +4735,7 @@ void EffectsManager::exitGlow(const Pos& p) {
 	int initFrame = playerIdleFrame;
 
 	// is passing this vs passing a ref to the exitGlowCount better?
-	auto getTickFunc = [this, x, y, initFrame](const bool flip, bool isDot) -> auto { // the axis in this case, is what diag axis tomove along
+	auto getTickFunc = [x, y, initFrame](const bool flip, bool isDot) -> auto { // the axis in this case, is what diag axis tomove along
 
 		int offsetVal = 8;
 
@@ -4737,7 +4748,7 @@ void EffectsManager::exitGlow(const Pos& p) {
 		int paletteIndex = 0; // should captures like these be replacements for the tempcounter?
 		int shouldDisappear = 0;
 		int startOffset = 80+16; // like,, i was going to try fitting this as a temp counter, but it being here honestly is just better
-		return [this, xStart, yStart, flip, isDot, paletteIndex, initFrame, shouldDisappear, startOffset](Effect* obj) mutable -> bool {
+		return [xStart, yStart, flip, isDot, paletteIndex, initFrame, shouldDisappear, startOffset](Effect* obj) mutable -> bool {
 
 			// THIS SHOULD TOGGLE WHEN DOTICK IS CALLED. TODO, INTEGRATE THAT
 
@@ -4746,16 +4757,16 @@ void EffectsManager::exitGlow(const Pos& p) {
 				switch(paletteIndex & 0b11) { // i have had,,,, weird interactions when putting paletes inside of arrays. additionally, this will let the palette change even when the user swaps it
 					default:
 					case 0:
-						obj->sprite.spritePointer.set_palette(globalGame->pal->getWhiteSpritePalette());
+						obj->sprite.spritePointer.set_palette(Game::pal->getWhiteSpritePalette());
 						break;
 					case 1:
-						obj->sprite.spritePointer.set_palette(globalGame->pal->getLightGraySpritePalette());
+						obj->sprite.spritePointer.set_palette(Game::pal->getLightGraySpritePalette());
 						break;
 					case 2:
-						obj->sprite.spritePointer.set_palette(globalGame->pal->getDarkGraySpritePalette());
+						obj->sprite.spritePointer.set_palette(Game::pal->getDarkGraySpritePalette());
 						break;
 					case 3:
-						obj->sprite.spritePointer.set_palette(globalGame->pal->getLightGraySpritePalette());
+						obj->sprite.spritePointer.set_palette(Game::pal->getLightGraySpritePalette());
 						break;
 				}
 			}
@@ -4818,7 +4829,7 @@ void EffectsManager::exitGlow(const Pos& p) {
 		};
 	};
 
-	auto generateEffect = [this, getTickFunc](const bool flip, const bn::sprite_tiles_item* tiles) -> void {
+	auto generateEffect = [getTickFunc](const bool flip, const bn::sprite_tiles_item* tiles) -> void {
 		exitGlowCount++;
 
 		auto dotCreateFunc = [flip, tiles](Effect* obj) mutable -> void {
@@ -4840,7 +4851,7 @@ void EffectsManager::exitGlow(const Pos& p) {
 				obj->graphicsIndex = 0;
 			}
 
-			obj->sprite.spritePointer.set_palette(globalGame->pal->getWhiteSpritePalette());
+			obj->sprite.spritePointer.set_palette(Game::pal->getWhiteSpritePalette());
 			obj->sprite.spritePointer.set_tiles(
 				*obj->tiles,
 				obj->graphicsIndex
@@ -4918,7 +4929,7 @@ void EffectsManager::shadowCreate(const Pos& p) {
 
 	//spr_cr_create
 
-	game->playSound(&bn::sound_items::snd_gestaltcreate);
+	Game::playSound(&bn::sound_items::snd_gestaltcreate);
 
 	auto getCreateFunc = [](int x, int y) -> auto {
 		return [x, y](Effect* obj) mutable -> void {
@@ -4967,13 +4978,13 @@ void EffectsManager::shadowCreate(const Pos& p) {
 void EffectsManager::shadowDeath(Shadow* shadow) {
 
 
-	Pos tempPos = entityManager->playerStart;
+	Pos tempPos = EntityManager::playerStart;
 
-	if(!entityManager->killAtPos(tempPos)) {
+	if(!EntityManager::killAtPos(tempPos)) {
 		return;
 	}
 
-	for(auto it = entityManager->shadowList.begin(); it != entityManager->shadowList.end(); ++it) {
+	for(auto it = EntityManager::shadowList.begin(); it != EntityManager::shadowList.end(); ++it) {
 		(*it)->doUpdate();
 	}
 
@@ -5152,7 +5163,7 @@ void EffectsManager::bombTileAnimate(Pos p) {
 
 	auto tickFunc = [p](Effect* obj) mutable -> bool {
 
-		if(globalGame->entityManager.hasFloor(p)) {
+		if(EntityManager::hasFloor(p)) {
 			return true;
 		}
 
@@ -5181,7 +5192,7 @@ void EffectsManager::corpseSparks() {
 
 	// spr_soulstar_spark_b
 
-	auto createEffect = [this](bn::fixed xDir, bn::fixed yDir) -> void {
+	auto createEffect = [](bn::fixed xDir, bn::fixed yDir) -> void {
 
 		auto createFunc = [xDir, yDir](Effect* obj) mutable -> void {
 
@@ -5362,7 +5373,7 @@ void EffectsManager::stinkLines(const Pos p) {
 
 	auto tickFunc = [state = -1, p](Effect* obj) mutable -> bool {
 
-		bool tempState = globalGame->entityManager.hasFloor(p).has_value();
+		bool tempState = EntityManager::hasFloor(p).has_value();
 
 		if(tempState != state) {
 			state = tempState;
@@ -5407,7 +5418,7 @@ void EffectsManager::rotateTanStatues() {
 		return;
 	}
 
-	if(globalGame->entityManager.tanStatueList.size() == 0) {
+	if(EntityManager::tanStatueList.size() == 0) {
 		return;
 	}
 
@@ -5423,22 +5434,22 @@ void EffectsManager::rotateTanStatues() {
 			return false;
 		}
 
-		globalGame->effectsManager.rotateTanStatuesFrames--;
-		const int val = (globalGame->effectsManager.rotateTanStatuesFrames) % 3;
+		EffectsManager::rotateTanStatuesFrames--;
+		const int val = (EffectsManager::rotateTanStatuesFrames) % 3;
 
-		if(globalGame->effectsManager.rotateTanStatuesFrames == 0) {
-			for(auto it = globalGame->entityManager.tanStatueList.begin(); it != globalGame->entityManager.tanStatueList.end(); ++it) {
+		if(EffectsManager::rotateTanStatuesFrames == 0) {
+			for(auto it = EntityManager::tanStatueList.begin(); it != EntityManager::tanStatueList.end(); ++it) {
 				(*it)->sprite.spritePointer.set_tiles(
 					bn::sprite_tiles_items::dw_spr_killer,
 					0
 				);
 			}
 
-			globalGame->effectsManager.rotateTanStatuesCount--;
+			EffectsManager::rotateTanStatuesCount--;
 			return true;
 		}
 
-		for(auto it = globalGame->entityManager.tanStatueList.begin(); it != globalGame->entityManager.tanStatueList.end(); ++it) {
+		for(auto it = EntityManager::tanStatueList.begin(); it != EntityManager::tanStatueList.end(); ++it) {
 			(*it)->sprite.spritePointer.set_tiles(
 				bn::sprite_tiles_items::dw_spr_killer,
 				val
@@ -5463,8 +5474,8 @@ void EffectsManager::corrupt(int frames) {
 	// butano calls them handles
 
 	// im going to have this as an unsigned instead of unsigned short,, unsure if ideal but we ball
-	//unsigned test = reinterpret_cast<unsigned>(globalGame->collision.rawMap.bgPointer.handle());
-	bn::optional<int> idOptional = globalGame->collision.rawMap.bgPointer.hw_id();
+	//unsigned test = reinterpret_cast<unsigned>(Game::collision.rawMap.bgPointer.handle());
+	bn::optional<int> idOptional = Game::collision.rawMap.bgPointer.hw_id();
 	BN_ASSERT(idOptional.has_value(), "background didnt have a hardware id??");
 	int id = idOptional.value();
 
@@ -5522,7 +5533,7 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 
 	// coming back to this, months later, so much of the initial setup in most lambdas could/should HAVE. been,,, more elegant.
 
-	const Pos p = entityManager->player->p;
+	const Pos p = EntityManager::player->p;
 
 	auto createGlowFunc = [p](Effect* obj) -> void {
 
@@ -5594,22 +5605,22 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 
 	const bn::sprite_tiles_item* itemGetTiles = &bn::sprite_tiles_items::dw_spr_player_item_get;
 
-	if(globalGame->mode == 1) {
+	if(Game::mode == 1) {
 		itemGetTiles = &bn::sprite_tiles_items::dw_spr_lil_item_get;
-	} else if(globalGame->mode == 2) {
+	} else if(Game::mode == 2) {
 		itemGetTiles = &bn::sprite_tiles_items::dw_spr_cif_item_get;
 	}
 
 	Sprite itemGetSprite(*itemGetTiles);
 	itemGetSprite.spritePointer.set_bg_priority(1);
 	itemGetSprite.spritePointer.set_z_order(-1);
-	itemGetSprite.updatePosition(entityManager->player->p);
+	itemGetSprite.updatePosition(EntityManager::player->p);
 
-	entityManager->player->sprite.spritePointer.set_visible(false);
+	EntityManager::player->sprite.spritePointer.set_visible(false);
 
 	if(isFirstLocust) {
 
-		if(globalGame->mode != 2) {
+		if(Game::mode != 2) {
 			//gray + lillie:
 			doDialogue(""
 			"[You acquired a locust idol]\n"
@@ -5628,7 +5639,7 @@ void EffectsManager::locustGet(bool isFirstLocust) {
 		delay(35 * 2 + 7); // 35 for one cycle, 70 for 2, extra 7 to let it rest properly
 	}
 
-	entityManager->player->sprite.spritePointer.set_visible(true);
+	EntityManager::player->sprite.spritePointer.set_visible(true);
 	removeEffect(e1);
 	removeEffect(e2);
 }

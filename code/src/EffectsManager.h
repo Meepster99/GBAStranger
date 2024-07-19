@@ -9,44 +9,6 @@
 // but in order to pass lambda funcs with captures as func pointers, its needed.
 #include <functional>
 
-class Game;
-class EntityManager;
-class TileManager;
-
-// while effects will be entities, they may also involve background tiles.
-// for that reason, we are balling here, instead of going more into entityManager
-// additionally, while Effects and entities will share a lot of stuff, i am still
-// going to create a completely seperate effects class.
-//,,,, ya know what? im going to plan this (curse) out ahead of time and actualluse my brain.
-
-/*
-
-
-what is an effect?:
-
-background art(call the background layer from game.h)
-glass(and other tiles) animated breaking.
-the zoom in which occurs on end/start of room
-gray's staff
-statues killing you
-
-(maybe, if i want to) a,,, text box?
-(maybe, if i want to) the sweat when gray is falling?
-(maybe) DIS projector, and also the DIS background
-(maybe), and i mean maybe.
-cutscenes?
-that will be a whole other class, but like
-gods i,,,, how far am i going to take this (curse)
-
-gods before this tho i should probs make a floor/Tile manager.
-unless i want that func in entitymanager to get huge
-also bc like, then tiles can have effect creators.
-ughhh
-ya know what? its only 1am, but im going to goto bed. ive only gotten 6 hours of sleep per night for the past few anytways.
-i deserve a break, i made good progress today.
-
-*/
-
 class EffectsLayer : public Layer {
 public:
 
@@ -211,11 +173,6 @@ public:
 	// i should of just had more specialized tail only stuff
 	// much of this func was also written before i figured out i could use lambdas as well
 
-	static Game* game;
-	static EntityManager* entityManager;
-	static EffectsManager* effectsManager;
-	static TileManager* tileManager;
-
 	const int width;
 	const int height;
 	const bn::sprite_tiles_item* tiles;
@@ -266,7 +223,6 @@ public:
 class MenuOption {
 public:
 
-	static EffectsManager* effectsManager;
 	static int yIndex;
 
 
@@ -307,63 +263,38 @@ public:
 
 };
 
-class EffectsManager {
-public:
+namespace EffectsManager {
 
-	Game* game = NULL;
-	EntityManager* entityManager = NULL;
-	TileManager* tileManager = NULL;
+	BN_DATA_EWRAM extern Palette* spritePalette;
+	BN_DATA_EWRAM extern bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
+	BN_DATA_EWRAM extern SaneSet<Effect*, MAXEFFECTSPRITES> removeEffectsList;
+	BN_DATA_EWRAM extern Effect* dialogueEndPointer;
+	BN_DATA_EWRAM extern bn::sprite_text_generator textGenerator;
+	BN_DATA_EWRAM extern bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine1;
+	BN_DATA_EWRAM extern bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine2;
+	BN_DATA_EWRAM extern bn::sprite_text_generator verTextGenerator;
+	BN_DATA_EWRAM extern bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
+	BN_DATA_EWRAM extern bn::vector<BigSprite*, 128> bigSprites;
+	BN_DATA_EWRAM extern bn::regular_bg_tiles_ptr tilesPointer;
+	BN_DATA_EWRAM extern EffectsLayer effectsLayer;
+	BN_DATA_EWRAM extern bn::vector<MenuOption*, 16> menuOptions;
+	BN_DATA_EWRAM extern bool playerWonLastExit;
+	BN_DATA_EWRAM extern int rodNumber;
+	BN_DATA_EWRAM extern bn::vector<Effect*, 16> roomDustTracker;
+	BN_DATA_EWRAM extern int questionMarkCount;
+	BN_DATA_EWRAM extern int exitGlowCount;
+	BN_DATA_EWRAM extern int rotateTanStatuesCount;
+	BN_DATA_EWRAM extern int rotateTanStatuesFrames;
 
-	static Palette* spritePalette;
+	void EffectsManager();
 
-	// do these even need to be pointers?
-	bn::vector<Effect*, MAXEFFECTSPRITES> effectList;
-	SaneSet<Effect*, MAXEFFECTSPRITES> removeEffectsList;
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_);
 
-	Effect* dialogueEndPointer = NULL;
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency);
 
-	bn::sprite_text_generator textGenerator;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine1;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> textSpritesLine2;
+	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, bool waitFlag);
 
-	bn::sprite_text_generator verTextGenerator;
-	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
-
-	bn::vector<BigSprite*, 128> bigSprites;
-
-	// the amount of time spent on this is pathetic.
-	// WHY, when i declared tilesPointer as a member var in effects layer did this not work?? but this does???
-	bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(128, bn::bpp_mode::BPP_4);
-	EffectsLayer effectsLayer;
-
-
-	bn::vector<MenuOption*, 16> menuOptions;
-
-	EffectsManager(Game* game_);
-
-	~EffectsManager();
-
-	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_) {
-		Effect* e = new Effect(create_, animate_, 1);
-		effectList.push_back(e);
-	}
-
-	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, int animationFrequency) {
-		Effect* e = new Effect(create_, animate_, animationFrequency);
-		effectList.push_back(e);
-	}
-
-	void createEffect(std::function<void(Effect*)> create_, std::function<bool(Effect*)> animate_, bool waitFlag) {
-		Effect* e = new Effect(create_, animate_, 1);
-		e->waitFlag = waitFlag;
-		effectList.push_back(e);
-	}
-
-	void removeEffect(Effect* effect) {
-		// should effectlist be a saneset?
-		// actually, ill just add this to a list, and remove it from like,,, the vblankfunc
-		removeEffectsList.insert(effect);
-	}
+	void removeEffect(Effect* effect);
 
 	// this is going to be where i define my effects, as static vars, to be called with EffectManager::effectname()
 	// these things should be static,, but i need them to access the effectList,,, so like, ugh
@@ -373,7 +304,7 @@ public:
 
 	// -----
 
-	bool playerWonLastExit = true;
+
 
 	bool zoomEffect(bool inward, bool autoSpeed = true);
 	bool topDownEffect(bool downward);
@@ -400,9 +331,7 @@ public:
 	// this being O2, scares me now that i think about it
 	// oh gods
 	__attribute__((noinline, target("thumb"), optimize("O2"))) void doDialogue(const char* data, bool isCutscene = false, const bn::sound_item* sound = NULL);
-	void doDialogue(const char* data, const bn::sound_item* sound) {
-		doDialogue(data, false, sound);
-	}
+	void doDialogue(const char* data, const bn::sound_item* sound);
 
 	void setBrandColor(int x, int y, bool isTile);
 	void doMenu();
@@ -412,16 +341,14 @@ public:
 	__attribute__((noinline, target("thumb"), optimize("O2"))) bool restRequest(const char* questionString = NULL, bool getOption = true);
 
 	void glassBreak(Pos p);
-	int rodNumber = 0;
-	USEEWRAM void voidRod(Pos p, Direction dir);
-	USEEWRAM void superRodNumber();
+	void voidRod(Pos p, Direction dir);
+	void superRodNumber();
 	void wings();
 	void explosion(Pos p);
 	void sword(Pos p, Direction dir);
 	void monLightning(Pos p, Direction dir);
 	void sparkle(Pos p, int sparkleLength = 8);
 	Effect* getRoomDustEffect(bool isCutscene = false);
-	bn::vector<Effect*, 16> roomDustTracker; // i have 0 clue whats going on, but SOMETIMES during cif;s dream, the fuzzys just glitch allover?
 	void roomDust();
 	void entityKill(Entity* entity);
 	void entityFall(Entity* entity);
@@ -429,7 +356,6 @@ public:
 	void playerBrandRoomBackground();
 	Effect* generateSweatEffect(Entity* sweatEntity = NULL);
 	Effect* generateDialogueEndpointer();
-	int questionMarkCount = 0;
 	void questionMark();
 	void treeLeaves();
 	void chestBonus(Chest* chest);
@@ -438,7 +364,6 @@ public:
 	void fadeBrand();
 	void glassShineSpark(const Pos& p);
 	void switchGlow(const Pos& p);
-	int exitGlowCount = 0;
 	void exitGlow(const Pos& p);
 	void copyGlow(const Pos& p);
 	void shadowCreate(const Pos& p);
@@ -450,8 +375,6 @@ public:
 	void corpseSparks();
 	void corpseFuzz();
 	void stinkLines(const Pos p);
-	int rotateTanStatuesCount = 0;
-	int rotateTanStatuesFrames = 0;
 	void rotateTanStatues();
 	void corrupt(int frames = 30);
 	void locustGet(bool isFirstLocust);
@@ -463,12 +386,11 @@ public:
 class Dialogue {
 public:
 
-	EffectsManager* effectsManager;
 	const char* originalData;
 
 	const char* data;
 
-	Dialogue(EffectsManager* effectsManager_, const char* data_);
+	Dialogue(const char* data_);
 
 	int getNextDialogue(char* res);
 

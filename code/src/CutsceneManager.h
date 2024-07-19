@@ -3,7 +3,7 @@
 #include "SharedTypes.h"
 #include "EffectsManager.h"
 
-class TileManager;
+//class TileManager;
 class FloorTile;
 
 #include <functional>
@@ -37,33 +37,22 @@ public:
 
 };
 
-class CutsceneManager {
-public:
+namespace CutsceneManager {
 
-	Game* game;
-	CutsceneLayer cutsceneLayer;
-	BackgroundLayer backgroundLayer;
+	BN_DATA_EWRAM extern CutsceneLayer cutsceneLayer;
+	BN_DATA_EWRAM extern BackgroundLayer backgroundLayer;
+	BN_DATA_EWRAM extern BackgroundMap* maps[4];
+	BN_DATA_EWRAM extern int zIndexBackup[4];
+	BN_DATA_EWRAM extern int priorityBackup[4];
+	BN_DATA_EWRAM extern bn::fixed xPosBackup[4];
+	BN_DATA_EWRAM extern bn::fixed yPosBackup[4];
+	BN_DATA_EWRAM extern bn::sprite_text_generator disTextGenerator;
+	BN_DATA_EWRAM extern bn::vector<bn::sprite_ptr, 8> disOsTextSprites;
+	BN_DATA_EWRAM extern bn::vector<bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>, 7> disTextSprites;
+	BN_DATA_EWRAM extern bn::vector<bn::regular_bg_map_ptr, 4> mapBackup;
+	BN_DATA_EWRAM extern bn::vector<std::function<void()>, 8> vBlankFuncs;
 
-	EffectsManager* effectsManager;
-	TileManager* tileManager;
-
-	BackgroundMap* maps[4];
-	int zIndexBackup[4];
-	int priorityBackup[4];
-
-	bn::fixed xPosBackup[4];
-	bn::fixed yPosBackup[4];
-
-	bn::sprite_text_generator disTextGenerator;
-	bn::vector<bn::sprite_ptr, 8> disOsTextSprites;
-	bn::vector<bn::vector<bn::sprite_ptr, MAXTEXTSPRITES>, 7> disTextSprites; // is this alloc going to be to large(if on stack)
-
-	// these things cant be arrays bc i cant have a ref to the pointer, i need the pointer itself
-	bn::vector<bn::regular_bg_map_ptr, 4> mapBackup;
-
-	CutsceneManager(Game* game_);
-
-	bn::vector<std::function<void()>, 8> vBlankFuncs;
+	void CutsceneManager();
 
 	void doVBlank();
 

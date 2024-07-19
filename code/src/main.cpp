@@ -419,19 +419,5 @@ int main() {
 
 	// dont cause a initial framedrop on boot.
 	bn::core::update();
-
-	Game* game = NULL;
-
-	// this needs to be a pointer, or else i get scary stack errors.
-	while(true) {
-		game = new Game();
-
-		// dont cause a initial framedrop on boot.
-		bn::core::update();
-
-		game->run();
-		delete game;
-		game = NULL;
-		bn::core::update();
-	}
+	Game::run();
 }

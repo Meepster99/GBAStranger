@@ -6,84 +6,59 @@
 #include "EffectsManager.h"
 #include "TileManager.h"
 
-class Game;
-class EffectsManager;
-class TileManager;
+//class Game;
+//class EffectsManager;
+//class TileManager;
 
 //extern SaneSet<Entity*, 4> entityMap[14][9];
 //extern SaneSet<Entity*, 4> futureEntityMap[14][9];
 
 
-class EntityManager {
-public:
+namespace EntityManager {
 
-	SaneSet<Entity*, 4> entityMap[14][9];
-	SaneSet<Entity*, 4> futureEntityMap[14][9];
+	BN_DATA_EWRAM extern SaneSet<Entity*, 4> entityMap[14][9];
+	BN_DATA_EWRAM extern SaneSet<Entity*, 4> futureEntityMap[14][9];
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> entityList;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> addStatueList;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> levStatueList;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> monStatueList;
+	BN_DATA_EWRAM extern bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
+	BN_DATA_EWRAM extern bn::deque<Pos, 128> shadowQueue;
+	BN_DATA_EWRAM extern SaneSet<Entity*, MAXENTITYSPRITES> deadList;
+	BN_DATA_EWRAM extern SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
+	BN_DATA_EWRAM extern SaneSet<Pos, MAXENTITYSPRITES> posTracker;
+	BN_DATA_EWRAM extern Pos playerStart; // track starting player position for handling death animations
+	BN_DATA_EWRAM extern Entity* playerPush;
+	BN_DATA_EWRAM extern Player* player; // player will be a member of entityList, and included everywhere else
+	BN_DATA_EWRAM extern SaneSet<Entity*, 4> killedPlayer;
+	BN_DATA_EWRAM extern bool menuOpened;
+	BN_DATA_EWRAM extern bool shouldTickPlayer;
+	BN_DATA_EWRAM extern bool levKill;
+	BN_DATA_EWRAM extern bool needKillAllAddStatues;
 
-	SaneSet<Entity*, MAXENTITYSPRITES> entityList;
-	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
-	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
-
-	// some more smaller lists may help,,,, with optimization?
-	// having an individual list for each statue type,,, ugh
-	// i could use a map??
-	// tbh wait,, thats not the worst idea?
-	// i could do that for all entities, i do worry about lookup times though
-	// seperate vars probs the way to go
-	// actually though, why. its not like performance is taking much of a hit from this specifically
-	// i should add new features, or focus on lag from moving tiles
-	// at this point, would a 2d vector addressed by entitytype just be better here?
-	SaneSet<Entity*, MAXENTITYSPRITES> addStatueList;
-	SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
-	SaneSet<Entity*, MAXENTITYSPRITES> levStatueList;
-	SaneSet<Entity*, MAXENTITYSPRITES> monStatueList;
-
-	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
-	bn::deque<Pos, 128> shadowQueue;
-
-	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
-	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
-
-	SaneSet<Pos, MAXENTITYSPRITES> posTracker;
-
-	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
-
-	Entity* playerPush = NULL;
-
-	Player* player = NULL; // player will be a member of entityList, and included everywhere else
-
-	Game* game = NULL;
-	EffectsManager* effectsManager = NULL;
-	TileManager* tileManager = NULL;
-
-	EntityManager(Game* game_) : game(game_) {}
-
-	~EntityManager();
-
-	USEEWRAM void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
+	void loadEntities(EntityHolder* entitiesPointer, int entitiesCount);
 	inline Interactable* getEmptyChest(Pos p);
 	inline AddStatue* getAddStatue(Pos p);
 	inline Boulder* getBoulder(Pos p);
 
-	bool menuOpened = false;
-
 	void updatePalette(Palette* pal);
 
-	USEEWRAM bool moveEntity(Entity* e, bool dontSet = false);
-	USEEWRAM void moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end);
-	USEEWRAM void moveEnemies();
-	USEEWRAM void moveObstacles();
+	bool moveEntity(Entity* e, bool dontSet = false);
+	void moveEntities(bn::vector<Entity*, MAXENTITYSPRITES>::iterator start, bn::vector<Entity*, MAXENTITYSPRITES>::iterator end);
+	void moveEnemies();
+	void moveObstacles();
 
-	USEEWRAM void doMoves();
+	void doMoves();
 
-	USEEWRAM void manageShadows(bn::optional<Direction> playerDir);
+	void manageShadows(bn::optional<Direction> playerDir);
 
-	USEEWRAM void updateMap();
+	void updateMap();
 
 	void updateScreen();
 
-
-	bool shouldTickPlayer = true;
 	void doTicks();
 
 	void fullUpdate();
@@ -93,111 +68,45 @@ public:
 	bn::vector<Entity*, 4>::iterator killEntity(Entity* e);
 	void removeEntity(Entity* e);
 
-	SaneSet<Entity*, 4>& getMap(const Pos &p) {
-		//BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
-		return entityMap[p.x][p.y];
-	}
+	//const SaneSet<Entity*, 4>& getMap(const Pos &p);
+	SaneSet<Entity*, 4>& getMap(const Pos &p);
 
-	const SaneSet<Entity*, 4>& getMap(const Pos &p) const {
-		//BN_ASSERT(p.sanity(), "point sanity failed in getmap, x=", p.x, " y=", p.y);
-		return entityMap[p.x][p.y];
-	}
+	bool hasEntity(const Pos& p);
+	bool hasPlayer(const Pos& p);
+	bool hasNonPlayerEntity(const Pos& p);
+	bool hasEnemy(const Pos& p);
+	bool hasObstacle(const Pos& p);
+	bool hasCollision(const Pos& p);
+	bn::optional<TileType> hasFloor(const Pos& p);
+	bool hasNonInteractableObstacle(const Pos& p); //nice function name (curse)
 
-	USEEWRAM bool hasEntity(const Pos& p) const;
-	USEEWRAM bool hasPlayer(const Pos& p) const;
-	USEEWRAM bool hasNonPlayerEntity(const Pos& p) const;
-	USEEWRAM bool hasEnemy(const Pos& p) const;
-	USEEWRAM bool hasObstacle(const Pos& p) const;
-	USEEWRAM bool hasCollision(const Pos& p) const;
-	USEEWRAM bn::optional<TileType> hasFloor(const Pos& p) const;
-	USEEWRAM bool hasNonInteractableObstacle(const Pos& p) const; //nice function name (curse)
-
-	USEEWRAM bn::optional<Direction> canSeePlayer(const Pos& p) const;
-	USEEWRAM bn::optional<Direction> canPathToPlayer(const Pos& p, const Pos& playerPos) const;
-	USEEWRAM bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStartPos);
-
-	bool levKill = false;
+	bn::optional<Direction> canSeePlayer(const Pos& p);
+	bn::optional<Direction> canPathToPlayer(const Pos& p, const Pos& playerPos);
+	bn::optional<Direction> canPathToPlayer(Diamond* e, Pos playerStartPos);
 
 	void rodUse();
 
-	void sanity() const;
+	void sanity();
 
-	void addKill(bn::optional<Entity*> e) {
-
-		// rm_bee_014, the one full of chesters
-		// picking up the floor tile causes this assert to get thrown.
-		// gods,, such a goofy case.
-		// im just going to make it such that the func returns and does nothing
-
-		//BN_ASSERT(killedPlayer.size() + 1 != killedPlayer.maxSize(), "ran out of entitys for the killplayer vector?");
-
-		if(killedPlayer.size() + 1 == killedPlayer.maxSize()) {
-			return;
-		}
-
-		if(e.has_value()) {
-			killedPlayer.insert(e.value());
-		}
-	}
+	void addKill(bn::optional<Entity*> e);
 
 	void addEntity(Entity* e);
 
-	bool hasKills() const { return killedPlayer.size() != 0; }
+	bool hasKills();
+	bool playerWon();
+	bool enemyKill();
+	bool fallKill();
+	bool obstacleKill();
 
-	bool playerWon() const { return killedPlayer.contains(NULL); }
-	bool enemyKill() const { return !killedPlayer.contains(player); }
-	bool fallKill() const { return killedPlayer.contains(player); }
-	bool obstacleKill() const {
-		bool customKill = false;
-		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
-			if(*it == NULL) {
-				continue;
-			}
-			if((*it)->isObstacle()) {
-				customKill = true;
-				break;
-			}
-		}
-		return customKill;
-	}
+	bool monKill();
 
-	bool monKill() const {
-		bool customKill = false;
-		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
-			if(*it == NULL) {
-				continue;
-			}
-			if((*it)->entityType() == EntityType::MonStatue) {
-				customKill = true;
-				break;
-			}
-		}
-		return customKill;
-	}
+	bool killAtPos(const Pos& p);
 
-	bool needKillAllAddStatues = false;
 	void killAllAddStatues();
-
-	bool killAtPos(const Pos& p) const {
-		for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
-			if(*it == NULL) {
-				continue;
-			}
-			if((*it)->entityType() != EntityType::Player && (*it)->p == p) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	void createKillEffects() const;
-
+	void createKillEffects();
 	void hideForDialogueBox(bool vis, bool isCutscene);
 
-	USEEWRAM bool exitRoom();
-	USEEWRAM bool enterRoom();
-	USEEWRAM void doVBlank();
-
-private:
-	SaneSet<Entity*, 4> killedPlayer;
+	bool exitRoom();
+	bool enterRoom();
+	void doVBlank();
 };

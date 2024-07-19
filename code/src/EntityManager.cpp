@@ -13,6 +13,99 @@
 
 // should, all managers (and game) be namespaces? it seems so
 
+namespace EntityManager {
+	SaneSet<Entity*, 4> entityMap[14][9];
+	SaneSet<Entity*, 4> futureEntityMap[14][9];
+	SaneSet<Entity*, MAXENTITYSPRITES> entityList;
+	SaneSet<Entity*, MAXENTITYSPRITES> enemyList;
+	SaneSet<Entity*, MAXENTITYSPRITES> obstacleList;
+	SaneSet<Entity*, MAXENTITYSPRITES> addStatueList;
+	SaneSet<Entity*, MAXENTITYSPRITES> tanStatueList;
+	SaneSet<Entity*, MAXENTITYSPRITES> levStatueList;
+	SaneSet<Entity*, MAXENTITYSPRITES> monStatueList;
+	bn::deque<Shadow*, MAXENTITYSPRITES> shadowList;
+	bn::deque<Pos, 128> shadowQueue;
+	SaneSet<Entity*, MAXENTITYSPRITES> deadList;
+	SaneSet<Obstacle*, MAXENTITYSPRITES> kickedList;
+	SaneSet<Pos, MAXENTITYSPRITES> posTracker;
+	Pos playerStart = Pos(0, 0); // track starting player position for handling death animations
+	Entity* playerPush = NULL;
+	Player* player = NULL; // player will be a member of entityList, and included everywhere else
+	SaneSet<Entity*, 4> killedPlayer;
+	bool menuOpened = false;
+	bool shouldTickPlayer = true;
+	bool levKill = false;
+	bool needKillAllAddStatues = false;
+};
+
+/*
+const SaneSet<Entity*, 4>& EntityManager::getMap(const Pos &p) {
+	return entityMap[p.x][p.y];
+}
+*/
+
+SaneSet<Entity*, 4>& EntityManager::getMap(const Pos &p) {
+	return entityMap[p.x][p.y];
+}
+
+
+void EntityManager::addKill(bn::optional<Entity*> e) {
+	if(killedPlayer.size() + 1 == killedPlayer.maxSize()) {
+		return;
+	}
+
+	if(e.has_value()) {
+		killedPlayer.insert(e.value());
+	}
+}
+
+bool EntityManager::hasKills() { return killedPlayer.size() != 0; }
+
+bool EntityManager::playerWon() { return killedPlayer.contains(NULL); }
+bool EntityManager::enemyKill() { return !killedPlayer.contains(player); }
+bool EntityManager::fallKill() { return killedPlayer.contains(player); }
+bool EntityManager::obstacleKill() {
+	bool customKill = false;
+	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
+		if((*it)->isObstacle()) {
+			customKill = true;
+			break;
+		}
+	}
+	return customKill;
+}
+
+bool EntityManager::monKill() {
+	bool customKill = false;
+	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
+		if((*it)->entityType() == EntityType::MonStatue) {
+			customKill = true;
+			break;
+		}
+	}
+	return customKill;
+}
+
+bool EntityManager::killAtPos(const Pos& p) {
+	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
+		if(*it == NULL) {
+			continue;
+		}
+		if((*it)->entityType() != EntityType::Player && (*it)->p == p) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// -----
+
 void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCount) {
 
 	posTracker.clear();
@@ -112,7 +205,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 
 		switch(temp.t) {
 			case EntityType::Player:
-				BN_ASSERT(player == NULL, "tried to load in a player when player wasnt NULL in room ", game->roomManager.currentRoomName());
+				BN_ASSERT(player == NULL, "tried to load in a player when player wasnt NULL in room ", RoomManager::currentRoomName());
 				player = new Player(tempPos);
 				entityList.insert(player);
 				break;
@@ -123,7 +216,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				entityList.insert(new Maggot(tempPos));
 				break;
 			case EntityType::Eye:
-				if(game->roomManager.currentRoomHash() == hashString("rm_secret_005")) {
+				if(RoomManager::currentRoomHash() == hashString("rm_secret_005")) {
 					entityList.insert(new Eye(tempPos + Pos(0, 1)));
 				} else {
 					entityList.insert(new Eye(tempPos));
@@ -166,14 +259,14 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 				break;
 			case EntityType::Chest:
 				entityList.insert(new Chest(tempPos));
-				if(tileManager->floorMap[tempPos.x][tempPos.y] == NULL) {
-					tileManager->floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
+				if(TileManager::floorMap[tempPos.x][tempPos.y] == NULL) {
+					TileManager::floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
 				}
 				break;
 			case EntityType::EmptyChest:
 				entityList.insert(getEmptyChest(tempPos));
-				if(tileManager->floorMap[tempPos.x][tempPos.y] == NULL) {
-					tileManager->floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
+				if(TileManager::floorMap[tempPos.x][tempPos.y] == NULL) {
+					TileManager::floorMap[tempPos.x][tempPos.y] = new FloorTile(tempPos);
 				}
 				break;
 			case EntityType::AddStatue:
@@ -231,7 +324,7 @@ void EntityManager::loadEntities(EntityHolder* entitiesPointer, int entitiesCoun
 		mapRef.insert(temp);
 
 		if(hasFloor(temp->p)) {
-			tileManager->stepOn(temp->p);
+			TileManager::stepOn(temp->p);
 		}
 
 		if(temp->isEnemy()) {
@@ -288,11 +381,11 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 		return;
 	};
 
-	unsigned roomHash = game->roomManager.currentRoomHash();
+	unsigned roomHash = RoomManager::currentRoomHash();
 
 	if(roomHash == hashString("rm_e_019\0")) { // the floor where it needs to move up every pause
 
-		specialBumpFunctionPointer = [this](AddStatue* e) -> void {
+		specialBumpFunctionPointer = [](AddStatue* e) -> void {
 
 			if(menuOpened) {
 
@@ -308,18 +401,18 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 
 				bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(e->entityType(), bn::pair<Pos, Pos>(pastPos, e->p));
 
-				tileManager->floorSteps.push_back(tempFloorStep);
+				TileManager::floorSteps.push_back(tempFloorStep);
 
 				futureEntityMap[e->p.x][e->p.y].insert(e);
 
 				e->doUpdate();
 
-				tileManager->doFloorSteps();
+				TileManager::doFloorSteps();
 
 				// such a weird one off case. calling resetroom in here also feels wrong
-				if(tileManager->exitTile != NULL && tileManager->exitTile->tilePos == player->p && Switch::pressedCount == Switch::totalCount) {
+				if(TileManager::exitTile != NULL && TileManager::exitTile->tilePos == player->p && Switch::pressedCount == Switch::totalCount) {
 					addKill(NULL);
-					globalGame->resetRoom();
+					Game::resetRoom();
 				}
 			}
 		};
@@ -331,7 +424,7 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 		// does killing the bull,, matter? if done before this case, yes i suppose
 		// this is going to be coded like shit. i dont care anymore
 
-		specialBumpFunctionPointer = [this,
+		specialBumpFunctionPointer = [
 		stage = 0,
 		hasLeech = true,
 		hasEye = true,
@@ -381,12 +474,12 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 		};
 	} else if(roomHash == hashString("rm_e_023\0")) {
 
-		specialBumpFunctionPointer = [this](AddStatue* e) mutable -> void {
+		specialBumpFunctionPointer = [](AddStatue* e) mutable -> void {
 			(void)e;
 
-			BN_ASSERT(tileManager->memoryTile != NULL, "memoryTile tile null for some reason");
-			BN_ASSERT(tileManager->wingsTile != NULL, "wingsTile tile null for some reason");
-			BN_ASSERT(tileManager->swordTile != NULL, "swordTile tile null for some reason");
+			BN_ASSERT(TileManager::memoryTile != NULL, "memoryTile tile null for some reason");
+			BN_ASSERT(TileManager::wingsTile != NULL, "wingsTile tile null for some reason");
+			BN_ASSERT(TileManager::swordTile != NULL, "swordTile tile null for some reason");
 
 			// (4, 4) (6, 4) (8, 4)
 
@@ -397,9 +490,9 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 			temp.insert(Pos(6, 4));
 			temp.insert(Pos(8, 4));
 
-			temp.erase(tileManager->memoryTile->tilePos);
-			temp.erase(tileManager->wingsTile->tilePos);
-			temp.erase(tileManager->swordTile->tilePos);
+			temp.erase(TileManager::memoryTile->tilePos);
+			temp.erase(TileManager::wingsTile->tilePos);
+			temp.erase(TileManager::swordTile->tilePos);
 
 			if(temp.size() == 0) {
 				needKillAllAddStatues = true;
@@ -410,12 +503,12 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 		// check if any glass.
 		// shit code
 
-		specialBumpFunctionPointer = [this](AddStatue* e) -> void {
+		specialBumpFunctionPointer = [](AddStatue* e) -> void {
 			(void)e;
 
 			for(int x=0; x<14; x++) {
 				for(int y=0; y<9; y++) {
-					if(tileManager->hasFloor(x, y) == TileType::Glass) {
+					if(TileManager::hasFloor(x, y) == TileType::Glass) {
 						return;
 					}
 				}
@@ -448,7 +541,7 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 
 		// 4 leeches, 2 maggots, 2 eyes
 
-		specialBumpFunctionPointer = [this,
+		specialBumpFunctionPointer = [
 		leechSuccessCount = 0,
 		maggotSuccessCount = 0,
 		eyeSuccessCount = 0
@@ -494,7 +587,7 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 
 		// send to "rm_e_027\0" if success
 
-		specialBumpFunctionPointer = [this](AddStatue* e) mutable -> void {
+		specialBumpFunctionPointer = [](AddStatue* e) mutable -> void {
 			(void)e;
 
 			if(enemyList.size() != 0) { // eyes need to be dead
@@ -535,14 +628,14 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 
 			if(temp.size() == 0) {
 				// add statues dont die here
-				tileManager->exitDestination = "rm_e_027\0";
+				TileManager::exitDestination = "rm_e_027\0";
 			}
 		};
 	} else if(roomHash == hashString("rm_secret_008\0")) {
 
 		// cif room, should give 99 locusts when the tan statue is moved
 
-		specialBumpFunctionPointer = [this](AddStatue* e) mutable -> void {
+		specialBumpFunctionPointer = [](AddStatue* e) mutable -> void {
 			(void)e;
 
 			if(player->p != Pos(8, 1) && getMap(Pos(8, 1)).size() == 1) {
@@ -558,14 +651,14 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 
 Interactable* EntityManager::getEmptyChest(Pos p) {
 
-	// reassignment doesnt work here when its auto, but does for defining the type??
+	// reassignment doesnt work hereGame::RoomManager:: when its auto, but does for defining the type??
 	std::function<void(void*)> interactFunc = [](void* unused) mutable -> void {
 		(void)unused;
 	};
 
 	std::function<bool(void*)> kickFunc = [](void* unused) mutable -> bool {
 		(void)unused;
-		globalGame->playSound(&bn::sound_items::snd_push_small);
+		Game::playSound(&bn::sound_items::snd_push_small);
 		return true;
 	};
 
@@ -580,33 +673,33 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		(void)inter;
 	};
 
-	int roomIndex = game->roomManager.roomIndex;
-	unsigned roomHash = game->roomManager.currentRoomHash();
+	int roomIndex = RoomManager::roomIndex;
+	unsigned roomHash = RoomManager::currentRoomHash();
 
 	if(roomIndex == 83 && p == Pos(3, 2)) {
 		interactFunc = [interactCount = 0](void* unused) mutable -> void {
 			(void)unused;
-			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			//if(RoomManager::roomIndex == 83 && p == Pos(3, 2)) {
 			// GOOFY WARNING
-			if(globalGame->entityManager.player->p == Pos(3, 2+1)) {
+			if(EntityManager::player->p == Pos(3, 2+1)) {
 				// shortcut chest;
 
 				interactCount++;
 
 				switch(interactCount) {
 					case 1:
-						globalGame->effectsManager.doDialogue("It's empty\0");
+						EffectsManager::doDialogue("It's empty\0");
 						break;
 					case 2:
-						globalGame->effectsManager.doDialogue("It's empty\0");
+						EffectsManager::doDialogue("It's empty\0");
 						break;
 					case 3:
-						globalGame->effectsManager.doDialogue("It's empty\0");
+						EffectsManager::doDialogue("It's empty\0");
 						break;
 					default:
-						globalGame->effectsManager.doDialogue("?? ??? ?\0");
-						globalGame->entityManager.addKill(NULL);
-						globalGame->tileManager.exitDestination = "rm_mon_shortcut_003\0";
+						EffectsManager::doDialogue("?? ??? ?\0");
+						EntityManager::addKill(NULL);
+						TileManager::exitDestination = "rm_mon_shortcut_003\0";
 						break;
 				}
 
@@ -633,23 +726,23 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 
 			Interactable* inter = static_cast<Interactable*>(obj);
 
-			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			//if(RoomManager::roomIndex == 83 && p == Pos(3, 2)) {
 			// GOOFY WARNING
 
-			if(globalGame->entityManager.player->p == Pos(6, 2+1)) {
-				if(interactCount == 0 && !globalGame->entityManager.player->hasMemory) {
-					globalGame->effectsManager.doDialogue(""
+			if(EntityManager::player->p == Pos(6, 2+1)) {
+				if(interactCount == 0 && !EntityManager::player->hasMemory) {
+					EffectsManager::doDialogue(""
 					"[You aquired a strange feeling]\n"
 					"[Your mind feels heavier]\n"
 					"[You don't know what to make of it]\0");
 					interactCount++;
-					globalGame->entityManager.player->hasMemory = true;
-					globalGame->tileManager.fullDraw();
+					EntityManager::player->hasMemory = true;
+					TileManager::fullDraw();
 
 					inter->animationIndex = 1;
 					inter->doUpdate();
 				} else {
-					globalGame->effectsManager.doDialogue("It's empty\0");
+					EffectsManager::doDialogue("It's empty\0");
 				}
 			}
 		};
@@ -663,7 +756,7 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 
 		kickFunc = [](void* obj) -> bool {
 
-			globalGame->playSound(&bn::sound_items::snd_push_small);
+			Game::playSound(&bn::sound_items::snd_push_small);
 
 			BN_ASSERT(obj != NULL, "WTF IN kickedfunc ");
 
@@ -692,7 +785,7 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 
 			if(!trig && inter->specialBumpCount == 6 && playerIdleFrame == inter->playerIdleStart && (frame - inter->playerIdleStart) >= 60 * 6) {
 				trig = true;
-				globalGame->entityManager.needKillAllAddStatues = true;
+				EntityManager::needKillAllAddStatues = true;
 			}
 		};
 
@@ -704,22 +797,22 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 			//(void)unused;
 			Interactable* inter = static_cast<Interactable*>(obj);
 
-			//if(globalGame->roomManager.roomIndex == 83 && p == Pos(3, 2)) {
+			//if(RoomManager::roomIndex == 83 && p == Pos(3, 2)) {
 			// GOOFY WARNING
 
-			if(globalGame->entityManager.player->p == Pos(6, 2+1)) {
-				if(interactCount == 0 && !globalGame->entityManager.player->hasWings) {
-					globalGame->effectsManager.doDialogue(""
+			if(EntityManager::player->p == Pos(6, 2+1)) {
+				if(interactCount == 0 && !EntityManager::player->hasWings) {
+					EffectsManager::doDialogue(""
 					"[Wings wings wings, yeet]"
 					"\0");
 					interactCount++;
-					globalGame->entityManager.player->hasWings = true;
-					globalGame->tileManager.fullDraw();
+					EntityManager::player->hasWings = true;
+					TileManager::fullDraw();
 
 					inter->animationIndex = 1;
 					inter->doUpdate();
 				} else {
-					globalGame->effectsManager.doDialogue("It's empty\0");
+					EffectsManager::doDialogue("It's empty\0");
 				}
 			}
 		};
@@ -738,19 +831,19 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 		interactFunc = [interactCount = 0](void* obj) mutable -> void {
 			Interactable* inter = static_cast<Interactable*>(obj);
 
-			if(globalGame->entityManager.player->p == Pos(7, 5+1)) {
-				if(interactCount == 0 && !globalGame->entityManager.player->hasSword) {
-					globalGame->effectsManager.doDialogue(""
+			if(EntityManager::player->p == Pos(7, 5+1)) {
+				if(interactCount == 0 && !EntityManager::player->hasSword) {
+					EffectsManager::doDialogue(""
 					"[Swords swords swords, yeet]"
 					"\0");
 					interactCount++;
-					globalGame->entityManager.player->hasSword = true;
-					globalGame->tileManager.fullDraw();
+					EntityManager::player->hasSword = true;
+					TileManager::fullDraw();
 
 					inter->animationIndex = 1;
 					inter->doUpdate();
 				} else {
-					globalGame->effectsManager.doDialogue("It's empty\0");
+					EffectsManager::doDialogue("It's empty\0");
 				}
 			}
 		};
@@ -775,15 +868,15 @@ Interactable* EntityManager::getEmptyChest(Pos p) {
 			Interactable* inter = static_cast<Interactable*>(obj);
 
 			if(inter->animationIndex == 1) {
-				globalGame->effectsManager.doDialogue("It's empty\0");
+				EffectsManager::doDialogue("It's empty\0");
 				return;
 			}
 
-			if(globalGame->entityManager.player->p == Pos(11, 3+1)) {
-				globalGame->effectsManager.doDialogue("[You aquired 99 locust idols]\n[I N C R E D I B L E !]\0");
+			if(EntityManager::player->p == Pos(11, 3+1)) {
+				EffectsManager::doDialogue("[You aquired 99 locust idols]\n[I N C R E D I B L E !]\0");
 				inter->animationIndex = 1;
-				globalGame->entityManager.player->locustCount = 99;
-				globalGame->tileManager.updateLocust();
+				EntityManager::player->locustCount = 99;
+				TileManager::updateLocust();
 				inter->doUpdate();
 			}
 		};
@@ -805,7 +898,7 @@ Boulder* EntityManager::getBoulder(Pos p) {
 
 	Boulder* res = new Boulder(p);
 
-	switch(game->roomManager.currentRoomHash()) {
+	switch(RoomManager::currentRoomHash()) {
 		case hashString("rm_e_intermission\0"):
 			res->specialDialogue = "That leech, that lazy eye, that maggot...\nTraitors' agents who roam here...\nHear me, reach them, slay them...\nAnd thus you shall prove your mettle...\0";
 			break;
@@ -860,53 +953,6 @@ void EntityManager::addEntity(Entity* e) {
 
 	entityMap[e->p.x][e->p.y].insert(e);
 	futureEntityMap[e->p.x][e->p.y].insert(e);
-}
-
-EntityManager::~EntityManager() {
-
-	killedPlayer.clear();
-	shadowQueue.clear();
-	kickedList.clear();
-
-	if(player != NULL) {
-		for(int i=0; i<player->rod.size(); i++) {
-			if(player->rod[i] != NULL) {
-				delete player->rod[i];
-				player->rod[i] = NULL;
-			}
-		}
-		player->rod.clear();
-	}
-
-	for(auto it = deadList.begin(); it != deadList.end(); ++it) {
-		if(*it != NULL) { // sanity check
-			delete *it;
-		}
-		*it = NULL;
-	}
-
-	for(auto it = entityList.begin(); it != entityList.end(); ++it) {
-		if(*it != NULL) { // sanity check
-			delete *it;
-		}
-		*it = NULL;
-	}
-
-	for(int x=0; x<14; x++) {
-		for(int y=0; y<9; y++) {
-			entityMap[x][y].clear();
-			futureEntityMap[x][y].clear();
-		}
-	}
-
-	entityList.clear();
-	enemyList.clear();
-	obstacleList.clear();
-	tanStatueList.clear();
-	shadowList.clear();
-	deadList.clear();
-
-	player = NULL;
 }
 
 // -----
@@ -994,7 +1040,7 @@ bool EntityManager::moveEntity(Entity* e, bool dontSet) { profileFunction();
 
 	bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(e->entityType(), bn::pair<Pos, Pos>(e->p, testPos));
 
-	tileManager->floorSteps.push_back(tempFloorStep);
+	TileManager::floorSteps.push_back(tempFloorStep);
 
 	//if(!dontSet) { // prev was above the !nextmove check, is this ok?
 	posTracker.insert(startPos);
@@ -1038,14 +1084,14 @@ void EntityManager::doMoves() { profileFunction();
 	// return an entity if we died an need a reset
 	bn::optional<Entity*> res;
 
-	player->hasWingsTile = player->inRod(tileManager->wingsTile);
+	player->hasWingsTile = player->inRod(TileManager::wingsTile);
 	bool prevHasWingsTile = player->hasWingsTile;
 
 	// insert player's move into its func
 	// IF THE PLAYER CHANGES THE FLOOR, DO IT HERE.
 	bn::pair<bool, bn::optional<Direction>> playerRes = player->doInput();
 
-	if(prevHasWingsTile && !player->inRod(tileManager->wingsTile)) {
+	if(prevHasWingsTile && !player->inRod(TileManager::wingsTile)) {
 		player->hasWingsTile = false;
 	}
 
@@ -1094,7 +1140,7 @@ void EntityManager::doMoves() { profileFunction();
 	} else {
 		Pos temp = playerStart;
 		if(playerRes.second.has_value() && temp.move(player->currentDir) && hasNonInteractableObstacle(temp)) {
-			game->playSound(&bn::sound_items::snd_push_small);
+			Game::playSound(&bn::sound_items::snd_push_small);
 		}
 	}
 
@@ -1109,7 +1155,7 @@ void EntityManager::doMoves() { profileFunction();
 		playerMoveCount++;
 	}
 
-	tileManager->doFloorSteps();
+	TileManager::doFloorSteps();
 
 	bn::optional<Direction> shadowMove = playerRes.second;
 	if(player->p == playerStart) {
@@ -1136,7 +1182,7 @@ void EntityManager::doMoves() { profileFunction();
 
 					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
 					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
-					effectsManager->monLightning((*it)->p, tempDir.value());
+					EffectsManager::monLightning((*it)->p, tempDir.value());
 					delay(30);
 					addKill(*it);
 				}
@@ -1304,7 +1350,7 @@ void EntityManager::doMoves() { profileFunction();
 
 					// TODO, HAVE MONS LIGHTNING TAKE UP THE MAIN THREAD!!!!!!
 					// THIS IS HOW WE SOLVE THE SCREEN TRANSITION TIMING ISSUES
-					effectsManager->monLightning((*it)->p, tempDir.value());
+					EffectsManager::monLightning((*it)->p, tempDir.value());
 					delay(30);
 					addKill(*it);
 				}
@@ -1330,12 +1376,12 @@ void EntityManager::doMoves() { profileFunction();
 	}
 
 	if(doLevKill) {
-		effectsManager->levKill();
+		EffectsManager::levKill();
 		addKill(hasLevStatue);
 	}
 
-	if(game->roomManager.isWhiteRooms()) {
-		tileManager->updateWhiteRooms(playerStartBackup, player->p);
+	if(RoomManager::isWhiteRooms()) {
+		TileManager::updateWhiteRooms(playerStartBackup, player->p);
 	}
 
 	sanity();
@@ -1389,14 +1435,14 @@ bn::vector<Entity*, 4>::iterator EntityManager::killEntity(Entity* e) { profileF
 	deadList.insert(e);
 
 	if(!hasFloor(tempPos)) {
-		effectsManager->entityFall(e);
+		EffectsManager::entityFall(e);
 	} else {
-		game->playSound(&bn::sound_items::snd_enemy_explosion);
+		Game::playSound(&bn::sound_items::snd_enemy_explosion);
 		e->sprite.setVisible(false);
-		effectsManager->explosion(tempPos);
+		EffectsManager::explosion(tempPos);
 	}
 
-	effectsManager->rotateTanStatues();
+	EffectsManager::rotateTanStatues();
 
 	e->isDead();
 
@@ -1431,7 +1477,7 @@ void EntityManager::killAllAddStatues() {
 	for(auto it = obstacleList.begin(); it != obstacleList.end(); ) {
 		BN_ASSERT(*it != NULL, "wtf in killalladdstatues");
 		if((*it)->entityType() == EntityType::AddStatue) {
-			tileManager->stepOffs.insert((*it)->p);
+			TileManager::stepOffs.insert((*it)->p);
 
 			killEntity(*it);
 
@@ -1441,7 +1487,7 @@ void EntityManager::killAllAddStatues() {
 		}
 	}
 
-	tileManager->doFloorSteps();
+	TileManager::doFloorSteps();
 }
 
 void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFunction();
@@ -1472,7 +1518,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 		shadowList.push_front(lastShadow);
 
 		bn::pair<EntityType, bn::pair<Pos, Pos>> tempFloorStep(EntityType::Shadow, bn::pair<Pos, Pos>(prevShadowPos, nextShadowPos));
-		tileManager->floorSteps.push_back(tempFloorStep);
+		TileManager::floorSteps.push_back(tempFloorStep);
 
 		futureEntityMap[prevShadowPos.x][prevShadowPos.y].erase(lastShadow);
 		futureEntityMap[nextShadowPos.x][nextShadowPos.y].insert(lastShadow);
@@ -1494,7 +1540,7 @@ void EntityManager::manageShadows(bn::optional<Direction> playerDir) { profileFu
 			// unsure if needed
 			posTracker.insert(queuePos);
 
-			effectsManager->shadowCreate(queuePos);
+			EffectsManager::shadowCreate(queuePos);
 			Shadow* temp = new Shadow(queuePos);
 
 			shadowList.push_back(temp);
@@ -1522,7 +1568,7 @@ void EntityManager::updateMap() { profileFunction();
 		}
 	}
 
-	tileManager->doFloorSteps();
+	TileManager::doFloorSteps();
 
 	if(hasKills()) {
 		return;
@@ -1570,7 +1616,7 @@ void EntityManager::updateMap() { profileFunction();
 												while(true) { // 11
 													player->doTick();
 													for(int j=0; j<6; j++) { // 12
-														game->doButanoUpdate();
+														Game::doButanoUpdate();
 													}
 													if(!player->pushAnimation) {
 														tempCount++;
@@ -1581,22 +1627,22 @@ void EntityManager::updateMap() { profileFunction();
 												}
 
 												player->wingsUse = 0;
-												Effect* sweatEffect = effectsManager->generateSweatEffect();
+												Effect* sweatEffect = EffectsManager::generateSweatEffect();
 
 												for(int i=0; i<8; i++) {
 													player->doTick();
 													for(int j=0; j<6; j++) {
-														game->doButanoUpdate();
+														Game::doButanoUpdate();
 													}
 												}
 
-												effectsManager->removeEffect(sweatEffect);
+												EffectsManager::removeEffect(sweatEffect);
 												shouldTickPlayer = true;
 											}
 											addKill(temp);
 										} else {
 											// spawn wing anim/sound here
-											effectsManager->wings();
+											EffectsManager::wings();
 										}
 									}
 								}
@@ -1713,7 +1759,7 @@ bool EntityManager::exitRoom() {
 	return true;
 }
 
-void EntityManager::createKillEffects() const {
+void EntityManager::createKillEffects() {
 
 	Entity* hasShadowKill = NULL;
 
@@ -1728,7 +1774,7 @@ void EntityManager::createKillEffects() const {
 	}
 
 	if(hasShadowKill != NULL) {
-		effectsManager->shadowDeath(static_cast<Shadow*>(hasShadowKill));
+		EffectsManager::shadowDeath(static_cast<Shadow*>(hasShadowKill));
 	}
 
 	for(auto it = killedPlayer.cbegin(); it != killedPlayer.cend(); ++it) {
@@ -1742,7 +1788,7 @@ void EntityManager::createKillEffects() const {
 			case EntityType::Shadow:
 				break;
 			default:
-				effectsManager->entityKill(*it);
+				EffectsManager::entityKill(*it);
 				break;
 		}
 	}
@@ -1812,19 +1858,19 @@ void EntityManager::doVBlank() { profileFunction();
 
 // -----
 
-bool EntityManager::hasEntity(const Pos& p) const {
+bool EntityManager::hasEntity(const Pos& p) {
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 	return temp.size() != 0;
 }
 
-bool EntityManager::hasPlayer(const Pos& p) const {
+bool EntityManager::hasPlayer(const Pos& p) {
 	if(!hasEntity(p)) {
 		return false;
 	}
 	return getMap(p).contains(player);
 }
 
-bool EntityManager::hasNonPlayerEntity(const Pos& p) const {
+bool EntityManager::hasNonPlayerEntity(const Pos& p) {
 	// this function exists entirely because of the goofyness with shadows technically being players
 	if(!hasEntity(p)) {
 		return false;
@@ -1838,7 +1884,7 @@ bool EntityManager::hasNonPlayerEntity(const Pos& p) const {
 	return true;
 }
 
-bool EntityManager::hasEnemy(const Pos& p) const {
+bool EntityManager::hasEnemy(const Pos& p) {
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 
 	if(temp.size() == 0) {
@@ -1854,7 +1900,7 @@ bool EntityManager::hasEnemy(const Pos& p) const {
 	return false;
 }
 
-bool EntityManager::hasObstacle(const Pos& p) const {
+bool EntityManager::hasObstacle(const Pos& p) {
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 
 	if(temp.size() == 0) {
@@ -1870,8 +1916,8 @@ bool EntityManager::hasObstacle(const Pos& p) const {
 	return false;
 }
 
-bool EntityManager::hasCollision(const Pos& p) const {
-	const u8 temp = game->collisionMap[p.x][p.y];
+bool EntityManager::hasCollision(const Pos& p) {
+	const u8 temp = Game::collisionMap[p.x][p.y];
 
 	if(temp == 0 || temp == 1 || temp == 12) {
 		return false;
@@ -1880,7 +1926,7 @@ bool EntityManager::hasCollision(const Pos& p) const {
 	return true;
 }
 
-bool EntityManager::hasNonInteractableObstacle(const Pos& p) const {
+bool EntityManager::hasNonInteractableObstacle(const Pos& p) {
 	const SaneSet<Entity*, 4>& temp = getMap(p);
 
 	if(temp.size() == 0) {
@@ -1896,11 +1942,11 @@ bool EntityManager::hasNonInteractableObstacle(const Pos& p) const {
 	return false;
 }
 
-bn::optional<TileType> EntityManager::hasFloor(const Pos& p) const {
-	return tileManager->hasFloor(p);
+bn::optional<TileType> EntityManager::hasFloor(const Pos& p) {
+	return TileManager::hasFloor(p);
 }
 
-bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profileFunction();
+bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) { profileFunction();
 
 	Pos playerPos = player->p;
 
@@ -1938,7 +1984,7 @@ bn::optional<Direction> EntityManager::canSeePlayer(const Pos& p) const { profil
 	return bn::optional<Direction>();
 }
 
-bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p, const Pos& playerPos) const {
+bn::optional<Direction> EntityManager::canPathToPlayer(const Pos& p, const Pos& playerPos) {
 
 	BN_ASSERT(playerPos != p, "why in tarnation do you have a diamond and player at the same pos????");
 
@@ -2061,7 +2107,7 @@ void EntityManager::rodUse() {
 
 // -----
 
-void EntityManager::sanity() const {
+void EntityManager::sanity() {
 
 	// check that all data structures are holding up
 	// kills performance, so is set to return by default

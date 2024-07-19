@@ -8,9 +8,8 @@
 #include "EntityManager.h"
 #include "EffectsManager.h"
 #include "CutsceneManager.h"
-//#include "LinkManager.h"
 
-extern Game* globalGame;
+
 extern bn::fixed sinTable[360];
 
 
@@ -102,77 +101,26 @@ struct GameSave {
 	uint64_t getSaveHash();
 };
 
-class Game {
-public:
+namespace Game {
 
-	Collision collision;
-	Details details;
+	BN_DATA_EWRAM extern Collision collision;
+	BN_DATA_EWRAM extern Details details;
+	BN_DATA_EWRAM extern u8 collisionMap[14][9];
+	BN_DATA_EWRAM extern u8 detailsMap[14][9];
+	BN_DATA_EWRAM extern GameSave saveData;
+	BN_DATA_EWRAM extern bn::timer miscTimer;
+	BN_DATA_EWRAM extern GameState state;
+	BN_DATA_EWRAM extern bool needRedraw;
+	BN_DATA_EWRAM extern int mode;
+	BN_DATA_EWRAM extern const char* strangerNames[3];
+	BN_DATA_EWRAM extern int paletteIndex;
+	BN_DATA_EWRAM extern Palette* pal;
+	BN_DATA_EWRAM extern int fadePaletteIndex;
+	#define MAXSOUNDS 4
+	BN_DATA_EWRAM extern SaneSet<const bn::sound_item*, MAXSOUNDS> queuedSounds;
+	BN_DATA_EWRAM extern SaneSet<const bn::sound_item*, MAXSOUNDS*2> removedSounds;
 
-	u8 collisionMap[14][9];
-	u8 detailsMap[14][9];
-
-	GameSave saveData;
-
-	RoomManager roomManager;
-
-	EntityManager entityManager;
-
-	// why is this one plural while the rest aint? i should rlly change that
-	EffectsManager effectsManager;
-
-	TileManager tileManager;
-
-	CutsceneManager cutsceneManager;
-
-	bn::timer miscTimer;
-
-	GameState state = GameState::Loading;
-
-	bool needRedraw = false;
-
-	int mode = 0;
-	const char* strangerNames[3] = {"Gray\0", "Lillie\0", "Cif\0"};
-
-	Game() : collision(),
-	details(&collision),
-	entityManager(this),
-	effectsManager(this),
-	tileManager(this, &collision),
-	cutsceneManager(this)
-	{
-
-		tileManager.entityManager = &entityManager;
-		tileManager.effectsManager = &effectsManager;
-		tileManager.cutsceneManager = &cutsceneManager;
-
-		entityManager.effectsManager = &effectsManager;
-		entityManager.tileManager = &tileManager;
-		effectsManager.tileManager = &tileManager;
-		effectsManager.entityManager = &entityManager;
-
-		FloorTile::effectsManager = &effectsManager;
-		FloorTile::tileManager = &tileManager;
-		FloorTile::entityManager = &entityManager;
-		FloorTile::floorLayer = &tileManager.floorLayer;
-
-		FloorTile::game = this;
-		BigSprite::game = this;
-
-		BigSprite::entityManager = &entityManager;
-		BigSprite::tileManager = &tileManager;
-		BigSprite::effectsManager = &effectsManager;
-
-		MenuOption::effectsManager = &effectsManager;
-
-		bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4);
-
-		collision.rawMap.bgPointer.set_tiles(backgroundTiles);
-
-		cutsceneManager.effectsManager = &effectsManager;
-		cutsceneManager.tileManager = &tileManager;
-	}
-
-	~Game();
+	void Game();
 
 	void run();
 
@@ -182,7 +130,7 @@ public:
 	void saveRNG();
 	void loadCustomSave();
 
-	__attribute__((section(".ewram"))) void loadTiles();
+	void loadTiles();
 	void createExitEffects();
 	void findNextRoom();
 	void loadLevel(bool debug = false);
@@ -193,35 +141,22 @@ public:
 
 	void doVBlank();
 
-	int paletteIndex = 0;
 	void changePalette(int offset);
-	Palette* pal = NULL;
+
 	void fadePalette(const int index);
-	int fadePaletteIndex = -1;
+
 
 	void changeMusic();
 
 	void doButanoUpdate();
 
-	void changeMode(int val) {
-		mode += val;
-		mode = ((mode % 3) + 3) % 3;
-		roomManager.setMode(mode);
-	}
+	void changeMode(int val);
 
-	const char* getMode() {
-		return strangerNames[mode];
-	}
-
-	#define MAXSOUNDS 4
+	const char* getMode();
 
 	// this should maybe be its own file
 	void playSound(const bn::sound_item* sound);
 	void removeSound(const bn::sound_item* sound);
 
 	void doSoundVBlank();
-
-private:
-	SaneSet<const bn::sound_item*, MAXSOUNDS> queuedSounds;
-	SaneSet<const bn::sound_item*, MAXSOUNDS*2> removedSounds;
 };
