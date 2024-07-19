@@ -103,8 +103,8 @@ struct GameSave {
 
 namespace Game {
 
-	BN_DATA_EWRAM extern Collision collision;
-	BN_DATA_EWRAM extern Details details;
+	BN_DATA_EWRAM extern Collision* collision;
+	BN_DATA_EWRAM extern Details* details;
 	BN_DATA_EWRAM extern u8 collisionMap[14][9];
 	BN_DATA_EWRAM extern u8 detailsMap[14][9];
 	BN_DATA_EWRAM extern GameSave saveData;

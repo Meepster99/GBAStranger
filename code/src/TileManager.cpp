@@ -16,7 +16,7 @@ namespace TileManager {
 	SpriteTile* memoryTile = NULL;
 	SpriteTile* wingsTile = NULL;
 	SpriteTile* swordTile = NULL;
-	Floor floorLayer;
+	Floor* floorLayer = NULL;
 	bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
 	SaneSet<Pos, MAXENTITYSPRITES> stepOns;
 	SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
@@ -26,7 +26,7 @@ namespace TileManager {
 };
 
 void TileManager::TileManager(Collision* col) {
-	floorLayer = Floor(col);
+	floorLayer = new Floor(col);
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
 			floorMap[x][y] = NULL;
@@ -424,7 +424,7 @@ const char* TileManager::checkBrand() { profileFunction();
 
 	if(!EntityManager::player->inRod(exitTile)) {
 		// if the player doesnt have the exit tile, return
-		CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+		CutsceneManager::cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
 		prevMatchIndex = -1;
 		return NULL;
 	}
@@ -455,12 +455,12 @@ const char* TileManager::checkBrand() { profileFunction();
 	if(matchIndex != -1) {
 		if(matchIndex != prevMatchIndex) {
 			if(matchIndex < 8) {
-				CutsceneManager::cutsceneLayer.rawMap.create(*lordBackgrounds[matchIndex], 1);
+				CutsceneManager::cutsceneLayer->rawMap.create(*lordBackgrounds[matchIndex], 1);
 			} else {
-				CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+				CutsceneManager::cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
 			}
 
-			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBlackBGPalette());
+			CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(Game::pal->getBlackBGPalette());
 
 			EffectsManager::fadeBrand();
 			prevMatchIndex = matchIndex;
@@ -468,7 +468,7 @@ const char* TileManager::checkBrand() { profileFunction();
 
 		return destinations[matchIndex];
 	}
-	CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	CutsceneManager::cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
 
 	prevMatchIndex = matchIndex;
 	return NULL;
@@ -558,7 +558,7 @@ void TileManager::updateTile(const Pos& p) {
 		}
 	}
 
-	floorLayer.reloadCells();
+	floorLayer->reloadCells();
 }
 
 void TileManager::updateExit() {
@@ -860,13 +860,13 @@ void TileManager::updateWhiteRooms(const Pos& startPos, const Pos& currentPos) {
 		}
 	}
 
-	floorLayer.reloadCells();
+	floorLayer->reloadCells();
 }
 
 void TileManager::fullDraw() {
 
 	//BN_LOG("tileManager layer draw");
-	floorLayer.draw(Game::collisionMap, floorMap);
+	floorLayer->draw(Game::collisionMap, floorMap);
 
 	//BN_LOG("tileManager exit update");
 	updateExit();

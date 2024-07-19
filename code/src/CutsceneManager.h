@@ -39,8 +39,10 @@ public:
 
 namespace CutsceneManager {
 
-	BN_DATA_EWRAM extern CutsceneLayer cutsceneLayer;
-	BN_DATA_EWRAM extern BackgroundLayer backgroundLayer;
+	//BN_DATA_EWRAM extern CutsceneLayer cutsceneLayer;
+	//BN_DATA_EWRAM extern BackgroundLayer backgroundLayer;
+	BN_DATA_EWRAM extern CutsceneLayer* cutsceneLayer;
+	BN_DATA_EWRAM extern BackgroundLayer* backgroundLayer;
 	BN_DATA_EWRAM extern BackgroundMap* maps[4];
 	BN_DATA_EWRAM extern int zIndexBackup[4];
 	BN_DATA_EWRAM extern int priorityBackup[4];

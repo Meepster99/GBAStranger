@@ -100,12 +100,13 @@
 
 #endif
 
+
 // https://stackoverflow.com/questions/33050620/golang-style-defer-in-c
 #define DEFER(captures, code) std::shared_ptr<void> _(nullptr, [captures](...) mutable { code });
 
 #define USEEWRAM __attribute__((section(".ewram")))
-#define USEIWRAM __attribute__((section(".iwram")))
-#define USEARM __attribute__((noinline, target("arm"), section(".iwram"), long_call)) // unsure if noinline and long_call are the way to go
+#define USEIWRAM __attribute__((section(".ewram")))
+#define USEARM __attribute__((noinline, target("arm"), section(".ewram"), long_call)) // unsure if noinline and long_call are the way to go
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -171,11 +172,11 @@ extern int* glitchTilesCount;
 : 12)
 
 // these funcs are long call here and not in main.cpp. is that ok?
-__attribute__((section(".iwram"), target("thumb"), long_call)) unsigned short bruhRand();
+__attribute__((section(".ewram"), target("thumb"), long_call)) unsigned short bruhRand();
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) unsigned getMiscData();
+__attribute__((noinline, optimize("O0"), target("arm"), section(".ewram"), long_call)) unsigned getMiscData();
 
-__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void uncompressData(u8 res[126], u8* input);
+void uncompressData(u8 res[126], u8* input);
 
 void _fullReset();
 
@@ -338,7 +339,7 @@ static const char *TileTypeToString[] ={
 
 }
 
-#define BACKGROUNDMAPATTRIBUTES __attribute__((section(".iwram")))
+#define BACKGROUNDMAPATTRIBUTES
 
 class BackgroundMap {
 public:
@@ -547,7 +548,7 @@ public:
 };
 
 #define POSATTRIBUTES
-//#define POSATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+//#define POSATTRIBUTES __attribute__((target("arm"), section(".ewram")))
 
 typedef int_fast8_t POSTYPE;
 //typedef int16_t POSTYPE;
@@ -788,8 +789,8 @@ public:
 // thing means this was just premature optimization
 
 #define SANESETATTRIBUTES
-//#define SANESETATTRIBUTES __attribute__((section(".iwram")))
-//#define SANESETATTRIBUTES __attribute__((target("arm"), section(".iwram")))
+//#define SANESETATTRIBUTES __attribute__((section(".ewram")))
+//#define SANESETATTRIBUTES __attribute__((target("arm"), section(".ewram")))
 
 template <typename T, int maxVecSize>
 class SaneSet {

@@ -314,7 +314,7 @@ void BigSprite::loadBoobTrap() {
 
 				delay(15);
 
-				CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_black_bg);
+				CutsceneManager::cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_black_bg);
 
 				// only here for debugging
 				boobaCount = MAX(32, boobaCount);
@@ -324,7 +324,7 @@ void BigSprite::loadBoobTrap() {
 					EffectsManager::deathTile(EntityManager::player->p);
 					delay(5);
 				}
-				CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+				CutsceneManager::cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
 				delay(5);
 
 				EntityManager::addKill(*(EntityManager::getMap(Pos(12, 5)).begin()));
@@ -634,7 +634,7 @@ void BigSprite::loadChest() {
 		EntityManager::player->hasSuperRod = isSuperRodChest;
 
 		TileManager::updateRod();
-		TileManager::floorLayer.reloadCells();
+		TileManager::floorLayer->reloadCells();
 
 		return;
 	};
@@ -1115,7 +1115,7 @@ void BigSprite::loadGorHead() {
 
 			EntityManager::player->locustCount = 1;
 			TileManager::updateLocust();
-			TileManager::floorLayer.reloadCells();
+			TileManager::floorLayer->reloadCells();
 
 			return;
 		}
@@ -1237,7 +1237,7 @@ void BigSprite::loadStink() {
 
 // -----
 
-void EffectsManager::EffectsManager()	{
+void EffectsManager::EffectsManager() {
 
 	// may not be the best idea?
 	textGenerator.set_one_sprite_per_character(true);
@@ -4547,11 +4547,11 @@ void EffectsManager::levKill() {
 	bn::sound_items::snd_judgment.play();
 
 	for(int i=0; i<5; i++) {
-		CutsceneManager::backgroundLayer.rawMap.create(*judgementBackgrounds[i]);
+		CutsceneManager::backgroundLayer->rawMap.create(*judgementBackgrounds[i]);
 
-		CutsceneManager::backgroundLayer.rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
-		CutsceneManager::backgroundLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
-		CutsceneManager::backgroundLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
+		CutsceneManager::backgroundLayer->rawMap.bgPointer.set_x(playerPos.x * 16 + 8 - 8);
+		CutsceneManager::backgroundLayer->rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
+		CutsceneManager::backgroundLayer->rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
 
 		// why do i not make this func global omfg
 		CutsceneManager::delay(4);
@@ -4585,23 +4585,23 @@ void EffectsManager::fadeBrand() {
 		constexpr int offset = 8;
 
 		if(obj->tempCounter == offset + factor * 1) {
-			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(1, false));
+			CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(1, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 2) {
-			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(2, false));
+			CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(2, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 3) {
-			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(3, false));
+			CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(3, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 4) {
-			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(4, false));
+			CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(Game::pal->getBGPaletteFade(4, false));
 		}
 
 		if(obj->tempCounter == offset + factor * 5) {
-			CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(Game::pal->getBGPalette());
+			CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(Game::pal->getBGPalette());
 			return true;
 		}
 
@@ -5474,8 +5474,8 @@ void EffectsManager::corrupt(int frames) {
 	// butano calls them handles
 
 	// im going to have this as an unsigned instead of unsigned short,, unsure if ideal but we ball
-	//unsigned test = reinterpret_cast<unsigned>(Game::collision.rawMap.bgPointer.handle());
-	bn::optional<int> idOptional = Game::collision.rawMap.bgPointer.hw_id();
+	//unsigned test = reinterpret_cast<unsigned>(Game::collision->rawMap.bgPointer.handle());
+	bn::optional<int> idOptional = Game::collision->rawMap.bgPointer.hw_id();
 	BN_ASSERT(idOptional.has_value(), "background didnt have a hardware id??");
 	int id = idOptional.value();
 

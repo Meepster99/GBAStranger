@@ -8,8 +8,10 @@
 
 
 namespace CutsceneManager {
-	CutsceneLayer cutsceneLayer;
-	BackgroundLayer backgroundLayer;
+	//CutsceneLayer cutsceneLayer;
+	//BackgroundLayer backgroundLayer;
+	CutsceneLayer* cutsceneLayer = NULL;
+	BackgroundLayer* backgroundLayer = NULL;
 	BackgroundMap* maps[4];
 	int zIndexBackup[4];
 	int priorityBackup[4];
@@ -24,10 +26,13 @@ namespace CutsceneManager {
 
 void CutsceneManager::CutsceneManager() {
 
-	maps[0] = &Game::collision.rawMap;
-	maps[1] = &backgroundLayer.rawMap;
+	BN_ASSERT(cutsceneLayer != NULL, "CutsceneLayer Empty");
+	BN_ASSERT(backgroundLayer != NULL, "BackgroundLayer Empty");
+
+	maps[0] = &Game::collision->rawMap;
+	maps[1] = &backgroundLayer->rawMap;
 	maps[2] = &EffectsManager::effectsLayer.rawMap;
-	maps[3] = &cutsceneLayer.rawMap;
+	maps[3] = &cutsceneLayer->rawMap;
 
 	for(int i=0; i<4; i++) {
 		mapBackup.push_back(maps[i]->bgPointer.map());
@@ -1061,15 +1066,15 @@ void CutsceneManager::createPlayerBrandRoom() {
 	// but that would require either modifying the,, image (annoying massformat reruns)
 	// or the bg map(id have to alloc tiles)
 	// ugh
-	backgroundLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
-	backgroundLayer.rawMap.bgPointer.set_x(16);
-	backgroundLayer.rawMap.bgPointer.set_y(64-8);
+	backgroundLayer->rawMap.create(bn::regular_bg_items::dw_spr_confinement_index0, 2);
+	backgroundLayer->rawMap.bgPointer.set_x(16);
+	backgroundLayer->rawMap.bgPointer.set_y(64-8);
 
-	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_confinement_index1, 2);
-	cutsceneLayer.rawMap.bgPointer.set_y(64-8-16);
+	cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_spr_confinement_index1, 2);
+	cutsceneLayer->rawMap.bgPointer.set_y(64-8-16);
 
-	cutsceneLayer.rawMap.bgPointer.put_below();
-	backgroundLayer.rawMap.bgPointer.put_below();
+	cutsceneLayer->rawMap.bgPointer.put_below();
+	backgroundLayer->rawMap.bgPointer.put_below();
 
 	auto func1 = [](void* obj) -> void {
 		(void)obj;
@@ -1160,9 +1165,9 @@ void CutsceneManager::createPlayerBrandRoom() {
 			maps[1]->create(bn::regular_bg_items::dw_spr_un_stare_index0, 0);
 			maps[1]->bgPointer.set_y(48 + 16);
 
-			Game::collision.rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
-			Game::collision.rawMap.bgPointer.set_priority(1);
-			Game::collision.rawMap.bgPointer.set_palette(Game::pal->getBGPalette());
+			Game::collision->rawMap.bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
+			Game::collision->rawMap.bgPointer.set_priority(1);
+			Game::collision->rawMap.bgPointer.set_palette(Game::pal->getBGPalette());
 
 			maps[2]->bgPointer.set_tiles(bn::regular_bg_tiles_items::dw_spr_glitchedsprites);
 			maps[2]->bgPointer.set_priority(1);
@@ -1172,11 +1177,11 @@ void CutsceneManager::createPlayerBrandRoom() {
 			maps[1]->bgPointer.set_palette(Game::pal->getBGPalette());
 			maps[0]->bgPointer.set_palette(Game::pal->getBGPalette());
 
-			int n = Game::collision.rawMap.bgPointer.tiles().tiles_count();
+			int n = Game::collision->rawMap.bgPointer.tiles().tiles_count();
 
 			for(int x=0; x<32; x++) {
 				for(int y=0; y<32; y++) {
-					Game::collision.rawMap.setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
+					Game::collision->rawMap.setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
 					maps[2]->setTile(x, y, randomGenerator.get_int(0, n), randomGenerator.get_int(0, 1), randomGenerator.get_int(0, 1));
 				}
 			}
@@ -1225,16 +1230,16 @@ void CutsceneManager::createResetRoom() {
 	// HOLY FUCKING SHIT HOLY FUCKING SHIT
 	// IT MAKES SO MUCH SENSE
 
-	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index0, 2);
-	cutsceneLayer.rawMap.bgPointer.put_below();
+	cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index0, 2);
+	cutsceneLayer->rawMap.bgPointer.put_below();
 
-	backgroundLayer.rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index1, 3);
+	backgroundLayer->rawMap.create(bn::regular_bg_items::dw_spr_dr_ab___on_index1, 3);
 
 	constexpr int bgX = 16;
 	constexpr int bgY = 40;
 
-	cutsceneLayer.rawMap.bgPointer.set_position(bgX, bgY);
-	backgroundLayer.rawMap.bgPointer.set_position(bgX + 32, bgY + 32);
+	cutsceneLayer->rawMap.bgPointer.set_position(bgX, bgY);
+	backgroundLayer->rawMap.bgPointer.set_position(bgX + 32, bgY + 32);
 
 	auto interactFunc = [](void* obj) -> void {
 		(void)obj;
@@ -1998,12 +2003,12 @@ void CutsceneManager::showCredits() {
 		verTextSprites[i].set_visible(true);
 	}
 
-	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_credits);
+	cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_credits);
 
-	cutsceneLayer.rawMap.bgPointer.set_priority(0);
-	cutsceneLayer.rawMap.bgPointer.put_above();
+	cutsceneLayer->rawMap.bgPointer.set_priority(0);
+	cutsceneLayer->rawMap.bgPointer.put_above();
 
-	cutsceneLayer.rawMap.bgPointer.set_y(cutsceneLayer.rawMap.bgPointer.y() - 8);
+	cutsceneLayer->rawMap.bgPointer.set_y(cutsceneLayer->rawMap.bgPointer.y() - 8);
 
 	delay(1);
 
@@ -2014,7 +2019,7 @@ void CutsceneManager::showCredits() {
 		Game::doButanoUpdate();
 	}
 
-	cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
 
 	Game::doButanoUpdate();
 	EffectsManager::setMenuVis(true);

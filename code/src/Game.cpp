@@ -13,8 +13,10 @@ bool debugToggle = false;
 
 
 namespace Game {
-	Collision collision;
-	Details details(&collision);
+	Collision* collision = NULL;
+	//Details details(&collision);
+	//Details details(NULL);
+	Details* details = NULL;
 	u8 collisionMap[14][9];
 	u8 detailsMap[14][9];
 	GameSave saveData;
@@ -42,13 +44,13 @@ const char* Game::getMode() {
 
 void Game::Game() {
 
-	TileManager::TileManager(&collision);
+	TileManager::TileManager(collision);
 
-	FloorTile::floorLayer = &TileManager::floorLayer;
+	FloorTile::floorLayer = TileManager::floorLayer;
 
 	bn::regular_bg_tiles_ptr backgroundTiles = bn::regular_bg_tiles_ptr::allocate(896, bn::bpp_mode::BPP_4);
 
-	collision.rawMap.bgPointer.set_tiles(backgroundTiles);
+	collision->rawMap.bgPointer.set_tiles(backgroundTiles);
 }
 
 // -----
@@ -395,8 +397,8 @@ void Game::resetRoom(bool debug) {
 	save();
 
 	// this hopefully wont slow down debug moving much
-	CutsceneManager::cutsceneLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
-	CutsceneManager::backgroundLayer.rawMap.create(bn::regular_bg_items::dw_default_bg);
+	CutsceneManager::cutsceneLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
+	CutsceneManager::backgroundLayer->rawMap.create(bn::regular_bg_items::dw_default_bg);
 
 	changeMusic();
 
@@ -446,9 +448,9 @@ void Game::loadTiles() {
 	int collisionTileCount = collisionTiles->tiles_ref().size();
 	int detailsTileCount = detailsTiles->tiles_ref().size();
 
-	details.collisionTileCount = floorTileCount + collisionTileCount;
+	details->collisionTileCount = floorTileCount + collisionTileCount;
 
-	bn::regular_bg_tiles_ptr backgroundTiles = collision.rawMap.bgPointer.tiles();
+	bn::regular_bg_tiles_ptr backgroundTiles = collision->rawMap.bgPointer.tiles();
 
 	bn::optional<bn::span<bn::tile>> tileRefOpt = backgroundTiles.vram();
 	BN_ASSERT(tileRefOpt.has_value(), "wtf");
@@ -496,8 +498,8 @@ void Game::loadTiles() {
 		memcpy(tileRef.data() + collisionTileCount + detailsTileCount, bn::regular_bg_tiles_items::dw_customfloortiles.tiles_ref().data(), 8 * sizeof(uint32_t) * floorTileCount);
 	}
 
-	details.collisionTileCount = collisionTileCount;
-	TileManager::floorLayer.collisionTileCount = collisionTileCount + detailsTileCount;
+	details->collisionTileCount = collisionTileCount;
+	TileManager::floorLayer->collisionTileCount = collisionTileCount + detailsTileCount;
 
 	tickCount = loadTilesTimer.elapsed_ticks();
 	BN_LOG("loadtiles took ", tickCount.safe_division(FRAMETICKS), " frames");
@@ -643,13 +645,7 @@ void Game::loadLevel(bool debug) {
 	BN_LOG("loadlevel completed, took ", tickCount.safe_division(FRAMETICKS), " frames");
 }
 
-#pragma GCC push_options
-//#pragma GCC optimize ("-fno-unroll-loops")
-//#pragma GCC optimize ("-Os")
-#pragma GCC optimize ("-O3")
-
-//__attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_call)) void drawCollisionAndDetails() {
-__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void drawCollisionAndDetails() {
+void drawCollisionAndDetails() {
 	// PUTTING THIS IN ARM GIVES A 50% REDUCTION. FIGURE IT OUT DUMBASS
 
 	// why the fuck. does putting this in arm and iwram cause everything in restrequest to fucking melt and die??
@@ -675,16 +671,16 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 			if(tile < 3) {
 				tile = detailsMap[x][y];
 				if(tile != 0) {
-					details.setTile(x * 2 + 1, y * 2 + 1, 4 * tile);
-					details.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
-					details.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
-					details.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);
+					details->setTile(x * 2 + 1, y * 2 + 1, 4 * tile);
+					details->setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
+					details->setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
+					details->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);
 				}
 			} else {
-				collision.setTile(x * 2 + 1, y * 2 + 1, 4 * tile);
-				collision.setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
-				collision.setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
-				collision.setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);
+				collision->setTile(x * 2 + 1, y * 2 + 1, 4 * tile);
+				collision->setTile(x * 2 + 2, y * 2 + 1, 4 * tile + 1);
+				collision->setTile(x * 2 + 1, y * 2 + 2, 4 * tile + 2);
+				collision->setTile(x * 2 + 2, y * 2 + 2, 4 * tile + 3);
 			}
 		}
 	}
@@ -692,9 +688,7 @@ __attribute__((noinline, target("arm"), section(".iwram"), long_call)) void draw
 	*reinterpret_cast<unsigned short*>(REG_IME) = 1; // enable interrupts
 }
 
-#pragma GCC pop_options
-
-__attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_call)) void clearGameMap() {
+void clearGameMap() {
 
 	// the goal of this is simple, to clear the game map
 	// i could do it in dotiledraw, but it rlly fucked performance (made it const time)
@@ -709,11 +703,11 @@ __attribute__((noinline, optimize("O3"), target("arm"), section(".iwram"), long_
 	// clearGameMap draw took 0.08715 frames
 	// [WARN] GBA Debug:	clearGameMap draw took 0.10717 frames
 	// going through butano funcs is pathetically slow, most likely due to mults/maybe they arent in iwram?
-	// i am quite suspicious of the difference between only having section(".iwram") and having that and target("arm")
+	// i am quite suspicious of the difference between only having section(".ewram") and having that and target("arm")
 	// i swear that the arm being there is needed to have it actually be in arm
 
-	auto& cells = Game::collision.rawMap.cells;
-	auto& mapItem = Game::collision.rawMap.mapItem;
+	auto& cells = Game::collision->rawMap.cells;
+	auto& mapItem = Game::collision->rawMap.mapItem;
 
 	for(int x=1; x<28+1; x++) {
 		for(int y=1; y<18+1; y++) {
@@ -817,13 +811,15 @@ void Game::changePalette(int offset) {
 	EffectsManager::updatePalette(paletteList[paletteIndex]);
 
 
-	collision.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	collision->rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	//TileManager::floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	EffectsManager::effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 
-	CutsceneManager::cutsceneLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	CutsceneManager::backgroundLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	BN_ASSERT(CutsceneManager::cutsceneLayer != NULL, "CutsceneLayer Empty");
+	BN_ASSERT(CutsceneManager::backgroundLayer != NULL, "BackgroundLayer Empty");
+	CutsceneManager::cutsceneLayer->rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	CutsceneManager::backgroundLayer->rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 
 	BackgroundMap::backgroundPalette = paletteList[paletteIndex];
 

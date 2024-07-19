@@ -312,9 +312,9 @@ namespace EffectsManager {
 	void setDebugDisplay(bool black = true);
 	void setBorderColor(bool black = true);
 
-	//#define EFFECTSMANAGERATTRIBUTES __attribute__((noinline, target("arm"), section(".iwram")))
+	//#define EFFECTSMANAGERATTRIBUTES __attribute__((noinline, target("arm"), section(".ewram")))
 	//#define EFFECTSMANAGERATTRIBUTES __attribute__((section(".ewram")))
-	//#define EFFECTSMANAGERATTRIBUTES __attribute__((section(".iwram")))
+	//#define EFFECTSMANAGERATTRIBUTES __attribute__((section(".ewram")))
 	#define EFFECTSMANAGERATTRIBUTES
 	EFFECTSMANAGERATTRIBUTES bool exitRoom();
 	EFFECTSMANAGERATTRIBUTES bool enterRoom();

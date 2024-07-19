@@ -36,7 +36,7 @@ void doNothing() {
 // should this be targeted to arm? unsure.
 
 // WHY DOES THIS TARGET BEING ARM SOMEHOW MESS UP THE CARTPULL FUNC?????
-__attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand() {
+__attribute__((section(".ewram"), target("thumb"))) unsigned short bruhRand() {
 	// WHAT IS THIS NUMBER???
 	const uint64_t a = 6364136223846793005ULL;
 
@@ -62,7 +62,7 @@ __attribute__((section(".iwram"), target("thumb"))) unsigned short bruhRand() {
 	return res;
 }
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void _cartPull() {
+__attribute__((noinline, optimize("O0"), target("arm"), section(".ewram"))) void _cartPull() {
 
 	//volatile unsigned short* verify = reinterpret_cast<volatile unsigned short*>(0x05000000);
 	volatile unsigned short* verify = reinterpret_cast<volatile unsigned short*>(0x0203FFF0);
@@ -286,7 +286,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) void
 	}
 }
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_call)) void _fullReset() {
+__attribute__((noinline, optimize("O0"), target("arm"), section(".ewram"), long_call)) void _fullReset() {
 
 	// https://www.coranac.com/tonc/text/swi.htm
 	// https://problemkaputt.de/gbatek-bios-reset-functions.htm
@@ -302,7 +302,7 @@ __attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"), long_
 
 volatile unsigned miscPointer = 0;
 
-__attribute__((noinline, optimize("O0"), target("arm"), section(".iwram"))) unsigned getMiscData() {
+__attribute__((noinline, optimize("O0"), target("arm"), section(".ewram"))) unsigned getMiscData() {
 
 	// ,,,,, dont ask.
 	// i could of, should of, and previously did this in a much easier way. but here i am now
@@ -416,6 +416,8 @@ int main() {
 	memcpy(stareTiles, dw_spr_un_stare_index0_bn_gfxTiles, *stareTilesCount);
 	memcpy(stareMap, dw_spr_un_stare_index0_bn_gfxMap, *stareMapCount);
 	memcpy(glitchTiles, dw_spr_glitchedsprites_bn_gfxTiles, *glitchTilesCount);
+
+	while(true) { 	bn::core::update(); }
 
 	// dont cause a initial framedrop on boot.
 	bn::core::update();

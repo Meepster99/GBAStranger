@@ -42,6 +42,7 @@ ROMCODE     :=  GBST
 
 #USERFLAGS   := -save-temps=cwd -fverbose-asm -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 USERFLAGS   := -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
+#USERFLAGS   := -g -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 
 USERASFLAGS :=
 USERLDFLAGS :=  -flto=auto
@@ -55,7 +56,7 @@ DEFAULTLIBS :=  -static-libstdc++
 USERBUILD   :=
 EXTTOOL     :=  python  ../misc/massFormatter/massFormatter.py regenIncludes; python  ../misc/soundConverter/soundConverter.py regenIncludes; python  ../misc/musicConverter/musicConverter.py regenIncludes
 
-STACKTRACE := true
+#STACKTRACE := true
 
 ifdef DISABLEASSERTS
 	USERFLAGS += -DDISABLEASSERTS=true

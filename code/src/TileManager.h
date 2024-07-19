@@ -20,9 +20,9 @@ public:
 	Floor() {}
 	Floor(Collision* collisionPointer_) : collisionPointer(collisionPointer_) {}
 
-	USEIWRAM void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false);
+	void setBigTile(int x, int y, int tile, bool flipX = false, bool flipY = false);
 
-	USEIWRAM void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
+	void setTile(int x, int y, int tileIndex, bool flipX=false, bool flipY=false);
 
 	//__attribute__((section(".ewram"))) void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][9]);
 	void draw(u8 (&collisionMap)[14][9], FloorTile* (&floorMap)[14][16]);
@@ -50,7 +50,7 @@ namespace TileManager {
 	BN_DATA_EWRAM extern SpriteTile* memoryTile;
 	BN_DATA_EWRAM extern SpriteTile* wingsTile;
 	BN_DATA_EWRAM extern SpriteTile* swordTile;
-	BN_DATA_EWRAM extern Floor floorLayer;
+	BN_DATA_EWRAM extern Floor* floorLayer;
 	BN_DATA_EWRAM extern bn::vector<bn::pair<EntityType, bn::pair<Pos, Pos>>, MAXENTITYSPRITES> floorSteps;
 	BN_DATA_EWRAM extern SaneSet<Pos, MAXENTITYSPRITES> stepOns;
 	BN_DATA_EWRAM extern SaneSet<Pos, MAXENTITYSPRITES> stepOffs;
@@ -77,7 +77,7 @@ namespace TileManager {
 
 	// this cant be arm, it causes some lambdas to fuck up. why? is iwram automatically set to be arm instructions, and then the lambdas,, ugh
 	// since this cant be arm, im putting it in ewram instead of iwram bc ewram is 16 bit for the thumb instrs
-	__attribute__((noinline, target("arm"), section(".iwram"), long_call)) void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
+	void loadTiles(u8* floorPointer, SecretHolder* secrets, int secretsCount, const char* exitDest);
 
 	void doFloorSteps();
 

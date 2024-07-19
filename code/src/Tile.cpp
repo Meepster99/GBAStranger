@@ -280,11 +280,11 @@ void WordTile::draw() {
 	temp = getWordTileIndex(second);
 	int secondTile = 228 + (((temp >> 1) << 2) | (temp & 1));
 
-	TileManager::floorLayer.setTile(x * 2 + 1, y * 2 + 1, firstTile);
-	TileManager::floorLayer.setTile(x * 2 + 1, y * 2 + 2, firstTile + 2);
+	TileManager::floorLayer->setTile(x * 2 + 1, y * 2 + 1, firstTile);
+	TileManager::floorLayer->setTile(x * 2 + 1, y * 2 + 2, firstTile + 2);
 
-	TileManager::floorLayer.setTile(x * 2 + 2, y * 2 + 1, secondTile);
-	TileManager::floorLayer.setTile(x * 2 + 2, y * 2 + 2, secondTile + 2);
+	TileManager::floorLayer->setTile(x * 2 + 2, y * 2 + 1, secondTile);
+	TileManager::floorLayer->setTile(x * 2 + 2, y * 2 + 2, secondTile + 2);
 }
 
 void Exit::isSteppedOnAnimation() {
