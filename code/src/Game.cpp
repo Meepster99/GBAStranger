@@ -814,7 +814,7 @@ void Game::changePalette(int offset) {
 	collision->rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	//details.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 	//TileManager::floorLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
-	EffectsManager::effectsLayer.rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
+	EffectsManager::effectsLayer->rawMap.bgPointer.set_palette(paletteList[paletteIndex]->getBGPalette());
 
 	BN_ASSERT(CutsceneManager::cutsceneLayer != NULL, "CutsceneLayer Empty");
 	BN_ASSERT(CutsceneManager::backgroundLayer != NULL, "BackgroundLayer Empty");

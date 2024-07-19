@@ -18,7 +18,7 @@ namespace EffectsManager {
 	bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
 	bn::vector<BigSprite*, 128> bigSprites;
 	bn::regular_bg_tiles_ptr tilesPointer = bn::regular_bg_tiles_ptr::allocate(128, bn::bpp_mode::BPP_4);
-	EffectsLayer effectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles);
+	EffectsLayer* effectsLayer = NULL;
 	bn::vector<MenuOption*, 16> menuOptions;
 	bool playerWonLastExit = true;
 	int rodNumber = 0;
@@ -1239,6 +1239,8 @@ void BigSprite::loadStink() {
 
 void EffectsManager::EffectsManager() {
 
+	effectsLayer = new EffectsLayer(bn::regular_bg_tiles_items::dw_default_bg_tiles);
+
 	// may not be the best idea?
 	textGenerator.set_one_sprite_per_character(true);
 
@@ -1265,11 +1267,11 @@ void EffectsManager::EffectsManager() {
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
-			effectsLayer.setBigTile(x, y, 0);
+			effectsLayer->setBigTile(x, y, 0);
 		}
 	}
 
-	effectsLayer.rawMap.bgPointer.set_tiles(tilesPointer);
+	effectsLayer->rawMap.bgPointer.set_tiles(tilesPointer);
 
 	for(int i=0; i<8; i++) {
 		tileRef[120].data[i] = 0x11111111;
@@ -1284,7 +1286,7 @@ void EffectsManager::EffectsManager() {
 		tileRef[127].data[i] = 0x11111111;
 	}
 
-	effectsLayer.reloadCells();
+	effectsLayer->reloadCells();
 }
 
 void EffectsManager::updatePalette(Palette* pal) {
@@ -1378,25 +1380,25 @@ bool EffectsManager::zoomEffect(bool inward, bool autoSpeed) {
 
 		for(int x = topLeftX; x<=bottomRightX; x++) {
 			if(topLeftY >= 0 && x >= 0) {
-				effectsLayer.setZoomTile(x, topLeftY, tileIndex);
+				effectsLayer->setZoomTile(x, topLeftY, tileIndex);
 			}
 			if(bottomRightY < 20 && x >= 0) {
-				effectsLayer.setZoomTile(x, bottomRightY, tileIndex);
+				effectsLayer->setZoomTile(x, bottomRightY, tileIndex);
 			}
 		}
 
 		for(int y = topLeftY; y<=bottomRightY; y++) {
 			if(topLeftX >= 0 && y >= 0) {
-				effectsLayer.setZoomTile(topLeftX, y, tileIndex);
+				effectsLayer->setZoomTile(topLeftX, y, tileIndex);
 			}
 			if(bottomRightX < 30 && y >= 0) {
-				effectsLayer.setZoomTile(bottomRightX, y, tileIndex);
+				effectsLayer->setZoomTile(bottomRightX, y, tileIndex);
 			}
 		}
 
 		layer += increment;
 
-		effectsLayer.update();
+		effectsLayer->update();
 		return false;
 	}
 
@@ -1412,7 +1414,7 @@ bool EffectsManager::topDownEffect(bool downward) {
 	if(nextLine < 9) {
 
 		for(int x=0; x<14; x++) {
-			effectsLayer.setBigTile(x, nextLine,
+			effectsLayer->setBigTile(x, nextLine,
 				downward ? 1+16-fillLevel : 1+fillLevel, false, !downward);
 		}
 		fillLevel+=8;
@@ -1422,7 +1424,7 @@ bool EffectsManager::topDownEffect(bool downward) {
 			nextLine++;
 		}
 
-		effectsLayer.update();
+		effectsLayer->update();
 		return false;
 	}
 
@@ -1477,20 +1479,20 @@ void EffectsManager::setBorderColor(bool black) {
 	unsigned borderVal = black ? 127 : 126;
 
 	for(int i=0; i<30; i++) {
-		effectsLayer.rawMap.setTile(i, 0, borderVal, false, true);
-		effectsLayer.rawMap.setTile(i, 19, borderVal, true, false);
+		effectsLayer->rawMap.setTile(i, 0, borderVal, false, true);
+		effectsLayer->rawMap.setTile(i, 19, borderVal, true, false);
 	}
 
 	for(int i=0; i<20; i++) {
-		effectsLayer.rawMap.setTile(0, i, borderVal, true, false);
-		effectsLayer.rawMap.setTile(29, i, borderVal, false, true);
+		effectsLayer->rawMap.setTile(0, i, borderVal, true, false);
+		effectsLayer->rawMap.setTile(29, i, borderVal, false, true);
 	}
 
-	effectsLayer.rawMap.setTile(0, 0, 121, false, true);
+	effectsLayer->rawMap.setTile(0, 0, 121, false, true);
 
 	setDebugDisplay(black);
 
-	effectsLayer.reloadCells();
+	effectsLayer->reloadCells();
 }
 
 bool EffectsManager::exitRoom() {
@@ -1922,20 +1924,20 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 	//Game::collision.reloadCells();
 	//Game::details.reloadCells();
 
-	effectsLayer.setBigTile(0, 6, 19);
-	effectsLayer.setBigTile(13, 6, 20);
-	effectsLayer.setBigTile(0, 8, 21);
-	effectsLayer.setBigTile(13, 8, 22);
-	effectsLayer.setBigTile(0, 7, 25);
-	effectsLayer.setBigTile(13, 7, 26);
+	effectsLayer->setBigTile(0, 6, 19);
+	effectsLayer->setBigTile(13, 6, 20);
+	effectsLayer->setBigTile(0, 8, 21);
+	effectsLayer->setBigTile(13, 8, 22);
+	effectsLayer->setBigTile(0, 7, 25);
+	effectsLayer->setBigTile(13, 7, 26);
 
 	for(int i=1; i<=12; i++) {
-		effectsLayer.setBigTile(i, 6, 23);
-		effectsLayer.setBigTile(i, 8, 24);
-		effectsLayer.setBigTile(i, 7, 18);
+		effectsLayer->setBigTile(i, 6, 23);
+		effectsLayer->setBigTile(i, 8, 24);
+		effectsLayer->setBigTile(i, 7, 18);
 	}
 
-	effectsLayer.update();
+	effectsLayer->update();
 
 	if(!isCutscene) {
 		hideForDialogueBox(false, isCutscene);
@@ -2164,10 +2166,10 @@ void EffectsManager::doDialogue(const char* data, bool isCutscene, const bn::sou
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
-			effectsLayer.setBigTile(x, y, 0);
+			effectsLayer->setBigTile(x, y, 0);
 		}
 	}
-	effectsLayer.update();
+	effectsLayer->update();
 
 
 	// this is trash, and will cause frame drops
@@ -2453,7 +2455,7 @@ void EffectsManager::doMenu() {
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
-			effectsLayer.setBigTile(x, y, 1);
+			effectsLayer->setBigTile(x, y, 1);
 		}
 	}
 
@@ -2465,12 +2467,12 @@ void EffectsManager::doMenu() {
 		}
 	}
 
-	effectsLayer.rawMap.setTile(27, 1, 122);
-	effectsLayer.rawMap.setTile(28, 1, 123);
-	effectsLayer.rawMap.setTile(27, 2, 124);
-	effectsLayer.rawMap.setTile(28, 2, 125);
+	effectsLayer->rawMap.setTile(27, 1, 122);
+	effectsLayer->rawMap.setTile(28, 1, 123);
+	effectsLayer->rawMap.setTile(27, 2, 124);
+	effectsLayer->rawMap.setTile(28, 2, 125);
 
-	effectsLayer.reloadCells();
+	effectsLayer->reloadCells();
 	Game::doButanoUpdate();
 
 	MenuOption::yIndex = -68;
@@ -2757,12 +2759,12 @@ void EffectsManager::doMenu() {
 
 	for(int x=0; x<14; x++) {
 		for(int y=0; y<9; y++) {
-			effectsLayer.setBigTile(x, y, 0);
+			effectsLayer->setBigTile(x, y, 0);
 		}
 	}
 	setBorderColor(!RoomManager::isWhiteRooms());
 
-	effectsLayer.reloadCells();
+	effectsLayer->reloadCells();
 	Game::doButanoUpdate();
 
 	Game::state = restoreState;
@@ -4513,8 +4515,8 @@ void EffectsManager::levKill() {
 
 	EntityManager::player->sprite.spritePointer.set_bg_priority(0);
 
-	effectsLayer.black();
-	effectsLayer.reloadCells();
+	effectsLayer->black();
+	effectsLayer->reloadCells();
 
 	// how will this perform if kicking a lev statue off?
 		// should this technically be a cutscene? i could either add an assert as the start to ensure that haskills.size == 0, or i could just have this func be blocking .
@@ -4563,8 +4565,8 @@ void EffectsManager::levKill() {
 
 	CutsceneManager::delay(15);
 
-	effectsLayer.clear();
-	effectsLayer.reloadCells();
+	effectsLayer->clear();
+	effectsLayer->reloadCells();
 
 	EntityManager::player->sprite.spritePointer.set_bg_priority(1);
 }

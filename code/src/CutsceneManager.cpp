@@ -31,7 +31,7 @@ void CutsceneManager::CutsceneManager() {
 
 	maps[0] = &Game::collision->rawMap;
 	maps[1] = &backgroundLayer->rawMap;
-	maps[2] = &EffectsManager::effectsLayer.rawMap;
+	maps[2] = &EffectsManager::effectsLayer->rawMap;
 	maps[3] = &cutsceneLayer->rawMap;
 
 	for(int i=0; i<4; i++) {
@@ -402,7 +402,7 @@ void CutsceneManager::cifDream() {
 	EffectsManager::doDialogue("Wake up.\0", true);
 
 	maps[1]->bgPointer.set_priority(0);
-	EffectsManager::effectsLayer.clear();
+	EffectsManager::effectsLayer->clear();
 
 	// changing this to a pointer bc,,,, running of of stack?
 	// its quite weird that,, effects was the thing using up so much iwram.

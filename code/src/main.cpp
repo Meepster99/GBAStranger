@@ -417,7 +417,7 @@ int main() {
 	memcpy(stareMap, dw_spr_un_stare_index0_bn_gfxMap, *stareMapCount);
 	memcpy(glitchTiles, dw_spr_glitchedsprites_bn_gfxTiles, *glitchTilesCount);
 
-	while(true) { 	bn::core::update(); }
+
 
 	// dont cause a initial framedrop on boot.
 	bn::core::update();

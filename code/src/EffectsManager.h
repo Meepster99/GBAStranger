@@ -276,7 +276,7 @@ namespace EffectsManager {
 	BN_DATA_EWRAM extern bn::vector<bn::sprite_ptr, MAXTEXTSPRITES> verTextSprites;
 	BN_DATA_EWRAM extern bn::vector<BigSprite*, 128> bigSprites;
 	BN_DATA_EWRAM extern bn::regular_bg_tiles_ptr tilesPointer;
-	BN_DATA_EWRAM extern EffectsLayer effectsLayer;
+	BN_DATA_EWRAM extern EffectsLayer* effectsLayer;
 	BN_DATA_EWRAM extern bn::vector<MenuOption*, 16> menuOptions;
 	BN_DATA_EWRAM extern bool playerWonLastExit;
 	BN_DATA_EWRAM extern int rodNumber;
