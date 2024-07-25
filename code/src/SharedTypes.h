@@ -183,6 +183,7 @@ void _fullReset();
 
 void logRamStatus();
 
+// this should probs be in ram?
 void doNothing();
 
 enum class GameState {

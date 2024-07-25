@@ -323,7 +323,6 @@ AddStatue* EntityManager::getAddStatue(Pos p) {
 				}
 			}
 		};
-
 	} else if(roomHash == hashString("rm_e_intermission\0")) {
 		// starting room of dis
 

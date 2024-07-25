@@ -12,6 +12,7 @@
 #include "bn_display.h"
 #include "bn_bg_palettes_transparent_color_hbe_ptr.h"
 #include "bn_backdrop_color_hbe_ptr.h"
+#include "bn_green_swap_hbe_ptr.h"
 #include "bn_hbes.h"
 
 class Game;

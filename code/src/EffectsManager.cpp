@@ -4091,7 +4091,7 @@ void EffectsManager::playerBrandRoomBackground() {
 
 	createEffect(generatorCreateFunc, generatorTickFunc);
 
-	if(bn::hbes::used_count() > 2) {
+	if(bn::hbes::used_count() > 4) {
 		return;
 	}
 
@@ -4102,15 +4102,34 @@ void EffectsManager::playerBrandRoomBackground() {
 	bn::color dark = globalGame->pal->getColorArray()[4];
 	bn::color light = globalGame->pal->getColorArray()[3];
 
+	// very interesting/nice syntax
+	alignas(int) constexpr bn::array<bool, bn::display::height()> greenSwapList = []{
+		bn::array<bool, bn::display::height()> res;
+		for(int i=0; i<bn::display::height(); i++) {
+			if((i < 8) || (i > bn::display::height() - 8)) {
+				res[i] = false;
+				continue;
+			}
+			res[i] = (i - 8 < 6 * 16) && (i % 2);
+		}
+		return res;
+	}();
+
     // change the background colors
 	createEffect([](Effect* obj) mutable -> void { obj->sprite.spritePointer.set_position(-32, -32); },
-	[ colors_hbe = bn::backdrop_color_hbe_ptr::create(hbeColorsList),
+	[
+	colors_hbe = bn::backdrop_color_hbe_ptr::create(hbeColorsList),
+	greenSwaphbe = bn::optional<bn::green_swap_hbe_ptr>(bn::green_swap_hbe_ptr::create(greenSwapList)),
 	this, count = 160, dark, light, bg](Effect* obj) mutable -> bool {
 		(void)obj;
 
 		count-=2;
 		if(!count) {
 			return true;
+		}
+
+		if(count < 140) {
+			greenSwaphbe.reset();
 		}
 
 		for(int index = 0; index<bn::display::height(); index++) {
@@ -4159,11 +4178,8 @@ Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
 		);
 
 		int xDiffs[4] = {-8, 8, 8, -8};
-		//int yDiffs[4] = {-8, -8, -8, -8};
 
-		// using tempCounters as offsets
 		obj->tempCounter  = xDiffs[static_cast<int>(sweatEntity->currentDir)];
-		//obj->tempCounter2 = yDiffs[static_cast<int>(player->currentDir)];
 		obj->tempCounter2 = -8;
 
 		if(sweatEntity->currentDir == Direction::Up || sweatEntity->currentDir == Direction::Right) {
@@ -4194,8 +4210,6 @@ Effect* EffectsManager::generateSweatEffect(Entity* sweatEntity) {
 		return false;
 	};
 
-	// i rlly should just have createeffect return the (curse)ing effect ptr
-	// also i never use animationfreq even when i should
 	Effect* e = new Effect(createFunc, tickFunc);
 	effectList.push_back(e);
 	return e;
@@ -4216,8 +4230,6 @@ Effect* EffectsManager::generateDialogueEndpointer() {
 		// this sprite to be visible initially.
 		// this will let the dialogue thingy cover it up, and we can change it at will.
 		obj->sprite.spritePointer.set_bg_priority(3);
-
-		// tempCounter is
 
 		obj->sprite.spritePointer.set_x(108);
 		obj->sprite.spritePointer.set_y(68);
@@ -4241,7 +4253,6 @@ Effect* EffectsManager::generateDialogueEndpointer() {
 	};
 
 	Effect* e = new Effect(createFunc, tickFunc);
-	//effectList.push_back(e);
 	return e;
 }
 
@@ -4268,7 +4279,7 @@ void EffectsManager::questionMark() {
 		obj->x = playerPos.x * 16;
 		obj->y = playerPos.y * 16;
 		obj->y -= 8;
-		//obj->sprite.updateRawPosition(obj->x, obj->y-16);
+
 		obj->sprite.updateRawPosition(obj->x, obj->y);
 
 		obj->sprite.spritePointer.set_z_order(-2);
@@ -4290,12 +4301,10 @@ void EffectsManager::questionMark() {
 
 		if(obj->graphicsIndex >= 9) {
 			obj->tempCounter2++;
-
 			if(obj->tempCounter2 == 10) {
 				questionMarkCount--;
 				return true;
 			}
-
 			return false;
 		}
 
@@ -4324,16 +4333,12 @@ void EffectsManager::treeLeaves() {
 	// tree base is Pos(6, 4)
 
 	auto createFunc = [](Effect* obj) mutable -> void {
-
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_leaves;
-
 		obj->tempCounter = 1;
 		obj->x = randomGenerator.get_int(5 * 16, 7 * 16);
 		obj->y = 3 * 16 + 8;
 		obj->sprite.updateRawPosition(obj->x, obj->y);
-
 		obj->sprite.spritePointer.set_z_order(-2);
-
 		obj->graphicsIndex = -1;
 		obj->animateFunc(obj);
 	};
@@ -4373,17 +4378,11 @@ void EffectsManager::chestBonus(Chest* chest) {
 	// some explosions (i have a func for that already right?)
 
 	auto createFunc = [chest](Effect* obj) mutable -> void {
-
 		chest->sprite.setVisible(false);
-
 		bn::sound_items::snd_resurrect.play();
-
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_chest_regular_flash;
-
 		obj->graphicsIndex = 0;
-
 		obj->sprite.updatePosition(chest->p);
-
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,
 			obj->graphicsIndex
@@ -4401,16 +4400,12 @@ void EffectsManager::chestBonus(Chest* chest) {
 		}
 
 		obj->tempCounter++;
-
 		if(obj->tempCounter == 16) {
 			chest->sprite.setVisible(true);
 			return true;
 		}
 
-
-
 		obj->graphicsIndex++;
-
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,
 			obj->graphicsIndex % 3
@@ -4426,20 +4421,15 @@ void EffectsManager::chestBonus(Chest* chest) {
 Effect* EffectsManager::levStatueActive(LevStatue* levStatue) {
 
 	auto createFunc = [levStatue](Effect* obj) mutable -> void {
-
 		// honestly,,, could/should of just used sprites for everything instead of tiles,,, maybe?
 		// im only using tiles bc i figured out their whack ass syntax first
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_watcher_eyes_glow; // 9 frames
-
 		obj->graphicsIndex = 0;
-
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,
 			obj->graphicsIndex
 		);
-
 		obj->sprite.updatePosition(levStatue->p);
-
 		obj->sprite.spritePointer.set_z_order(-2);
 	};
 
@@ -4480,7 +4470,6 @@ Effect* EffectsManager::levStatueActive(LevStatue* levStatue) {
 		}
 
 		obj->sprite.updatePosition(levStatue->p);
-
 
 		return false;
 	};
@@ -4589,8 +4578,7 @@ void EffectsManager::levKill() {
 		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_y(playerPos.y * 16 + 8 - 128 + 256);
 		game->cutsceneManager.backgroundLayer.rawMap.bgPointer.set_y(256-48-16+8+playerPos.y * 16); // i rlly should understand bg offsets by now
 
-		// why do i not make this func global omfg
-		game->cutsceneManager.delay(4);
+		delay(4);
 	}
 
 	// i PRAY this works
@@ -4620,27 +4608,14 @@ void EffectsManager::fadeBrand() {
 		constexpr int factor = 8;
 		constexpr int offset = 8;
 
-		if(obj->tempCounter == offset + factor * 1) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(1, false));
-		}
+		int val = (obj->tempCounter - offset) / factor; // factor of 2, dont worry
 
-		if(obj->tempCounter == offset + factor * 2) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(2, false));
-		}
-
-		if(obj->tempCounter == offset + factor * 3) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(3, false));
-		}
-
-		if(obj->tempCounter == offset + factor * 4) {
-			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(4, false));
-		}
-
-		if(obj->tempCounter == offset + factor * 5) {
+		if(val == 5) {
 			globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPalette());
 			return true;
 		}
 
+		globalGame->cutsceneManager.cutsceneLayer.rawMap.bgPointer.set_palette(globalGame->pal->getBGPaletteFade(val, false));
 		return false;
 	};
 
@@ -4784,6 +4759,7 @@ void EffectsManager::exitGlow(const Pos& p) {
 		int paletteIndex = 0; // should captures like these be replacements for the tempcounter?
 		int shouldDisappear = 0;
 		int startOffset = 80+16; // like,, i was going to try fitting this as a temp counter, but it being here honestly is just better
+
 		return [this, xStart, yStart, flip, isDot, paletteIndex, initFrame, shouldDisappear, startOffset](Effect* obj) mutable -> bool {
 
 			// THIS SHOULD TOGGLE WHEN DOTICK IS CALLED. TODO, INTEGRATE THAT
@@ -4955,7 +4931,6 @@ void EffectsManager::copyGlow(const Pos& p) {
 	int y = p.y * 16;
 
 	Effect* e1 = new Effect(getCreateFunc(x+8, y+8), tickFunc);
-
 	effectList.push_back(e1);
 }
 
@@ -5007,13 +4982,10 @@ void EffectsManager::shadowCreate(const Pos& p) {
 	int y = p.y * 16;
 
 	Effect* e1 = new Effect(getCreateFunc(x, y), tickFunc);
-
 	effectList.push_back(e1);
 }
 
 void EffectsManager::shadowDeath(Shadow* shadow) {
-
-
 	Pos tempPos = entityManager->playerStart;
 
 	if(!entityManager->killAtPos(tempPos)) {
@@ -5025,9 +4997,7 @@ void EffectsManager::shadowDeath(Shadow* shadow) {
 	}
 
 	generateSweatEffect(shadow);
-
 	delay(60);
-
 	entityFall(shadow);
 }
 
@@ -5054,7 +5024,6 @@ void EffectsManager::smokeCloud(Pos p, const Direction dir) {
 
 		obj->graphicsIndex = -1;
 		obj->animateFunc(obj);
-
 	};
 
 	auto tickFunc = [](Effect* obj) mutable -> bool {
@@ -5086,15 +5055,11 @@ void EffectsManager::deathTile(Pos p) {
 	// i REALLY dont want to be using a whole ass bg layer for this lightning sprite
 
 	auto createFunc = [p](Effect* obj) mutable -> void {
-
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_judgment_small;
-
 		obj->tempCounter = 0;
-
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
 		obj->sprite.updateRawPosition(-32, -32);
-
 	};
 
 	bn::vector<Sprite, 8> sprites;
@@ -5106,7 +5071,6 @@ void EffectsManager::deathTile(Pos p) {
 	}
 
 	auto tickFunc = [sprites = bn::move(sprites)](Effect* obj) mutable -> bool {
-
 		if(obj->tempCounter == 5) {
 			return true;
 		}
@@ -5121,7 +5085,6 @@ void EffectsManager::deathTile(Pos p) {
 		if(frame % 2 == 0) {
 			obj->tempCounter++;
 		}
-
 
 		return false;
 	};
@@ -5149,7 +5112,6 @@ void EffectsManager::deathTileAnimate(Pos p) {
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
 		obj->sprite.updateRawPosition(obj->x, obj->y);
-
 	};
 
 	auto tickFunc = [](Effect* obj) mutable -> bool {
@@ -5166,7 +5128,6 @@ void EffectsManager::deathTileAnimate(Pos p) {
 		if(frame % 16 == 0) {
 			obj->tempCounter++;
 		}
-
 
 		return false;
 	};
@@ -5194,7 +5155,6 @@ void EffectsManager::bombTileAnimate(Pos p) {
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
 		obj->sprite.updateRawPosition(obj->x, obj->y);
-
 	};
 
 	auto tickFunc = [p](Effect* obj) mutable -> bool {
@@ -5220,7 +5180,6 @@ void EffectsManager::bombTileAnimate(Pos p) {
 	// THIS SHOULD ALSO FLICKER THE DROPOFF, IF THERE WAS ONE
 
 	Effect* e1 = new Effect(createFunc, tickFunc);
-
 	effectList.push_back(e1);
 }
 
@@ -5231,11 +5190,6 @@ void EffectsManager::corpseSparks() {
 	auto createEffect = [this](bn::fixed xDir, bn::fixed yDir) -> void {
 
 		auto createFunc = [xDir, yDir](Effect* obj) mutable -> void {
-
-
-			//obj->x = 6 * 16 + (8 * xDir);
-			//obj->y = 5 * 16 + (8 * yDir);
-
 			obj->sprite.updateRawPosition(-32, -32);
 
 			obj->tiles = &bn::sprite_tiles_items::dw_spr_soulstar_spark_b;
@@ -5246,7 +5200,6 @@ void EffectsManager::corpseSparks() {
 				*obj->tiles,
 				obj->graphicsIndex % 3
 			);
-
 		};
 
 		// gods being able to do count = 0,, so many other effects would of been so much more simple
@@ -5275,7 +5228,6 @@ void EffectsManager::corpseSparks() {
 		};
 
 		effectList.push_back(new Effect(createFunc, tickFunc));
-
 	};
 
 	createEffect(-0.707, 0.707);
@@ -5292,8 +5244,6 @@ void EffectsManager::corpseSparks() {
 
 void EffectsManager::corpseFuzz() {
 
-	//Pos p = Pos(6, 4);
-
 	auto createEffect = [](int tileSelector) -> Effect* {
 
 		auto createFunc = [tileSelector](Effect* obj) mutable -> void {
@@ -5301,8 +5251,6 @@ void EffectsManager::corpseFuzz() {
 			obj->x = 6 * 16;
 			obj->y = 4 * 16;
 			obj->sprite.updateRawPosition(obj->x, obj->y);
-
-			//tileSelector = randomGenerator.get_int(0, 5);
 
 			const bn::sprite_tiles_item* spriteTiles[5] = {
 				&bn::sprite_tiles_items::dw_spr_soulglow_big,
@@ -5321,11 +5269,8 @@ void EffectsManager::corpseFuzz() {
 			};
 
 			obj->tiles = spriteTiles[tileSelector];
-
 			obj->sprite.spritePointer.set_tiles(*obj->tiles, spriteShapes[tileSelector]);
-
 			obj->sprite.spritePointer.set_bg_priority(3);
-
 		};
 
 		int tempOffset = randomGenerator.get_int(0, 16) - 8;
@@ -5351,8 +5296,6 @@ void EffectsManager::corpseFuzz() {
 			}
 
 			image_speed += 0.02;
-
-
 
 			t = ((t + 1) % 360);
 			x = (x + (amplitude * sinTable[t]));
@@ -5389,22 +5332,17 @@ void EffectsManager::corpseFuzz() {
 void EffectsManager::stinkLines(const Pos p) {
 
 	auto createFunc = [p](Effect* obj) mutable -> void {
-
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_stinklines;
-
 		obj->sprite.spritePointer.set_bg_priority(2);
-
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,
 			obj->tempCounter
 		);
 
 		obj->tempCounter = 0;
-
 		obj->x = p.x * 16;
 		obj->y = p.y * 16;
 		obj->sprite.updateRawPosition(-32, -32);
-
 	};
 
 	auto tickFunc = [state = -1, p](Effect* obj) mutable -> bool {
@@ -5413,29 +5351,23 @@ void EffectsManager::stinkLines(const Pos p) {
 
 		if(tempState != state) {
 			state = tempState;
-
 			if(state) {
 				obj->sprite.updateRawPosition(-32, -32);
 			} else {
 				obj->sprite.updateRawPosition(obj->x, obj->y);
 			}
-
 		}
 
 		if(state == 0 && (frame % 8) == 0) {
-
 			obj->sprite.spritePointer.set_tiles(
 				*obj->tiles,
 				obj->graphicsIndex
 			);
-
 			obj->graphicsIndex++;
-
 			if(obj->graphicsIndex == 7) {
 				obj->graphicsIndex = 0;
 			}
 		}
-
 
 		return false;
 	};
@@ -5544,16 +5476,12 @@ void EffectsManager::corrupt(int frames) {
 		(void)obj;
 
 		if(count) {
-
 			bn::green_swap::set_enabled(!bn::green_swap::enabled());
-
 			count--;
 			return false;
 		}
 
-
 		bn::green_swap::set_enabled(false);
-
 		return true;
 	};
 
@@ -5701,7 +5629,7 @@ void EffectsManager::generateSecretSparks(const Pos p) {
 
 		obj->tiles = &bn::sprite_tiles_items::dw_spr_spark_particle;
 
-		obj->sprite.spritePointer.set_bg_priority(3);
+		obj->sprite.spritePointer.set_bg_priority(2);
 
 		obj->sprite.spritePointer.set_tiles(
 			*obj->tiles,

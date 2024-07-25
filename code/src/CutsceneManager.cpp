@@ -1317,9 +1317,8 @@ void CutsceneManager::crashGame() {
 	*(reinterpret_cast<unsigned short*>(0x04000082)) = 0;
 	*(reinterpret_cast<unsigned short*>(0x04000084)) = 0;
 
-	for(int i=0; i<5; i++) {
-		game->doButanoUpdate();
-	}
+	delay(5);
+
 	//bn::core::set_vblank_callback(doNothing);
 	//game->doButanoUpdate();
 	bn::hw::irq::disable(bn::hw::irq::id::VBLANK);
@@ -1328,7 +1327,6 @@ void CutsceneManager::crashGame() {
 
 	unsigned short* bg1Control = (reinterpret_cast<unsigned short*>(0x400000A));
 	unsigned short* bg2Control = (reinterpret_cast<unsigned short*>(0x400000C));
-
 
 	unsigned short bg1CharBlock = (*bg1Control & 0b0000000000001100) >> 2;
 	unsigned short bg2CharBlock = (*bg2Control & 0b0000000000001100) >> 2;
@@ -1416,12 +1414,7 @@ void CutsceneManager::crashGame() {
 			*bg2XOffset = bg2XOffsetValue;
 			*bg2YOffset = bg2YOffsetValue;
 		}
-
-
-		//bn::core::update();
 	}
-
-	BN_ERROR("game 'crashed', i havent implimented it yet ");
 }
 
 void CutsceneManager::carcusEnding() {
