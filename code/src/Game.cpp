@@ -1521,7 +1521,15 @@ void Game::changeMusic() {
 
 		item.play();
 
+		if(item == bn::music_items::msc_voidsong && globalGame->mode == 2) {
+			adjustVal = 0.965;
+		}
+
 		// tbh,,,, no.
+		// VOIDED was effected by this omg
+		// i dont want to go back and sync it again
+		// honestly why did i remove this in the first place?
+		// actually i remember why, it sounds like shit with it??
 		//bn::music::set_pitch(adjustVal);
 		//bn::music::set_tempo(adjustVal);
 

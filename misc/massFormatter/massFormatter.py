@@ -1696,7 +1696,8 @@ def main():
 		# check out the start of main.cpp for a further explanation
 
 		copyIfChanged("irq_handler.s", "../../butano/butano/hw/3rd_party/libugba/src/")
-
+		copyIfChanged("../mmutil_withhashing.exe", "../../butano/butano/tools/")
+		copyIfChanged("../butano_assets_tool.py", "../../butano/butano/tools/")
 
 		generateAllIncludes()
 		exit(0)

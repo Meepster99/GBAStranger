@@ -40,16 +40,10 @@ DMGAUDIO    :=  dmg_audio ../butano/common/dmg_audio
 ROMTITLE    :=  GBAStranger
 ROMCODE     :=  GBST
 
-#USERFLAGS   := -save-temps=cwd -fverbose-asm -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 USERFLAGS   := -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
-#USERFLAGS   := -fdump-tree-cfg=cfg.cfg -mcpu=arm7tdmi -O3 -mthumb-interwork -mthumb -Wall -Wextra -DBN_CFG_AUDIO_MAX_MUSIC_CHANNELS=32 -DBN_CFG_AUDIO_MIXING_RATE=BN_AUDIO_MIXING_RATE_31_KHZ
 
-# valgrind --tool=callgrind ./mmutil TESTS/audio/cifdream.xm TESTS/audio/dancing_lesson.it TESTS/audio/egg.wav TESTS/audio/metal_pipe_falling_sound_effect.wav TESTS/audio/msc_001.it TESTS/audio/msc_007.it TESTS/audio/msc_013.it TESTS/audio/msc_beecircle.it TESTS/audio/msc_beesong.it TESTS/audio/msc_cifcircle.it TESTS/audio/msc_dungeon_wings.it TESTS/audio/msc_dungeongroove.it TESTS/audio/msc_endless.it TESTS/audio/msc_gorcircle_lo.it TESTS/audio/msc_levcircle.it TESTS/audio/msc_monstrail.it TESTS/audio/msc_themeofcif.it TESTS/audio/msc_voidsong.it TESTS/audio/snd_activate.wav TESTS/audio/snd_beginningbell.wav TESTS/audio/snd_bounce.wav TESTS/audio/snd_bounceimpact.wav TESTS/audio/snd_cifer.wav TESTS/audio/snd_enemy_explosion.wav TESTS/audio/snd_ex_heartbeat.wav TESTS/audio/snd_ex_heartbeat_b.wav TESTS/audio/snd_fall.wav TESTS/audio/snd_gestaltcreate.wav TESTS/audio/snd_golden.wav TESTS/audio/snd_gor.wav TESTS/audio/snd_judgment.wav TESTS/audio/snd_lillie.wav TESTS/audio/snd_lockdamage.wav TESTS/audio/snd_open.wav TESTS/audio/snd_player_damage.wav TESTS/audio/snd_player_fall.wav TESTS/audio/snd_push.wav TESTS/audio/snd_push_small.wav TESTS/audio/snd_resurrect.wav TESTS/audio/snd_reveal.wav TESTS/audio/snd_stairs.wav TESTS/audio/snd_stepglassfloor.wav TESTS/audio/snd_vanish.wav TESTS/audio/snd_voice2.wav TESTS/audio/snd_voidrod_place.wav TESTS/audio/snd_voidrod_store.wav TESTS/audio/snd_wingspawn.wav TESTS/audio/void_stranger_ost_56.wav -oTESTS/build/_bn_audio_soundbank.bin -hTESTS/build/_bn_audio_soundbank.h
-
-# .\mmutil  TESTS/audio/msc_voidsong.it TESTS/audio/snd_activate.wav -o./TESTS/build/_bn_audio_soundbank.bin -h./TESTS/build/_bn_audio_soundbank.h
-
-# ..\mmutil  audio/msc_voidsong.it audio/snd_activate.wav -obuild/_bn_audio_soundbank.bin -hbuild/_bn_audio_soundbank.h
-# ..\mmutil  audio/msc_voidsong.it audio/snd_activate.wav -o"build/_bn_audio_soundbank.bin" -h"build/_bn_audio_soundbank.h"
+# now using custom version of mmutil, massively reduces music conversion time
+BN_MMUTIL := ../misc/
 
 USERASFLAGS :=
 USERLDFLAGS :=  -flto=auto
