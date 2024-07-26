@@ -1647,11 +1647,11 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 			errorLine = isPickup ? ">ERR: LI NULL" : ">LI RESTORED";
 			break;
 		case TileType::SpriteTile: [[unlikely]]
-			if((void*)testTile == (void*)tileManager->memoryTile) {
+			if(game->entityManager.player->hasMemory && (void*)testTile == (void*)tileManager->memoryTile) {
 				errorLine = isPickup ? ">ERR: MEM1 REMOVED" : ">MEM1 RESTORED";
-			} else if((void*)testTile == (void*)tileManager->wingsTile) {
+			} else if(game->entityManager.player->hasWings && (void*)testTile == (void*)tileManager->wingsTile) {
 				errorLine = isPickup ? ">ERR: MEM2 REMOVED" : ">MEM2 RESTORED";
-			} else if((void*)testTile == (void*)tileManager->swordTile) {
+			} else if(game->entityManager.player->hasSword && (void*)testTile == (void*)tileManager->swordTile) {
 				errorLine = isPickup ? ">ERR: MEM3 REMOVED" : ">MEM3 RESTORED";
 			}
 			break;
