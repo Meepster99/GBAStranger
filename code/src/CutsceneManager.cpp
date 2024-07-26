@@ -1683,7 +1683,11 @@ void CutsceneManager::disCrash(FloorTile* testTile, bool isPickup) {
 					}
 					break;
 				case Pos(13, 8).getSwitchValue(): // bottom right room num
-					errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
+					if(game->roomManager.roomIndex <= 256) {
+						errorLine = isPickup ? ">ERR: INVALID/MISSING BR VALUE" : ">BR VALUE RESTORED";
+					} else {
+						errorLine = isPickup ? ">ERR: INVALID/MISSING EL VALUE" : ">EL VALUE RESTORED";
+					}
 					if(static_cast<WordTile*>(testTile)->first == '?') {
 						errorLine = ">FATAL ERROR: BR NULL";
 						doCrashGame = true;
