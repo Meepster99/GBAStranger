@@ -118,7 +118,8 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 
 			Obstacle* temp = static_cast<Obstacle*>(*(globalGame->entityManager.getMap(tilePos).begin()));
 
-			if(temp->entityType() == EntityType::Interactable || temp->entityType() == EntityType::Chest || hasMemory) {
+			if(temp->entityType() == EntityType::Interactable || temp->entityType() == EntityType::Chest ||
+				(hasMemory && !inRod(globalGame->tileManager.memoryTile))) {
 				temp->interact();
 			} else {
 				globalGame->effectsManager.questionMark();

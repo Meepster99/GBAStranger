@@ -1554,8 +1554,7 @@ void Game::changeMusic() {
 		temp = 28 * index;
 	}
 
-	if(roomIndex == 30) {
-		// tail!
+	if(roomIndex == 30) { // tail!
 		doPlay(bn::music_items::msc_007);
 		return;
 	}
