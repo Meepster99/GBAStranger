@@ -1543,7 +1543,6 @@ void EntityManager::updateMap() { profileFunction();
 					temp = *entityMap[x][y].begin();
 
 					if(!hasFloor(Pos(x, y)) && !hasCollision(Pos(x, y))) {
-
 						switch(temp->entityType()) {
 							case EntityType::Shadow:
 								addKill(temp);
