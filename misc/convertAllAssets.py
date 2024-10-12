@@ -83,7 +83,16 @@ if __name__ == "__main__":
 		#UMTURL = "https://github.com/krzys-h/UndertaleModTool/releases/download/0.5.0.0/v0.5.0.0_UndertaleModToolCLI_Windows.zip"
 		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/0.5.1.0/UndertaleModTool_v0.5.1.0.zip"
 		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip"
-		UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
+		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
+		
+		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
+		
+		# wowee maddy its almost as if pulling from bleeding edge constantly would cause bugs what?? who would have thought??
+		# there was some fucked shit in the past where,,, god the debug/release or single/multifile would cause critical differences and fuck everything right?
+		# clone the repo, checkout 438fc2143b13123b846d45cb03e5f84e5e9f884d
+		# dotnet publish UndertaleModCli --configuration=Debug 
+		# do that in case my site goes down for some reason, you know what to do. i really should host this,, somwewhere else? im not sure
+		UMTURL = "https://meepster.xyz/CLI-windows-latest-Release-isBundled-true.zip"
 		
 		res = requests.get(UMTURL)
 		
