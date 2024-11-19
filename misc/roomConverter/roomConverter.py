@@ -2477,7 +2477,11 @@ def convertAllRoomsWorker(f, isHardModePass):
 
 	for file in jsonFiles:
 		with open(os.path.join(inputPath, file)) as jsonFilePointer:
-			data = json.load(jsonFilePointer)
+			try:
+				data = json.load(jsonFilePointer)
+			except Exception as e:
+				print(RED + f"FAILED on {jsonFilePointer}" + RESET)
+				raise
 			allData.append(data)
 
 	global isHardMode
