@@ -1,11 +1,20 @@
 
 import importlib.util
 import sys, os
+import platform
 import subprocess
 import traceback
+from colorama import init, Fore, Back, Style
+RED = Fore.RED 
+GREEN = Fore.GREEN 
+CYAN = Fore.CYAN
+WHITE = Fore.WHITE
+RESET = Style.RESET_ALL
+import requests
+import zipfile
+import shutil
 
 def install(package):
-
 	if type(package) != str:
 		installName = package[1]
 		package = package[0]
@@ -22,7 +31,7 @@ def install(package):
 		subprocess.check_call([sys.executable, "-m", "pip", "install", installName])
 
 
-if __name__ == "__main__":
+def installpackages_win():
 	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", ("win32api", "pywin32"), "pytube"] ]
 
 	try:
@@ -31,21 +40,10 @@ if __name__ == "__main__":
 		print("please install ffmpeg")
 		exit(0)
 		
-import winreg
-import win32api
-import requests
-import zipfile
-import shutil
-from colorama import init, Fore, Back, Style
+	import winreg
+	import win32api
 
-init(convert=True)
-
-RED = Fore.RED 
-GREEN = Fore.GREEN 
-CYAN = Fore.CYAN
-WHITE = Fore.WHITE
-
-RESET = Style.RESET_ALL
+	init(convert=True)
 
 def read_reg(ep, p = r"", k = ''):
 	try:
@@ -58,8 +56,8 @@ def read_reg(ep, p = r"", k = ''):
 		return None
 	return None
 
-if __name__ == "__main__":
-
+def install_win():
+	installpackages_win()
 	# https://github.com/krzys-h/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip
 	
 	"""
@@ -202,6 +200,19 @@ if __name__ == "__main__":
 	
 	print("")
 	print(CYAN + "if you are seeing this, then everything(suprisingly) ran correctly." + RESET)
-	
-	pass
 
+def install_mac():
+	print(RED + f"Sorry, your platform ({platform.platform()}) is not currently supported." + RESET);
+	sys.exit()
+
+def install_linux():
+	print(RED + f"Sorry, your platform ({platform.platform()}) is not currently supported." + RESET);
+	sys.exit()
+
+if __name__ == "__main__":
+	if platform.system() == "Windows":
+		install_win()
+	elif platform.system() == "Darwin":
+		install_mac()
+	elif platform.system() != "":
+		install_linux()
