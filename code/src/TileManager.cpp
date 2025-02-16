@@ -154,7 +154,7 @@ auto swordGetFunc = []() -> int {
 	if(player->hasSword) {
 		Pos tempPos = player->p;
 
-		if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) {
+		if(tempPos.move(player->currentDir) && globalGame->entityManager.hasEnemy(tempPos)) { // i need to add a check that this ISNT a mimic here, but im very very sleepy your honor.
 			return 68 + (globalGame->mode == 2 ? 4 : 0) + ((frame % 16) / 4);
 		}
 

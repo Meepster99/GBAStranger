@@ -131,24 +131,29 @@ bn::pair<bool, bn::optional<Direction>> Player::doInput() {
 		// if there is a entity in this tile, this is an invalid move(unless sword!).
 
 		if(globalGame->entityManager.hasEntity(tilePos)) {
-			if( (hasSword && !inRod(globalGame->tileManager.swordTile)) ||
-				hashString("rm_0172\0") == globalGame->roomManager.currentRoomHash()
-				) {
-				BN_ASSERT(globalGame->entityManager.getMap(tilePos).size() == 1, "when killing an entity, there were multiple entitys in the tilepos??");
+			Entity* tempEntity = *(globalGame->entityManager.getMap(tilePos).begin());
+			EntityType tempEntityType = tempEntity->entityType();
+			BN_ASSERT(globalGame->entityManager.getMap(tilePos).size() == 1, "when killing an entity, there were multiple entitys in the tilepos??");
 
-				Entity* tempEntity = *(globalGame->entityManager.getMap(tilePos).begin());
+			if(tempEntityType == EntityType::GrayMimic ||
+			tempEntityType == EntityType::BlackMimic || 
+			tempEntityType == EntityType::WhiteMimic) {
+
+				if(hashString("rm_0172\0") == globalGame->roomManager.currentRoomHash()) {  // this is the room which has the mimic you normally talk to :3
+					// i rlly rlly hope that doing,,, this call so deep inside of the move code doesnt
+					// mess anything up during vblank
+					globalGame->cutsceneManager.mimicTalk();
+
+					globalGame->entityManager.removeEntity(tempEntity);
+					globalGame->effectsManager.sword(tilePos, currentDir);
+
+					return {true, bn::optional<Direction>()};
+				}
+
+
+			} else if( (hasSword && !inRod(globalGame->tileManager.swordTile)) ) {
+			
 				if(tempEntity->entityType() != EntityType::Shadow) {
-
-					if(hashString("rm_0172\0") == globalGame->roomManager.currentRoomHash()) {
-						// i rlly rlly hope that doing,,, this call so deep inside of the move code doesnt
-						// mess anything up during vblank
-						globalGame->cutsceneManager.mimicTalk();
-
-						globalGame->entityManager.removeEntity(tempEntity);
-						globalGame->effectsManager.sword(tilePos, currentDir);
-
-						return {true, bn::optional<Direction>()};
-					}
 
 					tempEntity->deathReason = EntityType::Player;
 
@@ -638,6 +643,8 @@ void Chest::specialBumpFunction() {
 		globalGame->effectsManager.chestBonus(this);
 	}
 };
+
+// i should go back and put the brand displays in,, maybe the dialogue, yea
 
 // all strings must be double nulltermed!
 constexpr const char* randomBoulderMessages[] = {
