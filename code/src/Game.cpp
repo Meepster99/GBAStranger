@@ -235,7 +235,7 @@ void Game::findNextRoom() {
 				saveData.locustCount = 0; // i gotta say, having 2(wait no, the tiles also have a count) copies of all the player data, sucks!
 				tileManager.updateLocust(); // is this enough?
 				// i made this project 1.5 years ago now. and wow, the way i handled it all. i would do it so differently now
-				// this code is not maintainable, 3 different variables for locusts?? insanity
+				// this code is not maintainable, 3 different variables for locusts?? insanity	
 
 				//tileManager.locustCounterTile->first = '0';
 				//tileManager.locustCounterTile->second = '0';

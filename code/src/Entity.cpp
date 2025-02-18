@@ -1,7 +1,7 @@
 
 #include "Entity.h"
 
-#include "entityManager.h"
+#include "EntityManager.h"
 
 #include "Game.h"
 
@@ -722,7 +722,7 @@ void Boulder::interact() {
 		return;
 	}
 
-	constexpr int prevMsgStackSize = 16;
+	constexpr int prevMsgStackSize = MIN(16, (sizeof(randomBoulderMessages)/sizeof(randomBoulderMessages[0])) - 1);
 	BN_DATA_EWRAM static bn::vector<int, prevMsgStackSize> prevMsgStack(prevMsgStackSize, -1);
 
 	int i=0;
