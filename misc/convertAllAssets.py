@@ -46,6 +46,8 @@ def installpackages_win():
 	init(convert=True)
 
 def read_reg(ep, p = r"", k = ''):
+	import winreg
+	import win32api
 	try:
 		key = winreg.OpenKeyEx(ep, p)
 		value = winreg.QueryValueEx(key,k)
@@ -83,14 +85,14 @@ def install_win():
 		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip"
 		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
 		
-		#UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
+		UMTURL = "https://github.com/UnderminersTeam/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Debug-isBundled-true.zip"
 		
 		# wowee maddy its almost as if pulling from bleeding edge constantly would cause bugs what?? who would have thought??
 		# there was some fucked shit in the past where,,, god the debug/release or single/multifile would cause critical differences and fuck everything right?
 		# clone the repo, checkout 438fc2143b13123b846d45cb03e5f84e5e9f884d
 		# dotnet publish UndertaleModCli --configuration=Debug 
 		# do that in case my site goes down for some reason, you know what to do. i really should host this,, somwewhere else? im not sure
-		UMTURL = "https://meepster.xyz/CLI-windows-latest-Release-isBundled-true.zip"
+		#UMTURL = "https://meepster.xyz/CLI-windows-latest-Release-isBundled-true.zip"
 		
 		res = requests.get(UMTURL)
 		
@@ -112,7 +114,8 @@ def install_win():
 		print("game datafiles not found, grabbing a copy.")
 		
 		print("trying my bests to find ur steam dir.")
-		
+		import winreg
+		import win32api
 		steamInstallPath = str(read_reg(ep = winreg.HKEY_LOCAL_MACHINE, p = r"SOFTWARE\Wow6432Node\Valve\Steam", k = 'InstallPath'))
 		
 		if steamInstallPath is None:

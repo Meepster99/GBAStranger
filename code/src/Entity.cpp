@@ -722,7 +722,7 @@ void Boulder::interact() {
 		return;
 	}
 
-	constexpr int prevMsgStackSize = MIN(16, (sizeof(randomBoulderMessages)/sizeof(randomBoulderMessages[0])) - 1);
+	constexpr int prevMsgStackSize = MIN(16, (sizeof(randomBoulderMessages)/sizeof(randomBoulderMessages[0])) - 2);
 	BN_DATA_EWRAM static bn::vector<int, prevMsgStackSize> prevMsgStack(prevMsgStackSize, -1);
 
 	int i=0;

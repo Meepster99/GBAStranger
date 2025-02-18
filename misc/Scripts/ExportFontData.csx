@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 using System.Linq;
-using System.Windows.Forms;
 
 EnsureDataLoaded();
 
@@ -16,15 +15,15 @@ TextureWorker worker = new TextureWorker();
 Directory.CreateDirectory(fntFolder);
 List<string> input = new List<string>();
 
- foreach (var x in Data.Fonts)
-    {
-        input.Add(x.Name.ToString().Replace("\"", ""));
-    }
+foreach (var x in Data.Fonts)
+{
+    input.Add(x.Name.ToString().Replace("\"", ""));
+}
 
 string[] arrayString = input.ToArray();
 
 await DumpFonts();
-worker.Cleanup();
+worker.Dispose();
 
 await StopProgressBarUpdater();
 HideProgressBar();

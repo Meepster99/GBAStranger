@@ -20,27 +20,27 @@ Directory.CreateDirectory(texFolder);
 
 UpdateProgress();
 await DumpSprites();
-worker.Cleanup();
+worker.Dispose();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
-void UpdateProgress() 
+void UpdateProgress()
 {
     UpdateProgressBar(null, "Sprites", progress++, Data.Sprites.Count);
 }
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
 
-async Task DumpSprites() 
+async Task DumpSprites()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
 }
 
-void DumpSprite(UndertaleSprite sprite) 
+void DumpSprite(UndertaleSprite sprite)
 {
     for (int i = 0; i < sprite.Textures.Count; i++)
         if (sprite.Textures[i]?.Texture != null)

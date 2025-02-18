@@ -12,17 +12,17 @@ int maxCount;
 // Setup root export folder.
 //string winFolder = GetFolder(FilePath) + "ExportData/"; // The folder data.win is located in.
 string winFolder = GetFolder(FilePath);
-bool usesAGRP               = (Data.AudioGroups.Count > 0);
+bool usesAGRP = (Data.AudioGroups.Count > 0);
 
 
 
 //Overwrite Folder Check One
-if (Directory.Exists(winFolder + "ExportData\\Exported_Sounds\\"))
+if (Directory.Exists(winFolder + "ExportData" + Path.DirectorySeparatorChar + "Exported_Sounds" + Path.DirectorySeparatorChar))
 {
     bool overwriteCheckOne = true;
-	
+
     if (overwriteCheckOne)
-        Directory.Delete(winFolder + "ExportData\\Exported_Sounds\\", true);
+        Directory.Delete(winFolder + "ExportData" + Path.DirectorySeparatorChar + "Exported_Sounds" + Path.DirectorySeparatorChar, true);
     if (!overwriteCheckOne)
     {
         ScriptError("A 'Exported_Sounds' folder already exists. Please remove it.", "Error: Export already exists.");
@@ -41,9 +41,9 @@ if (!externalOGGs)
     externalOGG_Copy = 0;
 
 // Overwrite Folder Check Two
-if (Directory.Exists(winFolder + "ExportData\\External_Sounds\\") && externalOGG_Copy == 1)
+if (Directory.Exists(winFolder + "ExportData\\External_Sounds" + Path.DirectorySeparatorChar) && externalOGG_Copy == 1)
 {
-	Directory.Delete(winFolder + "ExportData\\External_Sounds\\", true);
+    Directory.Delete(winFolder + "ExportData\\External_Sounds" + Path.DirectorySeparatorChar, true);
 }
 
 // Group by audio group check
@@ -51,12 +51,12 @@ var groupedExport = 0;
 if (usesAGRP)
 {
     bool groupedCheck = true;
-	
+
     if (groupedCheck)
         groupedExport = 1;
     if (!groupedCheck)
         groupedExport = 0;
-		
+
 }
 
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
@@ -70,7 +70,7 @@ await Task.Run(DumpSounds); // This runs sync, because it has to load audio grou
 
 await StopProgressBarUpdater();
 HideProgressBar();
-if (Directory.Exists(winFolder + "External_Sounds\\"))
+if (Directory.Exists(winFolder + "External_Sounds" + Path.DirectorySeparatorChar))
     ScriptMessage("Sounds exported to " + winFolder + " in the 'Exported_Sounds' and 'External_Sounds' folders.");
 else
     ScriptMessage("Sounds exported to " + winFolder + " in the 'Exported_Sounds' folder.");
@@ -114,7 +114,8 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
 
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
         ScriptMessage("An error occured while trying to load " + audioGroupName + ":\n" + e.Message);
         return null;
@@ -132,7 +133,7 @@ byte[] GetSoundData(UndertaleSound sound)
         if (audioGroup != null)
             return audioGroup[sound.AudioID].Data;
     }
-	
+
     return EMPTY_WAV_FILE_BYTES;
 }
 
@@ -156,12 +157,12 @@ void DumpSound(UndertaleSound sound)
     string audioExt = ".ogg";
     string soundFilePath;
     if (groupedExport == 1)
-        soundFilePath = winFolder + "ExportData\\" + "Exported_Sounds\\" + sound.AudioGroup.Name.Content + "\\" + soundName;
+        soundFilePath = winFolder + "ExportData" + Path.DirectorySeparatorChar + "Exported_Sounds" + Path.DirectorySeparatorChar + sound.AudioGroup.Name.Content + Path.DirectorySeparatorChar + soundName;
     else
-        soundFilePath = winFolder + "ExportData\\" + "Exported_Sounds\\" + soundName;
-    MakeFolder("ExportData\\Exported_Sounds");
+        soundFilePath = winFolder + "ExportData" + Path.DirectorySeparatorChar + "Exported_Sounds" + Path.DirectorySeparatorChar + soundName;
+    MakeFolder("ExportData" + Path.DirectorySeparatorChar + "Exported_Sounds");
     if (groupedExport == 1)
-        MakeFolder("ExportData\\Exported_Sounds\\" + sound.AudioGroup.Name.Content);
+        MakeFolder("ExportData" + Path.DirectorySeparatorChar + "Exported_Sounds" + Path.DirectorySeparatorChar + sound.AudioGroup.Name.Content);
     bool process = true;
     if (flagEmbedded && !flagCompressed) // 1.
         audioExt = ".wav";
@@ -174,30 +175,31 @@ void DumpSound(UndertaleSound sound)
         process = false;
         audioExt = ".ogg";
         string source = winFolder + soundName + audioExt;
-        string dest = winFolder + "External_Sounds\\" + soundName + audioExt;
+        string dest = winFolder + "External_Sounds" + Path.DirectorySeparatorChar + soundName + audioExt;
         if (externalOGG_Copy == 1)
         {
             if (groupedExport == 1)
             {
-                dest = winFolder + "External_Sounds\\" + sound.AudioGroup.Name.Content + "\\" + soundName + audioExt;
-                MakeFolder("ExportData\\External_Sounds\\" + sound.AudioGroup.Name.Content);
+                dest = winFolder + "External_Sounds" + Path.DirectorySeparatorChar + sound.AudioGroup.Name.Content + Path.DirectorySeparatorChar + soundName + audioExt;
+                MakeFolder("ExportData\\External_Sounds" + Path.DirectorySeparatorChar + sound.AudioGroup.Name.Content);
             }
-            MakeFolder("ExportData\\External_Sounds\\");
+            MakeFolder("ExportData\\External_Sounds" + Path.DirectorySeparatorChar);
             System.IO.File.Copy(source, dest, false);
         }
     }
-    if (process && !File.Exists(soundFilePath + audioExt)) {
-		File.WriteAllBytes(soundFilePath + audioExt, GetSoundData(sound));
-		
-		//var fs = new FileStream(soundFilePath + audioExt, FileMode.Create, FileAccess.Write)
-			
-		//fs.Write(GetSoundData(sound), 0, GetSoundData(sound).Length);
-		
-		//File.WriteAllText(soundFilePath + audioExt, "test");
-		
-		
-	}
-	
+    if (process && !File.Exists(soundFilePath + audioExt))
+    {
+        File.WriteAllBytes(soundFilePath + audioExt, GetSoundData(sound));
+
+        //var fs = new FileStream(soundFilePath + audioExt, FileMode.Create, FileAccess.Write)
+
+        //fs.Write(GetSoundData(sound), 0, GetSoundData(sound).Length);
+
+        //File.WriteAllText(soundFilePath + audioExt, "test");
+
+
+    }
+
     IncProgressLocal();
 }
 

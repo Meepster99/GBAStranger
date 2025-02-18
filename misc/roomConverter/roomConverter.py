@@ -186,6 +186,7 @@ def readCreationCode(p, creationCode):
 		"show_debug_message",
 		"randomize()",
 		"irandom_range",
+		"global.baseId",
 	]
 
 	parseStrings = [
@@ -210,6 +211,13 @@ def readCreationCode(p, creationCode):
 
 		(r"((?:instance_create_layer|instance_create_depth)\((?:.+?,\s*)+)(.+)\)", r'\1"\2")'),
 		(r"(instance_exists\()(.+?)(\))", r'\1"\2"\3'),
+
+		(r"global.gotShortcut1", "False"),
+		(r"global.gotShortcut2", "False"),
+		(r"global.gotShortcut3", "False"),
+		(r"global.gotShortcut4", "False"),
+		(r"global.gotShortcut5", "False"),
+		
 	]
 
 	for i, line in enumerate(lines):
@@ -2323,12 +2331,14 @@ def convertObjects(layerData):
 	floorExport = comp
 
 	entityPoses = set()
-	for e in entityExport:
+	for i, e in enumerate(entityExport):
 		temp = tuple([ int(x) for x in e.split(",")[1:]])
 		if temp in entityPoses:
 			print(RED + "room " + room + " had a duplicate entity at " + str(temp))
 			print(entityExport)
-			exit(1)
+			print(e)
+			del entityExport[i] # this is HORRENDOUS
+			#exit(1)
 		entityPoses.add(temp)
 
 	specialFloorExport.insert(0, "-1,-1,NULL")
