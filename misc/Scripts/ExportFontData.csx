@@ -23,7 +23,7 @@ foreach (var x in Data.Fonts)
 string[] arrayString = input.ToArray();
 
 await DumpFonts();
-worker.Dispose();
+worker.Cleanup();
 
 await StopProgressBarUpdater();
 HideProgressBar();

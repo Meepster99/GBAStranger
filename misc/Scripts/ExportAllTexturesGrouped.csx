@@ -35,7 +35,7 @@ StartProgressBarUpdater();
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
-worker.Dispose();
+worker.Cleanup();
 
 await StopProgressBarUpdater();
 HideProgressBar();

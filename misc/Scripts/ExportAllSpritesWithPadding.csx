@@ -20,7 +20,7 @@ Directory.CreateDirectory(texFolder);
 
 UpdateProgress();
 await DumpSprites();
-worker.Dispose();
+worker.Cleanup();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 

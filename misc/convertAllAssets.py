@@ -92,7 +92,7 @@ def install_win():
 		# clone the repo, checkout 438fc2143b13123b846d45cb03e5f84e5e9f884d
 		# dotnet publish UndertaleModCli --configuration=Debug 
 		# do that in case my site goes down for some reason, you know what to do. i really should host this,, somwewhere else? im not sure
-		#UMTURL = "https://meepster.xyz/CLI-windows-latest-Release-isBundled-true.zip"
+		UMTURL = "https://meepster.xyz/CLI-windows-latest-Release-isBundled-true.zip"
 		
 		res = requests.get(UMTURL)
 		
@@ -165,6 +165,11 @@ def install_win():
 	if not os.path.exists("./ExportData"):
 		print("extracting assets from data.win")
 		
+		#os.makedirs("./ExportData")
+		#os.makedirs("./ExportData/Export_Textures")
+		#os.makedirs("./ExportData/Export_Textures/Backgrounds")
+		#os.makedirs("./ExportData/Export_Textures_Padded")
+		
 		command = "./CLI-windows-latest-Release-isBundled-true/UndertaleModCli.exe load data.win -v -s Scripts/ExportAllCode.csx Scripts/ExportAllRooms.csx Scripts/ExportAllSounds.csx Scripts/ExportAllSpritesWithPadding.csx Scripts/ExportAllTexturesGrouped.csx Scripts/ExportFontData.csx"
 		
 		# making the command verbose prevents the crash. WHY
@@ -185,6 +190,9 @@ def install_win():
 			print("the undertalemodtool command crashed. this shouldnt happen(i hope)")
 			exit(1)
 
+		print("UMT COMMANDS RAN SUCCESSFULLY")
+		#exit(1)
+			
 	print("initial setup completed")
 
 	import roomConverter.roomConverter 

@@ -11,6 +11,8 @@ purchase and install Void Stranger on [itch](https://system-erasure.itch.io/void
 
 clone the repo, and do `git submodule update --init --recursive` in the repo's root directory
 
+use void stranger version 1.1.1
+
 run convertAllAssets.py, located in the misc folder
 
 make the makefile in code/ preferably with -j8 or -j16 and LOG=1 or PROFILE=1
