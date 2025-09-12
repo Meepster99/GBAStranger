@@ -125,7 +125,7 @@ customSampleRate = {
 	#"msc_013": 8000,
 	"msc_013": 7000,
 	#"msc_007": 8000,
-	"msc_007": 9000,
+	"msc_007": 9000, # this song has issues with the silent breaks. its not a mmutil problem, its a butano issue/me fucking with butano issue
 	"msc_levcircle": 5000, # sorry lev (actually it sounds rlly cool)
 	#"msc_dungeon_wings": 8300, # to much high freq to, do this
 	#"msc_beesong": 7000,
