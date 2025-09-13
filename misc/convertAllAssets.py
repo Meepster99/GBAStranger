@@ -26,7 +26,7 @@ def install(package):
 
 
 def installpackages_win():
-	[ install(p) for p in ["numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", ("win32api", "pywin32"), "pytube"] ]
+	[ install(p) for p in ["audioop-lts", "numpy", ("PIL", "Pillow"), "colorama", "pydub", "requests", ("win32api", "pywin32"), "pytube"] ]
 
 	try:
 		res = subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.STDOUT)
