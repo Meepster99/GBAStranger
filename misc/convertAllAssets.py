@@ -61,6 +61,17 @@ def read_reg(ep, p = r"", k = ''):
 def install_win():
 	installpackages_win()
 	
+	import winreg
+	import win32api
+	from colorama import init, Fore, Back, Style
+	RED = Fore.RED 
+	GREEN = Fore.GREEN 
+	CYAN = Fore.CYAN
+	WHITE = Fore.WHITE
+	RESET = Style.RESET_ALL
+	init(convert=True)
+	import requests
+	
 	# https://github.com/krzys-h/UndertaleModTool/releases/download/bleeding-edge/CLI-windows-latest-Release-isBundled-true.zip
 	
 	"""
