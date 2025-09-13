@@ -4,7 +4,7 @@ import sys, os
 import platform
 import subprocess
 import traceback
-import requests
+#import requests
 import zipfile
 import shutil
 
@@ -43,6 +43,7 @@ def installpackages_win():
 	WHITE = Fore.WHITE
 	RESET = Style.RESET_ALL
 	init(convert=True)
+	import requests
 
 def read_reg(ep, p = r"", k = ''):
 	import winreg
