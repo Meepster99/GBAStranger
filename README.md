@@ -3,6 +3,8 @@
 
 ## Instructions to build C++ code.
 
+video tutorial [here](https://youtu.be/PM65wBbbNNE)
+
 install [devkitpro](https://devkitpro.org/) and [python](https://www.python.org/downloads/) >= 3.11
 
 when installing devkitpro, make sure that the only option checked is for GBA. uncheck all others.
