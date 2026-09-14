@@ -34,3 +34,5 @@ use `cargo run --release`.
 ## License
 
 You can do whatever you want, provided you provide credit to Meepster99, Madeline Celestia, or Inana, and do not use any material here for the purpose of piracy.
+
+NO AI
